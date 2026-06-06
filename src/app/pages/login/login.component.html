@@ -1,0 +1,31 @@
+<div class="login-page">
+  <div class="login-card">
+    <div class="login-header">
+      <img src="climat-advisor-logo.svg" alt="" class="login-logo" width="48" height="48" />
+      <p class="login-brand">Climat Advisor</p>
+      <h2>Login</h2>
+      <p>Access your GCF Accreditation Portal account</p>
+    </div>
+
+    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+      <div class="form-group">
+        <label for="username">Username</label>
+        <input id="username" type="text" formControlName="username" placeholder="Enter username" autocomplete="username">
+      </div>
+
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input id="password" type="password" formControlName="password" placeholder="Enter password" autocomplete="current-password">
+      </div>
+
+      <button type="submit" class="btn-submit">Sign In</button>
+    </form>
+
+    <div class="login-hint">
+      <p><strong>Admin:</strong> hatyja / asier → Dashboard</p>
+      <p><strong>Applicant:</strong> hatyja2 / asier → Stage 2</p>
+    </div>
+
+    <a routerLink="/stage1" class="back-link">← Back to portal</a>
+  </div>
+</div>

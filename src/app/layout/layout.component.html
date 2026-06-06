@@ -1,0 +1,61 @@
+<div class="layout">
+  <header class="layout-header">
+    <div class="header-left">
+      <div class="logo">
+        <img src="climat-advisor-logo.svg" alt="" class="logo-mark" width="40" height="40" />
+        <div class="logo-text">
+          <h1>Climat Advisor</h1>
+          <span class="subtitle">GCF Accreditation Portal</span>
+        </div>
+      </div>
+    </div>
+    <div class="header-right">
+      @if (authService.isLoggedIn) {
+        <span class="user-badge">{{ authService.currentUserValue?.username }}</span>
+        @if (authService.currentUserValue?.role === 'admin') {
+          <a routerLink="/dashboard" routerLinkActive="active" class="btn-header">Dashboard</a>
+        }
+        <button type="button" class="btn-header btn-logout" (click)="logout()">Logout</button>
+      } @else {
+        <a routerLink="/login" class="btn-header btn-login">Login</a>
+      }
+    </div>
+  </header>
+
+  <div class="layout-body">
+    <nav class="sidebar">
+      <ul class="nav-menu">
+        <li>
+          <a routerLink="/stage1" routerLinkActive="active" class="nav-link">
+            <span class="nav-icon">📋</span>
+            Stage 1
+          </a>
+        </li>
+        @if (authService.isLoggedIn) {
+          <li>
+            <a routerLink="/stage2" routerLinkActive="active" class="nav-link">
+              <span class="nav-icon">📄</span>
+              Stage 2
+            </a>
+          </li>
+        }
+        @if (authService.currentUserValue?.role === 'admin') {
+          <li>
+            <a routerLink="/dashboard" routerLinkActive="active" class="nav-link">
+              <span class="nav-icon">📊</span>
+              Dashboard
+            </a>
+          </li>
+        }
+      </ul>
+    </nav>
+
+    <main class="main-content">
+      <router-outlet></router-outlet>
+    </main>
+  </div>
+
+  <footer class="layout-footer">
+    <p>Climat Advisor &copy; 2026 — GCF Accreditation Portal</p>
+  </footer>
+</div>

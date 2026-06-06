@@ -1,0 +1,898 @@
+﻿<div [formGroup]="form">
+<!-- ===== STEP 0: ACCESS MODALITY ===== -->
+      <div class="form-step" *ngIf="stepIndex === 0">
+        <div class="section-header">
+          <h2>GCF Access Modality</h2>
+          <p>Please indicate your organization type and provide relevant nomination or consultation details.</p>
+        </div>
+
+        <div class="form-card">
+          <h3>Organization Type <span class="required">*</span></h3>
+          <div class="radio-group">
+            <label class="radio-option">
+              <input type="radio" formControlName="organizationType" value="government">
+              <span class="radio-custom"></span>
+              <div class="radio-label">
+                <strong>Government or government-controlled direct access entity</strong>
+              </div>
+            </label>
+            <label class="radio-option">
+              <input type="radio" formControlName="organizationType" value="self-nominating-direct">
+              <span class="radio-custom"></span>
+              <div class="radio-label">
+                <strong>Self-nominating direct access entity</strong>
+                <span class="radio-desc">Subnational, national or regional entity that is not government-controlled</span>
+              </div>
+            </label>
+            <label class="radio-option">
+              <input type="radio" formControlName="organizationType" value="self-nominating-international">
+              <span class="radio-custom"></span>
+              <div class="radio-label">
+                <strong>Self-nominating international access entity</strong>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <!-- A: Government entity -->
+        <div class="form-card" *ngIf="form.get('organizationType')?.value === 'government'">
+          <h3>A. Government or Government-Controlled Direct Access Entity</h3>
+          <p class="field-help">Please confirm that you will attach a nomination letter from your country's national designated authority (NDA).</p>
+          <div class="radio-group">
+            <label class="radio-option">
+              <input type="radio" formControlName="nominationLetterAttached" value="yes">
+              <span class="radio-custom"></span>
+              <span>Yes, the nomination letter is attached</span>
+            </label>
+            <label class="radio-option">
+              <input type="radio" formControlName="nominationLetterAttached" value="later">
+              <span class="radio-custom"></span>
+              <span>No, it will be submitted later</span>
+            </label>
+          </div>
+          <div class="upload-area">
+            <div class="upload-icon">ðŸ“Ž</div>
+            <p>Upload NDA nomination letter</p>
+            <span class="upload-hint">Drag & drop or click to browse</span>
+          </div>
+        </div>
+
+        <!-- B: Self-nominating entity -->
+        <div class="form-card" *ngIf="form.get('organizationType')?.value === 'self-nominating-direct' || form.get('organizationType')?.value === 'self-nominating-international'">
+          <h3>B. Self-Nominating Entity</h3>
+          <p class="field-help">Please describe your engagement with the relevant national designated authority (NDA) in relation to your intention to seek accreditation to GCF.</p>
+
+          <div class="form-group">
+            <label>NDA Engagement Description</label>
+            <textarea formControlName="ndaEngagementDescription" rows="4" placeholder="Describe your engagement with the NDA..."></textarea>
+          </div>
+
+          <h4 class="subsection-title">Consultation Details</h4>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Country</label>
+              <select formControlName="consultationCountry">
+                <option value="">Select country...</option>
+                <option *ngFor="let c of countries" [value]="c">{{ c }}</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Contact Person (name & title)</label>
+              <input type="text" formControlName="consultationContactPerson" placeholder="Name and title">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Mode of Consultation</label>
+              <select formControlName="consultationMode">
+                <option value="">Select mode...</option>
+                <option value="email">Email</option>
+                <option value="virtual">Virtual Meeting</option>
+                <option value="in-person">In-person Meeting</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Consultation Dates</label>
+              <input type="date" formControlName="consultationDates">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>NDA Institution</label>
+              <input type="text" formControlName="ndaInstitution" placeholder="Name of the NDA or focal point organization">
+            </div>
+            <div class="form-group">
+              <label>NDA Contact Person</label>
+              <input type="text" formControlName="ndaContactPerson" placeholder="Name and title of the NDA contact">
+            </div>
+          </div>
+          <div class="form-group">
+            <label>NDA Contact Information</label>
+            <input type="text" formControlName="ndaContactInfo" placeholder="Email address and/or phone number">
+          </div>
+          <div class="form-group">
+            <label>Summary of Discussion (100 words max)</label>
+            <textarea formControlName="consultationSummary" rows="4" placeholder="Briefly describe what was discussed..."></textarea>
+          </div>
+          <div class="upload-area">
+            <div class="upload-icon">ðŸ“Ž</div>
+            <p>Upload Consultation Summary and supporting documentation</p>
+            <span class="upload-hint">Emails, meeting notes, etc.</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== STEP 1: GENERAL INFORMATION ===== -->
+      <div class="form-step" *ngIf="stepIndex === 1">
+        <div class="section-header">
+          <h2>Section 1: General Information</h2>
+          <p>Provide your organization's contact information, type, and area of operation.</p>
+        </div>
+
+        <!-- 1.1 Contact Information -->
+        <div class="form-card">
+          <h3>1.1 Contact Information</h3>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Applicant Name (full legal name) <span class="required">*</span></label>
+              <input type="text" formControlName="applicantName" placeholder="Full legal name of your organization">
+            </div>
+            <div class="form-group">
+              <label>Applicant Acronym <span class="required">*</span></label>
+              <input type="text" formControlName="applicantAcronym" placeholder="e.g. UNDP, WWF">
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Legal Address / Registered Office Address <span class="required">*</span></label>
+            <input type="text" formControlName="legalAddress" placeholder="Legal address or registered office address">
+          </div>
+          <div class="form-group">
+            <label>Operational Address (if different)</label>
+            <input type="text" formControlName="operationalAddress" placeholder="Operational address if different from legal address">
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Website <span class="required">*</span></label>
+              <input type="url" formControlName="website" placeholder="https://www.example.org">
+            </div>
+          </div>
+
+          <h4 class="subsection-title">Primary Contact</h4>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Name and Title <span class="required">*</span></label>
+              <input type="text" formControlName="primaryContactName" placeholder="Name and title">
+            </div>
+            <div class="form-group">
+              <label>Email <span class="required">*</span></label>
+              <input type="email" formControlName="primaryContactEmail" placeholder="email@example.org">
+            </div>
+            <div class="form-group">
+              <label>Phone <span class="required">*</span></label>
+              <input type="tel" formControlName="primaryContactPhone" placeholder="+1 234 567 890">
+            </div>
+          </div>
+
+          <h4 class="subsection-title">Secondary Contact</h4>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Name and Title</label>
+              <input type="text" formControlName="secondaryContactName" placeholder="Name and title">
+            </div>
+            <div class="form-group">
+              <label>Email</label>
+              <input type="email" formControlName="secondaryContactEmail" placeholder="email@example.org">
+            </div>
+            <div class="form-group">
+              <label>Phone</label>
+              <input type="tel" formControlName="secondaryContactPhone" placeholder="+1 234 567 890">
+            </div>
+          </div>
+        </div>
+
+        <!-- 1.2 Applicant Type -->
+        <div class="form-card">
+          <h3>1.2 Applicant Type</h3>
+
+          <h4 class="subsection-title">A. Scope of Operations <span class="required">*</span></h4>
+          <div class="radio-group">
+            <label class="radio-option">
+              <input type="radio" formControlName="scopeOfOperations" value="international">
+              <span class="radio-custom"></span>
+              <span>International (global activities or presence)</span>
+            </label>
+            <label class="radio-option">
+              <input type="radio" formControlName="scopeOfOperations" value="regional">
+              <span class="radio-custom"></span>
+              <span>Regional (multi-country or regional activities)</span>
+            </label>
+            <label class="radio-option">
+              <input type="radio" formControlName="scopeOfOperations" value="national">
+              <span class="radio-custom"></span>
+              <span>National (country-level activities)</span>
+            </label>
+            <label class="radio-option">
+              <input type="radio" formControlName="scopeOfOperations" value="subnational">
+              <span class="radio-custom"></span>
+              <span>Subnational / Local</span>
+            </label>
+            <label class="radio-option">
+              <input type="radio" formControlName="scopeOfOperations" value="other">
+              <span class="radio-custom"></span>
+              <span>Other</span>
+            </label>
+          </div>
+          <div class="form-group" *ngIf="form.get('scopeOfOperations')?.value === 'other'">
+            <input type="text" formControlName="scopeOfOperationsOther" placeholder="Please specify...">
+          </div>
+
+          <h4 class="subsection-title">B. Type of Entity <span class="required">*</span></h4>
+          <div class="radio-group">
+            <label class="radio-option">
+              <input type="radio" formControlName="typeOfEntity" value="public-government">
+              <span class="radio-custom"></span>
+              <span>Public sector â€“ Government</span>
+            </label>
+            <label class="radio-option">
+              <input type="radio" formControlName="typeOfEntity" value="public-controlled">
+              <span class="radio-custom"></span>
+              <span>Public sector â€“ Government-controlled subnational, national or regional entity</span>
+            </label>
+            <label class="radio-option">
+              <input type="radio" formControlName="typeOfEntity" value="private">
+              <span class="radio-custom"></span>
+              <span>Private sector â€“ Registered legal entities not government-controlled</span>
+            </label>
+            <label class="radio-option">
+              <input type="radio" formControlName="typeOfEntity" value="multilateral">
+              <span class="radio-custom"></span>
+              <span>Multilateral or other international organization</span>
+            </label>
+            <label class="radio-option">
+              <input type="radio" formControlName="typeOfEntity" value="un-system">
+              <span class="radio-custom"></span>
+              <span>UN System Entity</span>
+            </label>
+            <label class="radio-option">
+              <input type="radio" formControlName="typeOfEntity" value="cso-ngo">
+              <span class="radio-custom"></span>
+              <span>Civil society organization / Non-governmental organization</span>
+            </label>
+            <label class="radio-option">
+              <input type="radio" formControlName="typeOfEntity" value="academic">
+              <span class="radio-custom"></span>
+              <span>Academic / Research institution</span>
+            </label>
+            <label class="radio-option">
+              <input type="radio" formControlName="typeOfEntity" value="other">
+              <span class="radio-custom"></span>
+              <span>Other</span>
+            </label>
+          </div>
+          <div class="form-group" *ngIf="form.get('typeOfEntity')?.value === 'other'">
+            <input type="text" formControlName="typeOfEntityOther" placeholder="Please specify...">
+          </div>
+        </div>
+
+        <!-- 1.3 Area of Operation -->
+        <div class="form-card">
+          <h3>1.3 Area of Operation</h3>
+          <p class="field-help">Please indicate where your organization operates (check all that apply).</p>
+          <div formGroupName="areaOfOperation" class="checkbox-group">
+            <label class="checkbox-option">
+              <input type="checkbox" formControlName="developingCountries">
+              <span class="checkbox-custom"></span>
+              <span>Developing countries</span>
+            </label>
+            <label class="checkbox-option">
+              <input type="checkbox" formControlName="leastDevelopedCountries">
+              <span class="checkbox-custom"></span>
+              <span>Least developed countries</span>
+            </label>
+            <label class="checkbox-option">
+              <input type="checkbox" formControlName="smallIslandDevelopingStates">
+              <span class="checkbox-custom"></span>
+              <span>Small island developing states</span>
+            </label>
+            <label class="checkbox-option">
+              <input type="checkbox" formControlName="developedCountries">
+              <span class="checkbox-custom"></span>
+              <span>Developed countries</span>
+            </label>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Headquarters Country <span class="required">*</span></label>
+              <select formControlName="headquartersCountry">
+                <option value="">Select country...</option>
+                <option *ngFor="let c of countries" [value]="c">{{ c }}</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Country of Legal Incorporation <span class="required">*</span></label>
+              <select formControlName="incorporationCountry">
+                <option value="">Select country...</option>
+                <option *ngFor="let c of countries" [value]="c">{{ c }}</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== STEP 2: LEGAL STATUS & ELIGIBILITY ===== -->
+      <div class="form-step" *ngIf="stepIndex === 2">
+        <div class="section-header">
+          <h2>Section 2: Legal Status and Basic Eligibility</h2>
+          <p>Confirm your organization's legal personality, capacity and operational capabilities.</p>
+        </div>
+
+        <div class="alert-box">
+          <strong>âš ï¸ Important:</strong> If you answer "No" to any qualifying question, your organization may not meet the expectations for the AE role. The GCF Secretariat will guide you on alternative engagement options.
+        </div>
+
+        <!-- 2.1 Legal personality -->
+        <div class="form-card">
+          <h3>2.1 Legal Personality and Capacity</h3>
+
+          <div class="form-group">
+            <label>2.1.1. Does your organization possess independent legal personality under its constituent or governing documents and the laws of its establishment? <span class="required">*</span></label>
+            <div class="yes-no-group">
+              <label class="radio-option compact">
+                <input type="radio" formControlName="hasLegalPersonality" value="yes">
+                <span class="radio-custom"></span>
+                <span>Yes</span>
+              </label>
+              <label class="radio-option compact">
+                <input type="radio" formControlName="hasLegalPersonality" value="no">
+                <span class="radio-custom"></span>
+                <span>No</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>2.1.2. Does your organization have legal capacity and authority to enter into legal agreements with international organizations (such as GCF) in its own name? <span class="required">*</span></label>
+            <div class="yes-no-group">
+              <label class="radio-option compact">
+                <input type="radio" formControlName="hasLegalCapacity" value="yes">
+                <span class="radio-custom"></span>
+                <span>Yes</span>
+              </label>
+              <label class="radio-option compact">
+                <input type="radio" formControlName="hasLegalCapacity" value="no">
+                <span class="radio-custom"></span>
+                <span>No</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="upload-area">
+            <div class="upload-icon">ðŸ“Ž</div>
+            <p>Upload Supporting Documents</p>
+            <span class="upload-hint">Founding/incorporation certificates, Articles of Association, Ownership structure, etc.</span>
+          </div>
+        </div>
+
+        <!-- 2.3 Eligibility -->
+        <div class="form-card">
+          <h3>2.3 Basic Eligibility and Operational Capabilities</h3>
+
+          <div class="form-group">
+            <label>2.3.1. Can your organization receive and repay funds directly from/to the GCF Trustee (without an intermediary)? <span class="required">*</span></label>
+            <div class="yes-no-group">
+              <label class="radio-option compact">
+                <input type="radio" formControlName="canReceiveFundsDirectly" value="yes">
+                <span class="radio-custom"></span>
+                <span>Yes</span>
+              </label>
+              <label class="radio-option compact">
+                <input type="radio" formControlName="canReceiveFundsDirectly" value="no">
+                <span class="radio-custom"></span>
+                <span>No</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>2.3.2. Can your organization receive, hold and repay funds in GCF operational currencies (USD, EUR, JPY and GBP)? <span class="required">*</span></label>
+            <div class="yes-no-group">
+              <label class="radio-option compact">
+                <input type="radio" formControlName="canHandleGCFCurrencies" value="yes">
+                <span class="radio-custom"></span>
+                <span>Yes</span>
+              </label>
+              <label class="radio-option compact">
+                <input type="radio" formControlName="canHandleGCFCurrencies" value="no">
+                <span class="radio-custom"></span>
+                <span>No</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>2.3.3. Is your organization permitted to open and maintain an interest-bearing bank account for GCF funds? <span class="required">*</span></label>
+            <div class="yes-no-group">
+              <label class="radio-option compact">
+                <input type="radio" formControlName="canMaintainInterestBearingAccount" value="yes">
+                <span class="radio-custom"></span>
+                <span>Yes</span>
+              </label>
+              <label class="radio-option compact">
+                <input type="radio" formControlName="canMaintainInterestBearingAccount" value="no">
+                <span class="radio-custom"></span>
+                <span>No</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>2.3.4. Can your organization undertake the full project and programme cycle? <span class="required">*</span></label>
+            <p class="field-help">Including: engaging with developing countries, designing projects, implementing, monitoring and reporting.</p>
+            <div class="yes-no-group">
+              <label class="radio-option compact">
+                <input type="radio" formControlName="canUndertakeFullCycle" value="yes">
+                <span class="radio-custom"></span>
+                <span>Yes</span>
+              </label>
+              <label class="radio-option compact">
+                <input type="radio" formControlName="canUndertakeFullCycle" value="no">
+                <span class="radio-custom"></span>
+                <span>No</span>
+              </label>
+            </div>
+          </div>
+          <div class="form-group" *ngIf="form.get('canUndertakeFullCycle')?.value === 'yes'">
+            <label>Please briefly describe your approach (200 words max):</label>
+            <textarea formControlName="fullCycleDescription" rows="4" placeholder="Describe your approach to designing projects and developing funding proposals..."></textarea>
+          </div>
+        </div>
+
+        <!-- 2.3.5 Capacities -->
+        <div class="form-card">
+          <h3>2.3.5 Institutional Capacities</h3>
+
+          <div class="form-group">
+            <label>Project implementation in line with basic fiduciary standards? <span class="required">*</span></label>
+            <div class="yes-no-group">
+              <label class="radio-option compact">
+                <input type="radio" formControlName="hasFiduciaryCapacity" value="yes">
+                <span class="radio-custom"></span>
+                <span>Yes</span>
+              </label>
+              <label class="radio-option compact">
+                <input type="radio" formControlName="hasFiduciaryCapacity" value="no">
+                <span class="radio-custom"></span>
+                <span>No</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Management of environmental and social risks and ESS standards? <span class="required">*</span></label>
+            <div class="yes-no-group">
+              <label class="radio-option compact">
+                <input type="radio" formControlName="hasESSCapacity" value="yes">
+                <span class="radio-custom"></span>
+                <span>Yes</span>
+              </label>
+              <label class="radio-option compact">
+                <input type="radio" formControlName="hasESSCapacity" value="no">
+                <span class="radio-custom"></span>
+                <span>No</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Gender mainstreaming in programming activities? <span class="required">*</span></label>
+            <div class="yes-no-group">
+              <label class="radio-option compact">
+                <input type="radio" formControlName="hasGenderCapacity" value="yes">
+                <span class="radio-custom"></span>
+                <span>Yes</span>
+              </label>
+              <label class="radio-option compact">
+                <input type="radio" formControlName="hasGenderCapacity" value="no">
+                <span class="radio-custom"></span>
+                <span>No</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Monitoring, evaluation and reporting on programming activities? <span class="required">*</span></label>
+            <div class="yes-no-group">
+              <label class="radio-option compact">
+                <input type="radio" formControlName="hasMonitoringCapacity" value="yes">
+                <span class="radio-custom"></span>
+                <span>Yes</span>
+              </label>
+              <label class="radio-option compact">
+                <input type="radio" formControlName="hasMonitoringCapacity" value="no">
+                <span class="radio-custom"></span>
+                <span>No</span>
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== STEP 3: ADDITIONAL INFO ===== -->
+      <div class="form-step" *ngIf="stepIndex === 3">
+        <div class="section-header">
+          <h2>Section 3: Additional Information & Self-Reflection</h2>
+          <p>Highlight your business mandate, track record and institutional capacities.</p>
+        </div>
+
+        <!-- 3.1 Business Mandate -->
+        <div class="form-card">
+          <h3>3.1 Business Mandate and Track Record</h3>
+
+          <div class="form-group">
+            <label>3.1.1. Organization overview, business mandate, operational modalities and core business areas (100 words max) <span class="required">*</span></label>
+            <textarea formControlName="businessMandate" rows="4" placeholder="Describe how your organization contributes to the GCF mandate..."></textarea>
+          </div>
+
+          <div class="form-group">
+            <label>3.1.2. Do you have experience implementing climate finance or sustainability related projects/programmes?</label>
+            <div class="yes-no-group">
+              <label class="radio-option compact">
+                <input type="radio" formControlName="hasClimateFinanceExperience" value="yes">
+                <span class="radio-custom"></span>
+                <span>Yes</span>
+              </label>
+              <label class="radio-option compact">
+                <input type="radio" formControlName="hasClimateFinanceExperience" value="no">
+                <span class="radio-custom"></span>
+                <span>No</span>
+              </label>
+            </div>
+          </div>
+          <div class="form-group" *ngIf="form.get('hasClimateFinanceExperience')?.value === 'yes'">
+            <label>Brief overview (size of financing, location, ESS risk category, instruments - 100 words max):</label>
+            <textarea formControlName="climateFinanceOverview" rows="4" placeholder="Provide a brief overview..."></textarea>
+          </div>
+
+          <div class="form-group">
+            <label>Do you have a track record in the country or region of the intended programming?</label>
+            <div class="yes-no-group">
+              <label class="radio-option compact">
+                <input type="radio" formControlName="hasTrackRecordInRegion" value="yes">
+                <span class="radio-custom"></span>
+                <span>Yes</span>
+              </label>
+              <label class="radio-option compact">
+                <input type="radio" formControlName="hasTrackRecordInRegion" value="no">
+                <span class="radio-custom"></span>
+                <span>No</span>
+              </label>
+            </div>
+          </div>
+          <div class="form-group" *ngIf="form.get('hasTrackRecordInRegion')?.value === 'yes'">
+            <label>Brief overview of track record (100 words max):</label>
+            <textarea formControlName="trackRecordOverview" rows="4" placeholder="Describe your track record..."></textarea>
+          </div>
+        </div>
+
+        <!-- 3.2.1 Self-Assessment -->
+        <div class="form-card">
+          <h3>3.2.1 Institutional Capacity Self-Assessment</h3>
+          <p class="field-help">Select the option that best represents your organization's current level of capacity in each area.</p>
+
+          <div class="assessment-item">
+            <label>a) Basic fiduciary standards â€“ administrative and financial management, transparency, accountability, AML/CFT <span class="required">*</span></label>
+            <div class="level-group">
+              <label class="radio-option compact">
+                <input type="radio" formControlName="fiduciaryLevel" value="established">
+                <span class="radio-custom"></span>
+                <div><strong>Established</strong><span class="level-desc"> â€“ Dedicated staff, mature documented systems</span></div>
+              </label>
+              <label class="radio-option compact">
+                <input type="radio" formControlName="fiduciaryLevel" value="developing">
+                <span class="radio-custom"></span>
+                <div><strong>Developing</strong><span class="level-desc"> â€“ Policies in place, building track record</span></div>
+              </label>
+              <label class="radio-option compact">
+                <input type="radio" formControlName="fiduciaryLevel" value="foundational">
+                <span class="radio-custom"></span>
+                <div><strong>Foundational</strong><span class="level-desc"> â€“ Early stages of developing policies</span></div>
+              </label>
+            </div>
+          </div>
+
+          <div class="assessment-item">
+            <label>b) Project/programme management capacity â€“ procurement, contract management and oversight <span class="required">*</span></label>
+            <div class="level-group">
+              <label class="radio-option compact">
+                <input type="radio" formControlName="projectManagementLevel" value="established">
+                <span class="radio-custom"></span>
+                <div><strong>Established</strong><span class="level-desc"> â€“ Dedicated staff, mature documented systems</span></div>
+              </label>
+              <label class="radio-option compact">
+                <input type="radio" formControlName="projectManagementLevel" value="developing">
+                <span class="radio-custom"></span>
+                <div><strong>Developing</strong><span class="level-desc"> â€“ Policies in place, building track record</span></div>
+              </label>
+              <label class="radio-option compact">
+                <input type="radio" formControlName="projectManagementLevel" value="foundational">
+                <span class="radio-custom"></span>
+                <div><strong>Foundational</strong><span class="level-desc"> â€“ Early stages of developing policies</span></div>
+              </label>
+            </div>
+          </div>
+
+          <div class="assessment-item">
+            <label>c) Environmental and social risk management and ESS application <span class="required">*</span></label>
+            <div class="level-group">
+              <label class="radio-option compact">
+                <input type="radio" formControlName="essLevel" value="established">
+                <span class="radio-custom"></span>
+                <div><strong>Established</strong><span class="level-desc"> â€“ Dedicated staff, mature documented systems</span></div>
+              </label>
+              <label class="radio-option compact">
+                <input type="radio" formControlName="essLevel" value="developing">
+                <span class="radio-custom"></span>
+                <div><strong>Developing</strong><span class="level-desc"> â€“ Policies in place, building track record</span></div>
+              </label>
+              <label class="radio-option compact">
+                <input type="radio" formControlName="essLevel" value="foundational">
+                <span class="radio-custom"></span>
+                <div><strong>Foundational</strong><span class="level-desc"> â€“ Early stages of developing policies</span></div>
+              </label>
+            </div>
+          </div>
+
+          <div class="assessment-item">
+            <label>d) Grievance redress mechanism <span class="required">*</span></label>
+            <div class="yes-no-group" style="margin-bottom: 0.75rem;">
+              <label class="radio-option compact">
+                <input type="radio" formControlName="hasGrievanceMechanism" value="yes">
+                <span class="radio-custom"></span>
+                <span>Yes</span>
+              </label>
+              <label class="radio-option compact">
+                <input type="radio" formControlName="hasGrievanceMechanism" value="no">
+                <span class="radio-custom"></span>
+                <span>No</span>
+              </label>
+            </div>
+            <div class="level-group" *ngIf="form.get('hasGrievanceMechanism')?.value === 'yes'">
+              <label class="radio-option compact">
+                <input type="radio" formControlName="grievanceMechanismLevel" value="established">
+                <span class="radio-custom"></span>
+                <div><strong>Established</strong></div>
+              </label>
+              <label class="radio-option compact">
+                <input type="radio" formControlName="grievanceMechanismLevel" value="developing">
+                <span class="radio-custom"></span>
+                <div><strong>Developing</strong></div>
+              </label>
+              <label class="radio-option compact">
+                <input type="radio" formControlName="grievanceMechanismLevel" value="foundational">
+                <span class="radio-custom"></span>
+                <div><strong>Foundational</strong></div>
+              </label>
+            </div>
+          </div>
+
+          <div class="assessment-item">
+            <label>e) Gender equality and social inclusion mainstreaming <span class="required">*</span></label>
+            <div class="level-group">
+              <label class="radio-option compact">
+                <input type="radio" formControlName="genderLevel" value="established">
+                <span class="radio-custom"></span>
+                <div><strong>Established</strong><span class="level-desc"> â€“ Dedicated staff, mature documented systems</span></div>
+              </label>
+              <label class="radio-option compact">
+                <input type="radio" formControlName="genderLevel" value="developing">
+                <span class="radio-custom"></span>
+                <div><strong>Developing</strong><span class="level-desc"> â€“ Policies in place, building track record</span></div>
+              </label>
+              <label class="radio-option compact">
+                <input type="radio" formControlName="genderLevel" value="foundational">
+                <span class="radio-custom"></span>
+                <div><strong>Foundational</strong><span class="level-desc"> â€“ Early stages of developing policies</span></div>
+              </label>
+            </div>
+          </div>
+
+          <div class="assessment-item">
+            <label>f) Monitoring, evaluation, reporting and verification <span class="required">*</span></label>
+            <div class="level-group">
+              <label class="radio-option compact">
+                <input type="radio" formControlName="monitoringLevel" value="established">
+                <span class="radio-custom"></span>
+                <div><strong>Established</strong><span class="level-desc"> â€“ Dedicated staff, mature documented systems</span></div>
+              </label>
+              <label class="radio-option compact">
+                <input type="radio" formControlName="monitoringLevel" value="developing">
+                <span class="radio-custom"></span>
+                <div><strong>Developing</strong><span class="level-desc"> â€“ Policies in place, building track record</span></div>
+              </label>
+              <label class="radio-option compact">
+                <input type="radio" formControlName="monitoringLevel" value="foundational">
+                <span class="radio-custom"></span>
+                <div><strong>Foundational</strong><span class="level-desc"> â€“ Early stages of developing policies</span></div>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3.2.2 -->
+        <div class="form-card">
+          <h3>3.2.2 Downstream Compliance</h3>
+
+          <div class="form-group">
+            <label>a) Can you ensure that downstream executing entities apply relevant GCF safeguards, fiduciary requirements and policies? <span class="required">*</span></label>
+            <div class="yes-no-group">
+              <label class="radio-option compact">
+                <input type="radio" formControlName="canEnsureDownstreamCompliance" value="yes">
+                <span class="radio-custom"></span>
+                <span>Yes</span>
+              </label>
+              <label class="radio-option compact">
+                <input type="radio" formControlName="canEnsureDownstreamCompliance" value="no">
+                <span class="radio-custom"></span>
+                <span>No</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>b) Can you monitor, report and verify that safeguards and policies are being upheld? <span class="required">*</span></label>
+            <div class="yes-no-group">
+              <label class="radio-option compact">
+                <input type="radio" formControlName="canMonitorCompliance" value="yes">
+                <span class="radio-custom"></span>
+                <span>Yes</span>
+              </label>
+              <label class="radio-option compact">
+                <input type="radio" formControlName="canMonitorCompliance" value="no">
+                <span class="radio-custom"></span>
+                <span>No</span>
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== STEP 4: FAST-TRACK & ENGAGEMENT ===== -->
+      <div class="form-step" *ngIf="stepIndex === 4">
+        <div class="section-header">
+          <h2>Fast-Track Eligibility & Engagement</h2>
+          <p>Provide information on your fast-track eligibility, engagement with GCF, and partnership readiness.</p>
+        </div>
+
+        <!-- 3.3 Fast-track -->
+        <div class="form-card">
+          <h3>3.3 Fast-Track Eligibility</h3>
+          <p class="field-help">This section applies only if your organization has been accredited or assessed by any of the below-mentioned institutions.</p>
+
+          <h4 class="subsection-title">3.3.1 Existing Accreditations</h4>
+          <p class="field-help">Has your organization been accredited or assessed by any of the following? (Select all that apply)</p>
+          <div class="checkbox-group">
+            <label class="checkbox-option">
+              <input type="checkbox" formControlName="accreditedByGEF">
+              <span class="checkbox-custom"></span>
+              <span>Global Environment Facility (GEF)</span>
+            </label>
+            <label class="checkbox-option">
+              <input type="checkbox" formControlName="accreditedByAF">
+              <span class="checkbox-custom"></span>
+              <span>Adaptation Fund (AF)</span>
+            </label>
+            <label class="checkbox-option">
+              <input type="checkbox" formControlName="accreditedByEUDGINTPA">
+              <span class="checkbox-custom"></span>
+              <span>European Union's Directorate-General for International Partnerships (EU DG INTPA)</span>
+            </label>
+          </div>
+
+          <div class="form-group" *ngIf="form.get('accreditedByGEF')?.value || form.get('accreditedByAF')?.value || form.get('accreditedByEUDGINTPA')?.value">
+            <label>Please indicate whether your organization remains in full compliance with relevant accreditation requirements (100 words max):</label>
+            <textarea formControlName="fastTrackComplianceDetails" rows="3" placeholder="Describe compliance status..."></textarea>
+          </div>
+
+          <div class="upload-area">
+            <div class="upload-icon">ðŸ“Ž</div>
+            <p>Upload accreditation/assessment reference</p>
+            <span class="upload-hint">Supporting documentation for fast-track eligibility</span>
+          </div>
+        </div>
+
+        <!-- 3.4 Engagement -->
+        <div class="form-card">
+          <h3>3.4 Engagement with GCF</h3>
+
+          <div class="form-group">
+            <label>Has your organization requested or received pre-accreditation readiness support from GCF? <span class="required">*</span></label>
+            <div class="yes-no-group">
+              <label class="radio-option compact">
+                <input type="radio" formControlName="hasReceivedReadinessSupport" value="yes">
+                <span class="radio-custom"></span>
+                <span>Yes</span>
+              </label>
+              <label class="radio-option compact">
+                <input type="radio" formControlName="hasReceivedReadinessSupport" value="no">
+                <span class="radio-custom"></span>
+                <span>No</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Has your organization served as an executing entity for any GCF-funded activity? <span class="required">*</span></label>
+            <div class="yes-no-group">
+              <label class="radio-option compact">
+                <input type="radio" formControlName="hasServedAsExecutingEntity" value="yes">
+                <span class="radio-custom"></span>
+                <span>Yes</span>
+              </label>
+              <label class="radio-option compact">
+                <input type="radio" formControlName="hasServedAsExecutingEntity" value="no">
+                <span class="radio-custom"></span>
+                <span>No</span>
+              </label>
+            </div>
+          </div>
+          <div class="form-group" *ngIf="form.get('hasServedAsExecutingEntity')?.value === 'yes'">
+            <label>Please provide information on which projects (100 words max):</label>
+            <textarea formControlName="executingEntityDetails" rows="3" placeholder="Describe the projects..."></textarea>
+          </div>
+
+          <div class="form-group">
+            <label>Has your organization served as a delivery partner for Readiness Proposals or Project Preparation Facility Proposals? <span class="required">*</span></label>
+            <div class="yes-no-group">
+              <label class="radio-option compact">
+                <input type="radio" formControlName="hasServedAsDeliveryPartner" value="yes">
+                <span class="radio-custom"></span>
+                <span>Yes</span>
+              </label>
+              <label class="radio-option compact">
+                <input type="radio" formControlName="hasServedAsDeliveryPartner" value="no">
+                <span class="radio-custom"></span>
+                <span>No</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Has your organization engaged in project-specific assessment approach (PSAA) proposal origination discussions? <span class="required">*</span></label>
+            <div class="yes-no-group">
+              <label class="radio-option compact">
+                <input type="radio" formControlName="hasEngagedInPSAA" value="yes">
+                <span class="radio-custom"></span>
+                <span>Yes</span>
+              </label>
+              <label class="radio-option compact">
+                <input type="radio" formControlName="hasEngagedInPSAA" value="no">
+                <span class="radio-custom"></span>
+                <span>No</span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3.5 Partnerships -->
+        <div class="form-card">
+          <h3>3.5 Partnerships</h3>
+          <div class="form-group">
+            <label>Is your organization prepared to undertake projects or programmes originated by other organizations or to participate in co-financed or sponsored initiatives? <span class="required">*</span></label>
+            <div class="yes-no-group">
+              <label class="radio-option compact">
+                <input type="radio" formControlName="preparedForPartnerships" value="yes">
+                <span class="radio-custom"></span>
+                <span>Yes</span>
+              </label>
+              <label class="radio-option compact">
+                <input type="radio" formControlName="preparedForPartnerships" value="no">
+                <span class="radio-custom"></span>
+                <span>No</span>
+              </label>
+            </div>
+          </div>
+          <p class="field-help">Partnerships are encouraged to leverage complementary strengths, enhance efficiency and promote country ownership.</p>
+        </div>
+      </div>
+</div>

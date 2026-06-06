@@ -1,0 +1,18 @@
+@if (notifications().length > 0) {
+  <div class="notifications-container" aria-live="polite" aria-atomic="false">
+    @for (notification of notifications(); track notification.id) {
+      <div class="notification" [class]="'notification-' + notification.type" role="status">
+        <span class="notification-icon">{{ getIcon(notification.type) }}</span>
+        <p class="notification-message">{{ notification.message }}</p>
+        <button
+          type="button"
+          class="notification-close"
+          (click)="dismiss(notification.id)"
+          aria-label="Dismiss notification"
+        >
+          ×
+        </button>
+      </div>
+    }
+  </div>
+}

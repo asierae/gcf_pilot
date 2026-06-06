@@ -1,0 +1,108 @@
+.notifications-container {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  z-index: 10000;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  width: min(360px, calc(100vw - 2rem));
+}
+
+.notification {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.875rem 1rem;
+  border-radius: 12px;
+  border: 1px solid transparent;
+  background: rgba(15, 23, 42, 0.98);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.5);
+  animation: notification-slide-in 0.3s ease-out;
+}
+
+@keyframes notification-slide-in {
+  from {
+    opacity: 0;
+    transform: translateX(1.5rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.notification-icon {
+  flex-shrink: 0;
+  width: 1.5rem;
+  height: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.notification-message {
+  flex: 1;
+  margin: 0;
+  font-size: 0.875rem;
+  line-height: 1.4;
+  color: #e2e8f0;
+  word-break: break-word;
+}
+
+.notification-close {
+  flex-shrink: 0;
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  font-size: 1.25rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0;
+  margin: -0.15rem -0.25rem 0 0;
+  transition: color 0.2s;
+}
+
+.notification-close:hover {
+  color: #f8fafc;
+}
+
+.notification-success {
+  border-color: rgba(16, 185, 129, 0.4);
+}
+
+.notification-success .notification-icon {
+  background: rgba(16, 185, 129, 0.2);
+  color: #6ee7b7;
+}
+
+.notification-error {
+  border-color: rgba(239, 68, 68, 0.4);
+}
+
+.notification-error .notification-icon {
+  background: rgba(239, 68, 68, 0.2);
+  color: #fca5a5;
+}
+
+.notification-warning {
+  border-color: rgba(251, 191, 36, 0.4);
+}
+
+.notification-warning .notification-icon {
+  background: rgba(251, 191, 36, 0.2);
+  color: #fcd34d;
+}
+
+.notification-info {
+  border-color: rgba(59, 130, 246, 0.4);
+}
+
+.notification-info .notification-icon {
+  background: rgba(59, 130, 246, 0.2);
+  color: #93c5fd;
+}

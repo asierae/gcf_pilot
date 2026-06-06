@@ -1,0 +1,131 @@
+@if (!submission) {
+  <div class="detail-page">
+    <div class="empty-state">
+      <span class="empty-icon">🔍</span>
+      <h2>Submission not found</h2>
+      <p>The requested submission does not exist or was removed.</p>
+      <a routerLink="/dashboard" class="btn-back">← Back to Dashboard</a>
+    </div>
+  </div>
+} @else {
+  <div class="detail-page">
+    <a routerLink="/dashboard" class="btn-back">← Back to Dashboard</a>
+
+    <header class="detail-header">
+      <div class="detail-header-main">
+        <div class="detail-header-top">
+          <span class="detail-badge">Stage 1 Submission</span>
+          <select
+            [class]="getStatusClass()"
+            [value]="status"
+            (change)="onStatusChange($event)"
+            aria-label="Submission status"
+          >
+            @for (option of statusOptions; track option) {
+              <option [value]="option">{{ option }}</option>
+            }
+          </select>
+        </div>
+        <h1>{{ submission.data['applicantName'] || 'Unknown Applicant' }}</h1>
+        @if (submission.data['applicantAcronym']) {
+          <span class="detail-acronym">{{ submission.data['applicantAcronym'] }}</span>
+        }
+      </div>
+      <div class="detail-meta">
+        <div class="meta-item">
+          <span class="meta-label">Submitted</span>
+          <span class="meta-value">{{ formatDate(submission.date) }}</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Reference ID</span>
+          <span class="meta-value mono">{{ submission.id }}</span>
+        </div>
+        @if (lastSentAt) {
+          <div class="meta-item">
+            <span class="meta-label">Last sent to applicant</span>
+            <span class="meta-value">{{ formatDate(lastSentAt) }}</span>
+          </div>
+        }
+      </div>
+    </header>
+
+    <div class="summary-cards">
+      <div class="summary-card">
+        <span class="summary-label">Organization Type</span>
+        <span class="summary-value">{{ getValue('organizationType') || '—' }}</span>
+      </div>
+      <div class="summary-card">
+        <span class="summary-label">Primary Contact</span>
+        <span class="summary-value">{{ getValue('primaryContactName') || '—' }}</span>
+      </div>
+      <div class="summary-card">
+        <span class="summary-label">Email</span>
+        <span class="summary-value">{{ getValue('primaryContactEmail') || '—' }}</span>
+      </div>
+      <div class="summary-card">
+        <span class="summary-label">Headquarters</span>
+        <span class="summary-value">{{ getValue('headquartersCountry') || '—' }}</span>
+      </div>
+    </div>
+
+    @for (section of sections; track section.id; let i = $index) {
+      @if (sectionHasValues(i)) {
+        <section class="detail-section">
+          <div class="section-title">
+            <span class="section-icon">{{ section.icon }}</span>
+            <h2>{{ section.title }}</h2>
+          </div>
+          <div class="section-body">
+            <div class="section-content">
+              <div class="detail-grid">
+                @for (field of section.fields; track field.key) {
+                  @if (hasValue(field.key)) {
+                    <div class="detail-field" [class.detail-field-wide]="isLongText(field.key)">
+                      <dt>{{ field.label }}</dt>
+                      <dd>
+                        @if (isBadgeField(field.key)) {
+                          <span class="value-badge" [class.yes]="isYesValue(field.key)" [class.no]="!isYesValue(field.key)">
+                            {{ getValue(field.key) }}
+                          </span>
+                        } @else if (isLongText(field.key)) {
+                          <p class="value-text">{{ getValue(field.key) }}</p>
+                        } @else {
+                          {{ getValue(field.key) }}
+                        }
+                      </dd>
+                    </div>
+                  }
+                }
+              </div>
+            </div>
+            <aside class="section-notes">
+              <label [for]="'note-' + section.id">Admin notes</label>
+              <textarea
+                [id]="'note-' + section.id"
+                [value]="getNote(section.id)"
+                (input)="onNoteInput(section.id, $event)"
+                rows="8"
+                placeholder="Add your review notes for this section..."
+              ></textarea>
+              <span class="notes-hint">Saved automatically</span>
+            </aside>
+          </div>
+        </section>
+      }
+    }
+
+    <footer class="send-footer">
+      <div class="send-footer-info">
+        <p>Send all section notes to the applicant's primary contact email.</p>
+        <span class="send-recipient">From: {{ emailService.senderEmail }}</span>
+        @if (getValue('primaryContactEmail')) {
+          <span class="send-recipient">To: {{ getValue('primaryContactEmail') }}</span>
+        }
+      </div>
+      <button type="button" class="btn-send" (click)="sendToApplicant()" [disabled]="sending">
+        <span>{{ sending ? 'Sending…' : 'Send to applicant' }}</span>
+        <span class="btn-icon">✉️</span>
+      </button>
+    </footer>
+  </div>
+}

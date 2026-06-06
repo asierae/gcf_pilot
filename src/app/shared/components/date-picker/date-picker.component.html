@@ -1,0 +1,74 @@
+<div class="date-picker">
+  @if (label) {
+    <span class="date-picker-label">{{ label }}</span>
+  }
+
+  <div class="date-picker-control">
+    <button
+      type="button"
+      class="date-picker-trigger"
+      [class.has-value]="value"
+      [class.is-open]="open"
+      (click)="toggle($event)"
+      [attr.aria-label]="ariaLabel"
+      [attr.aria-expanded]="open"
+    >
+      <svg class="trigger-icon" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+        <rect x="3" y="4.5" width="14" height="12" rx="2" stroke="currentColor" stroke-width="1.4" />
+        <path
+          d="M3 8.5h14M7 2.5v3M13 2.5v3"
+          stroke="currentColor"
+          stroke-width="1.4"
+          stroke-linecap="round"
+        />
+      </svg>
+      <span class="trigger-text" [class.placeholder]="!value">{{ displayValue }}</span>
+      <svg class="trigger-chevron" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+        <path d="M6 8l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+      </svg>
+    </button>
+
+    @if (value) {
+      <button type="button" class="date-picker-clear" (click)="clearValue($event)" aria-label="Clear date">
+        ×
+      </button>
+    }
+  </div>
+
+  @if (open) {
+    <div class="date-picker-dropdown" (click)="onDropdownClick($event)">
+      <div class="calendar-header">
+        <button type="button" class="calendar-nav" (click)="prevMonth($event)" aria-label="Previous month">
+          ‹
+        </button>
+        <span class="calendar-month">{{ monthLabel }}</span>
+        <button type="button" class="calendar-nav" (click)="nextMonth($event)" aria-label="Next month">
+          ›
+        </button>
+      </div>
+
+      <div class="calendar-weekdays">
+        @for (day of weekDays; track day) {
+          <span class="weekday">{{ day }}</span>
+        }
+      </div>
+
+      <div class="calendar-grid">
+        @for (day of calendarDays; track day.date.getTime()) {
+          <button
+            type="button"
+            class="calendar-day"
+            [class.other-month]="!day.inMonth"
+            [class.today]="day.isToday"
+            [class.selected]="day.isSelected"
+            [class.disabled]="day.disabled"
+            [disabled]="day.disabled"
+            (click)="selectDay(day, $event)"
+          >
+            {{ day.label }}
+          </button>
+        }
+      </div>
+    </div>
+  }
+</div>

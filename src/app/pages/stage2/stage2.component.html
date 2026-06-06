@@ -1,0 +1,182 @@
+<div class="app-container">
+  @if (submitSuccess) {
+    <div class="success-banner">
+      <span class="success-icon">✅</span>
+      <h2>Application Submitted Successfully</h2>
+      <p>Your full accreditation application (Stage 1 + Stage 2) has been saved.</p>
+    </div>
+  } @else {
+    <div class="form-intro">
+      <h2>GCF Accreditation Application</h2>
+      <p>Complete pre-screening sections and accreditation requirements. You can navigate freely to review or edit any section.</p>
+    </div>
+
+    <div class="wizard-layout">
+      <aside class="wizard-sidebar">
+        <div class="wizard-progress-header">
+          <div class="progress-meta">
+            <span>Step {{ currentStep + 1 }} of {{ totalSteps }}</span>
+            <span class="progress-pct">{{ stepProgress | number:'1.0-0' }}%</span>
+          </div>
+          <div class="progress-bar">
+            <div class="progress-fill" [style.width.%]="stepProgress"></div>
+          </div>
+        </div>
+
+        @for (group of navGroups; track group.id) {
+          <div class="nav-group">
+            <h3 class="nav-group-label">{{ group.label }}</h3>
+            <ul class="nav-steps">
+              @for (item of group.steps; track item.id) {
+                <li>
+                  <button
+                    type="button"
+                    class="nav-step-btn"
+                    [class.active]="currentStep === item.index"
+                    [class.completed]="currentStep > item.index"
+                    [class.entry-point]="item.index === stage2EntryStep"
+                    (click)="goToStep(item.index)"
+                  >
+                    <span class="nav-step-icon">{{ item.icon }}</span>
+                    <span class="nav-step-text">
+                      <span class="nav-step-title">{{ item.title }}</span>
+                      @if (item.subtitle) {
+                        <span class="nav-step-subtitle">{{ item.subtitle }}</span>
+                      }
+                    </span>
+                    @if (currentStep > item.index) {
+                      <span class="nav-step-check">✓</span>
+                    }
+                  </button>
+                </li>
+              }
+            </ul>
+          </div>
+        }
+      </aside>
+
+      <div class="wizard-content">
+        <div class="content-header">
+          <span class="content-step-badge">Step {{ currentStep + 1 }}/{{ totalSteps }}</span>
+          <h2>{{ currentStepLabel }}</h2>
+        </div>
+
+        <form [formGroup]="form" (ngSubmit)="onSubmit()">
+          @if (isStage1Step) {
+            <app-stage1-steps [form]="form" [stepIndex]="currentStep"></app-stage1-steps>
+          } @else if (currentScreeningStep) {
+            <div class="form-step">
+              <div class="section-header">
+                <p>{{ currentScreeningStep.description }}</p>
+              </div>
+
+              @if (currentScreeningStep.screeningRequirement) {
+                <div class="alert-box info">
+                  <strong>Screening requirement:</strong> {{ currentScreeningStep.screeningRequirement }}
+                </div>
+              }
+
+              @if (currentStep === stage2EntryStep) {
+                <div class="form-card">
+                  <h3>Application Settings</h3>
+                  <div class="form-group">
+                    <label>Maximum E&S Risk Category of Intended Projects <span class="required">*</span></label>
+                    <select formControlName="maxRiskCategory">
+                      <option value="">Select category...</option>
+                      <option value="high">High risk (Category A / Intermediation-1)</option>
+                      <option value="medium">Medium risk (Category B / Intermediation-2)</option>
+                      <option value="minimal">Minimal to no risk (Category C / Intermediation-3)</option>
+                    </select>
+                  </div>
+                </div>
+              }
+
+              @for (question of currentScreeningStep.questions; track question.key) {
+                <div class="form-card screening-question">
+                  <div class="form-group">
+                    <label>{{ question.label }} <span class="required">*</span></label>
+                    @if (question.help) {
+                      <p class="field-help">{{ question.help }}</p>
+                    }
+                    <div class="yes-no-group">
+                      <label class="radio-option compact">
+                        <input type="radio" [formControlName]="question.key + '_answer'" value="yes">
+                        <span class="radio-custom"></span>
+                        <span>Yes</span>
+                      </label>
+                      <label class="radio-option compact">
+                        <input type="radio" [formControlName]="question.key + '_answer'" value="no">
+                        <span class="radio-custom"></span>
+                        <span>No</span>
+                      </label>
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <label>Narrative explanation (reference supporting documentation) <span class="required">*</span></label>
+                    <textarea
+                      [formControlName]="question.key + '_narrative'"
+                      rows="4"
+                      placeholder="Provide a narrative explanation with reference to supporting documentation (100–500 words)..."
+                    ></textarea>
+                  </div>
+                  <div class="upload-area">
+                    <div class="upload-icon">📎</div>
+                    <p>Upload mandatory / supplementary evidence</p>
+                    <span class="upload-hint">Drag & drop or click to browse</span>
+                  </div>
+                </div>
+              }
+
+              @if (currentScreeningStep.sectionStatusKey && currentScreeningStep.sectionCommentsKey) {
+                <div class="form-card section-feedback">
+                  <div class="form-group">
+                    <label>Section status <span class="required">*</span></label>
+                    <div class="status-group">
+                      <label class="radio-option compact">
+                        <input type="radio" [formControlName]="currentScreeningStep.sectionStatusKey" value="complete">
+                        <span class="radio-custom"></span>
+                        <span class="status-badge complete">Complete</span>
+                      </label>
+                      <label class="radio-option compact">
+                        <input type="radio" [formControlName]="currentScreeningStep.sectionStatusKey" value="pending">
+                        <span class="radio-custom"></span>
+                        <span class="status-badge pending">Pending</span>
+                      </label>
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <label>Comments</label>
+                    <textarea
+                      [formControlName]="currentScreeningStep.sectionCommentsKey"
+                      rows="4"
+                      placeholder="No comments yet. Please share your feedback."
+                    ></textarea>
+                  </div>
+                </div>
+              }
+
+              @if (currentStep === totalSteps - 1) {
+                <div class="submit-section">
+                  <button type="submit" class="btn-submit">
+                    <span>Submit Application</span>
+                    <span class="btn-icon">✉️</span>
+                  </button>
+                </div>
+              }
+            </div>
+          }
+
+          <div class="form-navigation">
+            @if (currentStep > 0) {
+              <button type="button" class="btn-nav btn-prev" (click)="prevStep()">← Previous</button>
+            }
+            <div class="nav-spacer"></div>
+            @if (currentStep < totalSteps - 1) {
+              <button type="button" class="btn-nav btn-next" (click)="nextStep()">Next →</button>
+            }
+          </div>
+        </form>
+      </div>
+    </div>
+  }
+</div>

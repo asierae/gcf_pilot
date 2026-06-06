@@ -1,0 +1,204 @@
+<div class="dashboard">
+  <div class="dashboard-header">
+    <h2>Dashboard — Stage 1 Submissions</h2>
+    <p>All pre-screening questionnaire submissions stored locally.</p>
+    <div class="header-actions">
+      <span class="count-badge">
+        @if (hasActiveFilters) {
+          {{ filteredSubmissions.length }} of {{ submissions.length }} submission(s)
+        } @else {
+          {{ submissions.length }} submission(s)
+        }
+      </span>
+      @if (selectedCount > 0) {
+        <button type="button" class="btn-delete" (click)="deleteSelected()">
+          Delete selected ({{ selectedCount }})
+        </button>
+      }
+    </div>
+  </div>
+
+  @if (submissions.length === 0) {
+    <div class="empty-state">
+      <span class="empty-icon">📭</span>
+      <p>No Stage 1 submissions yet.</p>
+      <p class="empty-hint">Submissions will appear here when users complete the Stage 1 form.</p>
+    </div>
+  } @else {
+    <div class="table-toolbar">
+      <label class="search-box">
+        <span class="search-icon" aria-hidden="true">
+          <svg viewBox="0 0 20 20" fill="none">
+            <path
+              d="M9 3.5a5.5 5.5 0 1 1 0 11 5.5 5.5 0 0 1 0-11Z"
+              stroke="currentColor"
+              stroke-width="1.5"
+            />
+            <path d="M13.5 13.5 17 17" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+          </svg>
+        </span>
+        <input
+          type="search"
+          class="search-input"
+          placeholder="Filter by any column…"
+          [value]="searchQuery"
+          (input)="onSearchInput($event)"
+        />
+        @if (searchQuery.trim()) {
+          <button type="button" class="search-clear" (click)="clearSearch()" aria-label="Clear search">
+            ×
+          </button>
+        }
+      </label>
+
+      <div class="date-range-filter">
+        <span class="date-range-label">
+          <svg viewBox="0 0 20 20" fill="none" aria-hidden="true">
+            <rect x="3" y="4.5" width="14" height="12" rx="2" stroke="currentColor" stroke-width="1.4"/>
+            <path d="M3 8.5h14M7 2.5v3M13 2.5v3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+          </svg>
+          Submitted between
+        </span>
+
+        <app-date-picker
+          label="From"
+          placeholder="Start date"
+          ariaLabel="From date"
+          [value]="dateFrom"
+          [maxDate]="dateTo"
+          (valueChange)="onDateFromChange($event)"
+        />
+
+        <span class="date-range-sep">to</span>
+
+        <app-date-picker
+          label="To"
+          placeholder="End date"
+          ariaLabel="To date"
+          [value]="dateTo"
+          [minDate]="dateFrom"
+          (valueChange)="onDateToChange($event)"
+        />
+
+        @if (dateFrom || dateTo) {
+          <button type="button" class="date-clear" (click)="clearDateFilter()">Clear dates</button>
+        }
+      </div>
+    </div>
+
+    @if (filteredSubmissions.length === 0) {
+      <div class="empty-state empty-state-filter">
+        <span class="empty-icon">🔎</span>
+        @if (hasInvalidDateRange) {
+          <p>Start date must be before or equal to end date.</p>
+        } @else if (hasActiveFilters) {
+          <p>No submissions match the current filters.</p>
+        } @else {
+          <p>No submissions to display.</p>
+        }
+        @if (hasActiveFilters) {
+          <button type="button" class="btn-clear-filter" (click)="clearAllFilters()">Clear all filters</button>
+        }
+      </div>
+    } @else {
+      <div class="table-wrapper">
+        <table class="submissions-table">
+          <thead>
+            <tr>
+              <th class="col-check">
+                <label class="checkbox-wrap" aria-label="Select all visible submissions">
+                  <input
+                    type="checkbox"
+                    class="checkbox-input"
+                    [checked]="allSelected"
+                    [indeterminate]="someSelected"
+                    (change)="toggleSelectAll($event)"
+                  />
+                  <span class="checkbox-box"></span>
+                </label>
+              </th>
+              <th>Submitted</th>
+              <th>Applicant</th>
+              <th>Acronym</th>
+              <th>Organization Type</th>
+              <th>Contact Email</th>
+              <th>Headquarters</th>
+              <th>Scope</th>
+              <th>Status</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (submission of paginatedSubmissions; track submission.id) {
+              <tr>
+                <td class="col-check">
+                  <label
+                    class="checkbox-wrap"
+                    [attr.aria-label]="'Select submission from ' + getSummary(submission).applicantName"
+                  >
+                    <input
+                      type="checkbox"
+                      class="checkbox-input"
+                      [checked]="isSelected(submission.id)"
+                      (change)="toggleSelection(submission.id, $event)"
+                    />
+                    <span class="checkbox-box"></span>
+                  </label>
+                </td>
+                <td class="col-date">{{ formatDate(submission.date) }}</td>
+                <td class="col-name">{{ getSummary(submission).applicantName }}</td>
+                <td><span class="acronym-badge">{{ getSummary(submission).acronym }}</span></td>
+                <td class="col-type">{{ getSummary(submission).organizationType }}</td>
+                <td class="col-email">{{ getSummary(submission).contactEmail }}</td>
+                <td>{{ getSummary(submission).headquarters }}</td>
+                <td>{{ getSummary(submission).scope }}</td>
+                <td class="col-status">
+                  <select
+                    [class]="getStatusClass(getStatus(submission.id))"
+                    [value]="getStatus(submission.id)"
+                    (change)="onStatusChange(submission.id, $event)"
+                    aria-label="Submission status"
+                  >
+                    @for (status of statusOptions; track status) {
+                      <option [value]="status">{{ status }}</option>
+                    }
+                  </select>
+                </td>
+                <td class="col-action">
+                  <a [routerLink]="['/dashboard/submission', submission.id]" class="btn-view">View</a>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+
+        @if (filteredSubmissions.length > pageSize) {
+          <div class="pagination">
+            <span class="pagination-info">
+              Showing {{ pageStart }}–{{ pageEnd }} of {{ filteredSubmissions.length }}
+            </span>
+            <div class="pagination-controls">
+              <button
+                type="button"
+                class="page-btn"
+                [disabled]="currentPage === 1"
+                (click)="prevPage()"
+              >
+                ← Prev
+              </button>
+              <span class="page-indicator">Page {{ currentPage }} / {{ totalPages }}</span>
+              <button
+                type="button"
+                class="page-btn"
+                [disabled]="currentPage === totalPages"
+                (click)="nextPage()"
+              >
+                Next →
+              </button>
+            </div>
+          </div>
+        }
+      </div>
+    }
+  }
+</div>
