@@ -28,6 +28,8 @@ export class DashboardComponent implements OnInit {
   dateTo = '';
   readonly pageSize = 20;
   currentPage = 1;
+  loading = true;
+  loadError = '';
 
   constructor(
     private storageService: StorageService,
@@ -35,19 +37,27 @@ export class DashboardComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.loadSubmissions();
+    void this.loadSubmissions();
   }
 
-  loadSubmissions(): void {
-    this.submissions = this.storageService.getStage1Submissions().reverse();
-    this.statusById = {};
-    for (const submission of this.submissions) {
-      this.statusById[submission.id] = this.storageService.getSubmissionStatus(submission.id);
+  async loadSubmissions(): Promise<void> {
+    this.loading = true;
+    this.loadError = '';
+
+    try {
+      const { submissions, statusById } = await this.storageService.loadDashboardData();
+      this.submissions = submissions.reverse();
+      this.statusById = statusById;
+      this.selectedIds = new Set(
+        [...this.selectedIds].filter((id) => this.submissions.some((s) => s.id === id))
+      );
+      this.clampCurrentPage();
+    } catch {
+      this.loadError = 'Could not load submissions from Firebase.';
+      this.notificationService.error(this.loadError);
+    } finally {
+      this.loading = false;
     }
-    this.selectedIds = new Set(
-      [...this.selectedIds].filter((id) => this.submissions.some((s) => s.id === id))
-    );
-    this.clampCurrentPage();
   }
 
   get filteredSubmissions(): FormSubmission[] {
@@ -125,10 +135,18 @@ export class DashboardComponent implements OnInit {
     return `status-select status-${status.toLowerCase()}`;
   }
 
-  onStatusChange(submissionId: string, event: Event): void {
+  async onStatusChange(submissionId: string, event: Event): Promise<void> {
     const value = (event.target as HTMLSelectElement).value as SubmissionStatus;
-    this.storageService.setSubmissionStatus(submissionId, value);
+    const previous = this.statusById[submissionId] ?? 'Pending';
+
     this.statusById[submissionId] = value;
+
+    try {
+      await this.storageService.setSubmissionStatus(submissionId, value);
+    } catch {
+      this.statusById[submissionId] = previous;
+      this.notificationService.error('Could not update status in Firebase.');
+    }
   }
 
   onSearchInput(event: Event): void {
@@ -217,7 +235,7 @@ export class DashboardComponent implements OnInit {
     this.selectedIds = new Set(this.selectedIds);
   }
 
-  deleteSelected(): void {
+  async deleteSelected(): Promise<void> {
     if (!this.selectedIds.size) {
       return;
     }
@@ -231,12 +249,16 @@ export class DashboardComponent implements OnInit {
       return;
     }
 
-    this.storageService.deleteStage1Submissions([...this.selectedIds]);
-    this.selectedIds = new Set();
-    this.loadSubmissions();
-    this.notificationService.success(
-      `${count} submission${count === 1 ? '' : 's'} deleted.`
-    );
+    try {
+      await this.storageService.deleteStage1Submissions([...this.selectedIds]);
+      this.selectedIds = new Set();
+      await this.loadSubmissions();
+      this.notificationService.success(
+        `${count} submission${count === 1 ? '' : 's'} deleted.`
+      );
+    } catch {
+      this.notificationService.error('Could not delete submissions from Firebase.');
+    }
   }
 
   private clampCurrentPage(): void {

@@ -1,0 +1,83 @@
+<div class="file-upload">
+  <div class="attached-header">
+    <span class="attached-title">Attached files</span>
+    <span class="attached-count">{{ savedCount }} / {{ maxFiles }}</span>
+  </div>
+
+  @if (files.length) {
+    <ul class="attached-list">
+      @for (file of files; track file.id) {
+        <li class="attached-item" [class.uploading]="file.uploading">
+          <div class="attached-item-main">
+            <span class="file-icon" aria-hidden="true">{{ file.uploading ? '⏳' : '📄' }}</span>
+            <div class="file-meta">
+              <span class="file-name">{{ file.name }}</span>
+              @if (file.uploading) {
+                <span class="file-status">Uploading to Cloudinary…</span>
+              } @else if (file.url) {
+                <a
+                  class="file-link"
+                  [href]="openUrl(file)"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  (click)="$event.stopPropagation()"
+                >
+                  Open file
+                </a>
+              }
+            </div>
+          </div>
+
+          @if (!file.uploading) {
+            <button
+              type="button"
+              class="btn-remove"
+              [disabled]="disabled || isRemoving(file)"
+              (click)="removeFile(file, $event)"
+            >
+              {{ isRemoving(file) ? 'Removing…' : 'Remove' }}
+            </button>
+          }
+        </li>
+      }
+    </ul>
+  } @else {
+    <p class="attached-empty">No files attached yet.</p>
+  }
+
+  <div
+    class="upload-area"
+    [class.drag-over]="dragOver"
+    [class.disabled]="!canAddMore"
+    (dragover)="onDragOver($event)"
+    (dragleave)="onDragLeave($event)"
+    (drop)="onDrop($event)"
+  >
+    <input
+      #fileInput
+      type="file"
+      class="file-input"
+      [accept]="accept"
+      [multiple]="slotsRemaining > 1"
+      [disabled]="!canAddMore"
+      (change)="onFileInput($event)"
+    />
+
+    <button
+      type="button"
+      class="browse-btn"
+      [disabled]="!canAddMore"
+      (click)="onBrowseClick($event, fileInput)"
+    >
+      <span class="upload-icon">📎</span>
+      <span class="browse-label">{{ label }}</span>
+      <span class="upload-hint">
+        @if (isBusy) {
+          Please wait while files are uploading…
+        } @else {
+          {{ hint }} — {{ slotsRemaining }} slot(s) left
+        }
+      </span>
+    </button>
+  </div>
+</div>

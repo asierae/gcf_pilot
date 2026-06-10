@@ -68,6 +68,28 @@
       </div>
     </div>
 
+    @if (attachmentFields.length) {
+      <section class="attachments-panel">
+        <h2>Uploaded documents</h2>
+        <div class="attachments-grid">
+          @for (group of attachmentFields; track group.key) {
+            <div class="attachment-group">
+              <h3>{{ group.label }}</h3>
+              <ul>
+                @for (attachment of group.attachments; track attachment.url) {
+                  <li>
+                    <a [href]="fileUrl(attachment)" target="_blank" rel="noopener noreferrer">
+                      {{ attachment.name || 'Document' }}
+                    </a>
+                  </li>
+                }
+              </ul>
+            </div>
+          }
+        </div>
+      </section>
+    }
+
     @for (section of sections; track section.id; let i = $index) {
       @if (sectionHasValues(i)) {
         <section class="detail-section">
@@ -83,7 +105,17 @@
                     <div class="detail-field" [class.detail-field-wide]="isLongText(field.key)">
                       <dt>{{ field.label }}</dt>
                       <dd>
-                        @if (isBadgeField(field.key)) {
+                        @if (isAttachmentField(field.key)) {
+                          <ul class="attachment-links">
+                            @for (attachment of getAttachmentItems(field.key); track attachment.url) {
+                              <li>
+                                <a [href]="fileUrl(attachment)" target="_blank" rel="noopener noreferrer">
+                                  {{ attachment.name || 'File' }}
+                                </a>
+                              </li>
+                            }
+                          </ul>
+                        } @else if (isBadgeField(field.key)) {
                           <span class="value-badge" [class.yes]="isYesValue(field.key)" [class.no]="!isYesValue(field.key)">
                             {{ getValue(field.key) }}
                           </span>

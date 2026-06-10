@@ -10,11 +10,19 @@ import {
 import { NotificationService } from '../../../services/notification.service';
 import { EmailService } from '../../../services/email.service';
 import {
+  collectAttachmentFields,
+  isAttachmentFieldKey
+} from '../../../config/attachments.config';
+import {
   DisplaySection,
   STAGE1_DISPLAY_SECTIONS,
   formatStage1Value,
+  getAttachments,
   hasDisplayValue
 } from '../../../shared/data/stage1-display.config';
+import { ApplicantRecord } from '../../../models/applicant.model';
+import { StoredAttachment } from '../../../models/attachment.model';
+import { resolveCloudinaryFileUrl } from '../../../shared/utils/cloudinary-url.util';
 
 @Component({
   selector: 'app-submission-detail',
@@ -30,6 +38,8 @@ export class SubmissionDetailComponent implements OnInit {
   lastSentAt: string | null = null;
   status: SubmissionStatus = 'Pending';
   readonly statusOptions = SUBMISSION_STATUSES;
+  applicantRecord: ApplicantRecord | null = null;
+  attachmentFields: { key: string; label: string; attachments: StoredAttachment[] }[] = [];
 
   constructor(
     private route: ActivatedRoute,
@@ -39,14 +49,26 @@ export class SubmissionDetailComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    void this.loadSubmission();
+  }
+
+  private async loadSubmission(): Promise<void> {
     const id = this.route.snapshot.paramMap.get('id');
-    if (id) {
-      this.submission = this.storageService.getStage1SubmissionById(id);
+    if (!id) {
+      return;
+    }
+
+    try {
+      this.submission = await this.storageService.getStage1SubmissionById(id);
+      this.applicantRecord = await this.storageService.getApplicantRecord(id);
       if (this.submission) {
-        this.sectionNotes = { ...this.storageService.getSubmissionReviewNotes(id) };
-        this.lastSentAt = this.storageService.getLastReviewSentAt(id);
-        this.status = this.storageService.getSubmissionStatus(id);
+        this.sectionNotes = { ...(await this.storageService.getSubmissionReviewNotes(id)) };
+        this.lastSentAt = await this.storageService.getLastReviewSentAt(id);
+        this.status = await this.storageService.getSubmissionStatus(id);
+        this.attachmentFields = collectAttachmentFields(this.getMergedSubmissionData());
       }
+    } catch {
+      this.notificationService.error('Could not load submission from Firebase.');
     }
   }
 
@@ -54,14 +76,21 @@ export class SubmissionDetailComponent implements OnInit {
     return `status-select status-${this.status.toLowerCase()}`;
   }
 
-  onStatusChange(event: Event): void {
+  async onStatusChange(event: Event): Promise<void> {
     if (!this.submission) {
       return;
     }
 
     const value = (event.target as HTMLSelectElement).value as SubmissionStatus;
-    this.storageService.setSubmissionStatus(this.submission.id, value);
+    const previous = this.status;
     this.status = value;
+
+    try {
+      await this.storageService.setSubmissionStatus(this.submission.id, value);
+    } catch {
+      this.status = previous;
+      this.notificationService.error('Could not update status in Firebase.');
+    }
   }
 
   formatDate(iso: string): string {
@@ -95,9 +124,12 @@ export class SubmissionDetailComponent implements OnInit {
     if (!this.submission) {
       return;
     }
+
     const value = (event.target as HTMLTextAreaElement).value;
     this.sectionNotes[sectionId] = value;
-    this.storageService.saveSubmissionReviewNote(this.submission.id, sectionId, value);
+    void this.storageService
+      .saveSubmissionReviewNote(this.submission.id, sectionId, value)
+      .catch(() => this.notificationService.error('Could not save note to Firebase.'));
   }
 
   hasAnyNotes(): boolean {
@@ -131,7 +163,7 @@ export class SubmissionDetailComponent implements OnInit {
     try {
       const mode = await this.emailService.sendReviewEmail({ to: recipient, subject, body });
 
-      this.storageService.markReviewSent(this.submission.id, recipient);
+      await this.storageService.markReviewSent(this.submission.id, recipient);
       this.lastSentAt = new Date().toISOString();
 
       if (mode === 'automatic') {
@@ -180,6 +212,29 @@ export class SubmissionDetailComponent implements OnInit {
 
   private visibleSectionsWithNotes(): DisplaySection[] {
     return this.sections.filter((s) => this.sectionHasValues(this.sections.indexOf(s)));
+  }
+
+  fileUrl(attachment: StoredAttachment | string): string {
+    return resolveCloudinaryFileUrl(attachment);
+  }
+
+  isAttachmentField(key: string): boolean {
+    return isAttachmentFieldKey(key);
+  }
+
+  getAttachmentItems(key: string): StoredAttachment[] {
+    if (!this.submission) {
+      return [];
+    }
+
+    return getAttachments(key, this.getMergedSubmissionData());
+  }
+
+  private getMergedSubmissionData(): Record<string, unknown> {
+    return {
+      ...(this.submission?.data ?? {}),
+      ...(this.applicantRecord?.stage2?.data ?? {})
+    };
   }
 
   isLongText(key: string): boolean {

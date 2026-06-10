@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { StorageService } from '../../services/storage.service';
 import { NotificationService } from '../../services/notification.service';
+import { FileUploadComponent } from '../../shared/components/file-upload/file-upload.component';
 import {
   buildMissingFieldsMessage,
   collectInvalidFields,
@@ -12,7 +13,7 @@ import {
 @Component({
   selector: 'app-stage1',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, FileUploadComponent],
   templateUrl: './stage1.component.html',
   styleUrl: './stage1.component.css'
 })
@@ -134,6 +135,10 @@ export class Stage1Component {
       hasServedAsDeliveryPartner: ['', Validators.required],
       hasEngagedInPSAA: ['', Validators.required],
       preparedForPartnerships: ['', Validators.required],
+      nominationLetterFiles: [[]],
+      consultationSummaryFiles: [[]],
+      legalSupportingDocumentsFiles: [[]],
+      fastTrackAccreditationFiles: [[]],
     });
   }
 
@@ -157,9 +162,7 @@ export class Stage1Component {
     markAllControlsTouched(this.form);
 
     if (this.form.valid) {
-      this.storageService.saveStage1Submission(this.form.value);
-      this.submitSuccess = true;
-      this.notificationService.success('Questionnaire submitted successfully!');
+      void this.submitForm();
     } else {
       const missing = collectInvalidFields(this.form);
       if (missing.length > 0) {
@@ -173,5 +176,15 @@ export class Stage1Component {
 
   getStepProgress(): number {
     return ((this.currentStep + 1) / this.steps.length) * 100;
+  }
+
+  private async submitForm(): Promise<void> {
+    try {
+      await this.storageService.saveStage1Submission(this.form.value);
+      this.submitSuccess = true;
+      this.notificationService.success('Questionnaire submitted successfully!');
+    } catch {
+      this.notificationService.error('Could not save submission to Firebase.');
+    }
   }
 }

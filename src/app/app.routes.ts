@@ -5,6 +5,7 @@ import { Stage2Component } from './pages/stage2/stage2.component';
 import { LoginComponent } from './pages/login/login.component';
 import { DashboardComponent } from './pages/dashboard/dashboard.component';
 import { SubmissionDetailComponent } from './pages/dashboard/submission-detail/submission-detail.component';
+import { LeadsImportComponent } from './pages/dashboard/leads-import/leads-import.component';
 import { adminGuard, authGuard } from './guards/auth.guard';
 
 export const routes: Routes = [
@@ -17,6 +18,7 @@ export const routes: Routes = [
       { path: 'stage1', component: Stage1Component },
       { path: 'stage2', component: Stage2Component, canActivate: [authGuard] },
       { path: 'dashboard', component: DashboardComponent, canActivate: [adminGuard] },
+      { path: 'dashboard/leads', component: LeadsImportComponent, canActivate: [adminGuard] },
       { path: 'dashboard/submission/:id', component: SubmissionDetailComponent, canActivate: [adminGuard] }
     ]
   },

@@ -1,4 +1,4 @@
-﻿<div [formGroup]="form">
+<div [formGroup]="form">
 <!-- ===== STEP 0: ACCESS MODALITY ===== -->
       <div class="form-step" *ngIf="stepIndex === 0">
         <div class="section-header">
@@ -50,11 +50,11 @@
               <span>No, it will be submitted later</span>
             </label>
           </div>
-          <div class="upload-area">
-            <div class="upload-icon">ðŸ“Ž</div>
-            <p>Upload NDA nomination letter</p>
-            <span class="upload-hint">Drag & drop or click to browse</span>
-          </div>
+          <app-file-upload
+            formControlName="nominationLetterFiles"
+            label="Upload NDA nomination letter"
+            hint="Drag & drop or click to browse"
+          />
         </div>
 
         <!-- B: Self-nominating entity -->
@@ -115,11 +115,11 @@
             <label>Summary of Discussion (100 words max)</label>
             <textarea formControlName="consultationSummary" rows="4" placeholder="Briefly describe what was discussed..."></textarea>
           </div>
-          <div class="upload-area">
-            <div class="upload-icon">ðŸ“Ž</div>
-            <p>Upload Consultation Summary and supporting documentation</p>
-            <span class="upload-hint">Emails, meeting notes, etc.</span>
-          </div>
+          <app-file-upload
+            formControlName="consultationSummaryFiles"
+            label="Upload Consultation Summary and supporting documentation"
+            hint="Emails, meeting notes, etc."
+          />
         </div>
       </div>
 
@@ -367,11 +367,11 @@
             </div>
           </div>
 
-          <div class="upload-area">
-            <div class="upload-icon">ðŸ“Ž</div>
-            <p>Upload Supporting Documents</p>
-            <span class="upload-hint">Founding/incorporation certificates, Articles of Association, Ownership structure, etc.</span>
-          </div>
+          <app-file-upload
+            formControlName="legalSupportingDocumentsFiles"
+            label="Upload Supporting Documents"
+            hint="Founding/incorporation certificates, Articles of Association, Ownership structure, etc."
+          />
         </div>
 
         <!-- 2.3 Eligibility -->
@@ -794,11 +794,11 @@
             <textarea formControlName="fastTrackComplianceDetails" rows="3" placeholder="Describe compliance status..."></textarea>
           </div>
 
-          <div class="upload-area">
-            <div class="upload-icon">ðŸ“Ž</div>
-            <p>Upload accreditation/assessment reference</p>
-            <span class="upload-hint">Supporting documentation for fast-track eligibility</span>
-          </div>
+          <app-file-upload
+            formControlName="fastTrackAccreditationFiles"
+            label="Upload accreditation/assessment reference"
+            hint="Supporting documentation for fast-track eligibility"
+          />
         </div>
 
         <!-- 3.4 Engagement -->

@@ -1,0 +1,15 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /applicants/{applicantId} {
+      // TODO: replace with Firebase Auth rules before production
+      allow read, write: if true;
+    }
+
+    match /leads/{leadId} {
+      // TODO: replace with Firebase Auth rules before production
+      allow read, write: if true;
+    }
+  }
+}

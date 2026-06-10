@@ -1,0 +1,115 @@
+:host {
+  display: block;
+  color: #e2e8f0;
+  font-family: 'Inter', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+.profile-page {
+  max-width: 1000px;
+}
+
+.profile-header {
+  margin-bottom: 2rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.profile-badge {
+  display: inline-block;
+  margin-bottom: 0.5rem;
+  padding: 0.25rem 0.6rem;
+  border-radius: 6px;
+  background: rgba(16, 185, 129, 0.12);
+  color: #6ee7b7;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.profile-header h1 {
+  margin: 0;
+  font-size: 1.75rem;
+  color: #f8fafc;
+}
+
+.profile-acronym,
+.profile-user {
+  margin: 0.35rem 0 0;
+  color: #94a3b8;
+}
+
+.attachments-panel h2 {
+  margin: 0 0 1rem;
+  font-size: 1.1rem;
+  color: #f8fafc;
+}
+
+.attachments-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1rem;
+}
+
+.attachment-card {
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+}
+
+.attachment-card h3 {
+  margin: 0 0 0.65rem;
+  font-size: 0.85rem;
+  color: #cbd5e1;
+}
+
+.attachment-card ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.attachment-card a {
+  color: #6ee7b7;
+  text-decoration: none;
+  font-size: 0.85rem;
+}
+
+.attachment-card a:hover {
+  text-decoration: underline;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 3rem 2rem;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 16px;
+  border: 1px dashed rgba(255, 255, 255, 0.1);
+}
+
+.empty-icon {
+  font-size: 2.5rem;
+  display: block;
+  margin-bottom: 0.75rem;
+}
+
+.empty-hint {
+  color: #64748b !important;
+  font-size: 0.875rem;
+}
+
+.btn-link {
+  display: inline-block;
+  margin-top: 1rem;
+  padding: 0.5rem 1rem;
+  border-radius: 10px;
+  background: rgba(16, 185, 129, 0.15);
+  border: 1px solid rgba(16, 185, 129, 0.35);
+  color: #6ee7b7;
+  text-decoration: none;
+  font-weight: 600;
+}

@@ -1,0 +1,44 @@
+<div class="profile-page">
+  <header class="profile-header">
+    <span class="profile-badge">Applicant profile</span>
+    <h1>{{ applicantName }}</h1>
+    @if (applicantAcronym) {
+      <p class="profile-acronym">{{ applicantAcronym }}</p>
+    }
+    <p class="profile-user">Signed in as {{ authService.currentUserValue?.username }}</p>
+  </header>
+
+  @if (loading) {
+    <div class="empty-state">
+      <span class="empty-icon">⏳</span>
+      <p>Loading your documents…</p>
+    </div>
+  } @else if (!attachmentFields.length) {
+    <div class="empty-state">
+      <span class="empty-icon">📭</span>
+      <p>No uploaded documents yet.</p>
+      <p class="empty-hint">Files you attach in Stage 1 or Stage 2 will appear here.</p>
+      <a routerLink="/stage1" class="btn-link">Go to Stage 1</a>
+    </div>
+  } @else {
+    <section class="attachments-panel">
+      <h2>Your uploaded documents</h2>
+      <div class="attachments-grid">
+        @for (group of attachmentFields; track group.key) {
+          <article class="attachment-card">
+            <h3>{{ group.label }}</h3>
+            <ul>
+              @for (attachment of group.attachments; track attachment.url) {
+                <li>
+                  <a [href]="fileUrl(attachment)" target="_blank" rel="noopener noreferrer">
+                    {{ attachment.name || 'Document' }}
+                  </a>
+                </li>
+              }
+            </ul>
+          </article>
+        }
+      </div>
+    </section>
+  }
+</div>

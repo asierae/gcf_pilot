@@ -1,0 +1,260 @@
+<div class="leads-page">
+  <div class="section-header">
+    <div>
+      <h2>Leads</h2>
+      <p>Import records from an Excel file and manage them in the table below.</p>
+    </div>
+    <a routerLink="/dashboard" class="btn-back">← Back to Dashboard</a>
+  </div>
+
+  <section class="upload-panel">
+    <label class="file-label">
+      <span>Select Excel file</span>
+      <input type="file" accept=".xlsx,.xls" (change)="onFileChange($event)" />
+    </label>
+
+    <p class="file-meta" *ngIf="fileName">Selected file: {{ fileName }}</p>
+    <p class="hint">
+      Required headers: Region, Country, Organization, Acronym, Entity Type, Website, Contact Email,
+      Climate Specialty/Profile.
+    </p>
+
+    <p class="error-message" *ngIf="parseError">{{ parseError }}</p>
+    <p class="success-message" *ngIf="successMessage">{{ successMessage }}</p>
+  </section>
+
+  <section class="preview-panel" *ngIf="pendingLeads.length">
+    <div class="preview-header">
+      <h3>Preview import ({{ pendingLeads.length }})</h3>
+      <button type="button" class="btn-save" (click)="saveLeads()" [disabled]="loading">
+        {{ loading ? 'Saving…' : 'Save' }}
+      </button>
+    </div>
+
+    <div class="table-scroll">
+      <table class="leads-table">
+        <thead>
+          <tr>
+            <th>Region</th>
+            <th>Country</th>
+            <th>Organization</th>
+            <th>Acronym</th>
+            <th>Entity Type</th>
+            <th>Website</th>
+            <th>Contact Email</th>
+            <th>Climate Specialty</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let lead of pendingLeads; index as i">
+            <td>
+              <input class="cell-input" [value]="lead.region" (change)="updatePendingField(i, 'region', $any($event.target).value)" />
+            </td>
+            <td>
+              <input class="cell-input" [value]="lead.country" (change)="updatePendingField(i, 'country', $any($event.target).value)" />
+            </td>
+            <td>
+              <input class="cell-input" [value]="lead.organization" (change)="updatePendingField(i, 'organization', $any($event.target).value)" />
+            </td>
+            <td>
+              <input class="cell-input" [value]="lead.acronym" (change)="updatePendingField(i, 'acronym', $any($event.target).value)" />
+            </td>
+            <td>
+              <input class="cell-input" [value]="lead.entityType" (change)="updatePendingField(i, 'entityType', $any($event.target).value)" />
+            </td>
+            <td>
+              <input class="cell-input" [value]="lead.website" (change)="updatePendingField(i, 'website', $any($event.target).value)" />
+            </td>
+            <td>
+              <input class="cell-input" [value]="lead.contactEmail" (change)="updatePendingField(i, 'contactEmail', $any($event.target).value)" />
+            </td>
+            <td>
+              <input class="cell-input" [value]="lead.climateSpecialty" (change)="updatePendingField(i, 'climateSpecialty', $any($event.target).value)" />
+            </td>
+            <td>
+              <select
+                [class]="getStatusClass(lead.status)"
+                [ngModel]="lead.status"
+                (ngModelChange)="updatePendingField(i, 'status', $event)"
+              >
+                <option *ngFor="let status of statusOptions" [value]="status">{{ status }}</option>
+              </select>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="saved-panel">
+    <div class="saved-header">
+      <h3>
+        Saved leads
+        <span class="count-badge" *ngIf="!tableLoading">
+          @if (hasSearch) {
+            {{ filteredLeads.length }} of {{ savedLeads.length }}
+          } @else {
+            {{ savedLeads.length }}
+          }
+        </span>
+      </h3>
+    </div>
+
+    <div class="table-toolbar" *ngIf="!tableLoading && savedLeads.length">
+      <label class="search-box">
+        <span class="search-icon" aria-hidden="true">
+          <svg viewBox="0 0 20 20" fill="none">
+            <path
+              d="M9 3.5a5.5 5.5 0 1 1 0 11 5.5 5.5 0 0 1 0-11Z"
+              stroke="currentColor"
+              stroke-width="1.5"
+            />
+            <path d="M13.5 13.5 17 17" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+          </svg>
+        </span>
+        <input
+          type="search"
+          class="search-input"
+          placeholder="Filter by any column…"
+          [value]="searchQuery"
+          (input)="onSearchInput($event)"
+        />
+        <button
+          type="button"
+          class="search-clear"
+          *ngIf="hasSearch"
+          (click)="clearSearch()"
+          aria-label="Clear search"
+        >
+          ×
+        </button>
+      </label>
+    </div>
+
+    <div class="empty-state" *ngIf="tableLoading">
+      <span class="empty-icon">⏳</span>
+      <p>Loading leads from Firebase…</p>
+    </div>
+
+    <div class="empty-state" *ngIf="!tableLoading && loadError">
+      <span class="empty-icon">⚠️</span>
+      <p>{{ loadError }}</p>
+      <button type="button" class="btn-retry" (click)="loadSavedLeads()">Retry</button>
+    </div>
+
+    <div class="empty-state" *ngIf="!tableLoading && !loadError && savedLeads.length === 0">
+      <span class="empty-icon">📭</span>
+      <p>No leads saved yet.</p>
+      <p class="empty-hint">Import an Excel file above and click Save to add rows here.</p>
+    </div>
+
+    <div class="empty-state" *ngIf="!tableLoading && !loadError && savedLeads.length > 0 && filteredLeads.length === 0">
+      <span class="empty-icon">🔎</span>
+      <p>No rows match the current filter.</p>
+      <button type="button" class="btn-retry" (click)="clearSearch()">Clear filter</button>
+    </div>
+
+    <div class="table-scroll" *ngIf="!tableLoading && !loadError && filteredLeads.length > 0">
+      <table class="leads-table">
+        <thead>
+          <tr>
+            <th>Region</th>
+            <th>Country</th>
+            <th>Organization</th>
+            <th>Acronym</th>
+            <th>Entity Type</th>
+            <th>Website</th>
+            <th>Contact Email</th>
+            <th>Climate Specialty</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let lead of paginatedLeads" [class.saving]="savingFieldId === lead.id">
+            <td>
+              <input
+                class="cell-input"
+                [value]="lead.region"
+                (change)="updateSavedField(lead, 'region', $any($event.target).value)"
+              />
+            </td>
+            <td>
+              <input
+                class="cell-input"
+                [value]="lead.country"
+                (change)="updateSavedField(lead, 'country', $any($event.target).value)"
+              />
+            </td>
+            <td>
+              <input
+                class="cell-input"
+                [value]="lead.organization"
+                (change)="updateSavedField(lead, 'organization', $any($event.target).value)"
+              />
+            </td>
+            <td>
+              <input
+                class="cell-input"
+                [value]="lead.acronym"
+                (change)="updateSavedField(lead, 'acronym', $any($event.target).value)"
+              />
+            </td>
+            <td>
+              <input
+                class="cell-input"
+                [value]="lead.entityType"
+                (change)="updateSavedField(lead, 'entityType', $any($event.target).value)"
+              />
+            </td>
+            <td>
+              <input
+                class="cell-input"
+                [value]="lead.website"
+                (change)="updateSavedField(lead, 'website', $any($event.target).value)"
+              />
+            </td>
+            <td>
+              <input
+                class="cell-input"
+                [value]="lead.contactEmail"
+                (change)="updateSavedField(lead, 'contactEmail', $any($event.target).value)"
+              />
+            </td>
+            <td>
+              <input
+                class="cell-input"
+                [value]="lead.climateSpecialty"
+                (change)="updateSavedField(lead, 'climateSpecialty', $any($event.target).value)"
+              />
+            </td>
+            <td>
+              <select
+                [class]="getStatusClass(lead.status)"
+                [ngModel]="lead.status"
+                (ngModelChange)="updateSavedField(lead, 'status', $event)"
+              >
+                <option *ngFor="let status of statusOptions" [value]="status">{{ status }}</option>
+              </select>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="pagination" *ngIf="filteredLeads.length > pageSize">
+        <span class="pagination-info">
+          Showing {{ pageStart }}–{{ pageEnd }} of {{ filteredLeads.length }}
+        </span>
+        <div class="pagination-controls">
+          <button type="button" class="page-btn" [disabled]="currentPage === 1" (click)="prevPage()">
+            ← Prev
+          </button>
+          <span class="page-indicator">Page {{ currentPage }} / {{ totalPages }}</span>
+          <button type="button" class="page-btn" [disabled]="currentPage === totalPages" (click)="nextPage()">
+            Next →
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>

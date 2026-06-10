@@ -13,11 +13,12 @@ import {
   buildWizardNav
 } from '../../shared/data/stage2-form.config';
 import { Stage1StepsComponent } from '../../shared/components/stage1-steps/stage1-steps.component';
+import { FileUploadComponent } from '../../shared/components/file-upload/file-upload.component';
 
 @Component({
   selector: 'app-stage2',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, Stage1StepsComponent],
+  imports: [CommonModule, ReactiveFormsModule, Stage1StepsComponent, FileUploadComponent],
   templateUrl: './stage2.component.html',
   styleUrl: './stage2.component.css'
 })
@@ -48,6 +49,7 @@ export class Stage2Component implements OnInit {
       for (const q of step.questions) {
         group[`${q.key}_answer`] = ['', Validators.required];
         group[`${q.key}_narrative`] = ['', Validators.required];
+        group[`${q.key}_files`] = [[]];
       }
       if (step.sectionStatusKey) {
         group[step.sectionStatusKey] = ['pending', Validators.required];
@@ -58,17 +60,21 @@ export class Stage2Component implements OnInit {
     }
 
     this.form = this.fb.group(group);
-    this.loadSavedData();
+    void this.loadSavedData();
   }
 
-  private loadSavedData(): void {
-    const stage2Data = this.storageService.getLatestStage2Submission()?.data;
-    const stage1Data = this.storageService.getLatestStage1Submission()?.data;
+  private async loadSavedData(): Promise<void> {
+    try {
+      const stage2Data = (await this.storageService.getLatestStage2Submission())?.data;
+      const stage1Data = (await this.storageService.getLatestStage1Submission())?.data;
 
-    if (stage2Data) {
-      this.form.patchValue(stage2Data);
-    } else if (stage1Data) {
-      this.form.patchValue(stage1Data);
+      if (stage2Data) {
+        this.form.patchValue(stage2Data);
+      } else if (stage1Data) {
+        this.form.patchValue(stage1Data);
+      }
+    } catch {
+      this.notificationService.error('Could not load saved data from Firebase.');
     }
   }
 
@@ -113,13 +119,19 @@ export class Stage2Component implements OnInit {
   onSubmit(): void {
     this.submitted = true;
     if (this.form.valid) {
-      const data = this.form.value;
-      this.storageService.saveStage2Submission(data);
-      this.storageService.saveStage1Submission(this.storageService.extractStage1Data(data));
-      this.submitSuccess = true;
-      this.notificationService.success('Application submitted successfully!');
+      void this.submitForm();
     } else {
       this.notificationService.error('Please fill in all required fields before submitting.');
+    }
+  }
+
+  private async submitForm(): Promise<void> {
+    try {
+      await this.storageService.saveStage2Submission(this.form.value);
+      this.submitSuccess = true;
+      this.notificationService.success('Application submitted successfully!');
+    } catch {
+      this.notificationService.error('Could not save application to Firebase.');
     }
   }
 }

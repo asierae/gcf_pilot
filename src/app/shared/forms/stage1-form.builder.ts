@@ -71,5 +71,9 @@ export function addStage1FormControls(fb: FormBuilder): Record<string, unknown> 
     hasServedAsDeliveryPartner: ['', Validators.required],
     hasEngagedInPSAA: ['', Validators.required],
     preparedForPartnerships: ['', Validators.required],
+    nominationLetterFiles: [[]],
+    consultationSummaryFiles: [[]],
+    legalSupportingDocumentsFiles: [[]],
+    fastTrackAccreditationFiles: [[]],
   };
 }

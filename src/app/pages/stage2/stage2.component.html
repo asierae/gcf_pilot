@@ -119,11 +119,11 @@
                       placeholder="Provide a narrative explanation with reference to supporting documentation (100–500 words)..."
                     ></textarea>
                   </div>
-                  <div class="upload-area">
-                    <div class="upload-icon">📎</div>
-                    <p>Upload mandatory / supplementary evidence</p>
-                    <span class="upload-hint">Drag & drop or click to browse</span>
-                  </div>
+                  <app-file-upload
+                    [formControlName]="question.key + '_files'"
+                    label="Upload mandatory / supplementary evidence"
+                    hint="Drag & drop or click to browse"
+                  />
                 </div>
               }
 

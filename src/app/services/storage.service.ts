@@ -1,14 +1,14 @@
 import { Injectable } from '@angular/core';
+import { ApplicantRecord, LeadRecord, SubmissionStatus } from '../models/applicant.model';
+export type { ApplicantRecord, LeadRecord, SubmissionStatus } from '../models/applicant.model';
+export { SUBMISSION_STATUSES } from '../models/applicant.model';
+import { FirebaseService } from './firebase.service';
 
 export interface FormSubmission {
   id: string;
   date: string;
   data: Record<string, unknown>;
 }
-
-export type SubmissionStatus = 'Pending' | 'Passed' | 'Failed';
-
-export const SUBMISSION_STATUSES: SubmissionStatus[] = ['Pending', 'Passed', 'Failed'];
 
 const STAGE1_FIELD_KEYS = [
   'organizationType', 'nominationLetterAttached', 'ndaEngagementDescription',
@@ -29,96 +29,87 @@ const STAGE1_FIELD_KEYS = [
   'canEnsureDownstreamCompliance', 'canMonitorCompliance', 'accreditedByGEF',
   'accreditedByAF', 'accreditedByEUDGINTPA', 'fastTrackComplianceDetails',
   'hasReceivedReadinessSupport', 'hasServedAsExecutingEntity', 'executingEntityDetails',
-  'hasServedAsDeliveryPartner', 'hasEngagedInPSAA', 'preparedForPartnerships'
+  'hasServedAsDeliveryPartner', 'hasEngagedInPSAA', 'preparedForPartnerships',
+  'nominationLetterFiles', 'consultationSummaryFiles', 'legalSupportingDocumentsFiles',
+  'fastTrackAccreditationFiles'
 ];
 
 @Injectable({
   providedIn: 'root'
 })
 export class StorageService {
-  private readonly STAGE1_KEY = 'gcf_stage1_submissions';
-  private readonly STAGE2_KEY = 'gcf_stage2_submissions';
-  private readonly REVIEW_NOTES_KEY = 'gcf_submission_review_notes';
-  private readonly REVIEW_SENT_KEY = 'gcf_submission_review_sent';
-  private readonly STATUS_KEY = 'gcf_submission_status';
+  constructor(private firebaseService: FirebaseService) {}
 
-  saveStage1Submission(data: Record<string, unknown>): void {
-    const submissions = this.getStage1Submissions();
-    submissions.push({
-      id: Date.now().toString(),
-      date: new Date().toISOString(),
-      data
-    });
-    localStorage.setItem(this.STAGE1_KEY, JSON.stringify(submissions));
+  async saveStage1Submission(data: Record<string, unknown>): Promise<void> {
+    await this.firebaseService.createApplicantStage1(data);
   }
 
-  getStage1Submissions(): FormSubmission[] {
-    const data = localStorage.getItem(this.STAGE1_KEY);
-    return data ? JSON.parse(data) : [];
+  async getStage1Submissions(): Promise<FormSubmission[]> {
+    const { submissions } = await this.loadDashboardData();
+    return submissions;
   }
 
-  getLatestStage1Submission(): FormSubmission | null {
-    const submissions = this.getStage1Submissions();
-    return submissions.length ? submissions[submissions.length - 1] : null;
-  }
+  async loadDashboardData(): Promise<{
+    submissions: FormSubmission[];
+    statusById: Record<string, SubmissionStatus>;
+  }> {
+    const applicants = await this.firebaseService.getAllApplicants();
+    const submissions: FormSubmission[] = [];
+    const statusById: Record<string, SubmissionStatus> = {};
 
-  getStage1SubmissionById(id: string): FormSubmission | null {
-    return this.getStage1Submissions().find((s) => s.id === id) ?? null;
-  }
-
-  getSubmissionStatus(submissionId: string): SubmissionStatus {
-    const all = this.getAllSubmissionStatuses();
-    return all[submissionId] ?? 'Pending';
-  }
-
-  setSubmissionStatus(submissionId: string, status: SubmissionStatus): void {
-    const all = this.getAllSubmissionStatuses();
-    all[submissionId] = status;
-    localStorage.setItem(this.STATUS_KEY, JSON.stringify(all));
-  }
-
-  deleteStage1Submissions(ids: string[]): void {
-    if (!ids.length) {
-      return;
+    for (const applicant of applicants) {
+      const submission = this.toStage1Submission(applicant);
+      if (submission) {
+        submissions.push(submission);
+        statusById[applicant.id] = applicant.admin.status;
+      }
     }
 
-    const idSet = new Set(ids);
-    const submissions = this.getStage1Submissions().filter((s) => !idSet.has(s.id));
-    localStorage.setItem(this.STAGE1_KEY, JSON.stringify(submissions));
+    return { submissions, statusById };
+  }
 
-    const notes = this.getAllReviewNotes();
-    const sent = this.getAllReviewSentLog();
-    const statuses = this.getAllSubmissionStatuses();
+  async getLatestStage1Submission(): Promise<FormSubmission | null> {
+    const applicant = await this.firebaseService.getLatestApplicantWithStage1();
+    return applicant ? this.toStage1Submission(applicant) : null;
+  }
 
-    for (const id of ids) {
-      delete notes[id];
-      delete sent[id];
-      delete statuses[id];
+  async getStage1SubmissionById(id: string): Promise<FormSubmission | null> {
+    const applicant = await this.firebaseService.getApplicantById(id);
+    if (!applicant) {
+      return null;
     }
 
-    localStorage.setItem(this.REVIEW_NOTES_KEY, JSON.stringify(notes));
-    localStorage.setItem(this.REVIEW_SENT_KEY, JSON.stringify(sent));
-    localStorage.setItem(this.STATUS_KEY, JSON.stringify(statuses));
+    return this.toStage1Submission(applicant);
   }
 
-  saveStage2Submission(data: Record<string, unknown>): void {
-    const submissions = this.getStage2Submissions();
-    submissions.push({
-      id: Date.now().toString(),
-      date: new Date().toISOString(),
-      data
-    });
-    localStorage.setItem(this.STAGE2_KEY, JSON.stringify(submissions));
+  async getSubmissionStatus(submissionId: string): Promise<SubmissionStatus> {
+    const applicant = await this.firebaseService.getApplicantById(submissionId);
+    return applicant?.admin.status ?? 'Pending';
   }
 
-  getStage2Submissions(): FormSubmission[] {
-    const data = localStorage.getItem(this.STAGE2_KEY);
-    return data ? JSON.parse(data) : [];
+  async setSubmissionStatus(submissionId: string, status: SubmissionStatus): Promise<void> {
+    await this.firebaseService.updateApplicantStatus(submissionId, status);
   }
 
-  getLatestStage2Submission(): FormSubmission | null {
-    const submissions = this.getStage2Submissions();
-    return submissions.length ? submissions[submissions.length - 1] : null;
+  async deleteStage1Submissions(ids: string[]): Promise<void> {
+    await this.firebaseService.deleteApplicants(ids);
+  }
+
+  async saveStage2Submission(data: Record<string, unknown>): Promise<void> {
+    const stage1Data = this.extractStage1Data(data);
+    await this.firebaseService.createApplicantStage2(data, stage1Data);
+  }
+
+  async getStage2Submissions(): Promise<FormSubmission[]> {
+    const applicants = await this.firebaseService.getAllApplicants();
+    return applicants
+      .map((applicant) => this.toStage2Submission(applicant))
+      .filter((submission): submission is FormSubmission => submission !== null);
+  }
+
+  async getLatestStage2Submission(): Promise<FormSubmission | null> {
+    const applicant = await this.firebaseService.getLatestApplicantWithStage2();
+    return applicant ? this.toStage2Submission(applicant) : null;
   }
 
   extractStage1Data(data: Record<string, unknown>): Record<string, unknown> {
@@ -131,46 +122,71 @@ export class StorageService {
     return stage1Data;
   }
 
-  getSubmissionReviewNotes(submissionId: string): Record<string, string> {
-    const all = this.getAllReviewNotes();
-    return all[submissionId] ?? {};
+  async getSubmissionReviewNotes(submissionId: string): Promise<Record<string, string>> {
+    const applicant = await this.firebaseService.getApplicantById(submissionId);
+    return applicant?.admin.reviewNotes ?? {};
   }
 
-  saveSubmissionReviewNote(submissionId: string, sectionId: string, note: string): void {
-    const all = this.getAllReviewNotes();
-    if (!all[submissionId]) {
-      all[submissionId] = {};
+  async saveSubmissionReviewNote(submissionId: string, sectionId: string, note: string): Promise<void> {
+    await this.firebaseService.updateApplicantReviewNote(submissionId, sectionId, note);
+  }
+
+  async getLastReviewSentAt(submissionId: string): Promise<string | null> {
+    const applicant = await this.firebaseService.getApplicantById(submissionId);
+    return applicant?.admin.lastReviewSent?.sentAt ?? null;
+  }
+
+  async markReviewSent(submissionId: string, recipient: string): Promise<void> {
+    await this.firebaseService.markApplicantReviewSent(submissionId, recipient);
+  }
+
+  async getApplicantRecord(id: string): Promise<ApplicantRecord | null> {
+    return this.firebaseService.getApplicantById(id);
+  }
+
+  async getLatestApplicantData(): Promise<Record<string, unknown>> {
+    const stage2 = await this.getLatestStage2Submission();
+    if (stage2?.data) {
+      return stage2.data;
     }
-    all[submissionId][sectionId] = note;
-    localStorage.setItem(this.REVIEW_NOTES_KEY, JSON.stringify(all));
+
+    const stage1 = await this.getLatestStage1Submission();
+    return stage1?.data ?? {};
   }
 
-  getLastReviewSentAt(submissionId: string): string | null {
-    const all = this.getAllReviewSentLog();
-    return all[submissionId]?.sentAt ?? null;
+  async getLeads(): Promise<LeadRecord[]> {
+    return this.firebaseService.getAllLeads();
   }
 
-  markReviewSent(submissionId: string, recipient: string): void {
-    const all = this.getAllReviewSentLog();
-    all[submissionId] = {
-      sentAt: new Date().toISOString(),
-      recipient
+  async saveLeads(leads: Omit<LeadRecord, 'id' | 'createdAt' | 'updatedAt'>[]): Promise<LeadRecord[]> {
+    return this.firebaseService.createLeads(leads);
+  }
+
+  async updateLead(id: string, lead: Omit<LeadRecord, 'id' | 'createdAt' | 'updatedAt'>): Promise<void> {
+    await this.firebaseService.updateLead(id, lead);
+  }
+
+  private toStage1Submission(applicant: ApplicantRecord): FormSubmission | null {
+    if (!applicant.stage1) {
+      return null;
+    }
+
+    return {
+      id: applicant.id,
+      date: applicant.stage1.submittedAt,
+      data: applicant.stage1.data
     };
-    localStorage.setItem(this.REVIEW_SENT_KEY, JSON.stringify(all));
   }
 
-  private getAllReviewNotes(): Record<string, Record<string, string>> {
-    const data = localStorage.getItem(this.REVIEW_NOTES_KEY);
-    return data ? JSON.parse(data) : {};
-  }
+  private toStage2Submission(applicant: ApplicantRecord): FormSubmission | null {
+    if (!applicant.stage2) {
+      return null;
+    }
 
-  private getAllReviewSentLog(): Record<string, { sentAt: string; recipient: string }> {
-    const data = localStorage.getItem(this.REVIEW_SENT_KEY);
-    return data ? JSON.parse(data) : {};
-  }
-
-  private getAllSubmissionStatuses(): Record<string, SubmissionStatus> {
-    const data = localStorage.getItem(this.STATUS_KEY);
-    return data ? JSON.parse(data) : {};
+    return {
+      id: applicant.id,
+      date: applicant.stage2.submittedAt,
+      data: applicant.stage2.data
+    };
   }
 }

@@ -7,6 +7,8 @@ export interface User {
   role: 'admin' | 'applicant';
 }
 
+const SESSION_USER_KEY = 'current_user';
+
 @Injectable({
   providedIn: 'root'
 })
@@ -15,7 +17,7 @@ export class AuthService {
   public currentUser$ = this.currentUserSubject.asObservable();
 
   constructor(private router: Router) {
-    const savedUser = localStorage.getItem('current_user');
+    const savedUser = sessionStorage.getItem(SESSION_USER_KEY);
     if (savedUser) {
       this.currentUserSubject.next(JSON.parse(savedUser));
     }
@@ -24,12 +26,12 @@ export class AuthService {
   login(username: string, pass: string): boolean {
     if (username === 'hatyja' && pass === 'asier') {
       const user: User = { username, role: 'admin' };
-      localStorage.setItem('current_user', JSON.stringify(user));
+      sessionStorage.setItem(SESSION_USER_KEY, JSON.stringify(user));
       this.currentUserSubject.next(user);
       return true;
     } else if (username === 'hatyja2' && pass === 'asier') {
       const user: User = { username, role: 'applicant' };
-      localStorage.setItem('current_user', JSON.stringify(user));
+      sessionStorage.setItem(SESSION_USER_KEY, JSON.stringify(user));
       this.currentUserSubject.next(user);
       return true;
     }
@@ -37,7 +39,7 @@ export class AuthService {
   }
 
   logout() {
-    localStorage.removeItem('current_user');
+    sessionStorage.removeItem(SESSION_USER_KEY);
     this.currentUserSubject.next(null);
     this.router.navigate(['/login']);
   }

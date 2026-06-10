@@ -169,6 +169,62 @@
   word-break: break-word;
 }
 
+.attachments-panel {
+  margin-bottom: 2rem;
+  padding: 1.25rem;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+}
+
+.attachments-panel h2 {
+  margin: 0 0 1rem;
+  font-size: 1.1rem;
+  color: #f8fafc;
+}
+
+.attachments-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+}
+
+.attachment-group {
+  padding: 0.85rem 1rem;
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.attachment-group h3 {
+  margin: 0 0 0.5rem;
+  font-size: 0.8rem;
+  color: #94a3b8;
+  font-weight: 600;
+}
+
+.attachment-group ul,
+.attachment-links {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.attachment-group a,
+.attachment-links a {
+  color: #6ee7b7;
+  text-decoration: none;
+  font-size: 0.85rem;
+}
+
+.attachment-group a:hover,
+.attachment-links a:hover {
+  text-decoration: underline;
+}
+
 .detail-section {
   margin-bottom: 1.5rem;
   background: rgba(255, 255, 255, 0.03);

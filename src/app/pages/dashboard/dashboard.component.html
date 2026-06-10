@@ -1,7 +1,7 @@
 <div class="dashboard">
   <div class="dashboard-header">
     <h2>Dashboard — Stage 1 Submissions</h2>
-    <p>All pre-screening questionnaire submissions stored locally.</p>
+    <p>All pre-screening questionnaire submissions stored in Firebase.</p>
     <div class="header-actions">
       <span class="count-badge">
         @if (hasActiveFilters) {
@@ -18,7 +18,18 @@
     </div>
   </div>
 
-  @if (submissions.length === 0) {
+  @if (loading) {
+    <div class="empty-state">
+      <span class="empty-icon">⏳</span>
+      <p>Loading submissions from Firebase…</p>
+    </div>
+  } @else if (loadError) {
+    <div class="empty-state">
+      <span class="empty-icon">⚠️</span>
+      <p>{{ loadError }}</p>
+      <button type="button" class="btn-clear-filter" (click)="loadSubmissions()">Retry</button>
+    </div>
+  } @else if (submissions.length === 0) {
     <div class="empty-state">
       <span class="empty-icon">📭</span>
       <p>No Stage 1 submissions yet.</p>

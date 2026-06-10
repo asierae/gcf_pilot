@@ -10,6 +10,14 @@ export interface DisplaySection {
   fields: DisplayField[];
 }
 
+import {
+  isAttachmentFieldKey,
+  normalizeAttachments,
+  normalizeAttachmentUrls
+} from '../../config/attachments.config';
+import { StoredAttachment } from '../../models/attachment.model';
+import { resolveCloudinaryFileUrl } from '../utils/cloudinary-url.util';
+
 export const STAGE1_ALL_LABELS: Record<string, string> = {
   organizationType: 'Organization Type',
   nominationLetterAttached: 'Nomination Letter Attached',
@@ -22,6 +30,10 @@ export const STAGE1_ALL_LABELS: Record<string, string> = {
   ndaContactPerson: 'NDA Contact Person',
   ndaContactInfo: 'NDA Contact Information',
   consultationSummary: 'Consultation Summary',
+  nominationLetterFiles: 'NDA Nomination Letter Files',
+  consultationSummaryFiles: 'Consultation Summary Files',
+  legalSupportingDocumentsFiles: 'Legal Supporting Documents',
+  fastTrackAccreditationFiles: 'Fast-Track Accreditation Files',
   applicantName: 'Applicant Name',
   applicantAcronym: 'Applicant Acronym',
   legalAddress: 'Legal Address',
@@ -137,6 +149,8 @@ export const STAGE1_DISPLAY_SECTIONS: DisplaySection[] = [
       { key: 'ndaContactPerson', label: STAGE1_ALL_LABELS['ndaContactPerson'] },
       { key: 'ndaContactInfo', label: STAGE1_ALL_LABELS['ndaContactInfo'] },
       { key: 'consultationSummary', label: STAGE1_ALL_LABELS['consultationSummary'] },
+      { key: 'nominationLetterFiles', label: STAGE1_ALL_LABELS['nominationLetterFiles'] },
+      { key: 'consultationSummaryFiles', label: STAGE1_ALL_LABELS['consultationSummaryFiles'] },
     ],
   },
   {
@@ -180,6 +194,7 @@ export const STAGE1_DISPLAY_SECTIONS: DisplaySection[] = [
       { key: 'hasESSCapacity', label: STAGE1_ALL_LABELS['hasESSCapacity'] },
       { key: 'hasGenderCapacity', label: STAGE1_ALL_LABELS['hasGenderCapacity'] },
       { key: 'hasMonitoringCapacity', label: STAGE1_ALL_LABELS['hasMonitoringCapacity'] },
+      { key: 'legalSupportingDocumentsFiles', label: STAGE1_ALL_LABELS['legalSupportingDocumentsFiles'] },
     ],
   },
   {
@@ -212,6 +227,7 @@ export const STAGE1_DISPLAY_SECTIONS: DisplaySection[] = [
       { key: 'accreditedByAF', label: STAGE1_ALL_LABELS['accreditedByAF'] },
       { key: 'accreditedByEUDGINTPA', label: STAGE1_ALL_LABELS['accreditedByEUDGINTPA'] },
       { key: 'fastTrackComplianceDetails', label: STAGE1_ALL_LABELS['fastTrackComplianceDetails'] },
+      { key: 'fastTrackAccreditationFiles', label: STAGE1_ALL_LABELS['fastTrackAccreditationFiles'] },
       { key: 'hasReceivedReadinessSupport', label: STAGE1_ALL_LABELS['hasReceivedReadinessSupport'] },
       { key: 'hasServedAsExecutingEntity', label: STAGE1_ALL_LABELS['hasServedAsExecutingEntity'] },
       { key: 'executingEntityDetails', label: STAGE1_ALL_LABELS['executingEntityDetails'] },
@@ -225,6 +241,11 @@ export const STAGE1_DISPLAY_SECTIONS: DisplaySection[] = [
 export function formatStage1Value(key: string, value: unknown): string {
   if (value === null || value === undefined || value === '') {
     return '';
+  }
+
+  if (isAttachmentFieldKey(key)) {
+    const attachments = normalizeAttachments(value);
+    return attachments.length ? `${attachments.length} file(s) attached` : '';
   }
 
   if (key === 'areaOfOperation' && typeof value === 'object' && value !== null) {
@@ -257,8 +278,21 @@ export function formatStage1Value(key: string, value: unknown): string {
   return String(value);
 }
 
+export function getAttachments(key: string, data: Record<string, unknown>): StoredAttachment[] {
+  return normalizeAttachments(data[key]);
+}
+
+export function getAttachmentUrls(key: string, data: Record<string, unknown>): string[] {
+  return getAttachments(key, data).map((item) => resolveCloudinaryFileUrl(item));
+}
+
 export function hasDisplayValue(key: string, data: Record<string, unknown>): boolean {
   const value = data[key];
+
+  if (isAttachmentFieldKey(key)) {
+    return normalizeAttachments(value).length > 0;
+  }
+
   if (key === 'areaOfOperation' && typeof value === 'object' && value !== null) {
     return Object.values(value as Record<string, boolean>).some(Boolean);
   }

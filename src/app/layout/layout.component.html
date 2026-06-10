@@ -13,7 +13,12 @@
       @if (authService.isLoggedIn) {
         <span class="user-badge">{{ authService.currentUserValue?.username }}</span>
         @if (authService.currentUserValue?.role === 'admin') {
-          <a routerLink="/dashboard" routerLinkActive="active" class="btn-header">Dashboard</a>
+          <a
+            routerLink="/dashboard"
+            routerLinkActive="active"
+            [routerLinkActiveOptions]="{ exact: true }"
+            class="btn-header"
+          >Dashboard</a>
         }
         <button type="button" class="btn-header btn-logout" (click)="logout()">Logout</button>
       } @else {
@@ -41,9 +46,20 @@
         }
         @if (authService.currentUserValue?.role === 'admin') {
           <li>
-            <a routerLink="/dashboard" routerLinkActive="active" class="nav-link">
+            <a
+              routerLink="/dashboard"
+              routerLinkActive="active"
+              [routerLinkActiveOptions]="{ exact: true }"
+              class="nav-link"
+            >
               <span class="nav-icon">📊</span>
               Dashboard
+            </a>
+          </li>
+          <li>
+            <a routerLink="/dashboard/leads" routerLinkActive="active" class="nav-link">
+              <span class="nav-icon">📋</span>
+              Leads
             </a>
           </li>
         }
