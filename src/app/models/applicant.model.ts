@@ -53,6 +53,7 @@ export interface LeadRecord {
   website: string;
   contactEmail: string;
   climateSpecialty: string;
+  comments: string;
   status: LeadStatus;
   createdAt?: string;
   updatedAt?: string;

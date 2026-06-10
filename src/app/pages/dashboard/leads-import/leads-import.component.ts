@@ -25,6 +25,7 @@ export class LeadsImportComponent implements OnInit {
   savingFieldId: string | null = null;
   pendingLeads: LeadRecord[] = [];
   savedLeads: LeadRecord[] = [];
+  selectedIds = new Set<string>();
   searchQuery = '';
   readonly statusOptions = LEAD_STATUS_OPTIONS;
   readonly pageSize = 20;
@@ -42,6 +43,9 @@ export class LeadsImportComponent implements OnInit {
 
     try {
       this.savedLeads = await this.storageService.getLeads();
+      this.selectedIds = new Set(
+        [...this.selectedIds].filter((id) => this.savedLeads.some((lead) => lead.id === id))
+      );
       this.clampCurrentPage();
     } catch {
       this.loadError = 'Could not load leads from Firebase.';
@@ -79,7 +83,7 @@ export class LeadsImportComponent implements OnInit {
         throw new Error('The Excel file must include a header row and at least one data row.');
       }
 
-      const headerRow = (rows[0] as any[]).map((value: unknown) => String(value ?? '').trim().toLowerCase());
+      const headerRow = (rows[0] as any[]).map((value: unknown) => this.normalizeHeader(value));
       const leadRows = rows.slice(1) as any[];
       const importedLeads: LeadRecord[] = leadRows
         .map((row) => this.parseRow(headerRow, row))
@@ -239,6 +243,92 @@ export class LeadsImportComponent implements OnInit {
     return `status-select status-${status.toLowerCase()}`;
   }
 
+  get visibleIds(): string[] {
+    return this.paginatedLeads.flatMap((lead) => (lead.id ? [lead.id] : []));
+  }
+
+  get selectedCount(): number {
+    return this.selectedIds.size;
+  }
+
+  get allSelected(): boolean {
+    const visible = this.visibleIds;
+    return visible.length > 0 && visible.every((id) => this.selectedIds.has(id));
+  }
+
+  get someSelected(): boolean {
+    const visible = this.visibleIds;
+    const selectedVisible = visible.filter((id) => this.selectedIds.has(id));
+    return selectedVisible.length > 0 && selectedVisible.length < visible.length;
+  }
+
+  isSelected(leadId: string | undefined): boolean {
+    return Boolean(leadId && this.selectedIds.has(leadId));
+  }
+
+  toggleSelection(leadId: string | undefined, event: Event): void {
+    if (!leadId) {
+      return;
+    }
+
+    const checked = (event.target as HTMLInputElement).checked;
+    if (checked) {
+      this.selectedIds.add(leadId);
+    } else {
+      this.selectedIds.delete(leadId);
+    }
+    this.selectedIds = new Set(this.selectedIds);
+  }
+
+  toggleSelectAll(event: Event): void {
+    const checked = (event.target as HTMLInputElement).checked;
+    for (const id of this.visibleIds) {
+      if (checked) {
+        this.selectedIds.add(id);
+      } else {
+        this.selectedIds.delete(id);
+      }
+    }
+    this.selectedIds = new Set(this.selectedIds);
+  }
+
+  async deleteSelected(): Promise<void> {
+    if (!this.selectedIds.size) {
+      return;
+    }
+
+    const count = this.selectedIds.size;
+    const confirmed = window.confirm(
+      `Delete ${count} lead${count === 1 ? '' : 's'}? This cannot be undone.`
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    this.loading = true;
+    this.clearMessages();
+
+    try {
+      await this.storageService.deleteLeads([...this.selectedIds]);
+      this.selectedIds = new Set();
+      await this.loadSavedLeads();
+      this.successMessage = `${count} lead${count === 1 ? '' : 's'} deleted.`;
+    } catch {
+      this.parseError = 'Could not delete leads from Firebase.';
+    } finally {
+      this.loading = false;
+    }
+  }
+
+  private normalizeHeader(value: unknown): string {
+    return String(value ?? '')
+      .trim()
+      .toLowerCase()
+      .replace(/\s*\/\s*/g, '/')
+      .replace(/\s+/g, ' ');
+  }
+
   private parseRow(headerRow: string[], row: (string | number)[]): LeadRecord | null {
     const normalizedRow = headerRow.reduce<Record<string, string>>((acc, header, index) => {
       acc[header] = String(row[index] ?? '').trim();
@@ -262,7 +352,11 @@ export class LeadsImportComponent implements OnInit {
       website: normalizedRow['website'] || '',
       contactEmail: normalizedRow['contact email'] || normalizedRow['email'] || '',
       climateSpecialty:
-        normalizedRow['climate specialty/profile'] || normalizedRow['climate specialty'] || normalizedRow['profile'] || '',
+        normalizedRow['climate specialty/profile'] ||
+        normalizedRow['climate specialty'] ||
+        normalizedRow['climate specialty profile'] ||
+        '',
+      comments: normalizedRow['comments'] || normalizedRow['comment'] || '',
       status: this.normalizeStatus(statusValue)
     };
   }
@@ -300,6 +394,7 @@ export class LeadsImportComponent implements OnInit {
       lead.website,
       lead.contactEmail,
       lead.climateSpecialty,
+      lead.comments,
       lead.status
     ]
       .join(' ')

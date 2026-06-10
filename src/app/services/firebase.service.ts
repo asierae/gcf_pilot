@@ -170,6 +170,18 @@ export class FirebaseService {
     });
   }
 
+  async deleteLeads(ids: string[]): Promise<void> {
+    if (!ids.length) {
+      return;
+    }
+
+    const batch = writeBatch(this.db);
+    for (const id of ids) {
+      batch.delete(doc(this.db, LEADS_COLLECTION, id));
+    }
+    await batch.commit();
+  }
+
   private normalizeLead(id: string, raw: Record<string, unknown>): LeadRecord {
     return {
       id: (raw['id'] as string) ?? id,
@@ -181,6 +193,7 @@ export class FirebaseService {
       website: String(raw['website'] ?? ''),
       contactEmail: String(raw['contactEmail'] ?? ''),
       climateSpecialty: String(raw['climateSpecialty'] ?? ''),
+      comments: String(raw['comments'] ?? ''),
       status: (raw['status'] as LeadRecord['status']) ?? 'Pending',
       createdAt: (raw['createdAt'] as string) ?? new Date().toISOString(),
       updatedAt: (raw['updatedAt'] as string) ?? new Date().toISOString()

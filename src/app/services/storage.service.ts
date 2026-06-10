@@ -166,6 +166,10 @@ export class StorageService {
     await this.firebaseService.updateLead(id, lead);
   }
 
+  async deleteLeads(ids: string[]): Promise<void> {
+    await this.firebaseService.deleteLeads(ids);
+  }
+
   private toStage1Submission(applicant: ApplicantRecord): FormSubmission | null {
     if (!applicant.stage1) {
       return null;
