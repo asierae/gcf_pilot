@@ -1,0 +1,18 @@
+@if (visible) {
+  <nav class="breadcrumb" aria-label="Breadcrumb">
+    <ol class="breadcrumb-list">
+      @for (crumb of crumbs; track crumb.label; let last = $last) {
+        <li class="breadcrumb-item">
+          @if (!last && crumb.link) {
+            <a [routerLink]="crumb.link" class="breadcrumb-link">{{ crumb.label }}</a>
+          } @else {
+            <span class="breadcrumb-current">{{ crumb.label }}</span>
+          }
+          @if (!last) {
+            <span class="breadcrumb-sep" aria-hidden="true">/</span>
+          }
+        </li>
+      }
+    </ol>
+  </nav>
+}

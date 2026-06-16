@@ -1,6 +1,6 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { FormGroup, FormArray, FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { COUNTRIES } from '../../data/form-steps.config';
 import { FileUploadComponent } from '../file-upload/file-upload.component';
 
@@ -16,4 +16,25 @@ export class Stage1StepsComponent {
   @Input({ required: true }) stepIndex!: number;
 
   countries = COUNTRIES;
+  private fb = inject(FormBuilder);
+
+  get climateTrackRecord() {
+    return this.form.get('climateTrackRecord') as FormArray;
+  }
+
+  addTrackRecord() {
+    this.climateTrackRecord.push(
+      this.fb.group({
+        title: [''],
+        location: [''],
+        theme: [''],
+        size: [''],
+        status: ['']
+      })
+    );
+  }
+
+  removeTrackRecord(index: number) {
+    this.climateTrackRecord.removeAt(index);
+  }
 }

@@ -1,7 +1,7 @@
 :host {
   display: block;
   color: #e2e8f0;
-  font-family: 'Inter', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  font-family: "Inter", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
 
 .dashboard-header {
@@ -71,7 +71,9 @@
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 12px;
-  transition: border-color 0.2s, box-shadow 0.2s;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s;
 }
 
 .search-box:focus-within {
@@ -122,7 +124,9 @@
   font-size: 1.1rem;
   line-height: 1;
   cursor: pointer;
-  transition: background 0.2s, color 0.2s;
+  transition:
+    background 0.2s,
+    color 0.2s;
 }
 
 .search-clear:hover {
@@ -136,10 +140,16 @@
   align-items: center;
   gap: 0.65rem;
   padding: 0.75rem 1rem;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(16, 185, 129, 0.04) 100%);
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.05) 0%,
+    rgba(16, 185, 129, 0.04) 100%
+  );
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 14px;
-  transition: border-color 0.2s, box-shadow 0.2s;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s;
 }
 
 .date-range-filter:focus-within {
@@ -257,7 +267,7 @@
 }
 
 .submissions-table th {
-  padding: 0.875rem 1rem;
+  padding: 0.25rem 0.5rem;
   text-align: left;
   font-size: 0.7rem;
   font-weight: 700;
@@ -266,6 +276,46 @@
   color: #64748b;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   white-space: nowrap;
+}
+
+.sort-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.5rem 0.5rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #64748b;
+  white-space: nowrap;
+  border-radius: 6px;
+  transition:
+    color 0.15s,
+    background 0.15s;
+  width: 100%;
+}
+
+.sort-btn:hover {
+  color: #cbd5e1;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.sort-btn.sort-active {
+  color: #6ee7b7;
+}
+
+.sort-icon {
+  font-size: 0.65rem;
+  opacity: 0.6;
+  line-height: 1;
+}
+
+.sort-btn.sort-active .sort-icon {
+  opacity: 1;
 }
 
 .submissions-table td {
@@ -348,11 +398,15 @@
   border: 1.5px solid rgba(148, 163, 184, 0.55);
   border-radius: 5px;
   background: rgba(15, 23, 42, 0.6);
-  transition: border-color 0.2s, background 0.2s, box-shadow 0.2s, transform 0.15s;
+  transition:
+    border-color 0.2s,
+    background 0.2s,
+    box-shadow 0.2s,
+    transform 0.15s;
 }
 
 .checkbox-box::after {
-  content: '';
+  content: "";
   width: 0.3rem;
   height: 0.55rem;
   border: solid transparent;
@@ -374,7 +428,11 @@
 }
 
 .checkbox-input:checked + .checkbox-box {
-  background: linear-gradient(135deg, rgba(16, 185, 129, 0.95), rgba(5, 150, 105, 0.95));
+  background: linear-gradient(
+    135deg,
+    rgba(16, 185, 129, 0.95),
+    rgba(5, 150, 105, 0.95)
+  );
   border-color: #34d399;
 }
 

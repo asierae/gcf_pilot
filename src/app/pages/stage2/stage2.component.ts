@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { StorageService } from '../../services/storage.service';
 import { NotificationService } from '../../services/notification.service';
+import { AuthService } from '../../services/auth.service';
 import { addStage1FormControls } from '../../shared/forms/stage1-form.builder';
 import { STAGE2_ENTRY_STEP } from '../../shared/data/form-steps.config';
 import {
@@ -33,10 +34,14 @@ export class Stage2Component implements OnInit {
   submitted = false;
   submitSuccess = false;
 
+  isAdmin = false;
+  viewMode: 'grid' | 'form' = 'form';
+
   constructor(
     private fb: FormBuilder,
     private storageService: StorageService,
-    private notificationService: NotificationService
+    private notificationService: NotificationService,
+    private authService: AuthService
   ) {}
 
   ngOnInit(): void {
@@ -60,6 +65,12 @@ export class Stage2Component implements OnInit {
     }
 
     this.form = this.fb.group(group);
+    
+    this.isAdmin = this.authService.currentUserValue?.role === 'admin';
+    if (!this.isAdmin) {
+      this.viewMode = 'grid';
+    }
+
     void this.loadSavedData();
   }
 
@@ -104,8 +115,16 @@ export class Stage2Component implements OnInit {
   goToStep(step: number): void {
     if (step >= 0 && step < this.totalSteps) {
       this.currentStep = step;
+      if (!this.isAdmin) {
+        this.viewMode = 'form';
+      }
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
+  }
+
+  backToGrid(): void {
+    this.viewMode = 'grid';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
   nextStep(): void {

@@ -1,0 +1,114 @@
+<div class="pricing-page">
+
+  <!-- Hero -->
+  <div class="pricing-hero">
+    <span class="pricing-eyebrow">Consulting Engagements</span>
+    <h1 class="pricing-title">Secure the Funding You Deserve</h1>
+    <p class="pricing-subtitle">
+      Navigating the GCF accreditation and securing millions in funding requires precision, rigorous planning, and expert guidance. Choose the engagement model that ensures your success.
+    </p>
+    <div class="pricing-guarantee">
+      <span class="guarantee-icon">📋</span>
+      <span>Transparent scoping · Expert-led advisory · Proven accreditation frameworks</span>
+    </div>
+  </div>
+
+  <!-- Plans grid -->
+  <div class="plans-grid">
+    @for (plan of plans; track plan.id) {
+      <div class="plan-card" [class]="plan.accentClass" [class.plan-featured]="plan.featured">
+
+        @if (plan.badge) {
+          <div class="plan-badge">
+            <span class="badge-star">✦</span> {{ plan.badge }}
+          </div>
+        }
+
+        <!-- Plan header -->
+        <div class="plan-header">
+          <span class="plan-icon">{{ plan.icon }}</span>
+          <h2 class="plan-name">{{ plan.name }}</h2>
+          <p class="plan-tagline">{{ plan.tagline }}</p>
+        </div>
+
+        <!-- Price -->
+        <div class="plan-price-wrap">
+          @if (plan.price) {
+            <div class="plan-price">
+              <span class="price-currency">{{ plan.currency }}</span>
+              <span class="price-amount">{{ plan.price }}</span>
+            </div>
+            <span class="price-period">{{ plan.period }}</span>
+          } @else if (!plan.ctaExternal) {
+            <div class="plan-price">
+              <span class="price-amount price-free">Complimentary</span>
+            </div>
+            <span class="price-period">initial evaluation</span>
+          } @else {
+            <div class="plan-price">
+              <span class="price-amount price-custom">Custom</span>
+            </div>
+            <span class="price-period">tailored to your needs</span>
+          }
+        </div>
+
+        <!-- CTA -->
+        @if (plan.ctaExternal) {
+          <a [href]="plan.ctaLink" class="plan-cta" [class]="'cta-' + plan.id">
+            {{ plan.ctaLabel }}
+            <span class="cta-arrow">→</span>
+          </a>
+        } @else {
+          <a [routerLink]="plan.ctaLink" class="plan-cta" [class]="'cta-' + plan.id">
+            {{ plan.ctaLabel }}
+            <span class="cta-arrow">→</span>
+          </a>
+        }
+
+        <!-- Divider -->
+        <div class="plan-divider"></div>
+
+        <!-- Features -->
+        <ul class="plan-features">
+          @for (feature of plan.features; track feature.text) {
+            <li class="feature-item" [class.feature-excluded]="!feature.included">
+              <span class="feature-icon">
+                @if (feature.included) { ✓ } @else { – }
+              </span>
+              <span class="feature-text">{{ feature.text }}</span>
+            </li>
+          }
+        </ul>
+
+      </div>
+    }
+  </div>
+
+  <!-- Bottom note -->
+  <div class="pricing-footer-note">
+    <div class="note-grid">
+      <div class="note-item">
+        <span class="note-icon">🌍</span>
+        <div>
+          <strong>GCF-Aligned</strong>
+          <p>All services are designed specifically for the GCF accreditation framework.</p>
+        </div>
+      </div>
+      <div class="note-item">
+        <span class="note-icon">📋</span>
+        <div>
+          <strong>Independent Advisory</strong>
+          <p>We are an independent advisory platform. Final funding decisions rest with the GCF.</p>
+        </div>
+      </div>
+      <div class="note-item">
+        <span class="note-icon">💬</span>
+        <div>
+          <strong>Questions?</strong>
+          <p>Use our chat assistant below or email <a href="mailto:support@gcf-support.org">support&#64;gcf-support.org</a></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>

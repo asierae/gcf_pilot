@@ -1,26 +1,46 @@
-import { Routes } from '@angular/router';
-import { LayoutComponent } from './layout/layout.component';
-import { Stage1Component } from './pages/stage1/stage1.component';
-import { Stage2Component } from './pages/stage2/stage2.component';
-import { LoginComponent } from './pages/login/login.component';
-import { DashboardComponent } from './pages/dashboard/dashboard.component';
-import { SubmissionDetailComponent } from './pages/dashboard/submission-detail/submission-detail.component';
-import { LeadsImportComponent } from './pages/dashboard/leads-import/leads-import.component';
-import { adminGuard, authGuard } from './guards/auth.guard';
+import { Routes } from "@angular/router";
+import { LayoutComponent } from "./layout/layout.component";
+import { Stage1Component } from "./pages/stage1/stage1.component";
+import { Stage2Component } from "./pages/stage2/stage2.component";
+import { LoginComponent } from "./pages/login/login.component";
+import { DashboardComponent } from "./pages/dashboard/dashboard.component";
+import { SubmissionDetailComponent } from "./pages/dashboard/submission-detail/submission-detail.component";
+import { LeadsImportComponent } from "./pages/dashboard/leads-import/leads-import.component";
+import { UserManagementComponent } from "./pages/settings/user-management/user-management.component";
+import { PricingComponent } from "./pages/pricing/pricing.component";
+import { adminGuard, authGuard } from "./guards/auth.guard";
 
 export const routes: Routes = [
-  { path: 'login', component: LoginComponent },
+  { path: "login", component: LoginComponent },
   {
-    path: '',
+    path: "",
     component: LayoutComponent,
     children: [
-      { path: '', redirectTo: 'stage1', pathMatch: 'full' },
-      { path: 'stage1', component: Stage1Component },
-      { path: 'stage2', component: Stage2Component, canActivate: [authGuard] },
-      { path: 'dashboard', component: DashboardComponent, canActivate: [adminGuard] },
-      { path: 'dashboard/leads', component: LeadsImportComponent, canActivate: [adminGuard] },
-      { path: 'dashboard/submission/:id', component: SubmissionDetailComponent, canActivate: [adminGuard] }
-    ]
+      { path: "", redirectTo: "stage1", pathMatch: "full" },
+      { path: "stage1", component: Stage1Component },
+      { path: "stage2", component: Stage2Component, canActivate: [authGuard] },
+      {
+        path: "dashboard",
+        component: DashboardComponent,
+        canActivate: [adminGuard],
+      },
+      {
+        path: "dashboard/leads",
+        component: LeadsImportComponent,
+        canActivate: [adminGuard],
+      },
+      {
+        path: "dashboard/submission/:id",
+        component: SubmissionDetailComponent,
+        canActivate: [adminGuard],
+      },
+      {
+        path: "settings/users",
+        component: UserManagementComponent,
+        canActivate: [adminGuard],
+      },
+      { path: "pricing", component: PricingComponent },
+    ],
   },
-  { path: '**', redirectTo: 'stage1' }
+  { path: "**", redirectTo: "stage1" },
 ];

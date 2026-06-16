@@ -1,0 +1,201 @@
+<!-- Backdrop -->
+@if (visible) {
+  <div class="sidebar-backdrop" (click)="close.emit()"></div>
+}
+
+<!-- Panel -->
+<div class="settings-sidebar" [class.sidebar-open]="visible" role="dialog" aria-label="Settings">
+  <!-- Header -->
+  <div class="sidebar-header">
+    <div class="sidebar-title">
+      <span class="sidebar-title-icon">⚙️</span>
+      <span>Settings</span>
+    </div>
+    <button type="button" class="sidebar-close" (click)="close.emit()" aria-label="Close settings">✕</button>
+  </div>
+
+  <!-- Section nav -->
+  <nav class="sidebar-nav">
+    <button
+      type="button"
+      class="sidebar-nav-btn"
+      [class.active]="activeSection === 'users'"
+      (click)="activeSection = 'users'"
+    >
+      <span class="sidebar-nav-icon">👥</span>
+      <span>Users</span>
+    </button>
+  </nav>
+
+  <!-- Content -->
+  <div class="sidebar-content">
+
+    @if (activeSection === 'users') {
+      <!-- User Management -->
+      <div class="section-header">
+        <div>
+          <h2>User Management</h2>
+          <p>Manage accounts and access roles.</p>
+        </div>
+        <button type="button" class="btn-new-user" (click)="openCreateForm()">
+          + New user
+        </button>
+      </div>
+
+      <!-- Search -->
+      <div class="user-search-wrap">
+        <input
+          type="search"
+          class="user-search"
+          placeholder="Search by username, email or organization…"
+          [(ngModel)]="userSearch"
+        />
+      </div>
+
+      <!-- Create / Edit form -->
+      @if (showForm) {
+        <div class="user-form-panel">
+          <div class="user-form-header">
+            <h3>{{ editingUser ? 'Edit user' : 'New user' }}</h3>
+            <button type="button" class="form-close-btn" (click)="cancelForm()">✕</button>
+          </div>
+
+          <div class="user-form-grid">
+            <label class="form-field">
+              <span>Username <span class="req">*</span></span>
+              <input type="text" [(ngModel)]="form.username" placeholder="e.g. john.doe" />
+            </label>
+
+            <label class="form-field">
+              <span>Email <span class="req">*</span></span>
+              <input type="email" [(ngModel)]="form.email" placeholder="user@example.com" />
+            </label>
+
+            <label class="form-field">
+              <span>{{ editingUser ? 'New password (leave blank to keep)' : 'Password' }}</span>
+              <input type="password" [(ngModel)]="form.password" placeholder="••••••••" autocomplete="new-password" />
+            </label>
+
+            <label class="form-field">
+              <span>Role</span>
+              <select [(ngModel)]="form.role">
+                <option value="applicant">Applicant</option>
+                <option value="admin">Admin</option>
+              </select>
+            </label>
+
+            @if (form.role === 'applicant') {
+              <label class="form-field form-field-wide">
+                <span>Organization name</span>
+                <input type="text" [(ngModel)]="form.organizationName" placeholder="Organization name" />
+              </label>
+
+              <label class="form-field form-field-wide">
+                <span>Linked submission IDs <span class="field-hint">(comma-separated)</span></span>
+                <input type="text" [(ngModel)]="form.linkedSubmissionIds" placeholder="sub-001, sub-002" />
+              </label>
+            }
+
+            @if (!editingUser) {
+              <label class="form-field form-field-wide status-field">
+                <span>Status</span>
+                <select [(ngModel)]="form.status">
+                  <option value="active">Active</option>
+                  <option value="pending">Pending</option>
+                  <option value="suspended">Suspended</option>
+                </select>
+              </label>
+            } @else {
+              <label class="form-field status-field">
+                <span>Status</span>
+                <select [(ngModel)]="form.status">
+                  <option value="active">Active</option>
+                  <option value="pending">Pending</option>
+                  <option value="suspended">Suspended</option>
+                </select>
+              </label>
+            }
+
+            @if (!editingUser) {
+              <label class="form-field form-field-wide checkbox-field">
+                <input type="checkbox" [(ngModel)]="form.sendActivation" />
+                <span>Send activation email to set password</span>
+              </label>
+            }
+          </div>
+
+          <div class="form-actions">
+            <button type="button" class="btn-cancel-form" (click)="cancelForm()">Cancel</button>
+            <button type="button" class="btn-save-form" (click)="saveForm()">
+              {{ editingUser ? 'Save changes' : 'Create user' }}
+            </button>
+          </div>
+        </div>
+      }
+
+      <!-- Users table -->
+      <div class="users-table-wrap">
+        @if (filteredUsers.length === 0) {
+          <div class="empty-users">
+            <span>{{ userSearch ? 'No users match your search.' : 'No users yet.' }}</span>
+          </div>
+        } @else {
+          <table class="users-table">
+            <thead>
+              <tr>
+                <th>User</th>
+                <th>Role</th>
+                <th>Organization</th>
+                <th>Status</th>
+                <th>Submissions</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (user of filteredUsers; track user.id) {
+                <tr>
+                  <td class="col-user">
+                    <div class="user-avatar" [class]="'avatar-' + user.role">
+                      {{ getInitials(user) }}
+                    </div>
+                    <div class="user-info">
+                      <span class="user-username">{{ user.username }}</span>
+                      <span class="user-email">{{ user.email }}</span>
+                    </div>
+                  </td>
+                  <td>
+                    <span class="role-badge" [class]="getRoleClass(user.role)">
+                      {{ user.role }}
+                    </span>
+                  </td>
+                  <td class="col-org">{{ user.organizationName || '—' }}</td>
+                  <td>
+                    <span class="status-badge" [class]="getStatusClass(user.status)">
+                      {{ user.status }}
+                    </span>
+                  </td>
+                  <td class="col-subs">
+                    @if (user.linkedSubmissionIds.length) {
+                      <span class="subs-count">{{ user.linkedSubmissionIds.length }}</span>
+                    } @else {
+                      <span class="col-empty">—</span>
+                    }
+                  </td>
+                  <td class="col-actions">
+                    <button type="button" class="btn-action btn-edit-user" (click)="openEditForm(user)" title="Edit">
+                      ✏️
+                    </button>
+                    <button type="button" class="btn-action btn-delete-user" (click)="deleteUser(user)" title="Delete">
+                      🗑️
+                    </button>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        }
+      </div>
+    }
+
+  </div>
+</div>

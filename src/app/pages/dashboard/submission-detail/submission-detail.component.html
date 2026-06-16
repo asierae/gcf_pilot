@@ -8,7 +8,7 @@
     </div>
   </div>
 } @else {
-  <div class="detail-page">
+  <div class="detail-page" [class.edit-active]="editMode">
     <a routerLink="/dashboard" class="btn-back">← Back to Dashboard</a>
 
     <header class="detail-header">
@@ -25,17 +25,54 @@
               <option [value]="option">{{ option }}</option>
             }
           </select>
+
+          <div class="edit-actions">
+            @if (!editMode) {
+              <button type="button" class="btn-edit" (click)="enterEditMode()">
+                <span class="btn-edit-icon">✏️</span> Edit
+              </button>
+            } @else {
+              <button
+                type="button"
+                class="btn-save-edit"
+                (click)="saveEdit()"
+                [disabled]="saving"
+              >
+                {{ saving ? "Saving…" : "✓ Save changes" }}
+              </button>
+              <button
+                type="button"
+                class="btn-cancel-edit"
+                (click)="cancelEdit()"
+              >
+                ✕ Cancel
+              </button>
+            }
+          </div>
         </div>
-        <h1>{{ submission.data['applicantName'] || 'Unknown Applicant' }}</h1>
-        @if (submission.data['applicantAcronym']) {
-          <span class="detail-acronym">{{ submission.data['applicantAcronym'] }}</span>
+
+        <!-- Applicant name: always read-only -->
+        <h1>{{ submission.data["applicantName"] || "Unknown Applicant" }}</h1>
+        @if (submission.data["applicantAcronym"]) {
+          <span class="detail-acronym">{{
+            submission.data["applicantAcronym"]
+          }}</span>
         }
       </div>
+
       <div class="detail-meta">
         <div class="meta-item">
           <span class="meta-label">Submitted</span>
           <span class="meta-value">{{ formatDate(submission.date) }}</span>
         </div>
+        @if (updatedAt) {
+          <div class="meta-item">
+            <span class="meta-label">Last updated</span>
+            <span class="meta-value meta-updated">{{
+              formatDate(updatedAt)
+            }}</span>
+          </div>
+        }
         <div class="meta-item">
           <span class="meta-label">Reference ID</span>
           <span class="meta-value mono">{{ submission.id }}</span>
@@ -49,47 +86,227 @@
       </div>
     </header>
 
+    @if (editMode) {
+      <div class="edit-banner">
+        <span class="edit-banner-icon">✏️</span>
+        <span
+          >Edit mode active — modify any field below, then click
+          <strong>Save changes</strong>. <em>Applicant Name</em> is
+          locked.</span
+        >
+      </div>
+    }
+
+    <!-- ── Summary cards ── -->
     <div class="summary-cards">
-      <div class="summary-card">
+      <div class="summary-card" [class.summary-card-editing]="editMode">
         <span class="summary-label">Organization Type</span>
-        <span class="summary-value">{{ getValue('organizationType') || '—' }}</span>
+        @if (editMode) {
+          <select
+            class="edit-select summary-edit-select"
+            (change)="
+              setEditValue('organizationType', $any($event.target).value)
+            "
+          >
+            @for (
+              opt of getSelectOptions("organizationType");
+              track opt.value
+            ) {
+              <option
+                [value]="opt.value"
+                [selected]="getEditValue('organizationType') === opt.value"
+              >
+                {{ opt.label }}
+              </option>
+            }
+          </select>
+        } @else {
+          <span class="summary-value">{{
+            getValue("organizationType") || "—"
+          }}</span>
+        }
       </div>
-      <div class="summary-card">
+
+      <div class="summary-card" [class.summary-card-editing]="editMode">
         <span class="summary-label">Primary Contact</span>
-        <span class="summary-value">{{ getValue('primaryContactName') || '—' }}</span>
+        @if (editMode) {
+          <input
+            type="text"
+            class="edit-input summary-edit-input"
+            [value]="getEditValue('primaryContactName')"
+            (input)="
+              setEditValue('primaryContactName', $any($event.target).value)
+            "
+            placeholder="Contact name"
+          />
+        } @else {
+          <span class="summary-value">{{
+            getValue("primaryContactName") || "—"
+          }}</span>
+        }
       </div>
-      <div class="summary-card">
+
+      <div class="summary-card" [class.summary-card-editing]="editMode">
         <span class="summary-label">Email</span>
-        <span class="summary-value">{{ getValue('primaryContactEmail') || '—' }}</span>
+        @if (editMode) {
+          <input
+            type="email"
+            class="edit-input summary-edit-input"
+            [value]="getEditValue('primaryContactEmail')"
+            (input)="
+              setEditValue('primaryContactEmail', $any($event.target).value)
+            "
+            placeholder="contact@example.com"
+          />
+        } @else {
+          <span class="summary-value">{{
+            getValue("primaryContactEmail") || "—"
+          }}</span>
+        }
       </div>
-      <div class="summary-card">
+
+      <div class="summary-card" [class.summary-card-editing]="editMode">
         <span class="summary-label">Headquarters</span>
-        <span class="summary-value">{{ getValue('headquartersCountry') || '—' }}</span>
+        @if (editMode) {
+          <input
+            type="text"
+            class="edit-input summary-edit-input"
+            [value]="getEditValue('headquartersCountry')"
+            (input)="
+              setEditValue('headquartersCountry', $any($event.target).value)
+            "
+            placeholder="Country"
+          />
+        } @else {
+          <span class="summary-value">{{
+            getValue("headquartersCountry") || "—"
+          }}</span>
+        }
       </div>
     </div>
 
-    @if (attachmentFields.length) {
-      <section class="attachments-panel">
-        <h2>Uploaded documents</h2>
+    <!-- ── Attachments panel ── -->
+    @if (liveAttachmentFields.length || editMode) {
+      <section
+        class="attachments-panel"
+        [class.attachments-panel-editing]="editMode"
+      >
+        <div class="attachments-panel-header">
+          <h2>
+            <span class="attachments-panel-icon">📎</span>
+            Uploaded documents
+          </h2>
+          @if (editMode) {
+            <span class="attachments-panel-hint"
+              >Click × to remove a file · Click Upload to add new ones</span
+            >
+          }
+        </div>
+
         <div class="attachments-grid">
-          @for (group of attachmentFields; track group.key) {
-            <div class="attachment-group">
+          @for (group of liveAttachmentFields; track group.key) {
+            <div
+              class="attachment-group"
+              [class.attachment-group-editing]="editMode"
+            >
               <h3>{{ group.label }}</h3>
-              <ul>
-                @for (attachment of group.attachments; track attachment.url) {
-                  <li>
-                    <a [href]="fileUrl(attachment)" target="_blank" rel="noopener noreferrer">
-                      {{ attachment.name || 'Document' }}
-                    </a>
-                  </li>
+
+              @if (!editMode) {
+                <!-- Read-only list -->
+                @if (group.attachments.length) {
+                  <ul class="attachment-read-list">
+                    @for (att of group.attachments; track att.url) {
+                      <li>
+                        <a
+                          [href]="fileUrl(att)"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          class="attachment-read-link"
+                        >
+                          <span class="att-read-icon">📄</span>
+                          {{ att.name || "Document" }}
+                        </a>
+                      </li>
+                    }
+                  </ul>
+                } @else {
+                  <p class="no-files-msg">No files attached</p>
                 }
-              </ul>
+              } @else {
+                <!-- Edit UI -->
+                <div class="attachment-editor">
+                  <!-- Existing files as pills -->
+                  @if (group.attachments.length) {
+                    <div class="attachment-pills">
+                      @for (
+                        att of group.attachments;
+                        track att.url;
+                        let i = $index
+                      ) {
+                        <div class="attachment-pill">
+                          <span class="pill-type-icon">📄</span>
+                          <a
+                            [href]="fileUrl(att)"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class="pill-name"
+                            [title]="att.name"
+                          >
+                            {{ att.name || "File" }}
+                          </a>
+                          <button
+                            type="button"
+                            class="pill-remove"
+                            (click)="removeAttachment(group.key, i)"
+                            aria-label="Remove file"
+                            [disabled]="isUploading(group.key)"
+                          >
+                            ✕
+                          </button>
+                        </div>
+                      }
+                    </div>
+                  } @else {
+                    <p class="no-files-msg no-files-edit">
+                      No files — upload below
+                    </p>
+                  }
+
+                  <!-- Upload row -->
+                  <div class="upload-row">
+                    @if (isUploading(group.key)) {
+                      <div class="upload-progress">
+                        <span class="upload-spinner"></span>
+                        <span>Uploading…</span>
+                      </div>
+                    } @else if (canUploadMore(group.key)) {
+                      <label class="upload-btn">
+                        <span class="upload-btn-icon">+</span>
+                        <span>Upload file</span>
+                        <input
+                          type="file"
+                          multiple
+                          (change)="uploadAttachment(group.key, $event)"
+                        />
+                      </label>
+                      <span class="upload-count-hint">
+                        {{ group.attachments.length }} / {{ maxFiles }}
+                      </span>
+                    } @else {
+                      <span class="upload-limit-reached"
+                        >Max {{ maxFiles }} files reached</span
+                      >
+                    }
+                  </div>
+                </div>
+              }
             </div>
           }
         </div>
       </section>
     }
 
+    <!-- ── Sections ── -->
     @for (section of sections; track section.id; let i = $index) {
       @if (sectionHasValues(i)) {
         <section class="detail-section">
@@ -101,28 +318,178 @@
             <div class="section-content">
               <div class="detail-grid">
                 @for (field of section.fields; track field.key) {
-                  @if (hasValue(field.key)) {
-                    <div class="detail-field" [class.detail-field-wide]="isLongText(field.key)">
-                      <dt>{{ field.label }}</dt>
+                  @if (
+                    hasValue(field.key) ||
+                    (editMode && isAttachmentField(field.key))
+                  ) {
+                    <div
+                      class="detail-field"
+                      [class.detail-field-wide]="isLongText(field.key)"
+                    >
+                      <dt>
+                        {{ field.label }}
+                        @if (
+                          editMode && getFieldType(field.key) === "readonly"
+                        ) {
+                          <span
+                            class="field-locked"
+                            title="This field cannot be edited"
+                            >🔒</span
+                          >
+                        }
+                      </dt>
                       <dd>
-                        @if (isAttachmentField(field.key)) {
-                          <ul class="attachment-links">
-                            @for (attachment of getAttachmentItems(field.key); track attachment.url) {
-                              <li>
-                                <a [href]="fileUrl(attachment)" target="_blank" rel="noopener noreferrer">
-                                  {{ attachment.name || 'File' }}
-                                </a>
-                              </li>
-                            }
-                          </ul>
-                        } @else if (isBadgeField(field.key)) {
-                          <span class="value-badge" [class.yes]="isYesValue(field.key)" [class.no]="!isYesValue(field.key)">
-                            {{ getValue(field.key) }}
-                          </span>
-                        } @else if (isLongText(field.key)) {
-                          <p class="value-text">{{ getValue(field.key) }}</p>
+                        @if (
+                          editMode && getFieldType(field.key) !== "readonly"
+                        ) {
+                          @if (getFieldType(field.key) === "select") {
+                            <select
+                              class="edit-select"
+                              (change)="
+                                setEditValue(
+                                  field.key,
+                                  $any($event.target).value
+                                )
+                              "
+                            >
+                              @for (
+                                opt of getSelectOptions(field.key);
+                                track opt.value
+                              ) {
+                                <option
+                                  [value]="opt.value"
+                                  [selected]="
+                                    getEditValue(field.key) === opt.value
+                                  "
+                                >
+                                  {{ opt.label }}
+                                </option>
+                              }
+                            </select>
+                          } @else if (getFieldType(field.key) === "textarea") {
+                            <textarea
+                              class="edit-textarea"
+                              rows="5"
+                              [value]="getEditValue(field.key)"
+                              (input)="
+                                setEditValue(
+                                  field.key,
+                                  $any($event.target).value
+                                )
+                              "
+                            ></textarea>
+                          } @else if (
+                            getFieldType(field.key) === "attachment"
+                          ) {
+                            <!-- Inline attachment editor (mirrors panel above) -->
+                            <div
+                              class="attachment-editor attachment-editor-inline"
+                            >
+                              @if (getEditAttachments(field.key).length) {
+                                <div class="attachment-pills">
+                                  @for (
+                                    att of getEditAttachments(field.key);
+                                    track att.url;
+                                    let ai = $index
+                                  ) {
+                                    <div class="attachment-pill">
+                                      <span class="pill-type-icon">📄</span>
+                                      <a
+                                        [href]="fileUrl(att)"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        class="pill-name"
+                                        [title]="att.name"
+                                      >
+                                        {{ att.name || "File" }}
+                                      </a>
+                                      <button
+                                        type="button"
+                                        class="pill-remove"
+                                        (click)="
+                                          removeAttachment(field.key, ai)
+                                        "
+                                        [disabled]="isUploading(field.key)"
+                                      >
+                                        ✕
+                                      </button>
+                                    </div>
+                                  }
+                                </div>
+                              } @else {
+                                <p class="no-files-msg no-files-edit">
+                                  No files — upload below
+                                </p>
+                              }
+                              <div class="upload-row">
+                                @if (isUploading(field.key)) {
+                                  <div class="upload-progress">
+                                    <span class="upload-spinner"></span>
+                                    <span>Uploading…</span>
+                                  </div>
+                                } @else if (canUploadMore(field.key)) {
+                                  <label class="upload-btn upload-btn-sm">
+                                    <span>+ Upload</span>
+                                    <input
+                                      type="file"
+                                      multiple
+                                      (change)="
+                                        uploadAttachment(field.key, $event)
+                                      "
+                                    />
+                                  </label>
+                                } @else {
+                                  <span class="upload-limit-reached"
+                                    >Max {{ maxFiles }} files</span
+                                  >
+                                }
+                              </div>
+                            </div>
+                          } @else {
+                            <input
+                              type="text"
+                              class="edit-input"
+                              [value]="getEditValue(field.key)"
+                              (input)="
+                                setEditValue(
+                                  field.key,
+                                  $any($event.target).value
+                                )
+                              "
+                            />
+                          }
                         } @else {
-                          {{ getValue(field.key) }}
+                          <!-- Read-only display -->
+                          @if (isAttachmentField(field.key)) {
+                            <ul class="attachment-links">
+                              @for (
+                                att of getAttachmentItems(field.key);
+                                track att.url
+                              ) {
+                                <li>
+                                  <a
+                                    [href]="fileUrl(att)"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                  >
+                                    {{ att.name || "File" }}
+                                  </a>
+                                </li>
+                              }
+                            </ul>
+                          } @else if (isBadgeField(field.key)) {
+                            <span
+                              class="value-badge"
+                              [class.yes]="isYesValue(field.key)"
+                              [class.no]="!isYesValue(field.key)"
+                            >
+                              {{ getValue(field.key) }}
+                            </span>
+                          } @else if (isLongText(field.key)) {
+                            <p class="value-text">{{ getValue(field.key) }}</p>
+                          } @else {
+                            {{ getValue(field.key) }}
+                          }
                         }
                       </dd>
                     </div>
@@ -150,12 +517,19 @@
       <div class="send-footer-info">
         <p>Send all section notes to the applicant's primary contact email.</p>
         <span class="send-recipient">From: {{ emailService.senderEmail }}</span>
-        @if (getValue('primaryContactEmail')) {
-          <span class="send-recipient">To: {{ getValue('primaryContactEmail') }}</span>
+        @if (getValue("primaryContactEmail")) {
+          <span class="send-recipient"
+            >To: {{ getValue("primaryContactEmail") }}</span
+          >
         }
       </div>
-      <button type="button" class="btn-send" (click)="sendToApplicant()" [disabled]="sending">
-        <span>{{ sending ? 'Sending…' : 'Send to applicant' }}</span>
+      <button
+        type="button"
+        class="btn-send"
+        (click)="sendToApplicant()"
+        [disabled]="sending || editMode"
+      >
+        <span>{{ sending ? "Sending…" : "Send to applicant" }}</span>
         <span class="btn-icon">✉️</span>
       </button>
     </footer>

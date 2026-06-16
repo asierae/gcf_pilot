@@ -1,47 +1,55 @@
-import { Injectable } from '@angular/core';
-import { Router } from '@angular/router';
-import { BehaviorSubject } from 'rxjs';
+import { Injectable } from "@angular/core";
+import { Router } from "@angular/router";
+import { BehaviorSubject } from "rxjs";
+import { UserService } from "./user.service";
 
 export interface User {
+  id: string;
   username: string;
-  role: 'admin' | 'applicant';
+  email: string;
+  role: "admin" | "applicant";
 }
 
-const SESSION_USER_KEY = 'current_user';
+const SESSION_USER_KEY = "current_user";
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable({ providedIn: "root" })
 export class AuthService {
   private currentUserSubject = new BehaviorSubject<User | null>(null);
   public currentUser$ = this.currentUserSubject.asObservable();
 
-  constructor(private router: Router) {
-    const savedUser = sessionStorage.getItem(SESSION_USER_KEY);
-    if (savedUser) {
-      this.currentUserSubject.next(JSON.parse(savedUser));
+  constructor(
+    private router: Router,
+    private userService: UserService,
+  ) {
+    const saved = sessionStorage.getItem(SESSION_USER_KEY);
+    if (saved) {
+      try {
+        this.currentUserSubject.next(JSON.parse(saved) as User);
+      } catch {
+        sessionStorage.removeItem(SESSION_USER_KEY);
+      }
     }
   }
 
   login(username: string, pass: string): boolean {
-    if (username === 'hatyja' && pass === 'asier') {
-      const user: User = { username, role: 'admin' };
-      sessionStorage.setItem(SESSION_USER_KEY, JSON.stringify(user));
-      this.currentUserSubject.next(user);
-      return true;
-    } else if (username === 'hatyja2' && pass === 'asier') {
-      const user: User = { username, role: 'applicant' };
-      sessionStorage.setItem(SESSION_USER_KEY, JSON.stringify(user));
-      this.currentUserSubject.next(user);
-      return true;
-    }
-    return false;
+    const appUser = this.userService.findByCredentials(username, pass);
+    if (!appUser) return false;
+
+    const user: User = {
+      id: appUser.id,
+      username: appUser.username,
+      email: appUser.email,
+      role: appUser.role,
+    };
+    sessionStorage.setItem(SESSION_USER_KEY, JSON.stringify(user));
+    this.currentUserSubject.next(user);
+    return true;
   }
 
-  logout() {
+  logout(): void {
     sessionStorage.removeItem(SESSION_USER_KEY);
     this.currentUserSubject.next(null);
-    this.router.navigate(['/login']);
+    this.router.navigate(["/login"]);
   }
 
   get currentUserValue(): User | null {

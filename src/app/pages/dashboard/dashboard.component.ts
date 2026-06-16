@@ -1,39 +1,41 @@
-import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
+import { Component, OnInit } from "@angular/core";
+import { CommonModule } from "@angular/common";
+import { RouterLink } from "@angular/router";
 import {
   FormSubmission,
   StorageService,
   SUBMISSION_STATUSES,
-  SubmissionStatus
-} from '../../services/storage.service';
-import { NotificationService } from '../../services/notification.service';
-import { getSubmissionSummary } from '../../shared/data/stage1-display.config';
-import { DatePickerComponent } from '../../shared/components/date-picker/date-picker.component';
+  SubmissionStatus,
+} from "../../services/storage.service";
+import { NotificationService } from "../../services/notification.service";
+import { getSubmissionSummary } from "../../shared/data/stage1-display.config";
+import { DatePickerComponent } from "../../shared/components/date-picker/date-picker.component";
 
 @Component({
-  selector: 'app-dashboard',
+  selector: "app-dashboard",
   standalone: true,
   imports: [CommonModule, RouterLink, DatePickerComponent],
-  templateUrl: './dashboard.component.html',
-  styleUrl: './dashboard.component.css'
+  templateUrl: "./dashboard.component.html",
+  styleUrl: "./dashboard.component.css",
 })
 export class DashboardComponent implements OnInit {
   submissions: FormSubmission[] = [];
   readonly statusOptions = SUBMISSION_STATUSES;
   selectedIds = new Set<string>();
   statusById: Record<string, SubmissionStatus> = {};
-  searchQuery = '';
-  dateFrom = '';
-  dateTo = '';
-  readonly pageSize = 20;
+  searchQuery = "";
+  dateFrom = "";
+  dateTo = "";
+  readonly pageSize = 10;
   currentPage = 1;
   loading = true;
-  loadError = '';
+  loadError = "";
+  sortColumn: string | null = null;
+  sortDir: "asc" | "desc" = "asc";
 
   constructor(
     private storageService: StorageService,
-    private notificationService: NotificationService
+    private notificationService: NotificationService,
   ) {}
 
   ngOnInit(): void {
@@ -42,18 +44,21 @@ export class DashboardComponent implements OnInit {
 
   async loadSubmissions(): Promise<void> {
     this.loading = true;
-    this.loadError = '';
+    this.loadError = "";
 
     try {
-      const { submissions, statusById } = await this.storageService.loadDashboardData();
+      const { submissions, statusById } =
+        await this.storageService.loadDashboardData();
       this.submissions = submissions.reverse();
       this.statusById = statusById;
       this.selectedIds = new Set(
-        [...this.selectedIds].filter((id) => this.submissions.some((s) => s.id === id))
+        [...this.selectedIds].filter((id) =>
+          this.submissions.some((s) => s.id === id),
+        ),
       );
       this.clampCurrentPage();
     } catch {
-      this.loadError = 'Could not load submissions from Firebase.';
+      this.loadError = "Could not load submissions from Firebase.";
       this.notificationService.error(this.loadError);
     } finally {
       this.loading = false;
@@ -74,8 +79,22 @@ export class DashboardComponent implements OnInit {
     const query = this.searchQuery.trim().toLowerCase();
     if (query) {
       result = result.filter((submission) =>
-        this.getSearchableText(submission).includes(query)
+        this.getSearchableText(submission).includes(query),
       );
+    }
+
+    if (this.sortColumn) {
+      const col = this.sortColumn;
+      const dir = this.sortDir;
+      result = [...result].sort((a, b) => {
+        const av = this.getSortValue(a, col);
+        const bv = this.getSortValue(b, col);
+        const cmp = av.localeCompare(bv, undefined, {
+          sensitivity: "base",
+          numeric: true,
+        });
+        return dir === "asc" ? cmp : -cmp;
+      });
     }
 
     return result;
@@ -95,7 +114,10 @@ export class DashboardComponent implements OnInit {
   }
 
   get totalPages(): number {
-    return Math.max(1, Math.ceil(this.filteredSubmissions.length / this.pageSize));
+    return Math.max(
+      1,
+      Math.ceil(this.filteredSubmissions.length / this.pageSize),
+    );
   }
 
   get pageStart(): number {
@@ -106,7 +128,10 @@ export class DashboardComponent implements OnInit {
   }
 
   get pageEnd(): number {
-    return Math.min(this.currentPage * this.pageSize, this.filteredSubmissions.length);
+    return Math.min(
+      this.currentPage * this.pageSize,
+      this.filteredSubmissions.length,
+    );
   }
 
   get visibleIds(): string[] {
@@ -119,16 +144,16 @@ export class DashboardComponent implements OnInit {
 
   formatDate(iso: string): string {
     return new Date(iso).toLocaleDateString(undefined, {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
     });
   }
 
   getStatus(submissionId: string): SubmissionStatus {
-    return this.statusById[submissionId] ?? 'Pending';
+    return this.statusById[submissionId] ?? "Pending";
   }
 
   getStatusClass(status: SubmissionStatus): string {
@@ -137,7 +162,7 @@ export class DashboardComponent implements OnInit {
 
   async onStatusChange(submissionId: string, event: Event): Promise<void> {
     const value = (event.target as HTMLSelectElement).value as SubmissionStatus;
-    const previous = this.statusById[submissionId] ?? 'Pending';
+    const previous = this.statusById[submissionId] ?? "Pending";
 
     this.statusById[submissionId] = value;
 
@@ -145,7 +170,7 @@ export class DashboardComponent implements OnInit {
       await this.storageService.setSubmissionStatus(submissionId, value);
     } catch {
       this.statusById[submissionId] = previous;
-      this.notificationService.error('Could not update status in Firebase.');
+      this.notificationService.error("Could not update status in Firebase.");
     }
   }
 
@@ -165,20 +190,20 @@ export class DashboardComponent implements OnInit {
   }
 
   clearSearch(): void {
-    this.searchQuery = '';
+    this.searchQuery = "";
     this.currentPage = 1;
   }
 
   clearDateFilter(): void {
-    this.dateFrom = '';
-    this.dateTo = '';
+    this.dateFrom = "";
+    this.dateTo = "";
     this.currentPage = 1;
   }
 
   clearAllFilters(): void {
-    this.searchQuery = '';
-    this.dateFrom = '';
-    this.dateTo = '';
+    this.searchQuery = "";
+    this.dateFrom = "";
+    this.dateTo = "";
     this.currentPage = 1;
   }
 
@@ -200,13 +225,17 @@ export class DashboardComponent implements OnInit {
 
   get allSelected(): boolean {
     const visible = this.visibleIds;
-    return visible.length > 0 && visible.every((id) => this.selectedIds.has(id));
+    return (
+      visible.length > 0 && visible.every((id) => this.selectedIds.has(id))
+    );
   }
 
   get someSelected(): boolean {
     const visible = this.visibleIds;
     const selectedVisible = visible.filter((id) => this.selectedIds.has(id));
-    return selectedVisible.length > 0 && selectedVisible.length < visible.length;
+    return (
+      selectedVisible.length > 0 && selectedVisible.length < visible.length
+    );
   }
 
   get selectedCount(): number {
@@ -242,7 +271,7 @@ export class DashboardComponent implements OnInit {
 
     const count = this.selectedIds.size;
     const confirmed = window.confirm(
-      `Delete ${count} submission${count === 1 ? '' : 's'}? This cannot be undone.`
+      `Delete ${count} submission${count === 1 ? "" : "s"}? This cannot be undone.`,
     );
 
     if (!confirmed) {
@@ -254,10 +283,46 @@ export class DashboardComponent implements OnInit {
       this.selectedIds = new Set();
       await this.loadSubmissions();
       this.notificationService.success(
-        `${count} submission${count === 1 ? '' : 's'} deleted.`
+        `${count} submission${count === 1 ? "" : "s"} deleted.`,
       );
     } catch {
-      this.notificationService.error('Could not delete submissions from Firebase.');
+      this.notificationService.error(
+        "Could not delete submissions from Firebase.",
+      );
+    }
+  }
+
+  sortBy(column: string): void {
+    if (this.sortColumn === column) {
+      this.sortDir = this.sortDir === "asc" ? "desc" : "asc";
+    } else {
+      this.sortColumn = column;
+      this.sortDir = "asc";
+    }
+    this.currentPage = 1;
+  }
+
+  private getSortValue(submission: FormSubmission, column: string): string {
+    const s = this.getSummary(submission);
+    switch (column) {
+      case "date":
+        return submission.date;
+      case "applicantName":
+        return s.applicantName;
+      case "acronym":
+        return s.acronym;
+      case "organizationType":
+        return s.organizationType;
+      case "contactEmail":
+        return s.contactEmail;
+      case "headquarters":
+        return s.headquarters;
+      case "scope":
+        return s.scope;
+      case "status":
+        return this.getStatus(submission.id);
+      default:
+        return "";
     }
   }
 
@@ -294,12 +359,12 @@ export class DashboardComponent implements OnInit {
   }
 
   private parseDateStart(dateStr: string): Date {
-    const [year, month, day] = dateStr.split('-').map(Number);
+    const [year, month, day] = dateStr.split("-").map(Number);
     return new Date(year, month - 1, day, 0, 0, 0, 0);
   }
 
   private parseDateEnd(dateStr: string): Date {
-    const [year, month, day] = dateStr.split('-').map(Number);
+    const [year, month, day] = dateStr.split("-").map(Number);
     return new Date(year, month - 1, day, 23, 59, 59, 999);
   }
 
@@ -313,9 +378,9 @@ export class DashboardComponent implements OnInit {
       summary.contactEmail,
       summary.headquarters,
       summary.scope,
-      this.getStatus(submission.id)
+      this.getStatus(submission.id),
     ]
-      .join(' ')
+      .join(" ")
       .toLowerCase();
   }
 }

@@ -459,6 +459,50 @@ textarea {
   background: rgba(255, 255, 255, 0.1);
 }
 
+.track-record-card {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 1.5rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+}
+.track-record-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+.track-record-header h4 {
+  margin: 0;
+  font-size: 1rem;
+  color: var(--text-primary);
+}
+.btn-remove {
+  background: rgba(255, 60, 60, 0.1);
+  color: #ff5555;
+  border: none;
+  padding: 0.25rem 0.75rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: all 0.2s ease;
+}
+.btn-remove:hover {
+  background: rgba(255, 60, 60, 0.2);
+}
+.btn-secondary {
+  background: rgba(255, 255, 255, 0.1);
+  color: #f8fafc;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
 .btn-next {
   background: linear-gradient(135deg, #3b82f6, #2563eb);
   border: none;

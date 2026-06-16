@@ -1,0 +1,96 @@
+<!-- Floating button -->
+<div class="chat-fab-wrap">
+  <button
+    type="button"
+    class="chat-fab"
+    [class.fab-open]="isOpen"
+    (click)="toggleChat()"
+    aria-label="Chat with GCF Support assistant"
+    title="Chat with assistant"
+  >
+    @if (!isOpen) {
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+      </svg>
+    } @else {
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+        <line x1="18" y1="6" x2="6" y2="18"/>
+        <line x1="6" y1="6" x2="18" y2="18"/>
+      </svg>
+    }
+  </button>
+</div>
+
+<!-- Chat panel -->
+@if (isOpen) {
+  <div class="chat-panel">
+    <!-- Header -->
+    <div class="chat-header">
+      <div class="chat-header-info">
+        <div class="chat-avatar">
+          <svg viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14H9V8h2v8zm4 0h-2V8h2v8z"/>
+          </svg>
+        </div>
+        <div>
+          <p class="chat-name">GCF Support Agent</p>
+          <p class="chat-status">
+            <span class="status-dot"></span>
+            Powered by Gemini (coming soon)
+          </p>
+        </div>
+      </div>
+      <button type="button" class="chat-close" (click)="closeChat()">✕</button>
+    </div>
+
+    <!-- Messages -->
+    <div class="chat-messages">
+      @for (msg of messages; track msg.id) {
+        <div class="chat-msg" [class.msg-user]="msg.role === 'user'" [class.msg-agent]="msg.role === 'agent'">
+          @if (msg.role === 'agent') {
+            <div class="msg-agent-avatar">G</div>
+          }
+          <div class="msg-bubble">
+            <div class="msg-text" [innerHTML]="formatText(msg.text)"></div>
+            <span class="msg-time">{{ formatTime(msg.timestamp) }}</span>
+          </div>
+        </div>
+      }
+
+      @if (thinking) {
+        <div class="chat-msg msg-agent">
+          <div class="msg-agent-avatar">G</div>
+          <div class="msg-bubble thinking-bubble">
+            <span class="dot"></span>
+            <span class="dot"></span>
+            <span class="dot"></span>
+          </div>
+        </div>
+      }
+
+      <div #messagesEnd></div>
+    </div>
+
+    <!-- Input -->
+    <div class="chat-input-row">
+      <textarea
+        class="chat-input"
+        rows="1"
+        placeholder="Ask about requirements, pricing, documents…"
+        [(ngModel)]="inputText"
+        (keydown)="onKeydown($event)"
+      ></textarea>
+      <button
+        type="button"
+        class="chat-send"
+        (click)="sendMessage()"
+        [disabled]="!inputText.trim() || thinking"
+        aria-label="Send"
+      >
+        <svg viewBox="0 0 24 24" fill="currentColor">
+          <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+}

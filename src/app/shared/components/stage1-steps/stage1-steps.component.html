@@ -573,6 +573,85 @@
             <label>Brief overview of track record (100 words max):</label>
             <textarea formControlName="trackRecordOverview" rows="4" placeholder="Describe your track record..."></textarea>
           </div>
+
+          <!-- 3.1.4 Track Record Array -->
+          <div class="form-group" style="margin-top: 2rem;">
+            <label>3.1.4. Climate-related projects/programmes track record (past 10 years)</label>
+            <p class="field-help">Provide a list of relevant projects. For grants, loans, equity and guarantees, provide examples of the largest/most successful projects.</p>
+            
+            <div formArrayName="climateTrackRecord">
+              <div *ngFor="let record of climateTrackRecord.controls; let i = index" [formGroupName]="i" class="track-record-card">
+                <div class="track-record-header">
+                  <h4>Project {{ i + 1 }}</h4>
+                  <button type="button" class="btn-remove" (click)="removeTrackRecord(i)">Remove</button>
+                </div>
+                <div class="form-row">
+                  <div class="form-group">
+                    <label>Title</label>
+                    <input type="text" formControlName="title" placeholder="Project title">
+                  </div>
+                  <div class="form-group">
+                    <label>Location</label>
+                    <input type="text" formControlName="location" placeholder="Country / Region">
+                  </div>
+                </div>
+                <div class="form-row">
+                  <div class="form-group">
+                    <label>Theme(s)</label>
+                    <input type="text" formControlName="theme" placeholder="Mitigation, Adaptation, Cross-cutting...">
+                  </div>
+                  <div class="form-group">
+                    <label>Size(s) (USD)</label>
+                    <input type="number" formControlName="size" placeholder="Total financing amount">
+                  </div>
+                  <div class="form-group">
+                    <label>Status</label>
+                    <input type="text" formControlName="status" placeholder="Completed, Ongoing...">
+                  </div>
+                </div>
+              </div>
+            </div>
+            <button type="button" class="btn-secondary" style="margin-top: 1rem;" (click)="addTrackRecord()">+ Add Project</button>
+          </div>
+
+          <!-- 3.1.5 ESS Category -->
+          <div class="form-group" style="margin-top: 2rem;">
+            <label>3.1.5. Does the applicant intend to programme with the following environmental and social risk category: <span class="required">*</span></label>
+            <div class="radio-group">
+              <label class="radio-option">
+                <input type="radio" formControlName="intendedESSRiskCategory" value="category-a">
+                <span class="radio-custom"></span>
+                <span>Category A / Intermediation 1</span>
+              </label>
+              <label class="radio-option">
+                <input type="radio" formControlName="intendedESSRiskCategory" value="category-b">
+                <span class="radio-custom"></span>
+                <span>Category B / Intermediation 2</span>
+              </label>
+              <label class="radio-option">
+                <input type="radio" formControlName="intendedESSRiskCategory" value="category-c">
+                <span class="radio-custom"></span>
+                <span>Category C / Intermediation 3</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- 3.1.6 Instruments -->
+          <div class="form-group">
+            <label>3.1.6. Does the applicant intend to programme with grants and non-grant instruments: <span class="required">*</span></label>
+            <div class="radio-group">
+              <label class="radio-option">
+                <input type="radio" formControlName="intendedFinancialInstruments" value="grant">
+                <span class="radio-custom"></span>
+                <span>Grant</span>
+              </label>
+              <label class="radio-option">
+                <input type="radio" formControlName="intendedFinancialInstruments" value="non-grant">
+                <span class="radio-custom"></span>
+                <span>Non-grant</span>
+              </label>
+            </div>
+          </div>
         </div>
 
         <!-- 3.2.1 Self-Assessment -->
@@ -804,6 +883,22 @@
         <!-- 3.4 Engagement -->
         <div class="form-card">
           <h3>3.4 Engagement with GCF</h3>
+
+          <div class="form-group">
+            <label>Has your organization submitted a Financial Management and Capacity Assessment (FMCA)? <span class="required">*</span></label>
+            <div class="yes-no-group">
+              <label class="radio-option compact">
+                <input type="radio" formControlName="hasSubmittedFMCA" value="yes">
+                <span class="radio-custom"></span>
+                <span>Yes</span>
+              </label>
+              <label class="radio-option compact">
+                <input type="radio" formControlName="hasSubmittedFMCA" value="no">
+                <span class="radio-custom"></span>
+                <span>No</span>
+              </label>
+            </div>
+          </div>
 
           <div class="form-group">
             <label>Has your organization requested or received pre-accreditation readiness support from GCF? <span class="required">*</span></label>

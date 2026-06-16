@@ -2,32 +2,206 @@
   <div class="section-header">
     <div>
       <h2>Leads</h2>
-      <p>Import records from an Excel file and manage them in the table below.</p>
+      <p>Import or add leads and manage them in the table below.</p>
     </div>
     <a routerLink="/dashboard" class="btn-back">← Back to Dashboard</a>
   </div>
 
-  <section class="upload-panel">
-    <label class="file-label">
-      <span>Select Excel file</span>
-      <input type="file" accept=".xlsx,.xls" (change)="onFileChange($event)" />
-    </label>
+  <!-- ── Tabbed input panel ── -->
+  <section class="input-panel">
+    <!-- Tab bar -->
+    <div class="tab-bar">
+      <button
+        type="button"
+        class="tab-btn"
+        [class.tab-active]="activeTab === 'import'"
+        (click)="activeTab = 'import'"
+      >
+        <span class="tab-icon">📁</span> Import from Excel
+      </button>
+      <button
+        type="button"
+        class="tab-btn"
+        [class.tab-active]="activeTab === 'single'"
+        (click)="activeTab = 'single'"
+      >
+        <span class="tab-icon">➕</span> Add single lead
+      </button>
+    </div>
 
-    <p class="file-meta" *ngIf="fileName">Selected file: {{ fileName }}</p>
-    <p class="hint">
-      Required headers: Region, Country, Organization, Acronym, Entity Type, Website, Contact Email,
-      Climate Specialty/Profile.
-    </p>
+    <!-- Tab: Import from Excel -->
+    @if (activeTab === "import") {
+      <div class="tab-content">
+        <label class="drop-area">
+          <div class="drop-area-inner">
+            <span class="drop-icon">📂</span>
+            <span class="drop-title">Drop your Excel file here</span>
+            <span class="drop-sub">or click to browse — .xlsx / .xls</span>
+          </div>
+          <input
+            type="file"
+            accept=".xlsx,.xls"
+            (change)="onFileChange($event)"
+          />
+        </label>
 
-    <p class="error-message" *ngIf="parseError">{{ parseError }}</p>
-    <p class="success-message" *ngIf="successMessage">{{ successMessage }}</p>
+        <p class="file-meta" *ngIf="fileName">
+          <span class="file-meta-icon">📄</span> {{ fileName }}
+        </p>
+        <p class="hint">
+          Required headers: Region, Country, Organization, Acronym, Entity Type,
+          Website, Contact Email, Climate Specialty/Profile.
+        </p>
+
+        <p class="error-message" *ngIf="parseError">{{ parseError }}</p>
+        <p class="success-message" *ngIf="successMessage">
+          {{ successMessage }}
+        </p>
+      </div>
+    }
+
+    <!-- Tab: Add single lead -->
+    @if (activeTab === "single") {
+      <div class="tab-content">
+        <div class="add-lead-grid">
+          <label class="add-field add-field-wide">
+            <span>Organization <span class="req">*</span></span>
+            <input
+              type="text"
+              class="add-input"
+              [(ngModel)]="addFormData.organization"
+              placeholder="Organization name"
+            />
+          </label>
+
+          <label class="add-field">
+            <span>Acronym</span>
+            <input
+              type="text"
+              class="add-input"
+              [(ngModel)]="addFormData.acronym"
+              placeholder="e.g. WAGA"
+            />
+          </label>
+
+          <label class="add-field">
+            <span>Region</span>
+            <input
+              type="text"
+              class="add-input"
+              [(ngModel)]="addFormData.region"
+              placeholder="e.g. Sub-Saharan Africa"
+            />
+          </label>
+
+          <label class="add-field">
+            <span>Country</span>
+            <input
+              type="text"
+              class="add-input"
+              [(ngModel)]="addFormData.country"
+              placeholder="e.g. Kenya"
+            />
+          </label>
+
+          <label class="add-field">
+            <span>Entity Type</span>
+            <input
+              type="text"
+              class="add-input"
+              [(ngModel)]="addFormData.entityType"
+              placeholder="e.g. NGO"
+            />
+          </label>
+
+          <label class="add-field">
+            <span>Website</span>
+            <input
+              type="url"
+              class="add-input"
+              [(ngModel)]="addFormData.website"
+              placeholder="https://…"
+            />
+          </label>
+
+          <label class="add-field">
+            <span>Contact Email</span>
+            <input
+              type="email"
+              class="add-input"
+              [(ngModel)]="addFormData.contactEmail"
+              placeholder="contact@org.org"
+            />
+          </label>
+
+          <label class="add-field">
+            <span>Status</span>
+            <select
+              class="add-input add-select"
+              [(ngModel)]="addFormData.status"
+            >
+              <option *ngFor="let s of statusOptions" [value]="s">
+                {{ s }}
+              </option>
+            </select>
+          </label>
+
+          <label class="add-field add-field-wide">
+            <span>Climate Specialty / Profile</span>
+            <input
+              type="text"
+              class="add-input"
+              [(ngModel)]="addFormData.climateSpecialty"
+              placeholder="e.g. Adaptation, REDD+, Renewable Energy…"
+            />
+          </label>
+
+          <label class="add-field add-field-wide">
+            <span>Comments</span>
+            <textarea
+              class="add-input add-textarea"
+              rows="3"
+              [(ngModel)]="addFormData.comments"
+              placeholder="Any additional notes…"
+            ></textarea>
+          </label>
+        </div>
+
+        @if (addFormError) {
+          <p class="add-form-error">{{ addFormError }}</p>
+        }
+        @if (successMessage && activeTab === "single") {
+          <p class="success-message">{{ successMessage }}</p>
+        }
+
+        <div class="add-form-actions">
+          <button type="button" class="btn-clear-add" (click)="resetAddForm()">
+            Clear
+          </button>
+          <button
+            type="button"
+            class="btn-submit-add"
+            (click)="submitAddForm()"
+            [disabled]="addFormSaving"
+          >
+            {{ addFormSaving ? "Saving…" : "Add lead" }}
+          </button>
+        </div>
+      </div>
+    }
   </section>
 
+  <!-- Preview imported leads -->
   <section class="preview-panel" *ngIf="pendingLeads.length">
     <div class="preview-header">
       <h3>Preview import ({{ pendingLeads.length }})</h3>
-      <button type="button" class="btn-save" (click)="saveLeads()" [disabled]="loading">
-        {{ loading ? 'Saving…' : 'Save' }}
+      <button
+        type="button"
+        class="btn-save"
+        (click)="saveLeads()"
+        [disabled]="loading"
+      >
+        {{ loading ? "Saving…" : "Save" }}
       </button>
     </div>
 
@@ -50,31 +224,97 @@
         <tbody>
           <tr *ngFor="let lead of pendingLeads; index as i">
             <td>
-              <input class="cell-input" [value]="lead.region" (change)="updatePendingField(i, 'region', $any($event.target).value)" />
+              <input
+                class="cell-input"
+                [value]="lead.region"
+                (change)="
+                  updatePendingField(i, 'region', $any($event.target).value)
+                "
+              />
             </td>
             <td>
-              <input class="cell-input" [value]="lead.country" (change)="updatePendingField(i, 'country', $any($event.target).value)" />
+              <input
+                class="cell-input"
+                [value]="lead.country"
+                (change)="
+                  updatePendingField(i, 'country', $any($event.target).value)
+                "
+              />
             </td>
             <td>
-              <input class="cell-input" [value]="lead.organization" (change)="updatePendingField(i, 'organization', $any($event.target).value)" />
+              <input
+                class="cell-input"
+                [value]="lead.organization"
+                (change)="
+                  updatePendingField(
+                    i,
+                    'organization',
+                    $any($event.target).value
+                  )
+                "
+              />
             </td>
             <td>
-              <input class="cell-input" [value]="lead.acronym" (change)="updatePendingField(i, 'acronym', $any($event.target).value)" />
+              <input
+                class="cell-input"
+                [value]="lead.acronym"
+                (change)="
+                  updatePendingField(i, 'acronym', $any($event.target).value)
+                "
+              />
             </td>
             <td>
-              <input class="cell-input" [value]="lead.entityType" (change)="updatePendingField(i, 'entityType', $any($event.target).value)" />
+              <input
+                class="cell-input"
+                [value]="lead.entityType"
+                (change)="
+                  updatePendingField(i, 'entityType', $any($event.target).value)
+                "
+              />
             </td>
             <td>
-              <input class="cell-input" [value]="lead.website" (change)="updatePendingField(i, 'website', $any($event.target).value)" />
+              <input
+                class="cell-input"
+                [value]="lead.website"
+                (change)="
+                  updatePendingField(i, 'website', $any($event.target).value)
+                "
+              />
             </td>
             <td>
-              <input class="cell-input" [value]="lead.contactEmail" (change)="updatePendingField(i, 'contactEmail', $any($event.target).value)" />
+              <input
+                class="cell-input"
+                [value]="lead.contactEmail"
+                (change)="
+                  updatePendingField(
+                    i,
+                    'contactEmail',
+                    $any($event.target).value
+                  )
+                "
+              />
             </td>
             <td>
-              <input class="cell-input cell-input-wide" [value]="lead.climateSpecialty" (change)="updatePendingField(i, 'climateSpecialty', $any($event.target).value)" />
+              <input
+                class="cell-input cell-input-wide"
+                [value]="lead.climateSpecialty"
+                (change)="
+                  updatePendingField(
+                    i,
+                    'climateSpecialty',
+                    $any($event.target).value
+                  )
+                "
+              />
             </td>
             <td>
-              <input class="cell-input cell-input-wide" [value]="lead.comments" (change)="updatePendingField(i, 'comments', $any($event.target).value)" />
+              <input
+                class="cell-input cell-input-wide"
+                [value]="lead.comments"
+                (change)="
+                  updatePendingField(i, 'comments', $any($event.target).value)
+                "
+              />
             </td>
             <td>
               <select
@@ -82,7 +322,9 @@
                 [ngModel]="lead.status"
                 (ngModelChange)="updatePendingField(i, 'status', $event)"
               >
-                <option *ngFor="let status of statusOptions" [value]="status">{{ status }}</option>
+                <option *ngFor="let status of statusOptions" [value]="status">
+                  {{ status }}
+                </option>
               </select>
             </td>
           </tr>
@@ -91,6 +333,7 @@
     </div>
   </section>
 
+  <!-- Saved leads -->
   <section class="saved-panel">
     <div class="saved-header">
       <h3>
@@ -123,7 +366,12 @@
               stroke="currentColor"
               stroke-width="1.5"
             />
-            <path d="M13.5 13.5 17 17" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+            <path
+              d="M13.5 13.5 17 17"
+              stroke="currentColor"
+              stroke-width="1.5"
+              stroke-linecap="round"
+            />
           </svg>
         </span>
         <input
@@ -149,31 +397,49 @@
       <span class="empty-icon">⏳</span>
       <p>Loading leads from Firebase…</p>
     </div>
-
     <div class="empty-state" *ngIf="!tableLoading && loadError">
       <span class="empty-icon">⚠️</span>
       <p>{{ loadError }}</p>
-      <button type="button" class="btn-retry" (click)="loadSavedLeads()">Retry</button>
+      <button type="button" class="btn-retry" (click)="loadSavedLeads()">
+        Retry
+      </button>
     </div>
-
-    <div class="empty-state" *ngIf="!tableLoading && !loadError && savedLeads.length === 0">
+    <div
+      class="empty-state"
+      *ngIf="!tableLoading && !loadError && savedLeads.length === 0"
+    >
       <span class="empty-icon">📭</span>
       <p>No leads saved yet.</p>
-      <p class="empty-hint">Import an Excel file above and click Save to add rows here.</p>
+      <p class="empty-hint">Import an Excel file or add a lead above.</p>
     </div>
-
-    <div class="empty-state" *ngIf="!tableLoading && !loadError && savedLeads.length > 0 && filteredLeads.length === 0">
+    <div
+      class="empty-state"
+      *ngIf="
+        !tableLoading &&
+        !loadError &&
+        savedLeads.length > 0 &&
+        filteredLeads.length === 0
+      "
+    >
       <span class="empty-icon">🔎</span>
       <p>No rows match the current filter.</p>
-      <button type="button" class="btn-retry" (click)="clearSearch()">Clear filter</button>
+      <button type="button" class="btn-retry" (click)="clearSearch()">
+        Clear filter
+      </button>
     </div>
 
-    <div class="table-scroll" *ngIf="!tableLoading && !loadError && filteredLeads.length > 0">
+    <div
+      class="table-scroll"
+      *ngIf="!tableLoading && !loadError && filteredLeads.length > 0"
+    >
       <table class="leads-table">
         <thead>
           <tr>
             <th class="col-check">
-              <label class="checkbox-wrap" aria-label="Select all visible leads">
+              <label
+                class="checkbox-wrap"
+                aria-label="Select all visible leads"
+              >
                 <input
                   type="checkbox"
                   class="checkbox-input"
@@ -197,9 +463,15 @@
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let lead of paginatedLeads" [class.saving]="savingFieldId === lead.id">
+          <tr
+            *ngFor="let lead of paginatedLeads"
+            [class.saving]="savingFieldId === lead.id"
+          >
             <td class="col-check">
-              <label class="checkbox-wrap" [attr.aria-label]="'Select lead ' + lead.organization">
+              <label
+                class="checkbox-wrap"
+                [attr.aria-label]="'Select lead ' + lead.organization"
+              >
                 <input
                   type="checkbox"
                   class="checkbox-input"
@@ -213,63 +485,97 @@
               <input
                 class="cell-input"
                 [value]="lead.region"
-                (change)="updateSavedField(lead, 'region', $any($event.target).value)"
+                (change)="
+                  updateSavedField(lead, 'region', $any($event.target).value)
+                "
               />
             </td>
             <td>
               <input
                 class="cell-input"
                 [value]="lead.country"
-                (change)="updateSavedField(lead, 'country', $any($event.target).value)"
+                (change)="
+                  updateSavedField(lead, 'country', $any($event.target).value)
+                "
               />
             </td>
             <td>
               <input
                 class="cell-input"
                 [value]="lead.organization"
-                (change)="updateSavedField(lead, 'organization', $any($event.target).value)"
+                (change)="
+                  updateSavedField(
+                    lead,
+                    'organization',
+                    $any($event.target).value
+                  )
+                "
               />
             </td>
             <td>
               <input
                 class="cell-input"
                 [value]="lead.acronym"
-                (change)="updateSavedField(lead, 'acronym', $any($event.target).value)"
+                (change)="
+                  updateSavedField(lead, 'acronym', $any($event.target).value)
+                "
               />
             </td>
             <td>
               <input
                 class="cell-input"
                 [value]="lead.entityType"
-                (change)="updateSavedField(lead, 'entityType', $any($event.target).value)"
+                (change)="
+                  updateSavedField(
+                    lead,
+                    'entityType',
+                    $any($event.target).value
+                  )
+                "
               />
             </td>
             <td>
               <input
                 class="cell-input"
                 [value]="lead.website"
-                (change)="updateSavedField(lead, 'website', $any($event.target).value)"
+                (change)="
+                  updateSavedField(lead, 'website', $any($event.target).value)
+                "
               />
             </td>
             <td>
               <input
                 class="cell-input"
                 [value]="lead.contactEmail"
-                (change)="updateSavedField(lead, 'contactEmail', $any($event.target).value)"
+                (change)="
+                  updateSavedField(
+                    lead,
+                    'contactEmail',
+                    $any($event.target).value
+                  )
+                "
               />
             </td>
             <td>
               <input
                 class="cell-input cell-input-wide"
                 [value]="lead.climateSpecialty"
-                (change)="updateSavedField(lead, 'climateSpecialty', $any($event.target).value)"
+                (change)="
+                  updateSavedField(
+                    lead,
+                    'climateSpecialty',
+                    $any($event.target).value
+                  )
+                "
               />
             </td>
             <td>
               <input
                 class="cell-input cell-input-wide"
                 [value]="lead.comments"
-                (change)="updateSavedField(lead, 'comments', $any($event.target).value)"
+                (change)="
+                  updateSavedField(lead, 'comments', $any($event.target).value)
+                "
               />
             </td>
             <td>
@@ -278,7 +584,9 @@
                 [ngModel]="lead.status"
                 (ngModelChange)="updateSavedField(lead, 'status', $event)"
               >
-                <option *ngFor="let status of statusOptions" [value]="status">{{ status }}</option>
+                <option *ngFor="let status of statusOptions" [value]="status">
+                  {{ status }}
+                </option>
               </select>
             </td>
           </tr>
@@ -286,15 +594,28 @@
       </table>
 
       <div class="pagination" *ngIf="filteredLeads.length > pageSize">
-        <span class="pagination-info">
-          Showing {{ pageStart }}–{{ pageEnd }} of {{ filteredLeads.length }}
-        </span>
+        <span class="pagination-info"
+          >Showing {{ pageStart }}–{{ pageEnd }} of
+          {{ filteredLeads.length }}</span
+        >
         <div class="pagination-controls">
-          <button type="button" class="page-btn" [disabled]="currentPage === 1" (click)="prevPage()">
+          <button
+            type="button"
+            class="page-btn"
+            [disabled]="currentPage === 1"
+            (click)="prevPage()"
+          >
             ← Prev
           </button>
-          <span class="page-indicator">Page {{ currentPage }} / {{ totalPages }}</span>
-          <button type="button" class="page-btn" [disabled]="currentPage === totalPages" (click)="nextPage()">
+          <span class="page-indicator"
+            >Page {{ currentPage }} / {{ totalPages }}</span
+          >
+          <button
+            type="button"
+            class="page-btn"
+            [disabled]="currentPage === totalPages"
+            (click)="nextPage()"
+          >
             Next →
           </button>
         </div>

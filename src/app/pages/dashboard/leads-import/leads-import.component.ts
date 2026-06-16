@@ -1,35 +1,97 @@
-import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
-import * as XLSX from 'xlsx';
-import { LeadRecord, LEAD_STATUS_OPTIONS, LeadStatus } from '../../../models/applicant.model';
-import { StorageService } from '../../../services/storage.service';
+import { Component, OnInit } from "@angular/core";
+import { CommonModule } from "@angular/common";
+import { FormsModule } from "@angular/forms";
+import { RouterLink } from "@angular/router";
+import * as XLSX from "xlsx";
+import {
+  LeadRecord,
+  LEAD_STATUS_OPTIONS,
+  LeadStatus,
+} from "../../../models/applicant.model";
+import { StorageService } from "../../../services/storage.service";
 
-type LeadField = keyof Omit<LeadRecord, 'id' | 'createdAt' | 'updatedAt'>;
+type LeadField = keyof Omit<LeadRecord, "id" | "createdAt" | "updatedAt">;
 
 @Component({
-  selector: 'app-leads-import',
+  selector: "app-leads-import",
   standalone: true,
   imports: [CommonModule, FormsModule, RouterLink],
-  templateUrl: './leads-import.component.html',
-  styleUrls: ['./leads-import.component.css']
+  templateUrl: "./leads-import.component.html",
+  styleUrls: ["./leads-import.component.css"],
 })
 export class LeadsImportComponent implements OnInit {
-  fileName = '';
-  parseError = '';
-  successMessage = '';
-  loadError = '';
+  fileName = "";
+  parseError = "";
+  successMessage = "";
+  loadError = "";
   loading = false;
   tableLoading = true;
   savingFieldId: string | null = null;
   pendingLeads: LeadRecord[] = [];
   savedLeads: LeadRecord[] = [];
   selectedIds = new Set<string>();
-  searchQuery = '';
+  searchQuery = "";
   readonly statusOptions = LEAD_STATUS_OPTIONS;
   readonly pageSize = 20;
   currentPage = 1;
+
+  // Tab state
+  activeTab: "import" | "single" = "import";
+
+  // Single lead form
+  showAddForm = false;
+  addFormData: Partial<LeadRecord> = {};
+  addFormSaving = false;
+  addFormError = "";
+
+  toggleAddForm(): void {
+    this.showAddForm = !this.showAddForm;
+    if (!this.showAddForm) {
+      this.resetAddForm();
+    }
+  }
+
+  resetAddForm(): void {
+    this.addFormData = {};
+    this.addFormError = "";
+  }
+
+  async submitAddForm(): Promise<void> {
+    const org = (this.addFormData.organization ?? "").trim();
+    if (!org) {
+      this.addFormError = "Organization name is required.";
+      return;
+    }
+
+    this.addFormSaving = true;
+    this.addFormError = "";
+
+    try {
+      const lead: Omit<LeadRecord, "id" | "createdAt" | "updatedAt"> = {
+        organization: org,
+        acronym: (this.addFormData.acronym ?? "").trim(),
+        region: (this.addFormData.region ?? "").trim(),
+        country: (this.addFormData.country ?? "").trim(),
+        entityType: (this.addFormData.entityType ?? "").trim(),
+        website: (this.addFormData.website ?? "").trim(),
+        contactEmail: (this.addFormData.contactEmail ?? "").trim(),
+        climateSpecialty: (this.addFormData.climateSpecialty ?? "").trim(),
+        comments: (this.addFormData.comments ?? "").trim(),
+        status: (this.addFormData.status as LeadStatus) ?? "Pending",
+      };
+
+      const [created] = await this.storageService.saveLeads([lead]);
+      this.savedLeads = [created, ...this.savedLeads];
+      this.currentPage = 1;
+      this.showAddForm = false;
+      this.resetAddForm();
+      this.successMessage = `Lead "${org}" added successfully.`;
+    } catch {
+      this.addFormError = "Could not save lead to Firebase. Please try again.";
+    } finally {
+      this.addFormSaving = false;
+    }
+  }
 
   constructor(private storageService: StorageService) {}
 
@@ -39,16 +101,18 @@ export class LeadsImportComponent implements OnInit {
 
   async loadSavedLeads(): Promise<void> {
     this.tableLoading = true;
-    this.loadError = '';
+    this.loadError = "";
 
     try {
       this.savedLeads = await this.storageService.getLeads();
       this.selectedIds = new Set(
-        [...this.selectedIds].filter((id) => this.savedLeads.some((lead) => lead.id === id))
+        [...this.selectedIds].filter((id) =>
+          this.savedLeads.some((lead) => lead.id === id),
+        ),
       );
       this.clampCurrentPage();
     } catch {
-      this.loadError = 'Could not load leads from Firebase.';
+      this.loadError = "Could not load leads from Firebase.";
     } finally {
       this.tableLoading = false;
     }
@@ -67,35 +131,42 @@ export class LeadsImportComponent implements OnInit {
 
     try {
       const arrayBuffer = await file.arrayBuffer();
-      const workbook = XLSX.read(arrayBuffer, { type: 'array' });
+      const workbook = XLSX.read(arrayBuffer, { type: "array" });
       const sheet = workbook.Sheets[workbook.SheetNames[0]];
 
       if (!sheet) {
-        throw new Error('No worksheet found in the selected file.');
+        throw new Error("No worksheet found in the selected file.");
       }
 
       const rows = XLSX.utils.sheet_to_json<any[]>(sheet, {
         header: 1,
-        defval: ''
+        defval: "",
       });
 
       if (rows.length < 2) {
-        throw new Error('The Excel file must include a header row and at least one data row.');
+        throw new Error(
+          "The Excel file must include a header row and at least one data row.",
+        );
       }
 
-      const headerRow = (rows[0] as any[]).map((value: unknown) => this.normalizeHeader(value));
+      const headerRow = (rows[0] as any[]).map((value: unknown) =>
+        this.normalizeHeader(value),
+      );
       const leadRows = rows.slice(1) as any[];
       const importedLeads: LeadRecord[] = leadRows
         .map((row) => this.parseRow(headerRow, row))
         .filter((lead): lead is LeadRecord => lead !== null);
 
       if (!importedLeads.length) {
-        throw new Error('No valid rows were found in the file.');
+        throw new Error("No valid rows were found in the file.");
       }
 
       this.pendingLeads = importedLeads;
     } catch (error) {
-      this.parseError = error instanceof Error ? error.message : 'Unable to parse the selected Excel file.';
+      this.parseError =
+        error instanceof Error
+          ? error.message
+          : "Unable to parse the selected Excel file.";
       this.pendingLeads = [];
     }
   }
@@ -107,7 +178,7 @@ export class LeadsImportComponent implements OnInit {
 
     this.pendingLeads[index] = {
       ...this.pendingLeads[index],
-      [field]: field === 'status' ? this.normalizeStatus(value) : value
+      [field]: field === "status" ? this.normalizeStatus(value) : value,
     };
   }
 
@@ -115,18 +186,22 @@ export class LeadsImportComponent implements OnInit {
     this.clearMessages();
 
     if (!this.pendingLeads.length) {
-      this.parseError = 'Please choose an Excel file before saving.';
+      this.parseError = "Please choose an Excel file before saving.";
       return;
     }
 
-    const existingKeys = new Set(this.savedLeads.map((lead) => this.leadKey(lead)));
-    const newLeads = this.pendingLeads.filter((lead) => !existingKeys.has(this.leadKey(lead)));
+    const existingKeys = new Set(
+      this.savedLeads.map((lead) => this.leadKey(lead)),
+    );
+    const newLeads = this.pendingLeads.filter(
+      (lead) => !existingKeys.has(this.leadKey(lead)),
+    );
     const skippedCount = this.pendingLeads.length - newLeads.length;
 
     if (!newLeads.length) {
-      this.successMessage = `All ${skippedCount} row${skippedCount === 1 ? '' : 's'} already exist and were ignored.`;
+      this.successMessage = `All ${skippedCount} row${skippedCount === 1 ? "" : "s"} already exist and were ignored.`;
       this.pendingLeads = [];
-      this.fileName = '';
+      this.fileName = "";
       return;
     }
 
@@ -139,30 +214,35 @@ export class LeadsImportComponent implements OnInit {
 
       const addedCount = created.length;
       if (skippedCount > 0) {
-        this.successMessage = `${addedCount} row${addedCount === 1 ? '' : 's'} added. ${skippedCount} duplicate${skippedCount === 1 ? '' : 's'} ignored.`;
+        this.successMessage = `${addedCount} row${addedCount === 1 ? "" : "s"} added. ${skippedCount} duplicate${skippedCount === 1 ? "" : "s"} ignored.`;
       } else {
-        this.successMessage = `${addedCount} row${addedCount === 1 ? '' : 's'} added successfully.`;
+        this.successMessage = `${addedCount} row${addedCount === 1 ? "" : "s"} added successfully.`;
       }
 
       this.pendingLeads = [];
-      this.fileName = '';
+      this.fileName = "";
     } catch {
-      this.parseError = 'Could not save leads to Firebase. Please try again.';
+      this.parseError = "Could not save leads to Firebase. Please try again.";
     } finally {
       this.loading = false;
     }
   }
 
-  async updateSavedField(lead: LeadRecord, field: LeadField, value: string): Promise<void> {
+  async updateSavedField(
+    lead: LeadRecord,
+    field: LeadField,
+    value: string,
+  ): Promise<void> {
     if (!lead.id) {
       return;
     }
 
-    const normalizedValue = field === 'status' ? this.normalizeStatus(value) : value;
+    const normalizedValue =
+      field === "status" ? this.normalizeStatus(value) : value;
     const previous = lead[field];
     const updatedLead: LeadRecord = {
       ...lead,
-      [field]: normalizedValue
+      [field]: normalizedValue,
     };
 
     const index = this.savedLeads.findIndex((item) => item.id === lead.id);
@@ -178,7 +258,7 @@ export class LeadsImportComponent implements OnInit {
       await this.storageService.updateLead(lead.id, payload);
     } catch {
       this.savedLeads[index] = { ...lead, [field]: previous };
-      this.parseError = 'Could not update the row in Firebase.';
+      this.parseError = "Could not update the row in Firebase.";
     } finally {
       this.savingFieldId = null;
     }
@@ -190,7 +270,7 @@ export class LeadsImportComponent implements OnInit {
   }
 
   clearSearch(): void {
-    this.searchQuery = '';
+    this.searchQuery = "";
     this.currentPage = 1;
   }
 
@@ -212,7 +292,9 @@ export class LeadsImportComponent implements OnInit {
       return this.savedLeads;
     }
 
-    return this.savedLeads.filter((lead) => this.getSearchableText(lead).includes(query));
+    return this.savedLeads.filter((lead) =>
+      this.getSearchableText(lead).includes(query),
+    );
   }
 
   get paginatedLeads(): LeadRecord[] {
@@ -232,7 +314,10 @@ export class LeadsImportComponent implements OnInit {
   }
 
   get pageEnd(): number {
-    return Math.min(this.currentPage * this.pageSize, this.filteredLeads.length);
+    return Math.min(
+      this.currentPage * this.pageSize,
+      this.filteredLeads.length,
+    );
   }
 
   get hasSearch(): boolean {
@@ -253,13 +338,17 @@ export class LeadsImportComponent implements OnInit {
 
   get allSelected(): boolean {
     const visible = this.visibleIds;
-    return visible.length > 0 && visible.every((id) => this.selectedIds.has(id));
+    return (
+      visible.length > 0 && visible.every((id) => this.selectedIds.has(id))
+    );
   }
 
   get someSelected(): boolean {
     const visible = this.visibleIds;
     const selectedVisible = visible.filter((id) => this.selectedIds.has(id));
-    return selectedVisible.length > 0 && selectedVisible.length < visible.length;
+    return (
+      selectedVisible.length > 0 && selectedVisible.length < visible.length
+    );
   }
 
   isSelected(leadId: string | undefined): boolean {
@@ -299,7 +388,7 @@ export class LeadsImportComponent implements OnInit {
 
     const count = this.selectedIds.size;
     const confirmed = window.confirm(
-      `Delete ${count} lead${count === 1 ? '' : 's'}? This cannot be undone.`
+      `Delete ${count} lead${count === 1 ? "" : "s"}? This cannot be undone.`,
     );
 
     if (!confirmed) {
@@ -313,59 +402,79 @@ export class LeadsImportComponent implements OnInit {
       await this.storageService.deleteLeads([...this.selectedIds]);
       this.selectedIds = new Set();
       await this.loadSavedLeads();
-      this.successMessage = `${count} lead${count === 1 ? '' : 's'} deleted.`;
+      this.successMessage = `${count} lead${count === 1 ? "" : "s"} deleted.`;
     } catch {
-      this.parseError = 'Could not delete leads from Firebase.';
+      this.parseError = "Could not delete leads from Firebase.";
     } finally {
       this.loading = false;
     }
   }
 
   private normalizeHeader(value: unknown): string {
-    return String(value ?? '')
+    return String(value ?? "")
       .trim()
       .toLowerCase()
-      .replace(/\s*\/\s*/g, '/')
-      .replace(/\s+/g, ' ');
+      .replace(/\s*\/\s*/g, "/")
+      .replace(/\s+/g, " ");
   }
 
-  private parseRow(headerRow: string[], row: (string | number)[]): LeadRecord | null {
-    const normalizedRow = headerRow.reduce<Record<string, string>>((acc, header, index) => {
-      acc[header] = String(row[index] ?? '').trim();
-      return acc;
-    }, {});
+  private parseRow(
+    headerRow: string[],
+    row: (string | number)[],
+  ): LeadRecord | null {
+    const normalizedRow = headerRow.reduce<Record<string, string>>(
+      (acc, header, index) => {
+        acc[header] = String(row[index] ?? "").trim();
+        return acc;
+      },
+      {},
+    );
 
-    const anyCellHasValue = Object.values(normalizedRow).some((value) => value.length > 0);
+    const anyCellHasValue = Object.values(normalizedRow).some(
+      (value) => value.length > 0,
+    );
     if (!anyCellHasValue) {
       return null;
     }
 
-    const statusValue = normalizedRow['status'] || normalizedRow['lead status'] || normalizedRow['estado'];
+    const statusValue =
+      normalizedRow["status"] ||
+      normalizedRow["lead status"] ||
+      normalizedRow["estado"];
 
     return {
-      region: normalizedRow['region'] || normalizedRow['region/area'] || normalizedRow['area'] || '',
-      country: normalizedRow['country'] || '',
+      region:
+        normalizedRow["region"] ||
+        normalizedRow["region/area"] ||
+        normalizedRow["area"] ||
+        "",
+      country: normalizedRow["country"] || "",
       organization:
-        normalizedRow['organization'] || normalizedRow['organization name'] || normalizedRow['entity'] || '',
-      acronym: normalizedRow['acronym'] || '',
-      entityType: normalizedRow['entity type'] || normalizedRow['type of entity'] || '',
-      website: normalizedRow['website'] || '',
-      contactEmail: normalizedRow['contact email'] || normalizedRow['email'] || '',
+        normalizedRow["organization"] ||
+        normalizedRow["organization name"] ||
+        normalizedRow["entity"] ||
+        "",
+      acronym: normalizedRow["acronym"] || "",
+      entityType:
+        normalizedRow["entity type"] || normalizedRow["type of entity"] || "",
+      website: normalizedRow["website"] || "",
+      contactEmail:
+        normalizedRow["contact email"] || normalizedRow["email"] || "",
       climateSpecialty:
-        normalizedRow['climate specialty/profile'] ||
-        normalizedRow['climate specialty'] ||
-        normalizedRow['climate specialty profile'] ||
-        '',
-      comments: normalizedRow['comments'] || normalizedRow['comment'] || '',
-      status: this.normalizeStatus(statusValue)
+        normalizedRow["climate specialty/profile"] ||
+        normalizedRow["climate specialty"] ||
+        normalizedRow["climate specialty profile"] ||
+        "",
+      comments: normalizedRow["comments"] || normalizedRow["comment"] || "",
+      status: this.normalizeStatus(statusValue),
     };
   }
 
   private normalizeStatus(value: string): LeadStatus {
     const statusOption = this.statusOptions.find(
-      (status) => status.toLowerCase() === String(value).trim().toLowerCase()
+      (status) => status.toLowerCase() === String(value).trim().toLowerCase(),
     );
-    return statusOption ?? 'Pending';
+    return statusOption ?? "Pending";
   }
 
   private leadKey(lead: LeadRecord): string {
@@ -374,14 +483,9 @@ export class LeadsImportComponent implements OnInit {
       return `email:${email}`;
     }
 
-    return [
-      lead.organization,
-      lead.country,
-      lead.acronym,
-      lead.region
-    ]
+    return [lead.organization, lead.country, lead.acronym, lead.region]
       .map((value) => value.trim().toLowerCase())
-      .join('|');
+      .join("|");
   }
 
   private getSearchableText(lead: LeadRecord): string {
@@ -395,9 +499,9 @@ export class LeadsImportComponent implements OnInit {
       lead.contactEmail,
       lead.climateSpecialty,
       lead.comments,
-      lead.status
+      lead.status,
     ]
-      .join(' ')
+      .join(" ")
       .toLowerCase();
   }
 
@@ -411,7 +515,7 @@ export class LeadsImportComponent implements OnInit {
   }
 
   private clearMessages(): void {
-    this.parseError = '';
-    this.successMessage = '';
+    this.parseError = "";
+    this.successMessage = "";
   }
 }

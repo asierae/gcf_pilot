@@ -1,77 +1,282 @@
 <div class="layout">
-  <header class="layout-header">
+  <!-- ══ HEADER ══ -->
+  <header class="layout-header" [class.header-public]="!authService.isLoggedIn">
+    <!-- Left: toggle (logged-in only) + logo -->
     <div class="header-left">
-      <div class="logo">
-        <img src="climat-advisor-logo.svg" alt="" class="logo-mark" width="40" height="40" />
+      @if (authService.isLoggedIn) {
+        <button
+          type="button"
+          class="sidebar-toggle"
+          (click)="toggleSidebar()"
+          [attr.aria-label]="
+            sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'
+          "
+          [attr.aria-expanded]="!sidebarCollapsed"
+        >
+          <span class="toggle-bar"></span>
+          <span class="toggle-bar"></span>
+          <span class="toggle-bar"></span>
+        </button>
+      }
+      <a routerLink="/" class="logo logo-link">
+        <img
+          src="gcf-support-logo.svg"
+          alt=""
+          class="logo-mark"
+          width="40"
+          height="40"
+        />
         <div class="logo-text">
-          <h1>Climat Advisor</h1>
-          <span class="subtitle">GCF Accreditation Portal</span>
+          <span class="logo-name">GCF Support</span>
+          @if (!authService.isLoggedIn) {
+            <span class="subtitle">Climate Project Advisory Platform</span>
+          }
         </div>
-      </div>
+      </a>
     </div>
+
+    <!-- Center: public navigation (logged-out only) -->
+    @if (!authService.isLoggedIn) {
+      <nav class="public-nav" aria-label="Main navigation">
+        <a
+          routerLink="/stage1"
+          routerLinkActive="pub-active"
+          class="pub-nav-link"
+        >
+          Pre-Screening
+        </a>
+        <a
+          routerLink="/pricing"
+          routerLinkActive="pub-active"
+          class="pub-nav-link"
+        >
+          Plans &amp; Pricing
+        </a>
+        <button
+          type="button"
+          class="pub-nav-link pub-nav-soon"
+          title="Coming soon"
+        >
+          How it Works
+        </button>
+        <button
+          type="button"
+          class="pub-nav-link pub-nav-soon"
+          title="Coming soon"
+        >
+          Resources
+        </button>
+        <button
+          type="button"
+          class="pub-nav-link pub-nav-soon"
+          title="Coming soon"
+        >
+          About
+        </button>
+        <button
+          type="button"
+          class="pub-nav-link pub-nav-soon"
+          title="Coming soon"
+        >
+          Contact
+        </button>
+      </nav>
+    }
+
+    <!-- Right: auth actions -->
     <div class="header-right">
       @if (authService.isLoggedIn) {
-        <span class="user-badge">{{ authService.currentUserValue?.username }}</span>
-        @if (authService.currentUserValue?.role === 'admin') {
+        @if (authService.currentUserValue?.role === "admin") {
           <a
             routerLink="/dashboard"
             routerLinkActive="active"
             [routerLinkActiveOptions]="{ exact: true }"
             class="btn-header"
-          >Dashboard</a>
+            >{{ 'HEADER.DASHBOARD' | translate }}</a
+          >
         }
-        <button type="button" class="btn-header btn-logout" (click)="logout()">Logout</button>
+        <div class="profile-menu-wrap">
+          <button type="button" class="user-badge-btn" (click)="toggleProfileMenu()">
+            <span class="user-avatar">{{ authService.currentUserValue?.username?.charAt(0)?.toUpperCase() }}</span>
+            <span class="user-name">{{ authService.currentUserValue?.username }}</span>
+            <span class="dropdown-arrow">▾</span>
+          </button>
+          
+          @if (profileMenuOpen) {
+            <div class="profile-backdrop" (click)="closeProfileMenu()"></div>
+            <div class="profile-menu" role="menu">
+              <div class="profile-menu-header">
+                <span class="profile-email">{{ authService.currentUserValue?.email }}</span>
+                <span class="profile-role badge-{{ authService.currentUserValue?.role }}">{{ authService.currentUserValue?.role }}</span>
+              </div>
+              
+              <div class="profile-menu-body">
+                <div class="language-selector-wrap">
+                  <label for="lang-select" class="lang-label">
+                    <span class="lang-icon">🌐</span> {{ 'HEADER.LANGUAGE' | translate }}
+                  </label>
+                  <select id="lang-select" class="lang-select" [value]="languageService.currentLanguage$ | async" (change)="changeLanguage($event)">
+                    <option value="en">English</option>
+                    <option value="es">Español</option>
+                    <option value="pt">Português</option>
+                    <option value="zh">中文 (Chinese)</option>
+                    <option value="ru">Русский (Russian)</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="profile-menu-footer">
+                <button type="button" class="btn-logout-menu" (click)="logout()">
+                  <span class="logout-icon">🚪</span> {{ 'HEADER.LOGOUT' | translate }}
+                </button>
+              </div>
+            </div>
+          }
+        </div>
       } @else {
-        <a routerLink="/login" class="btn-header btn-login">Login</a>
+        <a routerLink="/login" class="btn-header btn-login">Sign in →</a>
       }
     </div>
   </header>
 
+  <!-- ══ BODY ══ -->
   <div class="layout-body">
-    <nav class="sidebar">
-      <ul class="nav-menu">
-        <li>
-          <a routerLink="/stage1" routerLinkActive="active" class="nav-link">
-            <span class="nav-icon">📋</span>
-            Stage 1
-          </a>
-        </li>
-        @if (authService.isLoggedIn) {
-          <li>
-            <a routerLink="/stage2" routerLinkActive="active" class="nav-link">
-              <span class="nav-icon">📄</span>
-              Stage 2
-            </a>
-          </li>
-        }
-        @if (authService.currentUserValue?.role === 'admin') {
+    <!-- Sidebar: only when logged in -->
+    @if (authService.isLoggedIn) {
+      <nav
+        class="sidebar"
+        [class.sidebar-collapsed]="sidebarCollapsed"
+        aria-label="App navigation"
+      >
+        <ul class="nav-menu">
           <li>
             <a
-              routerLink="/dashboard"
+              routerLink="/pricing"
               routerLinkActive="active"
-              [routerLinkActiveOptions]="{ exact: true }"
               class="nav-link"
+              [title]="sidebarCollapsed ? 'Plans & Pricing' : ''"
             >
-              <span class="nav-icon">📊</span>
-              Dashboard
+              <span class="nav-icon">💎</span>
+              <span class="nav-label">Plans &amp; Pricing</span>
             </a>
           </li>
           <li>
-            <a routerLink="/dashboard/leads" routerLinkActive="active" class="nav-link">
+            <a
+              routerLink="/stage1"
+              routerLinkActive="active"
+              class="nav-link"
+              [title]="sidebarCollapsed ? 'Stage 1' : ''"
+            >
               <span class="nav-icon">📋</span>
-              Leads
+              <span class="nav-label">Stage 1</span>
             </a>
           </li>
-        }
-      </ul>
-    </nav>
+          <li>
+            <a
+              routerLink="/stage2"
+              routerLinkActive="active"
+              class="nav-link"
+              [title]="sidebarCollapsed ? 'Stage 2' : ''"
+            >
+              <span class="nav-icon">📄</span>
+              <span class="nav-label">Stage 2</span>
+            </a>
+          </li>
+          @if (authService.currentUserValue?.role === "admin") {
+            <li>
+              <a
+                routerLink="/dashboard"
+                routerLinkActive="active"
+                [routerLinkActiveOptions]="{ exact: true }"
+                class="nav-link"
+                [title]="sidebarCollapsed ? 'Dashboard' : ''"
+              >
+                <span class="nav-icon">📊</span>
+                <span class="nav-label">Dashboard</span>
+              </a>
+            </li>
+            <li>
+              <a
+                routerLink="/dashboard/leads"
+                routerLinkActive="active"
+                class="nav-link"
+                [title]="sidebarCollapsed ? 'Leads' : ''"
+              >
+                <span class="nav-icon">📋</span>
+                <span class="nav-label">Leads</span>
+              </a>
+            </li>
+          }
+        </ul>
+      </nav>
+    }
 
-    <main class="main-content">
+    <main class="main-content" [class.main-public]="!authService.isLoggedIn">
+      @if (authService.isLoggedIn) {
+        <app-breadcrumb />
+      }
       <router-outlet></router-outlet>
     </main>
   </div>
 
+  <!-- ⚙️ Gear button (admin only) -->
+  @if (authService.currentUserValue?.role === "admin") {
+    <div class="gear-wrap">
+      @if (gearMenuOpen) {
+        <div class="gear-backdrop" (click)="closeGearMenu()"></div>
+        <div class="gear-menu" role="menu">
+          <div class="gear-menu-header">Settings</div>
+          <button
+            type="button"
+            class="gear-menu-item"
+            role="menuitem"
+            (click)="navigateTo('/settings/users')"
+          >
+            <span class="gear-menu-item-icon">👥</span>
+            <span class="gear-menu-item-text">
+              <span class="gear-menu-item-label">User Management</span>
+              <span class="gear-menu-item-desc">Manage accounts and roles</span>
+            </span>
+            <span class="gear-menu-item-arrow">→</span>
+          </button>
+        </div>
+      }
+      <button
+        type="button"
+        class="settings-gear-btn"
+        [class.gear-open]="gearMenuOpen"
+        (click)="toggleGearMenu()"
+        aria-label="Settings menu"
+        title="Settings"
+      >
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.8"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <circle cx="12" cy="12" r="3" />
+          <path
+            d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"
+          />
+        </svg>
+      </button>
+    </div>
+  }
+
+  <!-- Chat assistant (always visible) -->
+  <app-chat />
+
   <footer class="layout-footer">
-    <p>Climat Advisor &copy; 2026 — GCF Accreditation Portal</p>
+    <p class="footer-disclaimer">
+      Our app provides tools and guidance to optimize your grant application
+      process. Please note that we are not a funding body and do not guarantee
+      the approval of grants or the receipt of funds. Our services are intended
+      to improve the quality and readiness of your application; however, final
+      funding decisions rest solely with the grant-giving organizations.
+    </p>
+    <p class="footer-copy">GCF Support &copy; 2026</p>
   </footer>
 </div>

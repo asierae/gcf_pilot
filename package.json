@@ -20,17 +20,19 @@
     "@angular/platform-browser": "^18.2.0",
     "@angular/platform-browser-dynamic": "^18.2.0",
     "@angular/router": "^18.2.0",
+    "@ngx-translate/core": "^18.0.0",
+    "@ngx-translate/http-loader": "^18.0.0",
+    "cloudinary": "^2.5.1",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "express": "^4.21.0",
     "firebase": "^12.14.0",
-    "nodemailer": "^6.9.15",
-    "cloudinary": "^2.5.1",
     "multer": "^1.4.5-lts.1",
+    "nodemailer": "^6.9.15",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0",
-    "zone.js": "~0.14.10",
-    "xlsx": "^0.18.5"
+    "xlsx": "^0.18.5",
+    "zone.js": "~0.14.10"
   },
   "devDependencies": {
     "@angular-devkit/build-angular": "^18.2.21",

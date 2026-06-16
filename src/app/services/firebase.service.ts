@@ -1,5 +1,5 @@
-import { Injectable } from '@angular/core';
-import { initializeApp, FirebaseApp } from 'firebase/app';
+import { Injectable } from "@angular/core";
+import { initializeApp, FirebaseApp } from "firebase/app";
 import {
   collection,
   deleteDoc,
@@ -10,21 +10,25 @@ import {
   getFirestore,
   setDoc,
   updateDoc,
-  writeBatch
-} from 'firebase/firestore';
-import { APPLICANTS_COLLECTION, firebaseConfig, LEADS_COLLECTION } from '../config/firebase.config';
+  writeBatch,
+} from "firebase/firestore";
+import {
+  APPLICANTS_COLLECTION,
+  firebaseConfig,
+  LEADS_COLLECTION,
+} from "../config/firebase.config";
 import {
   ApplicantAdmin,
   ApplicantRecord,
   DEFAULT_APPLICANT_ADMIN,
   LeadRecord,
   ReviewSentLog,
-  StagePayload
-} from '../models/applicant.model';
-import { SubmissionStatus } from '../models/applicant.model';
+  StagePayload,
+} from "../models/applicant.model";
+import { SubmissionStatus } from "../models/applicant.model";
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: "root",
 })
 export class FirebaseService {
   private readonly app: FirebaseApp;
@@ -51,7 +55,9 @@ export class FirebaseService {
     return this.normalizeApplicant(snapshot.id, snapshot.data());
   }
 
-  async createApplicantStage1(data: Record<string, unknown>): Promise<ApplicantRecord> {
+  async createApplicantStage1(
+    data: Record<string, unknown>,
+  ): Promise<ApplicantRecord> {
     const now = new Date().toISOString();
     const applicant: ApplicantRecord = {
       id: this.generateId(),
@@ -60,14 +66,17 @@ export class FirebaseService {
       stage1: { submittedAt: now, data },
       stage2: null,
       admin: { ...DEFAULT_APPLICANT_ADMIN },
-      extensions: {}
+      extensions: {},
     };
 
     await setDoc(doc(this.db, APPLICANTS_COLLECTION, applicant.id), applicant);
     return applicant;
   }
 
-  async createApplicantStage2(data: Record<string, unknown>, stage1Data: Record<string, unknown>): Promise<ApplicantRecord> {
+  async createApplicantStage2(
+    data: Record<string, unknown>,
+    stage1Data: Record<string, unknown>,
+  ): Promise<ApplicantRecord> {
     const now = new Date().toISOString();
     const applicant: ApplicantRecord = {
       id: this.generateId(),
@@ -76,7 +85,7 @@ export class FirebaseService {
       stage1: { submittedAt: now, data: stage1Data },
       stage2: { submittedAt: now, data },
       admin: { ...DEFAULT_APPLICANT_ADMIN },
-      extensions: {}
+      extensions: {},
     };
 
     await setDoc(doc(this.db, APPLICANTS_COLLECTION, applicant.id), applicant);
@@ -95,29 +104,47 @@ export class FirebaseService {
     await batch.commit();
   }
 
-  async updateApplicantStatus(id: string, status: SubmissionStatus): Promise<void> {
+  async updateApplicantStatus(
+    id: string,
+    status: SubmissionStatus,
+  ): Promise<void> {
     await updateDoc(doc(this.db, APPLICANTS_COLLECTION, id), {
-      'admin.status': status,
-      updatedAt: new Date().toISOString()
+      "admin.status": status,
+      updatedAt: new Date().toISOString(),
     });
   }
 
-  async updateApplicantReviewNote(id: string, sectionId: string, note: string): Promise<void> {
+  async updateApplicantStage1Data(
+    id: string,
+    data: Record<string, unknown>,
+    now: string,
+  ): Promise<void> {
+    await updateDoc(doc(this.db, APPLICANTS_COLLECTION, id), {
+      "stage1.data": data,
+      updatedAt: now,
+    });
+  }
+
+  async updateApplicantReviewNote(
+    id: string,
+    sectionId: string,
+    note: string,
+  ): Promise<void> {
     await updateDoc(doc(this.db, APPLICANTS_COLLECTION, id), {
       [`admin.reviewNotes.${sectionId}`]: note,
-      updatedAt: new Date().toISOString()
+      updatedAt: new Date().toISOString(),
     });
   }
 
   async markApplicantReviewSent(id: string, recipient: string): Promise<void> {
     const lastReviewSent: ReviewSentLog = {
       sentAt: new Date().toISOString(),
-      recipient
+      recipient,
     };
 
     await updateDoc(doc(this.db, APPLICANTS_COLLECTION, id), {
-      'admin.lastReviewSent': lastReviewSent,
-      updatedAt: new Date().toISOString()
+      "admin.lastReviewSent": lastReviewSent,
+      updatedAt: new Date().toISOString(),
     });
   }
 
@@ -135,10 +162,12 @@ export class FirebaseService {
     const snapshot = await getDocs(collection(this.db, LEADS_COLLECTION));
     return snapshot.docs
       .map((item) => this.normalizeLead(item.id, item.data()))
-      .sort((a, b) => (b.createdAt ?? '').localeCompare(a.createdAt ?? ''));
+      .sort((a, b) => (b.createdAt ?? "").localeCompare(a.createdAt ?? ""));
   }
 
-  async createLeads(leads: Omit<LeadRecord, 'id' | 'createdAt' | 'updatedAt'>[]): Promise<LeadRecord[]> {
+  async createLeads(
+    leads: Omit<LeadRecord, "id" | "createdAt" | "updatedAt">[],
+  ): Promise<LeadRecord[]> {
     if (!leads.length) {
       return [];
     }
@@ -153,7 +182,7 @@ export class FirebaseService {
         ...lead,
         id,
         createdAt: now,
-        updatedAt: now
+        updatedAt: now,
       };
       batch.set(doc(this.db, LEADS_COLLECTION, id), record);
       created.push(record);
@@ -163,10 +192,13 @@ export class FirebaseService {
     return created;
   }
 
-  async updateLead(id: string, lead: Omit<LeadRecord, 'id' | 'createdAt' | 'updatedAt'>): Promise<void> {
+  async updateLead(
+    id: string,
+    lead: Omit<LeadRecord, "id" | "createdAt" | "updatedAt">,
+  ): Promise<void> {
     await updateDoc(doc(this.db, LEADS_COLLECTION, id), {
       ...lead,
-      updatedAt: new Date().toISOString()
+      updatedAt: new Date().toISOString(),
     });
   }
 
@@ -184,37 +216,43 @@ export class FirebaseService {
 
   private normalizeLead(id: string, raw: Record<string, unknown>): LeadRecord {
     return {
-      id: (raw['id'] as string) ?? id,
-      region: String(raw['region'] ?? ''),
-      country: String(raw['country'] ?? ''),
-      organization: String(raw['organization'] ?? ''),
-      acronym: String(raw['acronym'] ?? ''),
-      entityType: String(raw['entityType'] ?? ''),
-      website: String(raw['website'] ?? ''),
-      contactEmail: String(raw['contactEmail'] ?? ''),
-      climateSpecialty: String(raw['climateSpecialty'] ?? ''),
-      comments: String(raw['comments'] ?? ''),
-      status: (raw['status'] as LeadRecord['status']) ?? 'Pending',
-      createdAt: (raw['createdAt'] as string) ?? new Date().toISOString(),
-      updatedAt: (raw['updatedAt'] as string) ?? new Date().toISOString()
+      id: (raw["id"] as string) ?? id,
+      region: String(raw["region"] ?? ""),
+      country: String(raw["country"] ?? ""),
+      organization: String(raw["organization"] ?? ""),
+      acronym: String(raw["acronym"] ?? ""),
+      entityType: String(raw["entityType"] ?? ""),
+      website: String(raw["website"] ?? ""),
+      contactEmail: String(raw["contactEmail"] ?? ""),
+      climateSpecialty: String(raw["climateSpecialty"] ?? ""),
+      comments: String(raw["comments"] ?? ""),
+      status: (raw["status"] as LeadRecord["status"]) ?? "Pending",
+      createdAt: (raw["createdAt"] as string) ?? new Date().toISOString(),
+      updatedAt: (raw["updatedAt"] as string) ?? new Date().toISOString(),
     };
   }
 
-  private normalizeApplicant(id: string, raw: Record<string, unknown>): ApplicantRecord {
-    const admin = (raw['admin'] as ApplicantAdmin | undefined) ?? { ...DEFAULT_APPLICANT_ADMIN };
+  private normalizeApplicant(
+    id: string,
+    raw: Record<string, unknown>,
+  ): ApplicantRecord {
+    const admin = (raw["admin"] as ApplicantAdmin | undefined) ?? {
+      ...DEFAULT_APPLICANT_ADMIN,
+    };
 
     return {
-      id: (raw['id'] as string) ?? id,
-      createdAt: (raw['createdAt'] as string) ?? new Date().toISOString(),
-      updatedAt: (raw['updatedAt'] as string) ?? new Date().toISOString(),
-      stage1: (raw['stage1'] as StagePayload | null | undefined) ?? null,
-      stage2: (raw['stage2'] as StagePayload | null | undefined) ?? null,
+      id: (raw["id"] as string) ?? id,
+      createdAt: (raw["createdAt"] as string) ?? new Date().toISOString(),
+      updatedAt: (raw["updatedAt"] as string) ?? new Date().toISOString(),
+      stage1: (raw["stage1"] as StagePayload | null | undefined) ?? null,
+      stage2: (raw["stage2"] as StagePayload | null | undefined) ?? null,
       admin: {
-        status: admin.status ?? 'Pending',
+        status: admin.status ?? "Pending",
         reviewNotes: admin.reviewNotes ?? {},
-        lastReviewSent: admin.lastReviewSent ?? null
+        lastReviewSent: admin.lastReviewSent ?? null,
       },
-      extensions: (raw['extensions'] as Record<string, unknown> | undefined) ?? {}
+      extensions:
+        (raw["extensions"] as Record<string, unknown> | undefined) ?? {},
     };
   }
 

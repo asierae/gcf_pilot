@@ -5,7 +5,8 @@
     <div class="header-actions">
       <span class="count-badge">
         @if (hasActiveFilters) {
-          {{ filteredSubmissions.length }} of {{ submissions.length }} submission(s)
+          {{ filteredSubmissions.length }} of
+          {{ submissions.length }} submission(s)
         } @else {
           {{ submissions.length }} submission(s)
         }
@@ -27,13 +28,21 @@
     <div class="empty-state">
       <span class="empty-icon">⚠️</span>
       <p>{{ loadError }}</p>
-      <button type="button" class="btn-clear-filter" (click)="loadSubmissions()">Retry</button>
+      <button
+        type="button"
+        class="btn-clear-filter"
+        (click)="loadSubmissions()"
+      >
+        Retry
+      </button>
     </div>
   } @else if (submissions.length === 0) {
     <div class="empty-state">
       <span class="empty-icon">📭</span>
       <p>No Stage 1 submissions yet.</p>
-      <p class="empty-hint">Submissions will appear here when users complete the Stage 1 form.</p>
+      <p class="empty-hint">
+        Submissions will appear here when users complete the Stage 1 form.
+      </p>
     </div>
   } @else {
     <div class="table-toolbar">
@@ -45,7 +54,12 @@
               stroke="currentColor"
               stroke-width="1.5"
             />
-            <path d="M13.5 13.5 17 17" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+            <path
+              d="M13.5 13.5 17 17"
+              stroke="currentColor"
+              stroke-width="1.5"
+              stroke-linecap="round"
+            />
           </svg>
         </span>
         <input
@@ -56,7 +70,12 @@
           (input)="onSearchInput($event)"
         />
         @if (searchQuery.trim()) {
-          <button type="button" class="search-clear" (click)="clearSearch()" aria-label="Clear search">
+          <button
+            type="button"
+            class="search-clear"
+            (click)="clearSearch()"
+            aria-label="Clear search"
+          >
             ×
           </button>
         }
@@ -65,8 +84,21 @@
       <div class="date-range-filter">
         <span class="date-range-label">
           <svg viewBox="0 0 20 20" fill="none" aria-hidden="true">
-            <rect x="3" y="4.5" width="14" height="12" rx="2" stroke="currentColor" stroke-width="1.4"/>
-            <path d="M3 8.5h14M7 2.5v3M13 2.5v3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+            <rect
+              x="3"
+              y="4.5"
+              width="14"
+              height="12"
+              rx="2"
+              stroke="currentColor"
+              stroke-width="1.4"
+            />
+            <path
+              d="M3 8.5h14M7 2.5v3M13 2.5v3"
+              stroke="currentColor"
+              stroke-width="1.4"
+              stroke-linecap="round"
+            />
           </svg>
           Submitted between
         </span>
@@ -92,7 +124,9 @@
         />
 
         @if (dateFrom || dateTo) {
-          <button type="button" class="date-clear" (click)="clearDateFilter()">Clear dates</button>
+          <button type="button" class="date-clear" (click)="clearDateFilter()">
+            Clear dates
+          </button>
         }
       </div>
     </div>
@@ -108,7 +142,13 @@
           <p>No submissions to display.</p>
         }
         @if (hasActiveFilters) {
-          <button type="button" class="btn-clear-filter" (click)="clearAllFilters()">Clear all filters</button>
+          <button
+            type="button"
+            class="btn-clear-filter"
+            (click)="clearAllFilters()"
+          >
+            Clear all filters
+          </button>
         }
       </div>
     } @else {
@@ -117,7 +157,10 @@
           <thead>
             <tr>
               <th class="col-check">
-                <label class="checkbox-wrap" aria-label="Select all visible submissions">
+                <label
+                  class="checkbox-wrap"
+                  aria-label="Select all visible submissions"
+                >
                   <input
                     type="checkbox"
                     class="checkbox-input"
@@ -128,14 +171,134 @@
                   <span class="checkbox-box"></span>
                 </label>
               </th>
-              <th>Submitted</th>
-              <th>Applicant</th>
-              <th>Acronym</th>
-              <th>Organization Type</th>
-              <th>Contact Email</th>
-              <th>Headquarters</th>
-              <th>Scope</th>
-              <th>Status</th>
+              <th>
+                <button
+                  class="sort-btn"
+                  [class.sort-active]="sortColumn === 'date'"
+                  (click)="sortBy('date')"
+                >
+                  Submitted
+                  <span class="sort-icon">{{
+                    sortColumn === "date"
+                      ? sortDir === "asc"
+                        ? "↑"
+                        : "↓"
+                      : "↕"
+                  }}</span>
+                </button>
+              </th>
+              <th>
+                <button
+                  class="sort-btn"
+                  [class.sort-active]="sortColumn === 'applicantName'"
+                  (click)="sortBy('applicantName')"
+                >
+                  Applicant
+                  <span class="sort-icon">{{
+                    sortColumn === "applicantName"
+                      ? sortDir === "asc"
+                        ? "↑"
+                        : "↓"
+                      : "↕"
+                  }}</span>
+                </button>
+              </th>
+              <th>
+                <button
+                  class="sort-btn"
+                  [class.sort-active]="sortColumn === 'acronym'"
+                  (click)="sortBy('acronym')"
+                >
+                  Acronym
+                  <span class="sort-icon">{{
+                    sortColumn === "acronym"
+                      ? sortDir === "asc"
+                        ? "↑"
+                        : "↓"
+                      : "↕"
+                  }}</span>
+                </button>
+              </th>
+              <th>
+                <button
+                  class="sort-btn"
+                  [class.sort-active]="sortColumn === 'organizationType'"
+                  (click)="sortBy('organizationType')"
+                >
+                  Organization Type
+                  <span class="sort-icon">{{
+                    sortColumn === "organizationType"
+                      ? sortDir === "asc"
+                        ? "↑"
+                        : "↓"
+                      : "↕"
+                  }}</span>
+                </button>
+              </th>
+              <th>
+                <button
+                  class="sort-btn"
+                  [class.sort-active]="sortColumn === 'contactEmail'"
+                  (click)="sortBy('contactEmail')"
+                >
+                  Contact Email
+                  <span class="sort-icon">{{
+                    sortColumn === "contactEmail"
+                      ? sortDir === "asc"
+                        ? "↑"
+                        : "↓"
+                      : "↕"
+                  }}</span>
+                </button>
+              </th>
+              <th>
+                <button
+                  class="sort-btn"
+                  [class.sort-active]="sortColumn === 'headquarters'"
+                  (click)="sortBy('headquarters')"
+                >
+                  Headquarters
+                  <span class="sort-icon">{{
+                    sortColumn === "headquarters"
+                      ? sortDir === "asc"
+                        ? "↑"
+                        : "↓"
+                      : "↕"
+                  }}</span>
+                </button>
+              </th>
+              <th>
+                <button
+                  class="sort-btn"
+                  [class.sort-active]="sortColumn === 'scope'"
+                  (click)="sortBy('scope')"
+                >
+                  Scope
+                  <span class="sort-icon">{{
+                    sortColumn === "scope"
+                      ? sortDir === "asc"
+                        ? "↑"
+                        : "↓"
+                      : "↕"
+                  }}</span>
+                </button>
+              </th>
+              <th>
+                <button
+                  class="sort-btn"
+                  [class.sort-active]="sortColumn === 'status'"
+                  (click)="sortBy('status')"
+                >
+                  Status
+                  <span class="sort-icon">{{
+                    sortColumn === "status"
+                      ? sortDir === "asc"
+                        ? "↑"
+                        : "↓"
+                      : "↕"
+                  }}</span>
+                </button>
+              </th>
               <th></th>
             </tr>
           </thead>
@@ -145,7 +308,10 @@
                 <td class="col-check">
                   <label
                     class="checkbox-wrap"
-                    [attr.aria-label]="'Select submission from ' + getSummary(submission).applicantName"
+                    [attr.aria-label]="
+                      'Select submission from ' +
+                      getSummary(submission).applicantName
+                    "
                   >
                     <input
                       type="checkbox"
@@ -157,10 +323,20 @@
                   </label>
                 </td>
                 <td class="col-date">{{ formatDate(submission.date) }}</td>
-                <td class="col-name">{{ getSummary(submission).applicantName }}</td>
-                <td><span class="acronym-badge">{{ getSummary(submission).acronym }}</span></td>
-                <td class="col-type">{{ getSummary(submission).organizationType }}</td>
-                <td class="col-email">{{ getSummary(submission).contactEmail }}</td>
+                <td class="col-name">
+                  {{ getSummary(submission).applicantName }}
+                </td>
+                <td>
+                  <span class="acronym-badge">{{
+                    getSummary(submission).acronym
+                  }}</span>
+                </td>
+                <td class="col-type">
+                  {{ getSummary(submission).organizationType }}
+                </td>
+                <td class="col-email">
+                  {{ getSummary(submission).contactEmail }}
+                </td>
                 <td>{{ getSummary(submission).headquarters }}</td>
                 <td>{{ getSummary(submission).scope }}</td>
                 <td class="col-status">
@@ -176,39 +352,44 @@
                   </select>
                 </td>
                 <td class="col-action">
-                  <a [routerLink]="['/dashboard/submission', submission.id]" class="btn-view">View</a>
+                  <a
+                    [routerLink]="['/dashboard/submission', submission.id]"
+                    class="btn-view"
+                    >View</a
+                  >
                 </td>
               </tr>
             }
           </tbody>
         </table>
 
-        @if (filteredSubmissions.length > pageSize) {
-          <div class="pagination">
-            <span class="pagination-info">
-              Showing {{ pageStart }}–{{ pageEnd }} of {{ filteredSubmissions.length }}
-            </span>
-            <div class="pagination-controls">
-              <button
-                type="button"
-                class="page-btn"
-                [disabled]="currentPage === 1"
-                (click)="prevPage()"
-              >
-                ← Prev
-              </button>
-              <span class="page-indicator">Page {{ currentPage }} / {{ totalPages }}</span>
-              <button
-                type="button"
-                class="page-btn"
-                [disabled]="currentPage === totalPages"
-                (click)="nextPage()"
-              >
-                Next →
-              </button>
-            </div>
+        <div class="pagination">
+          <span class="pagination-info">
+            Showing {{ pageStart }}–{{ pageEnd }} of
+            {{ filteredSubmissions.length }}
+          </span>
+          <div class="pagination-controls">
+            <button
+              type="button"
+              class="page-btn"
+              [disabled]="currentPage === 1"
+              (click)="prevPage()"
+            >
+              ← Prev
+            </button>
+            <span class="page-indicator"
+              >Page {{ currentPage }} / {{ totalPages }}</span
+            >
+            <button
+              type="button"
+              class="page-btn"
+              [disabled]="currentPage === totalPages"
+              (click)="nextPage()"
+            >
+              Next →
+            </button>
           </div>
-        }
+        </div>
       </div>
     }
   }
