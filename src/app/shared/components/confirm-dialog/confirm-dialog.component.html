@@ -1,0 +1,48 @@
+@if (open) {
+  <div class="confirm-backdrop" (click)="onBackdropClick($event)">
+    <div
+      class="confirm-dialog"
+      role="alertdialog"
+      [attr.aria-labelledby]="'confirm-dialog-title'"
+      [attr.aria-describedby]="'confirm-dialog-message'"
+      aria-modal="true"
+    >
+      <div class="confirm-icon" [class.danger]="variant === 'danger'" aria-hidden="true">
+        @if (variant === 'danger') {
+          <svg viewBox="0 0 24 24" fill="none">
+            <path
+              d="M12 9v4m0 4h.01M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"
+              stroke="currentColor"
+              stroke-width="1.75"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+        } @else {
+          <svg viewBox="0 0 24 24" fill="none">
+            <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.75" />
+            <path d="M12 8v5M12 16h.01" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" />
+          </svg>
+        }
+      </div>
+
+      <h2 id="confirm-dialog-title" class="confirm-title">{{ title }}</h2>
+      <p id="confirm-dialog-message" class="confirm-message">{{ message }}</p>
+
+      <div class="confirm-actions">
+        <button type="button" class="btn-cancel" [disabled]="loading" (click)="cancel()">
+          {{ cancelText }}
+        </button>
+        <button
+          type="button"
+          class="btn-confirm"
+          [class.danger]="variant === 'danger'"
+          [disabled]="loading"
+          (click)="confirm()"
+        >
+          {{ loading ? 'Please wait…' : confirmText }}
+        </button>
+      </div>
+    </div>
+  </div>
+}

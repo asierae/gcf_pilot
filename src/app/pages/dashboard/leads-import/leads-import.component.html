@@ -350,7 +350,7 @@
         type="button"
         class="btn-delete"
         *ngIf="selectedCount > 0"
-        (click)="deleteSelected()"
+        (click)="openDeleteConfirm()"
         [disabled]="loading"
       >
         Delete selected ({{ selectedCount }})
@@ -622,4 +622,16 @@
       </div>
     </div>
   </section>
+
+  <app-confirm-dialog
+    [open]="deleteConfirmOpen"
+    title="Delete leads"
+    [message]="deleteConfirmMessage"
+    confirmText="Delete"
+    cancelText="Cancel"
+    variant="danger"
+    [loading]="loading"
+    (confirmed)="confirmDelete()"
+    (cancelled)="cancelDeleteConfirm()"
+  />
 </div>

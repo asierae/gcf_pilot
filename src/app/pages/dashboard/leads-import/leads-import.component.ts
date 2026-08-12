@@ -9,13 +9,14 @@ import {
   LeadStatus,
 } from "../../../models/applicant.model";
 import { StorageService } from "../../../services/storage.service";
+import { ConfirmDialogComponent } from "../../../shared/components/confirm-dialog/confirm-dialog.component";
 
 type LeadField = keyof Omit<LeadRecord, "id" | "createdAt" | "updatedAt">;
 
 @Component({
   selector: "app-leads-import",
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule, RouterLink, ConfirmDialogComponent],
   templateUrl: "./leads-import.component.html",
   styleUrls: ["./leads-import.component.css"],
 })
@@ -30,6 +31,7 @@ export class LeadsImportComponent implements OnInit {
   pendingLeads: LeadRecord[] = [];
   savedLeads: LeadRecord[] = [];
   selectedIds = new Set<string>();
+  deleteConfirmOpen = false;
   searchQuery = "";
   readonly statusOptions = LEAD_STATUS_OPTIONS;
   readonly pageSize = 20;
@@ -381,26 +383,37 @@ export class LeadsImportComponent implements OnInit {
     this.selectedIds = new Set(this.selectedIds);
   }
 
-  async deleteSelected(): Promise<void> {
+  openDeleteConfirm(): void {
     if (!this.selectedIds.size) {
       return;
     }
 
-    const count = this.selectedIds.size;
-    const confirmed = window.confirm(
-      `Delete ${count} lead${count === 1 ? "" : "s"}? This cannot be undone.`,
-    );
+    this.deleteConfirmOpen = true;
+  }
 
-    if (!confirmed) {
+  cancelDeleteConfirm(): void {
+    this.deleteConfirmOpen = false;
+  }
+
+  get deleteConfirmMessage(): string {
+    const count = this.selectedIds.size;
+    return `You are about to delete ${count} lead${count === 1 ? "" : "s"}. This action cannot be undone.`;
+  }
+
+  async confirmDelete(): Promise<void> {
+    if (!this.selectedIds.size) {
+      this.deleteConfirmOpen = false;
       return;
     }
 
+    const count = this.selectedIds.size;
     this.loading = true;
     this.clearMessages();
 
     try {
       await this.storageService.deleteLeads([...this.selectedIds]);
       this.selectedIds = new Set();
+      this.deleteConfirmOpen = false;
       await this.loadSavedLeads();
       this.successMessage = `${count} lead${count === 1 ? "" : "s"} deleted.`;
     } catch {
