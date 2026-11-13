@@ -1,0 +1,242 @@
+:host {
+  display: block;
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.globe-media,
+.globe-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.globe-canvas {
+  display: block;
+  outline: none;
+}
+
+.globe-fallback {
+  position: absolute;
+  inset: 0;
+  display: none;
+  background:
+    radial-gradient(circle at 62% 48%, rgba(46, 230, 197, 0.16), transparent 42%),
+    radial-gradient(circle at 70% 55%, #103643 0%, #0b2532 38%, #091824 70%);
+}
+
+.globe-fallback::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 62%;
+  width: min(62vh, 640px);
+  aspect-ratio: 1;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background:
+    repeating-radial-gradient(
+      circle at 50% 50%,
+      rgba(46, 230, 197, 0.16) 0 1px,
+      transparent 1px 26px
+    ),
+    radial-gradient(circle at 38% 32%, rgba(46, 230, 197, 0.2), transparent 60%);
+  box-shadow: 0 0 90px rgba(46, 230, 197, 0.18);
+}
+
+:host(.globe-no-webgl) .globe-fallback {
+  display: block;
+}
+
+:host(.globe-no-webgl) .globe-canvas {
+  display: none;
+}
+
+.globe-vignette {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background:
+    linear-gradient(90deg, rgba(10, 24, 36, 0.95) 0%, rgba(10, 24, 36, 0.68) 29%, rgba(10, 24, 36, 0.14) 57%, transparent 71%),
+    linear-gradient(0deg, #091622 0%, rgba(9, 22, 34, 0) 34%),
+    linear-gradient(180deg, rgba(10, 24, 36, 0.68) 0%, transparent 22%);
+}
+
+@media (max-width: 1180px) {
+  .globe-vignette {
+    background:
+      linear-gradient(90deg, rgba(10, 24, 36, 0.9) 0%, rgba(10, 24, 36, 0.5) 47%, transparent 77%),
+      linear-gradient(0deg, #091622 0%, rgba(9, 22, 34, 0) 40%),
+      linear-gradient(180deg, rgba(10, 24, 36, 0.66) 0%, transparent 22%);
+  }
+}
+
+.globe-label-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+}
+
+.globe-label {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 7px 13px 7px 10px;
+  border: 1px solid rgba(46, 230, 197, 0.26);
+  border-radius: 999px;
+  background: rgba(10, 24, 36, 0.76);
+  box-shadow:
+    0 10px 30px rgba(0, 0, 0, 0.35),
+    inset 0 0 18px rgba(46, 230, 197, 0.05);
+  backdrop-filter: blur(10px);
+  color: #e9f7f4;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: auto;
+  transition:
+    opacity 0.25s ease,
+    border-color 0.25s ease,
+    box-shadow 0.25s ease;
+  will-change: transform, opacity;
+}
+
+.globe-label:hover {
+  border-color: rgba(46, 230, 197, 0.6);
+  box-shadow:
+    0 12px 34px rgba(0, 0, 0, 0.4),
+    0 0 26px rgba(46, 230, 197, 0.18);
+}
+
+.globe-label.is-dimmed {
+  opacity: 0.14 !important;
+}
+
+.globe-label-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #2ee6c5;
+  box-shadow:
+    0 0 0 3px rgba(46, 230, 197, 0.16),
+    0 0 14px rgba(46, 230, 197, 0.9);
+}
+
+.globe-label[data-kind="finance"] .globe-label-dot {
+  background: #37c8ff;
+  box-shadow:
+    0 0 0 3px rgba(55, 200, 255, 0.16),
+    0 0 14px rgba(55, 200, 255, 0.9);
+}
+
+.globe-label[data-kind="project"] .globe-label-dot {
+  background: #7dffb2;
+  box-shadow:
+    0 0 0 3px rgba(125, 255, 178, 0.18),
+    0 0 14px rgba(125, 255, 178, 0.9);
+}
+
+.globe-label-body {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  line-height: 1.15;
+}
+
+.globe-label-role {
+  font-family: "Inter", "Segoe UI", sans-serif;
+  font-size: 8px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #2ee6c5;
+}
+
+.globe-label[data-kind="finance"] .globe-label-role {
+  color: #7dd8ff;
+}
+
+.globe-label[data-kind="project"] .globe-label-role {
+  color: #9dffc6;
+}
+
+.globe-label-name {
+  font-family: "Inter", "Segoe UI", sans-serif;
+  font-size: 11px;
+  font-weight: 500;
+  color: rgba(233, 247, 244, 0.9);
+}
+
+.globe-tip {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 4;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 190px;
+  max-width: 230px;
+  padding: 11px 15px;
+  border: 1px solid rgba(46, 230, 197, 0.3);
+  border-radius: 12px;
+  background: rgba(9, 20, 31, 0.94);
+  box-shadow:
+    0 20px 45px rgba(0, 0, 0, 0.5),
+    0 0 30px rgba(46, 230, 197, 0.1);
+  backdrop-filter: blur(12px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.18s ease;
+  will-change: transform;
+}
+
+.globe-tip.is-visible {
+  opacity: 1;
+}
+
+.globe-tip-role {
+  font-family: "Inter", "Segoe UI", sans-serif;
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #2ee6c5;
+}
+
+.globe-tip-title {
+  font-family: "Sora", "Segoe UI", sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: #f4fbff;
+}
+
+.globe-tip-detail {
+  font-family: "Inter", "Segoe UI", sans-serif;
+  font-size: 11px;
+  line-height: 1.45;
+  color: rgba(190, 210, 220, 0.78);
+}
+
+@media (max-width: 900px) {
+  .globe-label {
+    padding: 6px 10px 6px 8px;
+  }
+
+  .globe-label-name {
+    font-size: 10px;
+  }
+}
+
+@media (max-width: 700px) {
+  .globe-label-layer,
+  .globe-tip {
+    display: none;
+  }
+}

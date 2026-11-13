@@ -12,11 +12,11 @@ interface ChatMessage {
 const STUB_RESPONSES: { keywords: string[]; response: string }[] = [
   {
     keywords: ['requirement', 'requirements', 'eligibility', 'eligible', 'apply', 'application'],
-    response: `To apply through GCF Support, your organization must complete two stages:\n\n**Stage 1** — Pre-screening questionnaire covering legal status, governance, fiduciary capacity and climate finance experience.\n\n**Stage 2** — Full accreditation application with detailed documentation.\n\nWould you like more detail on any specific requirement?`,
+    response: `To apply through Avera, your organization must complete two stages:\n\n**Stage 1** — Pre-screening questionnaire covering legal status, governance, fiduciary capacity and climate finance experience.\n\n**Stage 2** — Full accreditation application with detailed documentation.\n\nWould you like more detail on any specific requirement?`,
   },
   {
     keywords: ['price', 'pricing', 'cost', 'fee', 'fees', 'service', 'package', 'plan'],
-    response: `We offer three service tiers:\n\n• **Advisory** — Document review & feedback\n• **Full Support** — End-to-end application management\n• **Premium** — Dedicated consultant + Stage 2 preparation\n\nContact us at support@gcf-support.org for a tailored quote.`,
+    response: `We offer three service tiers:\n\n• **Advisory** — Document review & feedback\n• **Full Support** — End-to-end application management\n• **Premium** — Dedicated consultant + Stage 2 preparation\n\nContact us at support@avera.capital for a tailored quote.`,
   },
   {
     keywords: ['stage 1', 'stage1', 'pre-screening', 'prescreening', 'questionnaire'],
@@ -40,11 +40,11 @@ const STUB_RESPONSES: { keywords: string[]; response: string }[] = [
   },
   {
     keywords: ['hello', 'hi', 'hey', 'good morning', 'good afternoon', 'hola', 'help'],
-    response: `Hello! 👋 I'm the GCF Support assistant. I can help you with:\n\n• Eligibility requirements for GCF accreditation\n• Information about Stage 1 and Stage 2\n• Required documents\n• Timelines and processes\n• Service pricing\n\nWhat would you like to know?`,
+    response: `Hello! 👋 I'm the Avera assistant. I can help you with:\n\n• Eligibility requirements for GCF accreditation\n• Information about Stage 1 and Stage 2\n• Required documents\n• Timelines and processes\n• Service pricing\n\nWhat would you like to know?`,
   },
 ];
 
-const FALLBACK = `I don't have a specific answer for that yet. Our team will be happy to help — please contact us at **support@gcf-support.org** or use the form on our website.\n\nI can answer questions about eligibility requirements, application stages, required documents, timelines, and service pricing.`;
+const FALLBACK = `I don't have a specific answer for that yet. Our team will be happy to help — please contact us at **support@avera.capital** or use the form on our website.\n\nI can answer questions about eligibility requirements, application stages, required documents, timelines, and service pricing.`;
 
 @Component({
   selector: 'app-chat',
@@ -63,7 +63,7 @@ export class ChatComponent implements AfterViewChecked {
     {
       id: 'welcome',
       role: 'agent',
-      text: `Hello! 👋 I'm the GCF Support assistant. Ask me anything about the accreditation process, eligibility requirements, documentation, timelines or our service plans.`,
+      text: `Hello! 👋 I'm the Avera assistant. Ask me anything about the accreditation process, eligibility requirements, documentation, timelines or our service plans.`,
       timestamp: new Date(),
     },
   ];

@@ -1,4 +1,9 @@
-import { Component, OnInit } from "@angular/core";
+import {
+  Component,
+  HostListener,
+  OnDestroy,
+  OnInit,
+} from "@angular/core";
 import { CommonModule } from "@angular/common";
 import { FormsModule } from "@angular/forms";
 import { RouterLink } from "@angular/router";
@@ -20,7 +25,7 @@ type LeadField = keyof Omit<LeadRecord, "id" | "createdAt" | "updatedAt">;
   templateUrl: "./leads-import.component.html",
   styleUrls: ["./leads-import.component.css"],
 })
-export class LeadsImportComponent implements OnInit {
+export class LeadsImportComponent implements OnInit, OnDestroy {
   fileName = "";
   parseError = "";
   successMessage = "";
@@ -40,21 +45,51 @@ export class LeadsImportComponent implements OnInit {
   // Tab state
   activeTab: "import" | "single" = "import";
 
+  // Drawer state
+  drawerOpen = false;
+  private previousBodyOverflow = "";
+
   // Single lead form
-  showAddForm = false;
-  addFormData: Partial<LeadRecord> = {};
+  addFormData: Partial<LeadRecord> = { status: "Pending" };
   addFormSaving = false;
   addFormError = "";
 
-  toggleAddForm(): void {
-    this.showAddForm = !this.showAddForm;
-    if (!this.showAddForm) {
-      this.resetAddForm();
+  openDrawer(tab: "import" | "single"): void {
+    this.activeTab = tab;
+    this.drawerOpen = true;
+    this.clearMessages();
+    this.previousBodyOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+  }
+
+  closeDrawer(): void {
+    this.drawerOpen = false;
+    document.body.style.overflow = this.previousBodyOverflow;
+  }
+
+  @HostListener("document:keydown.escape")
+  onEscape(): void {
+    if (this.drawerOpen) {
+      this.closeDrawer();
     }
   }
 
+  ngOnDestroy(): void {
+    document.body.style.overflow = this.previousBodyOverflow;
+  }
+
+  dismissMessages(): void {
+    this.clearMessages();
+  }
+
+  cancelPreview(): void {
+    this.pendingLeads = [];
+    this.fileName = "";
+    this.clearMessages();
+  }
+
   resetAddForm(): void {
-    this.addFormData = {};
+    this.addFormData = { status: "Pending" };
     this.addFormError = "";
   }
 
@@ -85,7 +120,7 @@ export class LeadsImportComponent implements OnInit {
       const [created] = await this.storageService.saveLeads([lead]);
       this.savedLeads = [created, ...this.savedLeads];
       this.currentPage = 1;
-      this.showAddForm = false;
+      this.closeDrawer();
       this.resetAddForm();
       this.successMessage = `Lead "${org}" added successfully.`;
     } catch {
@@ -164,6 +199,15 @@ export class LeadsImportComponent implements OnInit {
       }
 
       this.pendingLeads = importedLeads;
+      this.closeDrawer();
+      window.setTimeout(() => {
+        const panel = document.querySelector(".preview-panel");
+        if (panel) {
+          const top =
+            panel.getBoundingClientRect().top + window.scrollY - 96;
+          window.scrollTo({ top, behavior: "smooth" });
+        }
+      }, 80);
     } catch (error) {
       this.parseError =
         error instanceof Error

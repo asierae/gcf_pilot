@@ -4,6 +4,7 @@ import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angula
 import { StorageService } from '../../services/storage.service';
 import { NotificationService } from '../../services/notification.service';
 import { FileUploadComponent } from '../../shared/components/file-upload/file-upload.component';
+import { StepIconComponent } from '../../shared/components/step-icon/step-icon.component';
 import {
   buildMissingFieldsMessage,
   collectInvalidFields,
@@ -13,7 +14,7 @@ import {
 @Component({
   selector: 'app-stage1',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, FileUploadComponent],
+  imports: [CommonModule, ReactiveFormsModule, FileUploadComponent, StepIconComponent],
   templateUrl: './stage1.component.html',
   styleUrl: './stage1.component.css'
 })

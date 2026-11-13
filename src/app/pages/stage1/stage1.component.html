@@ -12,7 +12,7 @@
         [class.completed]="currentStep > i"
         (click)="goToStep(i)"
       >
-        <span class="step-icon">{{ step.icon }}</span>
+        <span class="step-icon"><app-step-icon [name]="step.id" /></span>
         <span class="step-label">{{ step.title }}</span>
       </button>
     </div>
@@ -22,7 +22,12 @@
   <main class="main-content">
     @if (submitSuccess) {
       <div class="success-banner">
-        <span class="success-icon">✅</span>
+        <span class="success-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="9" />
+            <path d="m8.5 12 2.5 2.5 4.5-5" />
+          </svg>
+        </span>
         <h2>Questionnaire Submitted Successfully</h2>
         <p>Your Stage 1 pre-screening responses have been saved.</p>
       </div>
@@ -929,7 +934,11 @@
         <div class="submit-section">
           <button type="submit" class="btn-submit">
             <span>Submit Questionnaire</span>
-            <span class="btn-icon">✉️</span>
+            <span class="btn-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 3 10.5 13.5M21 3l-6.5 18-4-8-8-4L21 3Z" />
+              </svg>
+            </span>
           </button>
         </div>
       </div>

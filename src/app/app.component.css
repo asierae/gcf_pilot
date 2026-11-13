@@ -36,10 +36,10 @@
 
 .logo-icon {
   font-size: 2.5rem;
-  background: linear-gradient(135deg, #10b981 0%, #3b82f6 100%);
+  background: linear-gradient(135deg, #e8c06a 0%, #a8812f 100%);
   -webkit-background-clip: text;
   color: transparent;
-  text-shadow: 0 4px 20px rgba(16, 185, 129, 0.4);
+  text-shadow: 0 4px 20px rgba(212, 169, 78, 0.4);
 }
 
 .logo-text h1 {
@@ -78,7 +78,7 @@
 
 .progress-fill {
   height: 100%;
-  background: linear-gradient(90deg, #10b981, #3b82f6);
+  background: linear-gradient(90deg, #d4a94e, #e8c06a);
   transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
@@ -140,7 +140,7 @@
 }
 
 .step-btn.completed {
-  color: #10b981;
+  color: #d4a94e;
 }
 .step-btn.completed .step-icon {
   opacity: 1;
@@ -254,8 +254,8 @@ input:focus,
 select:focus,
 textarea:focus {
   outline: none;
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+  border-color: #e8c06a;
+  box-shadow: 0 0 0 3px rgba(232, 192, 106, 0.2);
   background: rgba(15, 23, 42, 0.8);
 }
 
@@ -329,25 +329,25 @@ textarea {
 }
 
 .radio-option input:checked + .radio-custom {
-  border-color: #10b981;
+  border-color: #d4a94e;
 }
 
 .radio-option input:checked + .radio-custom::after {
   content: '';
   width: 10px;
   height: 10px;
-  background: #10b981;
+  background: #d4a94e;
   border-radius: 50%;
 }
 
 .checkbox-option input:checked + .checkbox-custom {
-  background: #10b981;
-  border-color: #10b981;
+  background: #d4a94e;
+  border-color: #d4a94e;
 }
 
 .checkbox-option input:checked + .checkbox-custom::after {
   content: '✓';
-  color: white;
+  color: #0f172a;
   font-size: 14px;
 }
 
@@ -460,13 +460,13 @@ textarea {
 }
 
 .btn-next {
-  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  background: linear-gradient(135deg, #e8c06a, #a8812f);
   border: none;
 }
 
 .btn-next:hover {
-  background: linear-gradient(135deg, #60a5fa, #3b82f6);
-  box-shadow: 0 0 15px rgba(59, 130, 246, 0.5);
+  background: linear-gradient(135deg, #f5dfa8, #e8c06a);
+  box-shadow: 0 0 15px rgba(232, 192, 106, 0.5);
 }
 
 .submit-section {
@@ -479,22 +479,22 @@ textarea {
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  background: linear-gradient(135deg, #10b981, #059669);
+  background: linear-gradient(135deg, #d4a94e, #a8812f);
   border: none;
-  color: white;
+  color: #0f172a;
   padding: 1rem 2.5rem;
   border-radius: 50px;
   font-size: 1.1rem;
   font-weight: bold;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 10px 25px -5px rgba(16, 185, 129, 0.4);
+  box-shadow: 0 10px 25px -5px rgba(212, 169, 78, 0.4);
 }
 
 .btn-submit:hover {
   transform: translateY(-2px);
-  box-shadow: 0 15px 35px -5px rgba(16, 185, 129, 0.6);
-  background: linear-gradient(135deg, #34d399, #10b981);
+  box-shadow: 0 15px 35px -5px rgba(212, 169, 78, 0.6);
+  background: linear-gradient(135deg, #e8c06a, #d4a94e);
 }
 
 /* Footer */

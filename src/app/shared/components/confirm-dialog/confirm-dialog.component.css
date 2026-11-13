@@ -31,9 +31,9 @@
   height: 3rem;
   margin-bottom: 1rem;
   border-radius: 999px;
-  background: rgba(59, 130, 246, 0.12);
-  color: #93c5fd;
-  border: 1px solid rgba(59, 130, 246, 0.25);
+  background: rgba(232, 192, 106, 0.12);
+  color: #f5dfa8;
+  border: 1px solid rgba(232, 192, 106, 0.25);
 }
 
 .confirm-icon.danger {
@@ -88,9 +88,9 @@
 }
 
 .btn-confirm {
-  border: 1px solid rgba(16, 185, 129, 0.45);
-  background: linear-gradient(135deg, rgba(16, 185, 129, 0.95), rgba(5, 150, 105, 0.95));
-  color: #ffffff;
+  border: 1px solid rgba(212, 169, 78, 0.45);
+  background: linear-gradient(135deg, rgba(212, 169, 78, 0.95), rgba(168, 129, 47, 0.95));
+  color: #0f172a;
 }
 
 .btn-confirm.danger {

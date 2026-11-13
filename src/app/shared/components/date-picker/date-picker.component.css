@@ -43,18 +43,18 @@
 
 .date-picker-trigger:hover,
 .date-picker-trigger.is-open {
-  border-color: rgba(110, 231, 183, 0.45);
+  border-color: rgba(232, 192, 106, 0.45);
   background: rgba(15, 23, 42, 0.95);
 }
 
 .date-picker-trigger.is-open {
-  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
+  box-shadow: 0 0 0 3px rgba(212, 169, 78, 0.15);
 }
 
 .trigger-icon {
   width: 0.95rem;
   height: 0.95rem;
-  color: #6ee7b7;
+  color: #f5dfa8;
   flex-shrink: 0;
 }
 
@@ -81,7 +81,7 @@
 
 .date-picker-trigger.is-open .trigger-chevron {
   transform: rotate(180deg);
-  color: #6ee7b7;
+  color: #f5dfa8;
 }
 
 .date-picker-clear {
@@ -165,9 +165,9 @@
 }
 
 .calendar-nav:hover {
-  background: rgba(16, 185, 129, 0.15);
-  border-color: rgba(16, 185, 129, 0.35);
-  color: #6ee7b7;
+  background: rgba(212, 169, 78, 0.15);
+  border-color: rgba(212, 169, 78, 0.35);
+  color: #f5dfa8;
 }
 
 .calendar-weekdays {
@@ -220,16 +220,16 @@
 }
 
 .calendar-day.today:not(.selected) {
-  border-color: rgba(110, 231, 183, 0.45);
-  color: #6ee7b7;
+  border-color: rgba(232, 192, 106, 0.45);
+  color: #f5dfa8;
 }
 
 .calendar-day.selected {
-  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  background: linear-gradient(135deg, #d4a94e 0%, #a8812f 100%);
   border-color: transparent;
-  color: #ecfdf5;
+  color: #0f172a;
   font-weight: 700;
-  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);
+  box-shadow: 0 4px 14px rgba(212, 169, 78, 0.35);
 }
 
 .calendar-day.disabled {

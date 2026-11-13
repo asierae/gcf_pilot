@@ -1,212 +1,74 @@
 <div class="leads-page">
-  <div class="section-header">
-    <div>
+  <header class="page-head">
+    <div class="page-head-copy">
+      <p class="page-eyebrow">Pipeline</p>
       <h2>Leads</h2>
-      <p>Import or add leads and manage them in the table below.</p>
+      <p class="page-sub">
+        Import, enrich and manage the institutions in your outreach pipeline.
+      </p>
     </div>
-    <a routerLink="/dashboard" class="btn-back">← Back to Dashboard</a>
-  </div>
-
-  <!-- ── Tabbed input panel ── -->
-  <section class="input-panel">
-    <!-- Tab bar -->
-    <div class="tab-bar">
-      <button
-        type="button"
-        class="tab-btn"
-        [class.tab-active]="activeTab === 'import'"
-        (click)="activeTab = 'import'"
-      >
-        <span class="tab-icon">📁</span> Import from Excel
+    <div class="page-head-actions">
+      <a routerLink="/dashboard" class="btn-ghost">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M19 12H5M11 18l-6-6 6-6" />
+        </svg>
+        Dashboard
+      </a>
+      <button type="button" class="btn-secondary" (click)="openDrawer('single')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true">
+          <path d="M12 5v14M5 12h14" />
+        </svg>
+        Add lead
       </button>
-      <button
-        type="button"
-        class="tab-btn"
-        [class.tab-active]="activeTab === 'single'"
-        (click)="activeTab = 'single'"
-      >
-        <span class="tab-icon">➕</span> Add single lead
+      <button type="button" class="btn-primary" (click)="openDrawer('import')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M12 16V4M7 9l5-5 5 5" />
+          <path d="M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3" />
+        </svg>
+        Import Excel
       </button>
     </div>
+  </header>
 
-    <!-- Tab: Import from Excel -->
-    @if (activeTab === "import") {
-      <div class="tab-content">
-        <label class="drop-area">
-          <div class="drop-area-inner">
-            <span class="drop-icon">📂</span>
-            <span class="drop-title">Drop your Excel file here</span>
-            <span class="drop-sub">or click to browse — .xlsx / .xls</span>
-          </div>
-          <input
-            type="file"
-            accept=".xlsx,.xls"
-            (change)="onFileChange($event)"
-          />
-        </label>
-
-        <p class="file-meta" *ngIf="fileName">
-          <span class="file-meta-icon">📄</span> {{ fileName }}
-        </p>
-        <p class="hint">
-          Required headers: Region, Country, Organization, Acronym, Entity Type,
-          Website, Contact Email, Climate Specialty/Profile.
-        </p>
-
-        <p class="error-message" *ngIf="parseError">{{ parseError }}</p>
-        <p class="success-message" *ngIf="successMessage">
-          {{ successMessage }}
-        </p>
-      </div>
-    }
-
-    <!-- Tab: Add single lead -->
-    @if (activeTab === "single") {
-      <div class="tab-content">
-        <div class="add-lead-grid">
-          <label class="add-field add-field-wide">
-            <span>Organization <span class="req">*</span></span>
-            <input
-              type="text"
-              class="add-input"
-              [(ngModel)]="addFormData.organization"
-              placeholder="Organization name"
-            />
-          </label>
-
-          <label class="add-field">
-            <span>Acronym</span>
-            <input
-              type="text"
-              class="add-input"
-              [(ngModel)]="addFormData.acronym"
-              placeholder="e.g. WAGA"
-            />
-          </label>
-
-          <label class="add-field">
-            <span>Region</span>
-            <input
-              type="text"
-              class="add-input"
-              [(ngModel)]="addFormData.region"
-              placeholder="e.g. Sub-Saharan Africa"
-            />
-          </label>
-
-          <label class="add-field">
-            <span>Country</span>
-            <input
-              type="text"
-              class="add-input"
-              [(ngModel)]="addFormData.country"
-              placeholder="e.g. Kenya"
-            />
-          </label>
-
-          <label class="add-field">
-            <span>Entity Type</span>
-            <input
-              type="text"
-              class="add-input"
-              [(ngModel)]="addFormData.entityType"
-              placeholder="e.g. NGO"
-            />
-          </label>
-
-          <label class="add-field">
-            <span>Website</span>
-            <input
-              type="url"
-              class="add-input"
-              [(ngModel)]="addFormData.website"
-              placeholder="https://…"
-            />
-          </label>
-
-          <label class="add-field">
-            <span>Contact Email</span>
-            <input
-              type="email"
-              class="add-input"
-              [(ngModel)]="addFormData.contactEmail"
-              placeholder="contact@org.org"
-            />
-          </label>
-
-          <label class="add-field">
-            <span>Status</span>
-            <select
-              class="add-input add-select"
-              [(ngModel)]="addFormData.status"
-            >
-              <option *ngFor="let s of statusOptions" [value]="s">
-                {{ s }}
-              </option>
-            </select>
-          </label>
-
-          <label class="add-field add-field-wide">
-            <span>Climate Specialty / Profile</span>
-            <input
-              type="text"
-              class="add-input"
-              [(ngModel)]="addFormData.climateSpecialty"
-              placeholder="e.g. Adaptation, REDD+, Renewable Energy…"
-            />
-          </label>
-
-          <label class="add-field add-field-wide">
-            <span>Comments</span>
-            <textarea
-              class="add-input add-textarea"
-              rows="3"
-              [(ngModel)]="addFormData.comments"
-              placeholder="Any additional notes…"
-            ></textarea>
-          </label>
-        </div>
-
-        @if (addFormError) {
-          <p class="add-form-error">{{ addFormError }}</p>
-        }
-        @if (successMessage && activeTab === "single") {
-          <p class="success-message">{{ successMessage }}</p>
-        }
-
-        <div class="add-form-actions">
-          <button type="button" class="btn-clear-add" (click)="resetAddForm()">
-            Clear
-          </button>
-          <button
-            type="button"
-            class="btn-submit-add"
-            (click)="submitAddForm()"
-            [disabled]="addFormSaving"
-          >
-            {{ addFormSaving ? "Saving…" : "Add lead" }}
-          </button>
-        </div>
-      </div>
-    }
-  </section>
+  @if ((successMessage || parseError) && !drawerOpen) {
+    <div class="flash" [class.flash-error]="!!parseError" role="status">
+      <span class="flash-dot" aria-hidden="true"></span>
+      <span class="flash-text">{{ parseError || successMessage }}</span>
+      <button type="button" class="flash-close" (click)="dismissMessages()" aria-label="Dismiss message">
+        ×
+      </button>
+    </div>
+  }
 
   <!-- Preview imported leads -->
   <section class="preview-panel" *ngIf="pendingLeads.length">
     <div class="preview-header">
-      <h3>Preview import ({{ pendingLeads.length }})</h3>
-      <button
-        type="button"
-        class="btn-save"
-        (click)="saveLeads()"
-        [disabled]="loading"
-      >
-        {{ loading ? "Saving…" : "Save" }}
-      </button>
+      <div class="preview-heading">
+        <p class="page-eyebrow">Review import</p>
+        <h3>
+          {{ pendingLeads.length }} row{{ pendingLeads.length === 1 ? "" : "s" }} ready to save
+        </h3>
+        <p class="preview-sub">
+          Edit any cell before saving. Duplicate rows are ignored automatically.
+        </p>
+      </div>
+      <div class="preview-actions">
+        <button type="button" class="btn-ghost" (click)="cancelPreview()">
+          Cancel
+        </button>
+        <button
+          type="button"
+          class="btn-primary"
+          (click)="saveLeads()"
+          [disabled]="loading"
+        >
+          {{ loading ? "Saving…" : "Save " + pendingLeads.length + " leads" }}
+        </button>
+      </div>
     </div>
 
     <div class="table-scroll">
-      <table class="leads-table">
+      <table class="leads-table preview-table">
         <thead>
           <tr>
             <th>Region</th>
@@ -336,8 +198,8 @@
   <!-- Saved leads -->
   <section class="saved-panel">
     <div class="saved-header">
-      <h3>
-        Saved leads
+      <div class="saved-heading">
+        <h3>Saved leads</h3>
         <span class="count-badge" *ngIf="!tableLoading">
           @if (hasSearch) {
             {{ filteredLeads.length }} of {{ savedLeads.length }}
@@ -345,7 +207,7 @@
             {{ savedLeads.length }}
           }
         </span>
-      </h3>
+      </div>
       <button
         type="button"
         class="btn-delete"
@@ -377,7 +239,7 @@
         <input
           type="search"
           class="search-input"
-          placeholder="Filter by any column…"
+          placeholder="Filter by organisation, country, email…"
           [value]="searchQuery"
           (input)="onSearchInput($event)"
         />
@@ -391,6 +253,9 @@
           ×
         </button>
       </label>
+      <span class="toolbar-hint">
+        Click any cell to edit it inline
+      </span>
     </div>
 
     <div class="empty-state" *ngIf="tableLoading">
@@ -410,7 +275,15 @@
     >
       <span class="empty-icon">📭</span>
       <p>No leads saved yet.</p>
-      <p class="empty-hint">Import an Excel file or add a lead above.</p>
+      <p class="empty-hint">Import an Excel file or add a lead to get started.</p>
+      <div class="empty-actions">
+        <button type="button" class="btn-secondary" (click)="openDrawer('single')">
+          Add lead
+        </button>
+        <button type="button" class="btn-primary" (click)="openDrawer('import')">
+          Import Excel
+        </button>
+      </div>
     </div>
     <div
       class="empty-state"
@@ -485,6 +358,7 @@
               <input
                 class="cell-input"
                 [value]="lead.region"
+                aria-label="Region"
                 (change)="
                   updateSavedField(lead, 'region', $any($event.target).value)
                 "
@@ -494,6 +368,7 @@
               <input
                 class="cell-input"
                 [value]="lead.country"
+                aria-label="Country"
                 (change)="
                   updateSavedField(lead, 'country', $any($event.target).value)
                 "
@@ -501,8 +376,9 @@
             </td>
             <td>
               <input
-                class="cell-input"
+                class="cell-input cell-strong"
                 [value]="lead.organization"
+                aria-label="Organization"
                 (change)="
                   updateSavedField(
                     lead,
@@ -516,6 +392,7 @@
               <input
                 class="cell-input"
                 [value]="lead.acronym"
+                aria-label="Acronym"
                 (change)="
                   updateSavedField(lead, 'acronym', $any($event.target).value)
                 "
@@ -525,6 +402,7 @@
               <input
                 class="cell-input"
                 [value]="lead.entityType"
+                aria-label="Entity type"
                 (change)="
                   updateSavedField(
                     lead,
@@ -538,6 +416,7 @@
               <input
                 class="cell-input"
                 [value]="lead.website"
+                aria-label="Website"
                 (change)="
                   updateSavedField(lead, 'website', $any($event.target).value)
                 "
@@ -547,6 +426,7 @@
               <input
                 class="cell-input"
                 [value]="lead.contactEmail"
+                aria-label="Contact email"
                 (change)="
                   updateSavedField(
                     lead,
@@ -560,6 +440,7 @@
               <input
                 class="cell-input cell-input-wide"
                 [value]="lead.climateSpecialty"
+                aria-label="Climate specialty"
                 (change)="
                   updateSavedField(
                     lead,
@@ -573,6 +454,7 @@
               <input
                 class="cell-input cell-input-wide"
                 [value]="lead.comments"
+                aria-label="Comments"
                 (change)="
                   updateSavedField(lead, 'comments', $any($event.target).value)
                 "
@@ -583,6 +465,7 @@
                 [class]="getStatusClass(lead.status)"
                 [ngModel]="lead.status"
                 (ngModelChange)="updateSavedField(lead, 'status', $event)"
+                aria-label="Lead status"
               >
                 <option *ngFor="let status of statusOptions" [value]="status">
                   {{ status }}
@@ -622,6 +505,227 @@
       </div>
     </div>
   </section>
+
+  <!-- ── Lead intake drawer ── -->
+  <div class="drawer-layer" [class.is-open]="drawerOpen">
+    <div class="drawer-backdrop" (click)="closeDrawer()" aria-hidden="true"></div>
+    <aside
+      class="drawer"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="lead-intake-title"
+    >
+      <header class="drawer-head">
+        <div>
+          <p class="page-eyebrow">Lead intake</p>
+          <h3 id="lead-intake-title">
+            {{ activeTab === "import" ? "Import from Excel" : "Add a single lead" }}
+          </h3>
+          <p>
+            {{
+              activeTab === "import"
+                ? "Upload a spreadsheet and review the rows before saving."
+                : "Create one record manually. Only the organisation is required."
+            }}
+          </p>
+        </div>
+        <button
+          type="button"
+          class="drawer-close"
+          (click)="closeDrawer()"
+          aria-label="Close panel"
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true">
+            <path d="M6 6l12 12M18 6 6 18" />
+          </svg>
+        </button>
+      </header>
+
+      <div class="drawer-tabs" role="tablist" aria-label="Lead intake mode">
+        <button
+          type="button"
+          role="tab"
+          class="tab-btn"
+          [class.tab-active]="activeTab === 'import'"
+          [attr.aria-selected]="activeTab === 'import'"
+          (click)="activeTab = 'import'"
+        >
+          Import Excel
+        </button>
+        <button
+          type="button"
+          role="tab"
+          class="tab-btn"
+          [class.tab-active]="activeTab === 'single'"
+          [attr.aria-selected]="activeTab === 'single'"
+          (click)="activeTab = 'single'"
+        >
+          Single lead
+        </button>
+      </div>
+
+      <div class="drawer-body">
+        @if (activeTab === "import") {
+          <label class="drop-area">
+            <div class="drop-area-inner">
+              <span class="drop-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M12 16V4M7 9l5-5 5 5" />
+                  <path d="M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3" />
+                </svg>
+              </span>
+              <span class="drop-title">Drop your Excel file here</span>
+              <span class="drop-sub">or click to browse — .xlsx / .xls</span>
+            </div>
+            <input
+              type="file"
+              accept=".xlsx,.xls"
+              (click)="$any($event.target).value = ''"
+              (change)="onFileChange($event)"
+            />
+          </label>
+
+          <p class="file-meta" *ngIf="fileName">
+            <span class="file-meta-icon">📄</span> {{ fileName }}
+          </p>
+
+          <p class="drawer-note">
+            <strong>Required headers:</strong> Region, Country, Organization,
+            Acronym, Entity Type, Website, Contact Email, Climate
+            Specialty/Profile.
+          </p>
+
+          <p class="error-message" *ngIf="parseError">{{ parseError }}</p>
+        }
+
+        @if (activeTab === "single") {
+          <div class="add-lead-grid">
+            <label class="add-field add-field-wide">
+              <span>Organization <span class="req">*</span></span>
+              <input
+                type="text"
+                class="add-input"
+                [(ngModel)]="addFormData.organization"
+                placeholder="Organization name"
+              />
+            </label>
+
+            <label class="add-field">
+              <span>Acronym</span>
+              <input
+                type="text"
+                class="add-input"
+                [(ngModel)]="addFormData.acronym"
+                placeholder="e.g. WAGA"
+              />
+            </label>
+
+            <label class="add-field">
+              <span>Region</span>
+              <input
+                type="text"
+                class="add-input"
+                [(ngModel)]="addFormData.region"
+                placeholder="e.g. Sub-Saharan Africa"
+              />
+            </label>
+
+            <label class="add-field">
+              <span>Country</span>
+              <input
+                type="text"
+                class="add-input"
+                [(ngModel)]="addFormData.country"
+                placeholder="e.g. Kenya"
+              />
+            </label>
+
+            <label class="add-field">
+              <span>Entity Type</span>
+              <input
+                type="text"
+                class="add-input"
+                [(ngModel)]="addFormData.entityType"
+                placeholder="e.g. NGO"
+              />
+            </label>
+
+            <label class="add-field">
+              <span>Website</span>
+              <input
+                type="url"
+                class="add-input"
+                [(ngModel)]="addFormData.website"
+                placeholder="https://…"
+              />
+            </label>
+
+            <label class="add-field">
+              <span>Contact Email</span>
+              <input
+                type="email"
+                class="add-input"
+                [(ngModel)]="addFormData.contactEmail"
+                placeholder="contact@org.org"
+              />
+            </label>
+
+            <label class="add-field">
+              <span>Status</span>
+              <select
+                class="add-input add-select"
+                [(ngModel)]="addFormData.status"
+              >
+                <option *ngFor="let s of statusOptions" [value]="s">
+                  {{ s }}
+                </option>
+              </select>
+            </label>
+
+            <label class="add-field add-field-wide">
+              <span>Climate Specialty / Profile</span>
+              <input
+                type="text"
+                class="add-input"
+                [(ngModel)]="addFormData.climateSpecialty"
+                placeholder="e.g. Adaptation, REDD+, Renewable Energy…"
+              />
+            </label>
+
+            <label class="add-field add-field-wide">
+              <span>Comments</span>
+              <textarea
+                class="add-input add-textarea"
+                rows="3"
+                [(ngModel)]="addFormData.comments"
+                placeholder="Any additional notes…"
+              ></textarea>
+            </label>
+          </div>
+
+          @if (addFormError) {
+            <p class="add-form-error">{{ addFormError }}</p>
+          }
+        }
+      </div>
+
+      @if (activeTab === "single") {
+        <footer class="drawer-foot">
+          <button type="button" class="btn-ghost" (click)="resetAddForm()">
+            Clear
+          </button>
+          <button
+            type="button"
+            class="btn-primary"
+            (click)="submitAddForm()"
+            [disabled]="addFormSaving"
+          >
+            {{ addFormSaving ? "Saving…" : "Add lead" }}
+          </button>
+        </footer>
+      }
+    </aside>
+  </div>
 
   <app-confirm-dialog
     [open]="deleteConfirmOpen"

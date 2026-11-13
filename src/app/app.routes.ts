@@ -1,5 +1,6 @@
 import { Routes } from "@angular/router";
 import { LayoutComponent } from "./layout/layout.component";
+import { LandingComponent } from "./pages/landing/landing.component";
 import { Stage1Component } from "./pages/stage1/stage1.component";
 import { Stage2Component } from "./pages/stage2/stage2.component";
 import { LoginComponent } from "./pages/login/login.component";
@@ -12,11 +13,12 @@ import { adminGuard, authGuard } from "./guards/auth.guard";
 
 export const routes: Routes = [
   { path: "login", component: LoginComponent },
+  { path: "home", component: LandingComponent },
+  { path: "", redirectTo: "home", pathMatch: "full" },
   {
     path: "",
     component: LayoutComponent,
     children: [
-      { path: "", redirectTo: "stage1", pathMatch: "full" },
       { path: "stage1", component: Stage1Component },
       { path: "stage2", component: Stage2Component, canActivate: [authGuard] },
       {

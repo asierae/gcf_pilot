@@ -20,16 +20,16 @@
       }
       <a routerLink="/" class="logo logo-link">
         <img
-          src="gcf-support-logo.svg"
+          src="avera-logo.svg"
           alt=""
           class="logo-mark"
           width="40"
           height="40"
         />
         <div class="logo-text">
-          <span class="logo-name">GCF Support</span>
+          <span class="logo-name">AVERA</span>
           @if (!authService.isLoggedIn) {
-            <span class="subtitle">Climate Project Advisory Platform</span>
+            <span class="subtitle">CAPITAL ACCESS</span>
           }
         </div>
       </a>
@@ -148,6 +148,7 @@
         [class.sidebar-collapsed]="sidebarCollapsed"
         aria-label="App navigation"
       >
+        <div class="nav-caption" aria-hidden="true">Workspace</div>
         <ul class="nav-menu">
           <li>
             <a
@@ -156,7 +157,12 @@
               class="nav-link"
               [title]="sidebarCollapsed ? 'Plans & Pricing' : ''"
             >
-              <span class="nav-icon">💎</span>
+              <span class="nav-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M12 3 3 9l9 12 9-12-9-6Z" />
+                  <path d="M3 9h18" />
+                </svg>
+              </span>
               <span class="nav-label">Plans &amp; Pricing</span>
             </a>
           </li>
@@ -167,7 +173,13 @@
               class="nav-link"
               [title]="sidebarCollapsed ? 'Stage 1' : ''"
             >
-              <span class="nav-icon">📋</span>
+              <span class="nav-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M9 4H7a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-2" />
+                  <rect x="9" y="2.5" width="6" height="3.5" rx="1" />
+                  <path d="m9 13 2.2 2.2L15.5 11" />
+                </svg>
+              </span>
               <span class="nav-label">Stage 1</span>
             </a>
           </li>
@@ -178,7 +190,12 @@
               class="nav-link"
               [title]="sidebarCollapsed ? 'Stage 2' : ''"
             >
-              <span class="nav-icon">📄</span>
+              <span class="nav-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8l-5-5Z" />
+                  <path d="M14 3v5h5M9 13h6M9 17h6" />
+                </svg>
+              </span>
               <span class="nav-label">Stage 2</span>
             </a>
           </li>
@@ -191,7 +208,14 @@
                 class="nav-link"
                 [title]="sidebarCollapsed ? 'Dashboard' : ''"
               >
-                <span class="nav-icon">📊</span>
+                <span class="nav-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="3" width="7" height="7" rx="1.5" />
+                    <rect x="14" y="3" width="7" height="7" rx="1.5" />
+                    <rect x="3" y="14" width="7" height="7" rx="1.5" />
+                    <rect x="14" y="14" width="7" height="7" rx="1.5" />
+                  </svg>
+                </span>
                 <span class="nav-label">Dashboard</span>
               </a>
             </li>
@@ -202,7 +226,13 @@
                 class="nav-link"
                 [title]="sidebarCollapsed ? 'Leads' : ''"
               >
-                <span class="nav-icon">📋</span>
+                <span class="nav-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M16 20v-1.5a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4V20" />
+                    <circle cx="9.5" cy="7" r="3.5" />
+                    <path d="M17 4.5a3.5 3.5 0 0 1 0 6.9M21 20v-1.5a4 4 0 0 0-3-3.8" />
+                  </svg>
+                </span>
                 <span class="nav-label">Leads</span>
               </a>
             </li>
@@ -277,6 +307,6 @@
       to improve the quality and readiness of your application; however, final
       funding decisions rest solely with the grant-giving organizations.
     </p>
-    <p class="footer-copy">GCF Support &copy; 2026</p>
+    <p class="footer-copy">Avera Capital Access &copy; 2026</p>
   </footer>
 </div>

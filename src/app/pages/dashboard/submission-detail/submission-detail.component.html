@@ -29,7 +29,13 @@
           <div class="edit-actions">
             @if (!editMode) {
               <button type="button" class="btn-edit" (click)="enterEditMode()">
-                <span class="btn-edit-icon">✏️</span> Edit
+                <span class="btn-edit-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="m14 4 6 6L9 21H3v-6L14 4Z" />
+                    <path d="m12 6 6 6" />
+                  </svg>
+                </span>
+                Edit
               </button>
             } @else {
               <button
@@ -193,7 +199,11 @@
       >
         <div class="attachments-panel-header">
           <h2>
-            <span class="attachments-panel-icon">📎</span>
+            <span class="attachments-panel-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                <path d="m20.5 11.5-8.9 8.9a5.5 5.5 0 0 1-7.8-7.8l9.2-9.2a3.7 3.7 0 0 1 5.2 5.2l-9.2 9.2a1.8 1.8 0 0 1-2.6-2.6l8.5-8.5" />
+              </svg>
+            </span>
             Uploaded documents
           </h2>
           @if (editMode) {
@@ -223,7 +233,12 @@
                           rel="noopener noreferrer"
                           class="attachment-read-link"
                         >
-                          <span class="att-read-icon">📄</span>
+                          <span class="att-read-icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                              <path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8l-5-5Z" />
+                              <path d="M14 3v5h5" />
+                            </svg>
+                          </span>
                           {{ att.name || "Document" }}
                         </a>
                       </li>
@@ -311,7 +326,7 @@
       @if (sectionHasValues(i)) {
         <section class="detail-section">
           <div class="section-title">
-            <span class="section-icon">{{ section.icon }}</span>
+            <span class="section-icon"><app-step-icon [name]="sectionIconName(section.id)" /></span>
             <h2>{{ section.title }}</h2>
           </div>
           <div class="section-body">

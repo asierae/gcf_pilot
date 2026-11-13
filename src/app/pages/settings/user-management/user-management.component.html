@@ -1,6 +1,7 @@
 <div class="um-page">
   <div class="um-page-header">
     <div>
+      <p class="um-eyebrow">Workspace settings</p>
       <h2>User Management</h2>
       <p>Manage platform accounts, roles and access.</p>
     </div>
@@ -136,8 +137,19 @@
               </td>
               <td class="col-date">{{ formatDate(user.createdAt) }}</td>
               <td class="col-actions">
-                <button type="button" class="btn-action btn-edit-user" (click)="openEditForm(user)" title="Edit user">✏️</button>
-                <button type="button" class="btn-action btn-delete-user" (click)="deleteUser(user)" title="Delete user">🗑️</button>
+                <button type="button" class="btn-action btn-edit-user" (click)="openEditForm(user)" title="Edit user" aria-label="Edit user">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="m14 4 6 6L9 21H3v-6L14 4Z" />
+                    <path d="m12 6 6 6" />
+                  </svg>
+                </button>
+                <button type="button" class="btn-action btn-delete-user" (click)="deleteUser(user)" title="Delete user" aria-label="Delete user">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M4 7h16M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" />
+                    <path d="M6 7l1 13a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1l1-13" />
+                    <path d="M10 11v6M14 11v6" />
+                  </svg>
+                </button>
               </td>
             </tr>
           }

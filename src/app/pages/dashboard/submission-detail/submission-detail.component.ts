@@ -29,6 +29,7 @@ import {
 import { ApplicantRecord } from "../../../models/applicant.model";
 import { StoredAttachment } from "../../../models/attachment.model";
 import { resolveCloudinaryFileUrl } from "../../../shared/utils/cloudinary-url.util";
+import { StepIconComponent } from "../../../shared/components/step-icon/step-icon.component";
 
 type FieldEditType = "text" | "textarea" | "select" | "attachment" | "readonly";
 
@@ -38,13 +39,25 @@ const READ_ONLY_FIELDS = new Set(["applicantName", "areaOfOperation"]);
 @Component({
   selector: "app-submission-detail",
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, StepIconComponent],
   templateUrl: "./submission-detail.component.html",
   styleUrl: "./submission-detail.component.css",
 })
 export class SubmissionDetailComponent implements OnInit {
   submission: FormSubmission | null = null;
   sections = STAGE1_DISPLAY_SECTIONS;
+
+  private readonly sectionIconMap: Record<string, string> = {
+    "access-modality": "access",
+    "general-information": "general",
+    "legal-status": "legal",
+    "additional-information": "additional",
+    "fast-track": "fasttrack",
+  };
+
+  sectionIconName(sectionId: string): string {
+    return this.sectionIconMap[sectionId] ?? "general";
+  }
   sectionNotes: Record<string, string> = {};
   lastSentAt: string | null = null;
   status: SubmissionStatus = "Pending";

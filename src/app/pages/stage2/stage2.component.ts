@@ -15,11 +15,12 @@ import {
 } from '../../shared/data/stage2-form.config';
 import { Stage1StepsComponent } from '../../shared/components/stage1-steps/stage1-steps.component';
 import { FileUploadComponent } from '../../shared/components/file-upload/file-upload.component';
+import { StepIconComponent } from '../../shared/components/step-icon/step-icon.component';
 
 @Component({
   selector: 'app-stage2',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, Stage1StepsComponent, FileUploadComponent],
+  imports: [CommonModule, ReactiveFormsModule, Stage1StepsComponent, FileUploadComponent, StepIconComponent],
   templateUrl: './stage2.component.html',
   styleUrl: './stage2.component.css'
 })

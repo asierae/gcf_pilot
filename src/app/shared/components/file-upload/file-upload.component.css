@@ -30,9 +30,9 @@
 .attached-count {
   font-size: 0.75rem;
   font-weight: 700;
-  color: #6ee7b7;
-  background: rgba(16, 185, 129, 0.12);
-  border: 1px solid rgba(16, 185, 129, 0.25);
+  color: #f5dfa8;
+  background: rgba(212, 169, 78, 0.12);
+  border: 1px solid rgba(212, 169, 78, 0.25);
   border-radius: 999px;
   padding: 0.15rem 0.55rem;
 }
@@ -107,7 +107,7 @@
 
 .file-link {
   font-size: 0.75rem;
-  color: #6ee7b7;
+  color: #f5dfa8;
   text-decoration: none;
   width: fit-content;
 }
@@ -147,8 +147,8 @@
 }
 
 .upload-area.drag-over {
-  border-color: rgba(16, 185, 129, 0.55);
-  background: rgba(16, 185, 129, 0.06);
+  border-color: rgba(212, 169, 78, 0.55);
+  background: rgba(212, 169, 78, 0.06);
 }
 
 .upload-area.disabled {

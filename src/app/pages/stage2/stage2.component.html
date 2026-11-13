@@ -1,7 +1,12 @@
 <div class="app-container">
   @if (submitSuccess) {
     <div class="success-banner">
-      <span class="success-icon">✅</span>
+      <span class="success-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="9" />
+          <path d="m8.5 12 2.5 2.5 4.5-5" />
+        </svg>
+      </span>
       <h2>Application Submitted Successfully</h2>
       <p>Your full accreditation application (Stage 1 + Stage 2) has been saved.</p>
     </div>
@@ -38,7 +43,7 @@
                     [class.entry-point]="item.index === stage2EntryStep"
                     (click)="goToStep(item.index)"
                   >
-                    <span class="nav-step-icon">{{ item.icon }}</span>
+                    <span class="nav-step-icon"><app-step-icon [name]="item.id" /></span>
                     <span class="nav-step-text">
                       <span class="nav-step-title">{{ item.title }}</span>
                       @if (item.subtitle) {
@@ -66,7 +71,7 @@
                 <div class="card-grid">
                   @for (item of group.steps; track item.id) {
                     <div class="section-card" [class.completed]="currentStep > item.index" (click)="goToStep(item.index)">
-                      <div class="card-icon">{{ item.icon }}</div>
+                      <div class="card-icon"><app-step-icon [name]="item.id" /></div>
                       <div class="card-details">
                         <h4>{{ item.title }}</h4>
                         @if (item.subtitle) {
@@ -193,7 +198,11 @@
                 <div class="submit-section">
                   <button type="submit" class="btn-submit">
                     <span>Submit Application</span>
-                    <span class="btn-icon">✉️</span>
+                    <span class="btn-icon" aria-hidden="true">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 3 10.5 13.5M21 3l-6.5 18-4-8-8-4L21 3Z" />
+                      </svg>
+                    </span>
                   </button>
                 </div>
               }

@@ -1,0 +1,620 @@
+<div class="avera">
+  <header
+    class="avera-nav"
+    [class.is-scrolled]="scrolled"
+    [class.is-open]="menuOpen"
+  >
+    <a class="avera-brand" routerLink="/home" (click)="closeMenu()">
+      <span class="avera-brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 40 40" fill="none">
+          <path
+            d="M20 3.5 34.5 12v16L20 36.5 5.5 28V12L20 3.5Z"
+            stroke="currentColor"
+            stroke-width="1.4"
+          />
+          <path
+            d="M20 11v18M12 24l8-13 8 13"
+            stroke="currentColor"
+            stroke-width="1.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+        </svg>
+      </span>
+      <span class="avera-brand-text">
+        <strong>AVERA</strong>
+        <span>CAPITAL ACCESS</span>
+      </span>
+    </a>
+
+    <nav class="avera-nav-links" aria-label="Primary">
+      <a href="#methodology" (click)="closeMenu()">Methodology</a>
+      <a href="#edge" (click)="closeMenu()">The Avera Edge</a>
+      <a href="#reach" (click)="closeMenu()">Global Reach</a>
+      <a href="#portal" (click)="closeMenu()">Client Portal</a>
+    </nav>
+
+    <div class="avera-nav-actions">
+      <a routerLink="/login" class="avera-nav-login">Sign in</a>
+      <a routerLink="/stage1" class="avera-btn avera-btn-nav">
+        Get an Initial Assessment <span aria-hidden="true">→</span>
+      </a>
+    </div>
+
+    <button
+      type="button"
+      class="avera-burger"
+      [attr.aria-expanded]="menuOpen"
+      aria-label="Toggle navigation"
+      (click)="toggleMenu()"
+    >
+      <span></span><span></span><span></span>
+    </button>
+  </header>
+
+  <main>
+    <!-- ══ HERO ══ -->
+    <section class="avera-hero-stage" id="hero">
+      <div class="avera-hero-sticky">
+        <app-impact-globe class="avera-globe"></app-impact-globe>
+
+        <div class="avera-hero-grid">
+          <div class="avera-hero-copy">
+            <p class="avera-eyebrow">
+              <span class="avera-pulse" aria-hidden="true"></span>
+              Green Climate Fund Advisory &middot; Global
+            </p>
+
+            <h1>
+              <span class="avera-hero-brand">AVERA CAPITAL ACCESS</span>
+              <span class="avera-hero-title">
+                Bridging global capital to
+                <em>high&#8209;impact</em> climate projects.
+              </span>
+            </h1>
+
+            <p class="avera-hero-sub">
+              Expert guidance for public and private organizations to secure
+              Green Climate Fund (GCF) accreditation and funding.
+            </p>
+
+            <div class="avera-hero-actions">
+              <a routerLink="/stage1" class="avera-btn avera-btn-primary">
+                Get an Initial Assessment <span aria-hidden="true">→</span>
+              </a>
+              <a href="#methodology" class="avera-btn avera-btn-ghost">
+                Explore our methodology
+              </a>
+            </div>
+
+            <ul class="avera-hero-meta">
+              <li>
+                <strong data-count="4" data-decimals="0">4</strong>
+                <span>continents</span>
+              </li>
+              <li>
+                <strong data-count="38" data-decimals="0">38</strong>
+                <span>institutions advised</span>
+              </li>
+              <li>
+                <strong data-count="2.4" data-decimals="1" data-prefix="€" data-suffix="B"
+                  >€2.4B</strong
+                >
+                <span>capital bridged</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="avera-hero-cards" aria-hidden="true">
+          <article class="avera-data-card avera-card-a">
+            <p class="dc-label">Capital bridged</p>
+            <p class="dc-value">€2.4B</p>
+            <svg class="dc-spark" viewBox="0 0 120 34" fill="none">
+              <path
+                d="M2 28 16 24 28 26 42 17 56 20 70 12 84 14 98 7 118 3"
+                stroke="url(#sparkGrad)"
+                stroke-width="2"
+                stroke-linecap="round"
+              />
+              <defs>
+                <linearGradient id="sparkGrad" x1="0" y1="0" x2="120" y2="0">
+                  <stop stop-color="#d4a94e" />
+                  <stop offset="1" stop-color="#f5dfa8" />
+                </linearGradient>
+              </defs>
+            </svg>
+            <p class="dc-foot">Illustrative &middot; 2021&ndash;2026</p>
+          </article>
+
+          <article class="avera-data-card avera-card-b">
+            <p class="dc-label">Project scale</p>
+            <p class="dc-value">1,280 <span>MW</span></p>
+            <div class="dc-bars">
+              <span style="height: 34%"></span>
+              <span style="height: 58%"></span>
+              <span style="height: 46%"></span>
+              <span style="height: 72%"></span>
+              <span style="height: 88%"></span>
+            </div>
+            <p class="dc-foot">Illustrative renewable capacity</p>
+          </article>
+
+          <article class="avera-data-card avera-card-c">
+            <p class="dc-label">GCF alignment</p>
+            <p class="dc-value">94<span>%</span></p>
+            <p class="dc-ring-label">
+              <span class="avera-mini-dot"></span> Readiness benchmark
+            </p>
+            <p class="dc-foot">Illustrative assessment</p>
+          </article>
+        </div>
+
+        <div class="avera-scroll-cue">
+          <span>Scroll to follow the capital</span>
+          <span class="avera-scroll-line" aria-hidden="true"></span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══ METHODOLOGY ══ -->
+    <section class="avera-section avera-method" id="methodology">
+      <div class="avera-container">
+        <div class="avera-section-head">
+          <p class="avera-kicker" data-reveal>02 &mdash; Methodology</p>
+          <h2 data-reveal>Our results-driven methodology.</h2>
+          <p class="avera-lede" data-reveal>
+            Four disciplined workstreams that move institutions from structural
+            gaps to GCF-approved funding &mdash; with a clear deliverable at
+            every stage.
+          </p>
+        </div>
+
+        <div class="avera-method-grid">
+          <article class="avera-method-card" data-reveal>
+            <div class="mc-top">
+              <span class="mc-index">01</span>
+              <span class="mc-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4">
+                  <circle cx="10.5" cy="10.5" r="6.5" />
+                  <path d="m15.5 15.5 4.5 4.5M8 10.5h5M10.5 8v5" stroke-linecap="round" />
+                </svg>
+              </span>
+            </div>
+            <h3>Initial Assessment</h3>
+            <p>
+              A forensic gap analysis across fiduciary standards, environmental
+              and social safeguards, gender policy and monitoring capacity.
+            </p>
+            <div class="mc-deliverable">
+              <span>Deliverable</span>
+              <strong>Readiness Scorecard</strong>
+            </div>
+          </article>
+
+          <article class="avera-method-card" data-reveal>
+            <div class="mc-top">
+              <span class="mc-index">02</span>
+              <span class="mc-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4">
+                  <circle cx="12" cy="12" r="8" />
+                  <path d="m15.5 8.5-2 5-5 2 2-5 5-2Z" stroke-linejoin="round" />
+                </svg>
+              </span>
+            </div>
+            <h3>Strategy &amp; Advisory</h3>
+            <p>
+              Precise GCF alignment: entity positioning, accreditation pathway
+              design and a board-ready sequencing plan.
+            </p>
+            <div class="mc-deliverable">
+              <span>Deliverable</span>
+              <strong>Accreditation Roadmap</strong>
+            </div>
+          </article>
+
+          <article class="avera-method-card" data-reveal>
+            <div class="mc-top">
+              <span class="mc-index">03</span>
+              <span class="mc-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4">
+                  <path d="M12 3 21 8l-9 5-9-5 9-5Z" stroke-linejoin="round" />
+                  <path d="M3 12.5 12 17.5l9-5M3 16.5 12 21.5l9-5" stroke-linejoin="round" />
+                </svg>
+              </span>
+            </div>
+            <h3>Full-Cycle Consulting</h3>
+            <p>
+              Proposal engineering, project design, co-financing structure and
+              submission management through technical review.
+            </p>
+            <div class="mc-deliverable">
+              <span>Deliverable</span>
+              <strong>Fund-Ready Dossier</strong>
+            </div>
+          </article>
+
+          <article class="avera-method-card" data-reveal>
+            <div class="mc-top">
+              <span class="mc-index">04</span>
+              <span class="mc-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4">
+                  <path d="M12 3.5 19 6v5.5c0 4.3-3 7.3-7 9-4-1.7-7-4.7-7-9V6l7-2.5Z" stroke-linejoin="round" />
+                  <path d="m9 12 2 2 4-4" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+              </span>
+            </div>
+            <h3>Institutional Retainer</h3>
+            <p>
+              A dedicated long-term advisory desk for portfolio monitoring,
+              compliance and successive funding cycles.
+            </p>
+            <div class="mc-deliverable">
+              <span>Deliverable</span>
+              <strong>Advisory Desk</strong>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══ AVERA EDGE ══ -->
+    <section class="avera-section avera-edge" id="edge">
+      <div class="avera-container">
+        <div class="avera-section-head avera-head-split">
+          <div>
+            <p class="avera-kicker" data-reveal>03 &mdash; The Avera Edge</p>
+            <h2 data-reveal>Structural precision, end to end.</h2>
+          </div>
+          <p class="avera-lede" data-reveal>
+            We do not simply advise. We engineer the institutional and financial
+            architecture that makes climate projects fundable.
+          </p>
+        </div>
+
+        <div class="avera-steps">
+          <article class="avera-step" data-reveal>
+            <span class="step-num">01</span>
+            <h3>Structural Readiness</h3>
+            <p>
+              We benchmark your institution against GCF fiduciary and
+              environmental standards, closing gaps before formal review.
+            </p>
+            <span class="step-tag">Gap closure &middot; Governance</span>
+          </article>
+
+          <article class="avera-step" data-reveal>
+            <span class="step-num">02</span>
+            <h3>GCF Accreditation</h3>
+            <p>
+              We engineer the accreditation package and shepherd it through the
+              Fund's technical and independent review.
+            </p>
+            <span class="step-tag">Documentation &middot; Review</span>
+          </article>
+
+          <article class="avera-step" data-reveal>
+            <span class="step-num">03</span>
+            <h3>Fund Approval</h3>
+            <p>
+              We structure bankable projects, align co-financing and prepare the
+              dossier for Board approval.
+            </p>
+            <span class="step-tag">Structuring &middot; Board</span>
+          </article>
+        </div>
+
+        <div class="avera-stat-strip" data-reveal>
+          <div>
+            <strong data-count="2.4" data-decimals="1" data-prefix="€" data-suffix="B">€2.4B</strong>
+            <span>Capital bridged</span>
+          </div>
+          <div>
+            <strong data-count="38" data-decimals="0" data-suffix="+">38+</strong>
+            <span>Institutions advised</span>
+          </div>
+          <div>
+            <strong data-count="9" data-decimals="0">9</strong>
+            <span>Months average pathway</span>
+          </div>
+          <div>
+            <strong data-count="4" data-decimals="0">4</strong>
+            <span>Continents</span>
+          </div>
+          <p class="avera-stat-note">Illustrative portfolio figures.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══ GLOBAL REACH ══ -->
+    <section class="avera-section avera-reach" id="reach">
+      <div class="avera-container avera-reach-grid">
+        <div class="avera-reach-copy">
+          <p class="avera-kicker" data-reveal>04 &mdash; Global Reach</p>
+          <h2 data-reveal>Trusted by leaders,<br />driven by impact.</h2>
+          <p class="avera-lede" data-reveal>
+            From ministries of finance to regional development banks, Avera
+            works where policy, capital and climate outcomes intersect.
+          </p>
+
+          <ul class="avera-regions" data-reveal>
+            <li><span></span>Europe &amp; Switzerland &middot; Advisory hub</li>
+            <li><span></span>Africa &middot; Clean energy &amp; resilience</li>
+            <li><span></span>Asia-Pacific &middot; Adaptation finance</li>
+            <li><span></span>Latin America &middot; Nature-based capital</li>
+          </ul>
+
+          <p class="avera-reach-note" data-reveal>
+            Representative engagements. Client names withheld under advisory
+            confidentiality.
+          </p>
+        </div>
+
+        <div class="avera-reach-visual" data-reveal aria-hidden="true">
+          <div class="reach-orbit reach-orbit-1"></div>
+          <div class="reach-orbit reach-orbit-2"></div>
+          <div class="reach-orbit reach-orbit-3"></div>
+
+          <div class="reach-globe">
+            <div class="reach-globe-texture"></div>
+            <div class="reach-globe-shade"></div>
+            <div class="reach-marker" style="left: 27%; top: 39%">
+              <span>New York</span>
+            </div>
+            <div class="reach-marker" style="left: 47%; top: 29%">
+              <span>London</span>
+            </div>
+            <div class="reach-marker reach-marker-hub" style="left: 52%; top: 38%">
+              <span>Geneva</span>
+            </div>
+            <div class="reach-marker" style="left: 61%; top: 47%">
+              <span>Abu Dhabi</span>
+            </div>
+            <div class="reach-marker" style="left: 73%; top: 58%">
+              <span>Singapore</span>
+            </div>
+            <div class="reach-marker reach-marker-project" style="left: 56%; top: 64%">
+              <span>Nairobi</span>
+            </div>
+          </div>
+
+          <svg class="reach-arcs" viewBox="0 0 100 100" fill="none" preserveAspectRatio="none">
+            <path d="M27 39 Q39 20 52 38" />
+            <path d="M47 29 Q50 24 52 38" />
+            <path d="M61 47 Q56 40 52 38" />
+            <path d="M73 58 Q62 36 52 38" />
+            <path d="M52 38 Q58 52 56 64" />
+          </svg>
+        </div>
+      </div>
+
+      <div class="avera-container">
+        <div class="avera-quotes">
+          <figure class="avera-quote" data-reveal>
+            <div class="quote-logo">WAF &middot; MINISTRY OF FINANCE</div>
+            <blockquote>
+              Avera turned a two-year accreditation maze into a structured
+              nine-month pathway. Their gap analysis was the turning point for
+              our institution.
+            </blockquote>
+            <figcaption>
+              <strong>Minister of Climate Finance</strong>
+              <span>West African Republic &middot; Representative engagement</span>
+            </figcaption>
+          </figure>
+
+          <figure class="avera-quote" data-reveal>
+            <div class="quote-logo">RDB &middot; REGIONAL DEVELOPMENT BANK</div>
+            <blockquote>
+              Their structural review gave our board the confidence to pursue
+              GCF accreditation at scale &mdash; with a clear view of every
+              compliance requirement.
+            </blockquote>
+            <figcaption>
+              <strong>Chief Executive Officer</strong>
+              <span>Regional Development Bank &middot; Representative engagement</span>
+            </figcaption>
+          </figure>
+
+          <figure class="avera-quote" data-reveal>
+            <div class="quote-logo">SCF &middot; SOVEREIGN CLIMATE FUND</div>
+            <blockquote>
+              The most precise climate finance advisory team we have worked
+              with. Rigorous, discreet and genuinely focused on impact.
+            </blockquote>
+            <figcaption>
+              <strong>Director of Investments</strong>
+              <span>Sovereign Climate Fund &middot; Representative engagement</span>
+            </figcaption>
+          </figure>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══ CLIENT PORTAL ══ -->
+    <section class="avera-section avera-portal" id="portal">
+      <div class="avera-container avera-portal-grid">
+        <div class="avera-portal-copy">
+          <p class="avera-kicker" data-reveal>05 &mdash; Client Portal</p>
+          <h2 data-reveal>Access your PATH to funding.</h2>
+          <p class="avera-lede" data-reveal>
+            One secure workspace for documents, accreditation milestones and
+            direct advisory. Every requirement, every deadline, in view.
+          </p>
+
+          <ul class="avera-check-list" data-reveal>
+            <li>Secure document vault with audit trail</li>
+            <li>Live accreditation status and milestone tracking</li>
+            <li>Direct channel to your dedicated advisory desk</li>
+            <li>Board-ready reporting and portfolio analytics</li>
+          </ul>
+
+          <a routerLink="/login" class="avera-btn avera-btn-primary" data-reveal>
+            Consult our experts <span aria-hidden="true">→</span>
+          </a>
+        </div>
+
+        <div class="avera-portal-mock" data-reveal aria-hidden="true">
+          <div class="pm-chrome">
+            <span></span><span></span><span></span>
+            <em>portal.averacapital.com</em>
+          </div>
+
+          <div class="pm-body">
+            <div class="pm-login">
+              <div class="pm-mark">
+                <span class="pm-mark-shape"></span>
+                <span>AVERA</span>
+              </div>
+              <h3>Client sign in</h3>
+              <p>Secure access to your accreditation workspace.</p>
+
+              <label>Email address</label>
+              <div class="pm-field">name&#64;institution.org</div>
+              <label>Password</label>
+              <div class="pm-field pm-field-dots">••••••••••</div>
+
+              <div class="pm-submit">Sign in securely <span>→</span></div>
+              <p class="pm-secure">
+                <span class="pm-lock"></span> 256-bit encrypted session
+              </p>
+            </div>
+
+            <div class="pm-dashboard">
+              <div class="pm-dash-head">
+                <div>
+                  <p>Project status</p>
+                  <strong>East Africa Clean Energy Corridor</strong>
+                </div>
+                <span class="pm-badge">In review</span>
+              </div>
+
+              <div class="pm-progress">
+                <span style="width: 68%"></span>
+              </div>
+              <div class="pm-progress-meta">
+                <span>GCF accreditation &middot; technical review</span>
+                <strong>68%</strong>
+              </div>
+
+              <ul class="pm-steps">
+                <li class="is-done">Eligibility screening</li>
+                <li class="is-done">Gap analysis</li>
+                <li class="is-active">Accreditation package</li>
+                <li>Board review</li>
+              </ul>
+
+              <div class="pm-metrics">
+                <div><span>Capital aligned</span><strong>€186M</strong></div>
+                <div><span>Capacity</span><strong>1,280 MW</strong></div>
+                <div><span>Milestones</span><strong>7 / 10</strong></div>
+              </div>
+
+              <div class="pm-chart">
+                <span style="height: 38%"></span>
+                <span style="height: 54%"></span>
+                <span style="height: 46%"></span>
+                <span style="height: 70%"></span>
+                <span style="height: 62%"></span>
+                <span style="height: 84%"></span>
+                <span style="height: 76%"></span>
+                <span style="height: 96%"></span>
+              </div>
+              <p class="pm-chart-label">Illustrative readiness progression</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══ FINAL CTA ══ -->
+    <section class="avera-final">
+      <div class="avera-final-glow" aria-hidden="true"></div>
+      <div class="avera-container avera-final-inner">
+        <p class="avera-kicker" data-reveal>Next step</p>
+        <h2 data-reveal>Ready to structure your climate finance pathway?</h2>
+        <p data-reveal>
+          Begin with a confidential initial assessment. We will map your
+          institutional readiness and outline the fastest credible route to GCF
+          funding.
+        </p>
+        <div class="avera-final-actions" data-reveal>
+          <a routerLink="/stage1" class="avera-btn avera-btn-primary">
+            Get an Initial Assessment <span aria-hidden="true">→</span>
+          </a>
+          <a routerLink="/pricing" class="avera-btn avera-btn-ghost">
+            View engagement plans
+          </a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="avera-footer">
+    <div class="avera-container avera-footer-grid">
+      <div class="avera-footer-brand">
+        <a class="avera-brand" routerLink="/home">
+          <span class="avera-brand-mark" aria-hidden="true">
+            <svg viewBox="0 0 40 40" fill="none">
+              <path
+                d="M20 3.5 34.5 12v16L20 36.5 5.5 28V12L20 3.5Z"
+                stroke="currentColor"
+                stroke-width="1.4"
+              />
+              <path
+                d="M20 11v18M12 24l8-13 8 13"
+                stroke="currentColor"
+                stroke-width="1.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+          </span>
+          <span class="avera-brand-text">
+            <strong>AVERA</strong>
+            <span>CAPITAL ACCESS</span>
+          </span>
+        </a>
+        <p>
+          Climate finance advisory for public and private institutions seeking
+          Green Climate Fund accreditation and funding.
+        </p>
+      </div>
+
+      <div class="avera-footer-col">
+        <h4>Advisory</h4>
+        <a href="#methodology">Methodology</a>
+        <a href="#edge">The Avera Edge</a>
+        <a href="#reach">Global Reach</a>
+        <a routerLink="/pricing">Engagement plans</a>
+      </div>
+
+      <div class="avera-footer-col">
+        <h4>Access</h4>
+        <a routerLink="/login">Client portal</a>
+        <a routerLink="/stage1">Initial assessment</a>
+        <a routerLink="/dashboard">Advisor dashboard</a>
+      </div>
+
+      <div class="avera-footer-col">
+        <h4>Contact</h4>
+        <a href="mailto:advisory@averacapital.example">advisory&#64;averacapital.example</a>
+        <span>Geneva &middot; London &middot; Singapore</span>
+        <span>Mon&ndash;Fri &middot; 09:00&ndash;18:00 CET</span>
+      </div>
+    </div>
+
+    <div class="avera-container avera-footer-bottom">
+      <p>&copy; 2026 Avera Capital Access. All rights reserved.</p>
+      <p>
+        Independent advisory firm, not affiliated with the Green Climate Fund.
+        Figures and client references are illustrative.
+      </p>
+      <div class="avera-footer-legal">
+        <a href="#hero">Privacy</a>
+        <a href="#hero">Terms</a>
+        <a href="#hero">Disclosures</a>
+      </div>
+    </div>
+  </footer>
+</div>

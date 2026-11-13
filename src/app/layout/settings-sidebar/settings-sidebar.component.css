@@ -107,9 +107,9 @@
 }
 
 .sidebar-nav-btn.active {
-  color: #6ee7b7;
-  background: rgba(16, 185, 129, 0.1);
-  border-color: rgba(16, 185, 129, 0.25);
+  color: #f5dfa8;
+  background: rgba(212, 169, 78, 0.1);
+  border-color: rgba(212, 169, 78, 0.25);
 }
 
 .sidebar-nav-icon {
@@ -149,10 +149,10 @@
 
 .btn-new-user {
   padding: 0.5rem 1rem;
-  background: linear-gradient(135deg, #10b981, #059669);
+  background: linear-gradient(135deg, #d4a94e, #a8812f);
   border: none;
   border-radius: 10px;
-  color: #fff;
+  color: #0f172a;
   font-size: 0.85rem;
   font-weight: 700;
   cursor: pointer;
@@ -181,7 +181,7 @@
 }
 
 .user-search:focus {
-  border-color: rgba(16, 185, 129, 0.45);
+  border-color: rgba(212, 169, 78, 0.45);
 }
 
 .user-search::placeholder { color: #475569; }
@@ -189,7 +189,7 @@
 /* ── User form panel ── */
 .user-form-panel {
   background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(16, 185, 129, 0.2);
+  border: 1px solid rgba(212, 169, 78, 0.2);
   border-radius: 14px;
   padding: 1.25rem;
   animation: slideDown 0.2s ease;
@@ -261,8 +261,8 @@
 
 .form-field input:focus,
 .form-field select:focus {
-  border-color: rgba(16, 185, 129, 0.5);
-  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+  border-color: rgba(212, 169, 78, 0.5);
+  box-shadow: 0 0 0 3px rgba(212, 169, 78, 0.1);
 }
 
 .form-field select option { background: #1e293b; }
@@ -309,10 +309,10 @@
 
 .btn-save-form {
   padding: 0.5rem 1.125rem;
-  background: linear-gradient(135deg, #10b981, #059669);
+  background: linear-gradient(135deg, #d4a94e, #a8812f);
   border: none;
   border-radius: 8px;
-  color: #fff;
+  color: #0f172a;
   font-size: 0.8rem;
   font-weight: 700;
   cursor: pointer;
@@ -379,15 +379,15 @@
 }
 
 .avatar-admin {
-  background: rgba(139, 92, 246, 0.2);
-  color: #c4b5fd;
-  border: 1px solid rgba(139, 92, 246, 0.3);
+  background: rgba(232, 192, 106, 0.2);
+  color: #f5dfa8;
+  border: 1px solid rgba(232, 192, 106, 0.3);
 }
 
 .avatar-applicant {
-  background: rgba(16, 185, 129, 0.15);
-  color: #6ee7b7;
-  border: 1px solid rgba(16, 185, 129, 0.25);
+  background: rgba(212, 169, 78, 0.15);
+  color: #f5dfa8;
+  border: 1px solid rgba(212, 169, 78, 0.25);
 }
 
 .user-info {
@@ -424,15 +424,15 @@
 }
 
 .badge-admin {
-  background: rgba(139, 92, 246, 0.15);
-  color: #c4b5fd;
-  border: 1px solid rgba(139, 92, 246, 0.3);
+  background: rgba(232, 192, 106, 0.15);
+  color: #f5dfa8;
+  border: 1px solid rgba(232, 192, 106, 0.3);
 }
 
 .badge-applicant {
-  background: rgba(16, 185, 129, 0.12);
-  color: #6ee7b7;
-  border: 1px solid rgba(16, 185, 129, 0.25);
+  background: rgba(212, 169, 78, 0.12);
+  color: #f5dfa8;
+  border: 1px solid rgba(212, 169, 78, 0.25);
 }
 
 /* Status badge */
@@ -446,9 +446,9 @@
 }
 
 .badge-status-active {
-  background: rgba(16, 185, 129, 0.12);
-  color: #6ee7b7;
-  border: 1px solid rgba(16, 185, 129, 0.25);
+  background: rgba(212, 169, 78, 0.12);
+  color: #f5dfa8;
+  border: 1px solid rgba(212, 169, 78, 0.25);
 }
 
 .badge-status-pending {
@@ -480,11 +480,11 @@
   justify-content: center;
   width: 1.5rem;
   height: 1.5rem;
-  background: rgba(16, 185, 129, 0.12);
+  background: rgba(212, 169, 78, 0.12);
   border-radius: 50%;
   font-size: 0.75rem;
   font-weight: 700;
-  color: #6ee7b7;
+  color: #f5dfa8;
 }
 
 .col-empty { color: #334155; }
@@ -509,7 +509,7 @@
   transition: background 0.15s;
 }
 
-.btn-edit-user:hover { background: rgba(16, 185, 129, 0.12); }
+.btn-edit-user:hover { background: rgba(212, 169, 78, 0.12); }
 .btn-delete-user:hover { background: rgba(239, 68, 68, 0.12); }
 
 .empty-users {

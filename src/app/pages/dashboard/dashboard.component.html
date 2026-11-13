@@ -1,7 +1,10 @@
 <div class="dashboard">
-  <div class="dashboard-header">
-    <h2>Dashboard — Stage 1 Submissions</h2>
-    <p>All pre-screening questionnaire submissions stored in Firebase.</p>
+  <header class="dashboard-header">
+    <div class="dashboard-header-copy">
+      <p class="page-eyebrow">Admin overview</p>
+      <h2>Stage 1 submissions</h2>
+      <p>All pre-screening questionnaire submissions stored in Firebase.</p>
+    </div>
     <div class="header-actions">
       <span class="count-badge">
         @if (hasActiveFilters) {
@@ -17,7 +20,7 @@
         </button>
       }
     </div>
-  </div>
+  </header>
 
   @if (loading) {
     <div class="empty-state">
@@ -342,12 +345,16 @@
                 <td class="col-status">
                   <select
                     [class]="getStatusClass(getStatus(submission.id))"
-                    [value]="getStatus(submission.id)"
                     (change)="onStatusChange(submission.id, $event)"
                     aria-label="Submission status"
                   >
                     @for (status of statusOptions; track status) {
-                      <option [value]="status">{{ status }}</option>
+                      <option
+                        [value]="status"
+                        [selected]="status === getStatus(submission.id)"
+                      >
+                        {{ status }}
+                      </option>
                     }
                   </select>
                 </td>

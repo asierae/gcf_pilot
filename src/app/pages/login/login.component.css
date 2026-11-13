@@ -7,40 +7,70 @@
 }
 
 .login-page {
+  position: relative;
   min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 2rem;
+  overflow: hidden;
+  background:
+    radial-gradient(900px 600px at 50% 0%, rgba(212, 169, 78, 0.09), transparent 60%),
+    radial-gradient(700px 500px at 85% 90%, rgba(30, 64, 120, 0.22), transparent 65%);
+}
+
+.login-page::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+  background-size: 46px 46px;
+  mask-image: radial-gradient(circle at 50% 45%, #000 0%, transparent 72%);
+  pointer-events: none;
 }
 
 .login-card {
+  position: relative;
   width: 100%;
-  max-width: 420px;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 20px;
-  padding: 2.5rem;
-  box-shadow: 0 20px 50px -20px rgba(0, 0, 0, 0.5);
+  max-width: 430px;
+  padding: 2.6rem 2.5rem 2.25rem;
+  background: linear-gradient(180deg, rgba(20, 33, 54, 0.96), rgba(12, 22, 39, 0.98));
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 22px;
+  box-shadow:
+    0 40px 90px -40px rgba(0, 0, 0, 0.9),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.login-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 12%;
+  right: 12%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(232, 192, 106, 0.7), transparent);
 }
 
 .login-header {
   text-align: center;
-  margin-bottom: 2rem;
+  margin-bottom: 1.9rem;
 }
 
 .login-logo {
   display: block;
   margin: 0 auto 0.75rem;
-  filter: drop-shadow(0 4px 14px rgba(16, 185, 129, 0.3));
+  filter: drop-shadow(0 4px 14px rgba(212, 169, 78, 0.3));
 }
 
 .login-brand {
   margin: 0 0 0.35rem;
-  font-size: 1.1rem;
-  font-weight: 800;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.26em;
   color: #f8fafc;
-  letter-spacing: -0.02em;
 }
 
 .login-header h2 {
@@ -69,19 +99,29 @@
 
 .form-group input {
   width: 100%;
-  padding: 0.75rem 1rem;
-  background: rgba(0, 0, 0, 0.3);
+  padding: 0.8rem 1rem;
+  background: rgba(7, 14, 27, 0.72);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 10px;
   color: #e2e8f0;
-  font-size: 1rem;
+  font-size: 0.95rem;
+  font-family: inherit;
   box-sizing: border-box;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s,
+    background 0.2s;
+}
+
+.form-group input::placeholder {
+  color: #475569;
 }
 
 .form-group input:focus {
   outline: none;
-  border-color: #10b981;
-  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
+  background: rgba(7, 14, 27, 0.95);
+  border-color: #d4a94e;
+  box-shadow: 0 0 0 3px rgba(212, 169, 78, 0.15);
 }
 
 .error-message {
@@ -96,19 +136,25 @@
 
 .btn-submit {
   width: 100%;
-  padding: 0.875rem;
-  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  padding: 0.9rem;
+  background: linear-gradient(135deg, #e8c06a 0%, #c99b3c 100%);
   border: none;
   border-radius: 10px;
-  color: white;
-  font-size: 1rem;
+  color: #0f172a;
+  font-size: 0.95rem;
   font-weight: 600;
+  font-family: inherit;
   cursor: pointer;
-  transition: opacity 0.2s;
+  box-shadow: 0 10px 26px -12px rgba(212, 169, 78, 0.45);
+  transition:
+    transform 0.2s,
+    box-shadow 0.2s,
+    opacity 0.2s;
 }
 
 .btn-submit:hover:not(:disabled) {
-  opacity: 0.9;
+  transform: translateY(-1px);
+  box-shadow: 0 14px 30px -12px rgba(212, 169, 78, 0.55);
 }
 
 .btn-submit:disabled {
@@ -118,26 +164,34 @@
 
 .login-hint {
   margin-top: 1.5rem;
-  padding: 1rem;
-  background: rgba(255, 255, 255, 0.03);
+  padding: 0.9rem 1rem;
+  background: rgba(255, 255, 255, 0.025);
+  border: 1px solid rgba(255, 255, 255, 0.06);
   border-radius: 10px;
-  font-size: 0.8rem;
+  font-size: 0.76rem;
+  line-height: 1.55;
   color: #64748b;
 }
 
+.login-hint strong {
+  color: #94a3b8;
+  font-weight: 600;
+}
+
 .login-hint p {
-  margin: 0.25rem 0;
+  margin: 0.15rem 0;
 }
 
 .back-link {
   display: block;
   text-align: center;
   margin-top: 1.5rem;
-  color: #94a3b8;
+  color: #64748b;
   text-decoration: none;
-  font-size: 0.875rem;
+  font-size: 0.82rem;
+  transition: color 0.2s;
 }
 
 .back-link:hover {
-  color: #6ee7b7;
+  color: #f5dfa8;
 }

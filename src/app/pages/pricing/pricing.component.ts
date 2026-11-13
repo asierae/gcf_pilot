@@ -124,7 +124,7 @@ export class PricingComponent implements OnInit, OnDestroy {
       currency: null,
       featured: false,
       ctaLabel: 'Schedule Consultation',
-      ctaLink: 'mailto:support@gcf-support.org',
+      ctaLink: 'mailto:support@avera.capital',
       ctaExternal: true,
       accentClass: 'plan-enterprise',
       features: [

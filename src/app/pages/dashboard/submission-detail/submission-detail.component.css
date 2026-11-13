@@ -21,7 +21,7 @@
 }
 
 .btn-back:hover {
-  color: #6ee7b7;
+  color: #f5dfa8;
 }
 
 .detail-header {
@@ -76,10 +76,10 @@
 
 .btn-save-edit {
   padding: 0.4rem 1rem;
-  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  background: linear-gradient(135deg, #d4a94e 0%, #a8812f 100%);
   border: none;
   border-radius: 8px;
-  color: #fff;
+  color: #0f172a;
   font-size: 0.8rem;
   font-weight: 700;
   cursor: pointer;
@@ -117,8 +117,8 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: #6ee7b7;
-  background: rgba(16, 185, 129, 0.12);
+  color: #f5dfa8;
+  background: rgba(212, 169, 78, 0.12);
   padding: 0.25rem 0.6rem;
   border-radius: 6px;
 }
@@ -144,9 +144,9 @@
 }
 
 .status-pending {
-  background-color: rgba(251, 191, 36, 0.15);
-  color: #fcd34d;
-  border-color: rgba(251, 191, 36, 0.4);
+  background-color: rgba(251, 146, 60, 0.15);
+  color: #fdba74;
+  border-color: rgba(251, 146, 60, 0.4);
 }
 
 .status-passed {
@@ -210,7 +210,7 @@
 }
 
 .meta-updated {
-  color: #6ee7b7 !important;
+  color: #f5dfa8 !important;
 }
 
 /* ── Edit banner ── */
@@ -220,11 +220,11 @@
   gap: 0.75rem;
   margin-bottom: 1.25rem;
   padding: 0.75rem 1rem;
-  background: rgba(16, 185, 129, 0.08);
-  border: 1px solid rgba(16, 185, 129, 0.25);
+  background: rgba(212, 169, 78, 0.08);
+  border: 1px solid rgba(212, 169, 78, 0.25);
   border-radius: 12px;
   font-size: 0.85rem;
-  color: #a7f3d0;
+  color: #f5dfa8;
 }
 
 .edit-banner-icon {
@@ -233,14 +233,14 @@
 }
 
 .edit-banner strong {
-  color: #6ee7b7;
+  color: #f5dfa8;
 }
 
 /* ── Highlight editable fields ── */
 .edit-active .detail-field:has(.edit-input),
 .edit-active .detail-field:has(.edit-textarea),
 .edit-active .detail-field:has(.edit-select) {
-  background: rgba(16, 185, 129, 0.04);
+  background: rgba(212, 169, 78, 0.04);
 }
 
 /* ── Edit input controls ── */
@@ -266,8 +266,8 @@
 .edit-textarea:focus,
 .edit-select:focus {
   outline: none;
-  border-color: rgba(16, 185, 129, 0.55);
-  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.12);
+  border-color: rgba(212, 169, 78, 0.55);
+  box-shadow: 0 0 0 3px rgba(212, 169, 78, 0.12);
 }
 
 .edit-textarea {
@@ -306,8 +306,8 @@
 }
 
 .summary-card-editing {
-  border-color: rgba(16, 185, 129, 0.25);
-  background: rgba(16, 185, 129, 0.04);
+  border-color: rgba(212, 169, 78, 0.25);
+  background: rgba(212, 169, 78, 0.04);
 }
 
 .summary-label {
@@ -344,8 +344,8 @@
 }
 
 .attachments-panel-editing {
-  background: rgba(16, 185, 129, 0.04);
-  border-color: rgba(16, 185, 129, 0.2);
+  background: rgba(212, 169, 78, 0.04);
+  border-color: rgba(212, 169, 78, 0.2);
 }
 
 .attachments-panel-header {
@@ -366,12 +366,19 @@
 }
 
 .attachments-panel-icon {
+  display: inline-flex;
   font-size: 1.1rem;
+  color: #e8c06a;
+}
+
+.attachments-panel-icon svg {
+  width: 1em;
+  height: 1em;
 }
 
 .attachments-panel-hint {
   font-size: 0.75rem;
-  color: #6ee7b7;
+  color: #f5dfa8;
   opacity: 0.8;
   margin-left: auto;
 }
@@ -418,20 +425,27 @@
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
-  color: #6ee7b7;
+  color: #f5dfa8;
   text-decoration: none;
   font-size: 0.85rem;
   transition: color 0.15s;
 }
 
 .attachment-read-link:hover {
-  color: #a7f3d0;
+  color: #f5dfa8;
   text-decoration: underline;
 }
 
 .att-read-icon {
+  display: inline-flex;
   font-size: 0.9rem;
-  opacity: 0.7;
+  opacity: 0.75;
+  color: #f5dfa8;
+}
+
+.att-read-icon svg {
+  width: 1em;
+  height: 1em;
 }
 
 .attachment-links {
@@ -444,7 +458,7 @@
 }
 
 .attachment-links a {
-  color: #6ee7b7;
+  color: #f5dfa8;
   text-decoration: none;
   font-size: 0.85rem;
 }
@@ -507,7 +521,7 @@
   flex: 1;
   min-width: 0;
   font-size: 0.8rem;
-  color: #6ee7b7;
+  color: #f5dfa8;
   text-decoration: none;
   white-space: nowrap;
   overflow: hidden;
@@ -516,7 +530,7 @@
 }
 
 .pill-name:hover {
-  color: #a7f3d0;
+  color: #f5dfa8;
   text-decoration: underline;
 }
 
@@ -563,10 +577,10 @@
   align-items: center;
   gap: 0.4rem;
   padding: 0.45rem 0.875rem;
-  background: rgba(16, 185, 129, 0.1);
-  border: 1px dashed rgba(16, 185, 129, 0.45);
+  background: rgba(212, 169, 78, 0.1);
+  border: 1px dashed rgba(212, 169, 78, 0.45);
   border-radius: 8px;
-  color: #6ee7b7;
+  color: #f5dfa8;
   font-size: 0.8rem;
   font-weight: 600;
   cursor: pointer;
@@ -576,8 +590,8 @@
 }
 
 .upload-btn:hover {
-  background: rgba(16, 185, 129, 0.18);
-  border-color: rgba(16, 185, 129, 0.65);
+  background: rgba(212, 169, 78, 0.18);
+  border-color: rgba(212, 169, 78, 0.65);
 }
 
 .upload-btn input[type="file"] {
@@ -611,15 +625,15 @@
   align-items: center;
   gap: 0.5rem;
   font-size: 0.8rem;
-  color: #6ee7b7;
+  color: #f5dfa8;
 }
 
 .upload-spinner {
   display: inline-block;
   width: 0.875rem;
   height: 0.875rem;
-  border: 2px solid rgba(110, 231, 183, 0.3);
-  border-top-color: #6ee7b7;
+  border: 2px solid rgba(232, 192, 106, 0.3);
+  border-top-color: #f5dfa8;
   border-radius: 50%;
   animation: spin 0.7s linear infinite;
 }
@@ -648,7 +662,24 @@
 }
 
 .section-icon {
+  display: inline-flex;
   font-size: 1.25rem;
+  color: #e8c06a;
+}
+
+.section-icon svg {
+  width: 1em;
+  height: 1em;
+}
+
+.btn-edit-icon {
+  display: inline-flex;
+  font-size: 0.9rem;
+}
+
+.btn-edit-icon svg {
+  width: 1em;
+  height: 1em;
 }
 
 .section-title h2 {
@@ -702,8 +733,8 @@
 
 .section-notes textarea:focus {
   outline: none;
-  border-color: rgba(16, 185, 129, 0.5);
-  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.12);
+  border-color: rgba(212, 169, 78, 0.5);
+  box-shadow: 0 0 0 3px rgba(212, 169, 78, 0.12);
 }
 
 .section-notes textarea::placeholder {
@@ -751,10 +782,10 @@
   align-items: center;
   gap: 0.5rem;
   padding: 0.875rem 1.5rem;
-  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  background: linear-gradient(135deg, #d4a94e 0%, #a8812f 100%);
   border: none;
   border-radius: 12px;
-  color: white;
+  color: #0f172a;
   font-size: 0.95rem;
   font-weight: 600;
   cursor: pointer;
@@ -823,8 +854,8 @@
 }
 
 .value-badge.yes {
-  background: rgba(16, 185, 129, 0.15);
-  color: #6ee7b7;
+  background: rgba(212, 169, 78, 0.15);
+  color: #f5dfa8;
 }
 
 .value-badge.no {
