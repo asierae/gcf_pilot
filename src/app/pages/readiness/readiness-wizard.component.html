@@ -1,0 +1,1285 @@
+<div class="wizard-shell">
+  <!-- ── Top bar ── -->
+  <header class="wizard-topbar">
+    <div class="topbar-inner">
+      <a routerLink="/home" class="wizard-brand" aria-label="Avera Capital Access home">
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2.5 21 7.5v9L12 21.5 3 16.5v-9l9-5Z" />
+            <path d="M12 7.5v9" />
+            <path d="M7.5 10v4.5" />
+            <path d="M16.5 10v4.5" />
+          </svg>
+        </span>
+        <span class="brand-text">
+          <span class="brand-name">Readiness Intake</span>
+          <span class="brand-sub">GCF 2024–2027 application</span>
+        </span>
+      </a>
+
+      <div class="topbar-actions">
+        <span class="save-state" [class.is-error]="saveState === 'error'">
+          <span class="save-dot" aria-hidden="true"></span>
+          {{ saveText }}
+        </span>
+        <button type="button" class="btn btn-ghost" (click)="fillDemoData()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M13 2 4.5 13.5H11l-1 8.5 8.5-11.5H12l1-8.5Z" />
+          </svg>
+          Fill Demo Data
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <div class="wizard-body">
+    <!-- ── Stepper ── -->
+    <nav class="stepper" aria-label="Application progress">
+      <div class="stepper-meta">
+        <p class="stepper-kicker">GCF Readiness &amp; Preparatory Support — 2024–2027</p>
+        <p class="stepper-count">
+          Step {{ currentStep }} of {{ steps.length }}
+          <span class="stepper-sep">·</span>
+          {{ completedSteps }} of {{ steps.length }} complete
+        </p>
+      </div>
+
+      <div
+        class="progress-track"
+        role="progressbar"
+        [attr.aria-valuenow]="progressPercent"
+        aria-valuemin="0"
+        aria-valuemax="100"
+        [attr.aria-label]="'Application ' + progressPercent + ' percent complete'"
+      >
+        <span class="progress-fill" [style.width.%]="progressPercent"></span>
+      </div>
+
+      <ol class="step-list">
+        @for (step of steps; track step.n) {
+          <li
+            class="step-pill"
+            [class.is-active]="stepState(step.n) === 'active'"
+            [class.is-complete]="stepState(step.n) === 'complete'"
+            [class.is-skipped]="stepState(step.n) === 'skipped'"
+          >
+            <button
+              type="button"
+              class="step-button"
+              [disabled]="stepState(step.n) === 'skipped'"
+              (click)="goToStep(step.n)"
+            >
+              <span class="step-index">
+                @if (stepState(step.n) === 'complete') {
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="m5 13 4 4L19 7" />
+                  </svg>
+                } @else if (stepState(step.n) === 'skipped') {
+                  <span aria-hidden="true">–</span>
+                } @else {
+                  {{ step.n }}
+                }
+              </span>
+              <span class="step-label">{{ step.short }}</span>
+            </button>
+          </li>
+        }
+      </ol>
+    </nav>
+
+    <!-- ── Step heading ── -->
+    <div class="step-heading">
+      <p class="step-eyebrow">Step {{ currentStep }}</p>
+      <h1>{{ currentStepMeta.title }}</h1>
+      <p class="step-subtitle">{{ currentStepMeta.subtitle }}</p>
+      @if (currentStep === 1) {
+        <p class="step-note">
+          Unaccredited organizations can apply through an accredited Delivery Partner, or act as their
+          own Delivery Partner and undergo the GCF Financial Management Capacity Assessment (FMCA).
+        </p>
+      }
+    </div>
+
+    <!-- ── Error banner ── -->
+    @if (errorSummary || showIssues) {
+      <div class="alert alert-error" role="alert">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M12 3 2.5 20h19L12 3Z" />
+          <path d="M12 9v5" />
+          <path d="M12 17.5h.01" />
+        </svg>
+        <div>
+          <p class="alert-title">{{ errorSummary || 'Please resolve the items below before continuing.' }}</p>
+          @if (showIssues) {
+            <ul class="alert-list">
+              @for (issue of currentIssues; track issue) {
+                <li>{{ issue }}</li>
+              }
+            </ul>
+          }
+        </div>
+      </div>
+    }
+
+    <!-- ══ STEP 1 ══ -->
+    @if (currentStep === 1) {
+      <section class="card">
+        <h2 class="card-title">Proposal metadata</h2>
+        <div class="grid grid-2">
+          <label class="field span-2">
+            <span class="field-label">Proposal title <em>*</em></span>
+            <input
+              type="text"
+              [(ngModel)]="application.metadata.proposalTitle"
+              (ngModelChange)="onUserInput()"
+              placeholder="e.g. Building GCF Direct Access Readiness for the National Climate Finance Authority"
+            />
+          </label>
+
+          <label class="field">
+            <span class="field-label">Country <em>*</em></span>
+            <input
+              type="text"
+              [(ngModel)]="application.metadata.country"
+              (ngModelChange)="onUserInput()"
+              placeholder="Country of implementation"
+            />
+          </label>
+
+          <label class="field">
+            <span class="field-label">Organization legal name <em>*</em></span>
+            <input
+              type="text"
+              [(ngModel)]="application.metadata.organizationLegalName"
+              (ngModelChange)="onUserInput()"
+              placeholder="Registered legal name of the applicant"
+            />
+          </label>
+
+          <label class="field">
+            <span class="field-label">Entity type</span>
+            <select [(ngModel)]="application.metadata.entityType" (ngModelChange)="onUserInput()">
+              @for (option of entityOptions; track option.value) {
+                <option [value]="option.value">{{ option.label }}</option>
+              }
+            </select>
+          </label>
+
+          <label class="field">
+            <span class="field-label">Requested grant amount (USD) <em>*</em></span>
+            <input
+              type="number"
+              min="1"
+              step="1000"
+              [(ngModel)]="application.metadata.requestedAmountUSD"
+              (ngModelChange)="onUserInput()"
+              placeholder="e.g. 950000"
+            />
+            <span class="field-hint">
+              Readiness grants typically range from $300,000 to $1,000,000+ over 12–36 months.
+            </span>
+          </label>
+
+          <label class="field">
+            <span class="field-label">Implementation duration</span>
+            <select [(ngModel)]="application.metadata.durationMonths" (ngModelChange)="onUserInput()">
+              <option [ngValue]="12">12 months</option>
+              <option [ngValue]="18">18 months</option>
+              <option [ngValue]="24">24 months</option>
+              <option [ngValue]="36">36 months</option>
+            </select>
+          </label>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="card-head">
+          <h2 class="card-title">GCF Readiness 2024–2027 objectives <em class="req">*</em></h2>
+          <span class="chip">{{ application.metadata.readinessObjectives.length }} selected</span>
+        </div>
+        <p class="card-lede">
+          Select every objective this proposal delivers against. Objective 3 is the recommended
+          entry point for unaccredited entities pursuing Direct Access Entity status.
+        </p>
+
+        <div class="objective-grid">
+          @for (option of objectiveOptions; track option.value) {
+            <button
+              type="button"
+              class="objective-card"
+              [class.is-selected]="isObjectiveSelected(option.value)"
+              [attr.aria-pressed]="isObjectiveSelected(option.value)"
+              (click)="toggleObjective(option.value)"
+            >
+              <span class="objective-top">
+                <span class="objective-code">{{ option.code }}</span>
+                @if (option.recommended) {
+                  <span class="tag tag-gold">Recommended</span>
+                }
+                <span class="objective-check" aria-hidden="true">
+                  @if (isObjectiveSelected(option.value)) {
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="m5 13 4 4L19 7" />
+                    </svg>
+                  }
+                </span>
+              </span>
+              <span class="objective-title">{{ option.title }}</span>
+              <span class="objective-desc">{{ option.description }}</span>
+            </button>
+          }
+        </div>
+      </section>
+
+      <section class="card">
+        <h2 class="card-title">NDA focal point</h2>
+        <div class="grid grid-2">
+          <label class="field">
+            <span class="field-label">Focal point name <em>*</em></span>
+            <input
+              type="text"
+              [(ngModel)]="application.metadata.ndaFocalPointName"
+              (ngModelChange)="onUserInput()"
+              placeholder="Full name"
+            />
+          </label>
+          <label class="field">
+            <span class="field-label">Ministry / authority <em>*</em></span>
+            <input
+              type="text"
+              [(ngModel)]="application.metadata.ndaMinistry"
+              (ngModelChange)="onUserInput()"
+              placeholder="National Designated Authority"
+            />
+          </label>
+          <label class="field span-2">
+            <span class="field-label">Focal point email <em>*</em></span>
+            <input
+              type="email"
+              [(ngModel)]="application.metadata.ndaEmail"
+              (ngModelChange)="onUserInput()"
+              placeholder="name@ministry.gov"
+            />
+          </label>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2 class="card-title">Delivery partner pathway</h2>
+        <p class="card-lede">
+          Are you applying through an existing Accredited Delivery Partner?
+        </p>
+
+        <div class="pathway-grid">
+          <button
+            type="button"
+            class="pathway-card"
+            [class.is-selected]="application.metadata.hasExternalDeliveryPartner"
+            [attr.aria-pressed]="application.metadata.hasExternalDeliveryPartner"
+            (click)="setDeliveryPartner(true)"
+          >
+            <span class="pathway-head">
+              <span class="pathway-radio" aria-hidden="true"></span>
+              <span class="pathway-title">Yes — accredited Delivery Partner</span>
+            </span>
+            <span class="pathway-desc">
+              An accredited GCF entity manages the funds on your behalf. FMCA due diligence is not
+              triggered and Step 6 is skipped.
+            </span>
+          </button>
+
+          <button
+            type="button"
+            class="pathway-card"
+            [class.is-selected]="!application.metadata.hasExternalDeliveryPartner"
+            [attr.aria-pressed]="!application.metadata.hasExternalDeliveryPartner"
+            (click)="setDeliveryPartner(false)"
+          >
+            <span class="pathway-head">
+              <span class="pathway-radio" aria-hidden="true"></span>
+              <span class="pathway-title">No — act as our own Delivery Partner</span>
+            </span>
+            <span class="pathway-desc">
+              You receive the funds directly. This unlocks the GCF FMCA fiduciary vetting module in
+              Step 6 and requires three years of clean external audits.
+            </span>
+          </button>
+        </div>
+
+        @if (application.metadata.hasExternalDeliveryPartner) {
+          <label class="field">
+            <span class="field-label">Accredited Delivery Partner name <em>*</em></span>
+            <input
+              type="text"
+              [(ngModel)]="application.metadata.externalDeliveryPartnerName"
+              (ngModelChange)="onUserInput()"
+              placeholder="e.g. United Nations Development Programme"
+            />
+          </label>
+        } @else {
+          <div class="callout callout-gold">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="12" cy="12" r="9" />
+              <path d="M12 8v4.5" />
+              <path d="M12 16h.01" />
+            </svg>
+            <p>
+              Choosing this pathway activates Step 6 (FMCA) and adds three financial PDFs to the
+              Step 7 vault: audited statements, finance &amp; procurement manuals, and bank account
+              confirmation.
+            </p>
+          </div>
+        }
+      </section>
+    }
+
+    <!-- ══ STEP 2 ══ -->
+    @if (currentStep === 2) {
+      <section class="card">
+        <h2 class="card-title">Institutional profile</h2>
+        <div class="grid grid-2">
+          <label class="field">
+            <span class="field-label">Registration number <em>*</em></span>
+            <input
+              type="text"
+              [(ngModel)]="application.institutionalProfile.registrationNumber"
+              (ngModelChange)="onUserInput()"
+              placeholder="Official registration identifier"
+            />
+          </label>
+          <label class="field">
+            <span class="field-label">Incorporation date <em>*</em></span>
+            <input
+              type="date"
+              [(ngModel)]="application.institutionalProfile.incorporationDate"
+              (ngModelChange)="onUserInput()"
+            />
+          </label>
+          <label class="field">
+            <span class="field-label">Staff count <em>*</em></span>
+            <input
+              type="number"
+              min="1"
+              [(ngModel)]="application.institutionalProfile.staffCount"
+              (ngModelChange)="onUserInput()"
+              placeholder="e.g. 84"
+            />
+          </label>
+          <label class="field">
+            <span class="field-label">Annual operating budget (USD)</span>
+            <input
+              type="number"
+              min="0"
+              step="1000"
+              [(ngModel)]="application.institutionalProfile.annualOperatingBudgetUSD"
+              (ngModelChange)="onUserInput()"
+              placeholder="e.g. 6400000"
+            />
+          </label>
+          <label class="field span-2">
+            <span class="field-label">Largest previous grant received (USD)</span>
+            <input
+              type="number"
+              min="0"
+              step="1000"
+              [(ngModel)]="application.institutionalProfile.largestPreviousGrantUSD"
+              (ngModelChange)="onUserInput()"
+              placeholder="e.g. 1200000"
+            />
+            <span class="field-hint">
+              Used by the FMCA risk engine: a track record below 50% of the requested amount raises
+              the risk rating.
+            </span>
+          </label>
+          <label class="field span-2">
+            <span class="field-label">Institutional mandate summary <em>*</em></span>
+            <textarea
+              rows="4"
+              [(ngModel)]="application.institutionalProfile.mandateSummary"
+              (ngModelChange)="onUserInput()"
+              placeholder="Describe your legal mandate and role in national climate finance."
+            ></textarea>
+            <span class="field-hint">{{ charCount(application.institutionalProfile.mandateSummary) }} characters (minimum 40)</span>
+          </label>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="card-head">
+          <h2 class="card-title">Accreditation gap matrix</h2>
+          <div class="gap-badges">
+            <span class="tag tag-danger">{{ gapStats.missing }} missing</span>
+            <span class="tag tag-warn">{{ gapStats.draft }} in draft</span>
+            <span class="tag tag-success">{{ gapStats.approved }} approved</span>
+          </div>
+        </div>
+        <p class="card-lede">
+          Rate each GCF fiduciary, ESS and gender pillar. Missing or draft policies should become
+          deliverables in your Step 4 logframe.
+        </p>
+
+        <div class="gap-table">
+          <div class="gap-row gap-head">
+            <span>Pillar &amp; policy</span>
+            <span>Status</span>
+          </div>
+          @for (gf of gapFields; track gf.key) {
+            <div class="gap-row">
+              <div class="gap-name">
+                <span class="gap-pillar">{{ gf.pillar }}</span>
+                <span class="gap-label">{{ gf.label }}</span>
+              </div>
+              <div class="policy-group" role="group" [attr.aria-label]="gf.label + ' status'">
+                @for (option of policyOptions; track option.value) {
+                  <button
+                    type="button"
+                    class="policy-pill"
+                    [class.is-selected]="application.institutionalProfile.gapMatrix[gf.key] === option.value"
+                    (click)="setPolicy(gf.key, option.value)"
+                  >
+                    {{ option.label }}
+                  </button>
+                }
+              </div>
+            </div>
+          }
+        </div>
+
+        <label class="field">
+          <span class="field-label">Gap summary <em>*</em></span>
+          <textarea
+            rows="4"
+            [(ngModel)]="application.institutionalProfile.identifiedGapsSummary"
+            (ngModelChange)="onUserInput()"
+            placeholder="Which policies or systems must be built with this Readiness grant?"
+          ></textarea>
+          <span class="field-hint">{{ charCount(application.institutionalProfile.identifiedGapsSummary) }} characters (minimum 20)</span>
+        </label>
+
+        <div class="callout callout-gold">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M4 20V10" />
+            <path d="M10 20V4" />
+            <path d="M16 20v-7" />
+            <path d="M22 20H2" />
+          </svg>
+          <p>
+            {{ gapStats.missing + gapStats.draft }} policies are missing or still in draft. Turn each
+            one into a Step 4 activity so GCF reviewers can trace the deliverable to a budget line.
+          </p>
+        </div>
+      </section>
+    }
+
+    <!-- ══ STEP 3 ══ -->
+    @if (currentStep === 3) {
+      <section class="card">
+        <h2 class="card-title">Strategic narrative</h2>
+        <p class="card-lede">
+          Each section needs at least 80 characters. Cite national policy instruments and be explicit
+          about what is new versus what earlier Readiness grants already funded.
+        </p>
+
+        <div class="narrative-stack">
+          <label class="field">
+            <span class="field-label">Problem statement &amp; barriers <em>*</em></span>
+            <textarea
+              rows="5"
+              [(ngModel)]="application.narrative.problemStatementAndBarriers"
+              (ngModelChange)="onUserInput()"
+              placeholder="What institutional, technical or financial barrier prevents access to GCF funding today?"
+            ></textarea>
+            <span class="field-hint">
+              {{ charCount(application.narrative.problemStatementAndBarriers) }} / 80 characters ·
+              Be specific about the gap, not the general climate context.
+            </span>
+          </label>
+
+          <label class="field">
+            <span class="field-label">National alignment (NDC / NAP) <em>*</em></span>
+            <textarea
+              rows="5"
+              [(ngModel)]="application.narrative.nationalAlignmentNdcNap"
+              (ngModelChange)="onUserInput()"
+              placeholder="Reference the NDC, NAP, country programme or sector strategy this proposal delivers."
+            ></textarea>
+            <span class="field-hint">
+              {{ charCount(application.narrative.nationalAlignmentNdcNap) }} / 80 characters ·
+              Name the policy instrument and the specific priority it addresses.
+            </span>
+          </label>
+
+          <label class="field">
+            <span class="field-label">Complementarity with past grants <em>*</em></span>
+            <textarea
+              rows="5"
+              [(ngModel)]="application.narrative.complementarityPastGrants"
+              (ngModelChange)="onUserInput()"
+              placeholder="Which earlier Readiness or donor grants does this build on, and how do you avoid duplication?"
+            ></textarea>
+            <span class="field-hint">
+              {{ charCount(application.narrative.complementarityPastGrants) }} / 80 characters ·
+              GCF rejects proposals that repeat work already funded.
+            </span>
+          </label>
+
+          <label class="field">
+            <span class="field-label">Theory of change <em>*</em></span>
+            <textarea
+              rows="5"
+              [(ngModel)]="application.narrative.theoryOfChange"
+              (ngModelChange)="onUserInput()"
+              placeholder="If we deliver these activities, then these outputs, leading to this outcome, because…"
+            ></textarea>
+            <span class="field-hint">
+              {{ charCount(application.narrative.theoryOfChange) }} / 80 characters ·
+              Use an if / then / because structure that matches your logframe.
+            </span>
+          </label>
+
+          <label class="field">
+            <span class="field-label">Sustainability &amp; exit strategy <em>*</em></span>
+            <textarea
+              rows="5"
+              [(ngModel)]="application.narrative.sustainabilityAndExitStrategy"
+              (ngModelChange)="onUserInput()"
+              placeholder="How will policies, staff capacity and the pipeline survive after the grant closes?"
+            ></textarea>
+            <span class="field-hint">
+              {{ charCount(application.narrative.sustainabilityAndExitStrategy) }} / 80 characters ·
+              Identify who owns each asset and the budget line that maintains it.
+            </span>
+          </label>
+        </div>
+      </section>
+    }
+
+    <!-- ══ STEP 4 ══ -->
+    @if (currentStep === 4) {
+      <div class="card-head card-head-flush">
+        <h2 class="card-title">Logframe &amp; quarterly workplan</h2>
+        <button type="button" class="btn btn-primary" (click)="addOutcome()">+ Add outcome</button>
+      </div>
+
+      @for (outcome of application.logframe.outcomes; track outcome.id; let oi = $index) {
+        <section class="card outcome-card">
+          <div class="outcome-head">
+            <span class="outcome-tag">{{ outcome.code }}</span>
+            @if (application.logframe.outcomes.length > 1) {
+              <button type="button" class="icon-btn" title="Remove outcome" (click)="removeOutcome(oi)">
+                Remove
+              </button>
+            }
+          </div>
+
+          <div class="grid grid-2">
+            <label class="field span-2">
+              <span class="field-label">Outcome description <em>*</em></span>
+              <input
+                type="text"
+                [(ngModel)]="outcome.description"
+                (ngModelChange)="onUserInput()"
+                placeholder="The institutional change this outcome delivers"
+              />
+            </label>
+            <label class="field">
+              <span class="field-label">Indicator <em>*</em></span>
+              <input type="text" [(ngModel)]="outcome.indicator" (ngModelChange)="onUserInput()" placeholder="Measurable indicator" />
+            </label>
+            <label class="field">
+              <span class="field-label">Means of verification</span>
+              <input type="text" [(ngModel)]="outcome.meansOfVerification" (ngModelChange)="onUserInput()" placeholder="Evidence source" />
+            </label>
+            <label class="field">
+              <span class="field-label">Baseline</span>
+              <input type="text" [(ngModel)]="outcome.baseline" (ngModelChange)="onUserInput()" placeholder="e.g. 3 of 8 criteria met" />
+            </label>
+            <label class="field">
+              <span class="field-label">Target</span>
+              <input type="text" [(ngModel)]="outcome.target" (ngModelChange)="onUserInput()" placeholder="e.g. 8 of 8 criteria met" />
+            </label>
+          </div>
+
+          @for (output of outcome.outputs; track output.id; let pi = $index) {
+            <div class="output-block">
+              <div class="output-head">
+                <span class="output-tag">{{ output.code }}</span>
+                @if (outcome.outputs.length > 1) {
+                  <button type="button" class="icon-btn" (click)="removeOutput(oi, pi)">Remove output</button>
+                }
+              </div>
+
+              <div class="grid grid-2">
+                <label class="field span-2">
+                  <span class="field-label">Output description <em>*</em></span>
+                  <input type="text" [(ngModel)]="output.description" (ngModelChange)="onUserInput()" placeholder="The tangible output delivered" />
+                </label>
+                <label class="field">
+                  <span class="field-label">Indicator <em>*</em></span>
+                  <input type="text" [(ngModel)]="output.indicator" (ngModelChange)="onUserInput()" placeholder="Indicator" />
+                </label>
+                <label class="field">
+                  <span class="field-label">Target</span>
+                  <input type="text" [(ngModel)]="output.target" (ngModelChange)="onUserInput()" placeholder="Target value" />
+                </label>
+              </div>
+
+              <div class="activity-list">
+                @for (activity of output.activities; track activity.id; let ai = $index) {
+                  <article class="activity-card">
+                    <div class="activity-head">
+                      <span class="activity-tag">{{ activity.code }}</span>
+                      <span class="activity-id">ID: {{ activity.id }}</span>
+                      <button type="button" class="icon-btn" (click)="removeActivity(oi, pi, ai)">Remove</button>
+                    </div>
+
+                    <div class="grid grid-2">
+                      <label class="field span-2">
+                        <span class="field-label">Activity description <em>*</em></span>
+                        <input
+                          type="text"
+                          [(ngModel)]="activity.description"
+                          (ngModelChange)="onUserInput()"
+                          placeholder="What will be done, by whom"
+                        />
+                      </label>
+                      <label class="field span-2">
+                        <span class="field-label">Deliverable <em>*</em></span>
+                        <input
+                          type="text"
+                          [(ngModel)]="activity.deliverable"
+                          (ngModelChange)="onUserInput()"
+                          placeholder="Verifiable deliverable (report, manual, concept note…)"
+                        />
+                      </label>
+                    </div>
+
+                    <div class="gantt">
+                      <span class="gantt-label">Execution timeline <em>*</em></span>
+                      <div class="gantt-pills">
+                        @for (q of quarters; track q) {
+                          <button
+                            type="button"
+                            class="quarter-pill"
+                            [class.is-on]="activity.quarters.includes(q)"
+                            [attr.aria-pressed]="activity.quarters.includes(q)"
+                            (click)="toggleQuarter(activity, q)"
+                          >
+                            {{ q }}
+                          </button>
+                        }
+                      </div>
+                      <div class="gantt-track" aria-hidden="true">
+                        @for (q of quarters; track q) {
+                          <span class="gantt-cell" [class.is-on]="activity.quarters.includes(q)"></span>
+                        }
+                      </div>
+                    </div>
+                  </article>
+                }
+              </div>
+
+              <button type="button" class="btn btn-outline btn-sm" (click)="addActivity(oi, pi)">
+                + Add activity
+              </button>
+            </div>
+          }
+
+          <button type="button" class="btn btn-ghost btn-sm" (click)="addOutput(oi)">+ Add output</button>
+        </section>
+      }
+
+      @if (!application.logframe.outcomes.length) {
+        <div class="empty-state">
+          <p>No outcomes yet. Add your first outcome to start the logframe.</p>
+          <button type="button" class="btn btn-primary" (click)="addOutcome()">+ Add outcome</button>
+        </div>
+      }
+    }
+
+    <!-- ══ STEP 5 ══ -->
+    @if (currentStep === 5) {
+      <div class="card-head card-head-flush">
+        <h2 class="card-title">Activity-based budget</h2>
+        <button type="button" class="btn btn-primary" (click)="addBudgetLine()">+ Add budget line</button>
+      </div>
+
+      @if (!activityOptions().length) {
+        <div class="alert alert-warn" role="alert">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M12 3 2.5 20h19L12 3Z" />
+            <path d="M12 9v5" />
+            <path d="M12 17.5h.01" />
+          </svg>
+          <div>
+            <p class="alert-title">No logframe activities available.</p>
+            <p class="alert-body">
+              Return to Step 4 and add at least one activity. Every budget line must link to an
+              activity ID.
+            </p>
+          </div>
+        </div>
+      }
+
+      <section class="card">
+        @if (!application.budget.lineItems.length) {
+          <div class="empty-state">
+            <p>No budget lines yet. Add a line and link it to a logframe activity.</p>
+            <button type="button" class="btn btn-primary" (click)="addBudgetLine()">+ Add budget line</button>
+          </div>
+        }
+
+        @for (line of application.budget.lineItems; track line.id; let li = $index) {
+          <article class="budget-card">
+            <div class="budget-head">
+              <span class="budget-index">Line {{ li + 1 }}</span>
+              <span class="budget-total">{{ money(lineTotal(line)) }}</span>
+              <button type="button" class="icon-btn" (click)="removeBudgetLine(li)">Remove</button>
+            </div>
+
+            <div class="grid grid-2">
+              <label class="field span-2">
+                <span class="field-label">Linked logframe activity <em>*</em></span>
+                <select [(ngModel)]="line.activityId" (ngModelChange)="onUserInput()">
+                  <option value="">Select an activity…</option>
+                  @for (option of activityOptions(); track option.id) {
+                    <option [value]="option.id">{{ option.label }}</option>
+                  }
+                </select>
+                @if (!line.activityId) {
+                  <span class="field-error">GCF rejects costs that cannot be traced to a logframe activity.</span>
+                }
+              </label>
+
+              <label class="field">
+                <span class="field-label">Budget category</span>
+                <select [(ngModel)]="line.category" (ngModelChange)="onUserInput()">
+                  @for (option of budgetCategoryOptions; track option.value) {
+                    <option [value]="option.value">{{ option.label }}</option>
+                  }
+                </select>
+              </label>
+
+              <label class="field">
+                <span class="field-label">Procurement method</span>
+                <select [(ngModel)]="line.procurementMethod" (ngModelChange)="onUserInput()">
+                  @for (option of procurementOptions; track option.value) {
+                    <option [value]="option.value">{{ option.label }}</option>
+                  }
+                </select>
+              </label>
+
+              <label class="field span-2">
+                <span class="field-label">Description <em>*</em></span>
+                <input type="text" [(ngModel)]="line.description" (ngModelChange)="onUserInput()" placeholder="What is being purchased" />
+              </label>
+
+              <label class="field">
+                <span class="field-label">Unit type</span>
+                <select [(ngModel)]="line.unitType" (ngModelChange)="onUserInput()">
+                  @for (option of unitTypeOptions; track option.value) {
+                    <option [value]="option.value">{{ option.label }}</option>
+                  }
+                </select>
+              </label>
+
+              <label class="field">
+                <span class="field-label">Delivery quarter</span>
+                <select [(ngModel)]="line.targetQuarter" (ngModelChange)="onUserInput()">
+                  @for (q of quarters; track q) {
+                    <option [value]="q">{{ q }}</option>
+                  }
+                </select>
+              </label>
+
+              <label class="field">
+                <span class="field-label">Unit cost (USD) <em>*</em></span>
+                <input type="number" min="0" step="50" [(ngModel)]="line.unitCostUSD" (ngModelChange)="onUserInput()" />
+              </label>
+
+              <label class="field">
+                <span class="field-label">Quantity <em>*</em></span>
+                <input type="number" min="0" step="1" [(ngModel)]="line.quantity" (ngModelChange)="onUserInput()" />
+              </label>
+
+              <label class="field span-2">
+                <span class="field-label">Budget note justification <em>*</em></span>
+                <textarea
+                  rows="2"
+                  [(ngModel)]="line.budgetNoteJustification"
+                  (ngModelChange)="onUserInput()"
+                  placeholder="Why is this cost necessary and how was it estimated?"
+                ></textarea>
+              </label>
+            </div>
+          </article>
+        }
+      </section>
+
+      <!-- Guardrails -->
+      <section class="card guardrail-card">
+        <h2 class="card-title">Live budget guardrails</h2>
+        <div class="summary-grid">
+          <div class="summary-tile">
+            <span class="summary-label">Total direct costs</span>
+            <span class="summary-value">{{ money(totalDirectCosts) }}</span>
+          </div>
+          <div class="summary-tile" [class.is-alert]="pmcPercent > 7.5">
+            <span class="summary-label">PMC (7.5% cap)</span>
+            <span class="summary-value">{{ money(pmcTotal) }}</span>
+            <span class="summary-foot">{{ pct(pmcPercent) }} of direct costs</span>
+          </div>
+          <div class="summary-tile" [class.is-alert]="varianceAlert">
+            <span class="summary-label">Grand total</span>
+            <span class="summary-value">{{ money(grandTotal) }}</span>
+            <span class="summary-foot">vs. request {{ money(application.metadata.requestedAmountUSD) }}</span>
+          </div>
+          <div class="summary-tile" [class.is-alert]="trancheAlert">
+            <span class="summary-label">Disbursement tranches</span>
+            <span class="summary-value">{{ money(trancheTotal) }}</span>
+            <span class="summary-foot">{{ application.budget.disbursementTranches.length }} tranche(s)</span>
+          </div>
+        </div>
+
+        @if (budgetWarnings.length) {
+          <ul class="warning-list">
+            @for (warning of budgetWarnings; track warning.text) {
+              <li [class.is-info]="warning.tone === 'info'">
+                <span class="warning-dot" aria-hidden="true"></span>
+                {{ warning.text }}
+              </li>
+            }
+          </ul>
+        } @else {
+          <p class="guardrail-ok">All budget guardrails pass. Costs are traceable and within the PMC cap.</p>
+        }
+
+        @if (procurementSummary.length) {
+          <div class="procurement-table">
+            <div class="procurement-row procurement-head">
+              <span>Procurement method</span>
+              <span>Lines</span>
+              <span>Total</span>
+            </div>
+            @for (row of procurementSummary; track row.label) {
+              <div class="procurement-row">
+                <span>{{ row.label }}</span>
+                <span>{{ row.count }}</span>
+                <span>{{ money(row.total) }}</span>
+              </div>
+            }
+          </div>
+        }
+      </section>
+
+      <section class="card">
+        <div class="card-head">
+          <h2 class="card-title">Disbursement tranches</h2>
+          <button type="button" class="btn btn-ghost btn-sm" (click)="addTranche()">+ Add tranche</button>
+        </div>
+
+        @for (tranche of application.budget.disbursementTranches; track $index; let ti = $index) {
+          <div class="tranche-row">
+            <span class="tranche-index">T{{ tranche.trancheNumber }}</span>
+            <label class="field">
+              <span class="field-label">Milestone</span>
+              <input
+                type="text"
+                [(ngModel)]="tranche.milestoneDescription"
+                (ngModelChange)="onUserInput()"
+                placeholder="Milestone that releases this tranche"
+              />
+            </label>
+            <label class="field">
+              <span class="field-label">Amount (USD)</span>
+              <input type="number" min="0" step="1000" [(ngModel)]="tranche.amountUSD" (ngModelChange)="onUserInput()" />
+            </label>
+            <label class="field">
+              <span class="field-label">Month</span>
+              <input type="number" min="1" max="36" [(ngModel)]="tranche.estimatedMonth" (ngModelChange)="onUserInput()" />
+            </label>
+            @if (application.budget.disbursementTranches.length > 1) {
+              <button type="button" class="icon-btn" (click)="removeTranche(ti)">Remove</button>
+            }
+          </div>
+        }
+      </section>
+    }
+
+    <!-- ══ STEP 6 (conditional) ══ -->
+    @if (currentStep === 6 && !application.metadata.hasExternalDeliveryPartner) {
+      <section class="card risk-card" [ngClass]="'risk-' + risk.level">
+        <div class="risk-head">
+          <div>
+            <p class="risk-kicker">Live GCF fiduciary risk indicator</p>
+            <h2 class="risk-title">{{ risk.label }}</h2>
+          </div>
+          <span class="risk-badge" [ngClass]="'risk-badge-' + risk.level">
+            {{ risk.level.toUpperCase() }} RISK
+          </span>
+        </div>
+        <p class="risk-summary">{{ risk.summary }}</p>
+        @if (risk.reasons.length) {
+          <ul class="risk-reasons">
+            @for (reason of risk.reasons; track reason) {
+              <li>{{ reason }}</li>
+            }
+          </ul>
+        } @else {
+          <ul class="risk-reasons risk-reasons-ok">
+            <li>External audit opinion: unqualified</li>
+            <li>GCF funds segregated in a dedicated account</li>
+            <li>Accounting standard: {{ fmca.accountingStandard }}</li>
+            <li>Independent audit committee and sanctions screening in place</li>
+          </ul>
+        }
+      </section>
+
+      <section class="card">
+        <h2 class="card-title">FMCA pillar 1–4: legal, governance &amp; accounting</h2>
+        <div class="grid grid-2">
+          <label class="field">
+            <span class="field-label">Financial regulatory authority <em>*</em></span>
+            <input
+              type="text"
+              [(ngModel)]="fmca.regulatoryAuthority"
+              (ngModelChange)="onUserInput()"
+              placeholder="e.g. Central Bank of Kenya"
+            />
+          </label>
+          <label class="field">
+            <span class="field-label">Total assets (USD)</span>
+            <input type="number" min="0" step="1000" [(ngModel)]="fmca.totalAssetsUSD" (ngModelChange)="onUserInput()" />
+          </label>
+          <label class="field">
+            <span class="field-label">Accounting standard</span>
+            <select [(ngModel)]="fmca.accountingStandard" (ngModelChange)="onUserInput()">
+              @for (option of accountingStandardOptions; track option.value) {
+                <option [value]="option.value">{{ option.label }}</option>
+              }
+            </select>
+            @if (fmca.accountingStandard === 'Cash_Basis') {
+              <span class="field-error">Cash-basis accounting triggers a HIGH risk rating.</span>
+            }
+          </label>
+          <label class="field">
+            <span class="field-label">Accounting software <em>*</em></span>
+            <input
+              type="text"
+              [(ngModel)]="fmca.accountingSoftwareName"
+              (ngModelChange)="onUserInput()"
+              placeholder="e.g. Sage Intacct"
+            />
+          </label>
+        </div>
+
+        <div class="toggle-list">
+          <label class="toggle-row">
+            <span class="toggle-copy">
+              <strong>Independent audit committee</strong>
+              <span>A board-level committee with an independent majority oversees the external audit.</span>
+            </span>
+            <input type="checkbox" [(ngModel)]="fmca.hasIndependentAuditCommittee" (ngModelChange)="onUserInput()" />
+          </label>
+          <label class="toggle-row">
+            <span class="toggle-copy">
+              <strong>Dedicated GCF bank account</strong>
+              <span>GCF funds can be segregated in a separate project account.</span>
+            </span>
+            <input type="checkbox" [(ngModel)]="fmca.canSegregateGcfFundsInSeparateAccount" (ngModelChange)="onUserInput()" />
+          </label>
+          <label class="toggle-row">
+            <span class="toggle-copy">
+              <strong>Dual signatory controls</strong>
+              <span>Every disbursement requires two authorised signatories.</span>
+            </span>
+            <input type="checkbox" [(ngModel)]="fmca.hasDualSignatoryControls" (ngModelChange)="onUserInput()" />
+          </label>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2 class="card-title">FMCA pillar 5–7: audits, AML/CFT &amp; track record</h2>
+        <div class="grid grid-2">
+          <label class="field">
+            <span class="field-label">Past 3 years audit opinion</span>
+            <select [(ngModel)]="fmca.past3YearsAuditOpinion" (ngModelChange)="onUserInput()">
+              @for (option of auditOpinionOptions; track option.value) {
+                <option [value]="option.value">{{ option.label }}</option>
+              }
+            </select>
+            @if (fmca.past3YearsAuditOpinion !== 'unqualified') {
+              <span class="field-error">Anything other than an unqualified opinion triggers HIGH risk.</span>
+            }
+          </label>
+          <label class="field">
+            <span class="field-label">External auditor name <em>*</em></span>
+            <input
+              type="text"
+              [(ngModel)]="fmca.externalAuditorName"
+              (ngModelChange)="onUserInput()"
+              placeholder="e.g. Deloitte East Africa"
+            />
+          </label>
+        </div>
+
+        <div class="toggle-list">
+          <label class="toggle-row">
+            <span class="toggle-copy">
+              <strong>AML/CFT sanctions screening</strong>
+              <span>Documented screening of counterparties against sanctions lists.</span>
+            </span>
+            <input type="checkbox" [(ngModel)]="fmca.hasSanctionsScreeningProcess" (ngModelChange)="onUserInput()" />
+          </label>
+          <label class="toggle-row">
+            <span class="toggle-copy">
+              <strong>Ongoing litigation</strong>
+              <span>Any current legal proceedings involving the organization.</span>
+            </span>
+            <input type="checkbox" [(ngModel)]="fmca.hasOngoingLitigation" (ngModelChange)="onUserInput()" />
+          </label>
+        </div>
+
+        @if (fmca.hasOngoingLitigation) {
+          <label class="field">
+            <span class="field-label">Litigation details <em>*</em></span>
+            <textarea
+              rows="3"
+              [(ngModel)]="fmca.litigationDetails"
+              (ngModelChange)="onUserInput()"
+              placeholder="Describe the proceedings, amounts at stake and expected resolution."
+            ></textarea>
+          </label>
+        }
+
+        <div class="card-head">
+          <h3 class="sub-title">Donor track record</h3>
+          <button type="button" class="btn btn-ghost btn-sm" (click)="addPastGrant()">+ Add grant</button>
+        </div>
+
+        @if (!fmca.pastGrantsTrackRecord.length) {
+          <p class="muted-note">
+            Add your largest previous grants. The largest amount is cross-checked against the Step 1
+            request.
+          </p>
+        }
+
+        @for (grant of fmca.pastGrantsTrackRecord; track $index; let gi = $index) {
+          <div class="grant-row">
+            <label class="field">
+              <span class="field-label">Donor</span>
+              <input type="text" [(ngModel)]="grant.donorName" (ngModelChange)="onUserInput()" placeholder="Donor name" />
+            </label>
+            <label class="field">
+              <span class="field-label">Amount (USD)</span>
+              <input type="number" min="0" step="1000" [(ngModel)]="grant.amountUSD" (ngModelChange)="onUserInput()" />
+            </label>
+            <label class="field">
+              <span class="field-label">Year</span>
+              <input type="number" min="1950" max="2100" [(ngModel)]="grant.year" (ngModelChange)="onUserInput()" />
+            </label>
+            <label class="field">
+              <span class="field-label">Status</span>
+              <select [(ngModel)]="grant.status" (ngModelChange)="onUserInput()">
+                <option value="completed">Completed</option>
+                <option value="ongoing">Ongoing</option>
+              </select>
+            </label>
+            <button type="button" class="icon-btn" (click)="removePastGrant(gi)">Remove</button>
+          </div>
+        }
+      </section>
+    }
+
+    <!-- ══ STEP 7 ══ -->
+    @if (currentStep === 7) {
+      <section class="card">
+        <div class="card-head">
+          <h2 class="card-title">Mandatory legal &amp; compliance PDFs</h2>
+          <span class="chip">{{ attachedCount }} / {{ requiredDocuments.length }} attached</span>
+        </div>
+        <p class="card-lede">
+          Drag a PDF into each dropzone or browse your device. Files stay on this device — only the
+          filename is stored in the exported JSON.
+        </p>
+
+        <div class="doc-grid">
+          @for (doc of requiredDocuments; track doc.key) {
+            <div
+              class="doc-card"
+              [class.has-file]="!!docMeta[doc.key]"
+              (dragover)="onDragOver($event)"
+              (drop)="onDrop($event, doc.key)"
+            >
+              <div class="doc-head">
+                <span class="doc-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8l-5-5Z" />
+                    <path d="M14 3v5h5" />
+                  </svg>
+                </span>
+                <div>
+                  <p class="doc-title">{{ doc.label }}</p>
+                  @if (doc.conditional) {
+                    <span class="tag tag-gold">FMCA required</span>
+                  }
+                </div>
+              </div>
+              <p class="doc-desc">{{ doc.description }}</p>
+
+              @if (docMeta[doc.key]) {
+                <div class="doc-file">
+                  <span class="doc-file-name">{{ docMeta[doc.key] }}</span>
+                  <span class="doc-file-size">{{ fileSizeLabel(doc.key) }}</span>
+                  <button type="button" class="icon-btn" (click)="removeDocument(doc.key)">Remove</button>
+                </div>
+              } @else {
+                <div class="doc-drop">
+                  <p>Drop PDF here</p>
+                  <input
+                    #fileInput
+                    type="file"
+                    accept="application/pdf,.pdf"
+                    class="visually-hidden"
+                    (change)="onFileSelected($event, doc.key)"
+                  />
+                  <button type="button" class="btn btn-outline btn-sm" (click)="fileInput.click()">
+                    Browse files
+                  </button>
+                </div>
+              }
+
+              @if (docErrors[doc.key]) {
+                <span class="field-error">{{ docErrors[doc.key] }}</span>
+              }
+            </div>
+          }
+        </div>
+      </section>
+
+      <section class="card">
+        <h2 class="card-title">Final validation checklist</h2>
+        <ul class="checklist">
+          @for (step of steps; track step.n) {
+            @if (!stepSkipped(step.n)) {
+              <li [class.is-done]="stepValid(step.n)">
+                <span class="checklist-mark" aria-hidden="true">
+                  @if (stepValid(step.n)) {
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="m5 13 4 4L19 7" />
+                    </svg>
+                  } @else {
+                    <span>!</span>
+                  }
+                </span>
+                <button type="button" class="checklist-link" (click)="goToStep(step.n)">
+                  {{ step.title }}
+                </button>
+                <span class="checklist-state">{{ stepValid(step.n) ? 'Complete' : 'Action needed' }}</span>
+              </li>
+            } @else {
+              <li class="is-skipped">
+                <span class="checklist-mark" aria-hidden="true">–</span>
+                <span>{{ step.title }}</span>
+                <span class="checklist-state">Skipped</span>
+              </li>
+            }
+          }
+        </ul>
+
+        @if (!application.metadata.hasExternalDeliveryPartner) {
+          <div class="callout callout-gold">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M12 3 2.5 20h19L12 3Z" />
+              <path d="M12 9v5" />
+              <path d="M12 17.5h.01" />
+            </svg>
+            <p>
+              You are applying as your own Delivery Partner. The FMCA module and three financial PDFs
+              are mandatory for this package.
+            </p>
+          </div>
+        }
+
+        <div class="export-actions">
+          <button type="button" class="btn btn-primary btn-lg" (click)="downloadJson()">
+            Download Application JSON
+          </button>
+          <button type="button" class="btn btn-ghost" (click)="openPreview()">Preview JSON</button>
+        </div>
+        <p class="export-note">
+          Official GCF proposals are submitted through the GCF Partner Portal. This export is
+          structured for direct population of the Readiness template.
+        </p>
+      </section>
+    }
+
+    <!-- ── Footer nav ── -->
+    <div class="wizard-footer">
+      @if (currentStep === 5) {
+        <div class="footer-budget" aria-label="Budget summary">
+          <span>
+            <em>Direct</em>
+            {{ money(totalDirectCosts) }}
+          </span>
+          <span [class.is-alert]="pmcPercent > 7.5">
+            <em>PMC</em>
+            {{ pct(pmcPercent) }}
+          </span>
+          <span [class.is-alert]="varianceAlert">
+            <em>Total</em>
+            {{ money(grandTotal) }}
+          </span>
+          <span [class.is-alert]="trancheAlert">
+            <em>Variance</em>
+            {{ money(budgetVariance) }}
+          </span>
+        </div>
+      }
+
+      <button type="button" class="btn btn-ghost" [disabled]="currentStep === 1" (click)="previousStep()">
+        ← Back
+      </button>
+
+      <span class="footer-hint">
+        @if (currentStep === 5) {
+          {{ application.metadata.hasExternalDeliveryPartner ? 'Step 6 is skipped for this pathway.' : 'Next: FMCA fiduciary due diligence.' }}
+        } @else if (currentStep === 7) {
+          Review the checklist, then export your application package.
+        } @else {
+          Progress saves automatically in this browser.
+        }
+      </span>
+
+      @if (currentStep < 7) {
+        <button type="button" class="btn btn-primary" (click)="nextStep()">
+          Continue →
+        </button>
+      } @else {
+        <button type="button" class="btn btn-primary" (click)="downloadJson()">
+          Download JSON
+        </button>
+      }
+    </div>
+  </div>
+</div>
+
+<!-- ── JSON preview modal ── -->
+@if (previewOpen) {
+  <div class="modal-backdrop" (click)="closePreview()">
+    <div class="modal" role="dialog" aria-modal="true" aria-label="Application JSON preview" (click)="$event.stopPropagation()">
+      <div class="modal-head">
+        <div>
+          <h2>Application JSON preview</h2>
+          <p>Schema version gcf-readiness-intake-1.0</p>
+        </div>
+        <button type="button" class="icon-btn" (click)="closePreview()">Close</button>
+      </div>
+      <pre class="json-preview">{{ previewJson }}</pre>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-ghost" (click)="copyJson()">{{ copyLabel }}</button>
+        <button type="button" class="btn btn-primary" (click)="downloadJson()">Download Application JSON</button>
+      </div>
+    </div>
+  </div>
+}

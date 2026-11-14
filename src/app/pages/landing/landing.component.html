@@ -32,6 +32,7 @@
       <a href="#edge" (click)="closeMenu()">The Avera Edge</a>
       <a href="#reach" (click)="closeMenu()">Global Reach</a>
       <a href="#portal" (click)="closeMenu()">Client Portal</a>
+      <a href="#readiness" (click)="closeMenu()">Readiness Intake</a>
     </nav>
 
     <div class="avera-nav-actions">
@@ -527,6 +528,68 @@
       </div>
     </section>
 
+    <!-- ══ GCF READINESS INTAKE ══ -->
+    <section class="avera-section avera-readiness" id="readiness">
+      <div class="avera-container avera-readiness-inner">
+        <div class="avera-readiness-head">
+          <p class="avera-kicker" data-reveal>06 &mdash; GCF Readiness Intake</p>
+          <h2 data-reveal>Structure a Readiness proposal GCF can actually review.</h2>
+          <p class="avera-lede" data-reveal>
+            A guided seven-step intake for unaccredited organizations pursuing GCF Readiness
+            2024&ndash;2027. Build the logframe, trace every cost to an activity, run the FMCA
+            fiduciary check and export a clean JSON package.
+          </p>
+        </div>
+
+        <div class="avera-readiness-grid">
+          <div class="avera-readiness-copy" data-reveal>
+            <ul class="avera-check-list avera-readiness-list">
+              <li>Eligibility, NDA focal point and Readiness objective alignment</li>
+              <li>Accreditation gap matrix across fiduciary, ESS and gender pillars</li>
+              <li>Outcome &rarr; output &rarr; activity logframe with a Q1&ndash;Q8 Gantt</li>
+              <li>Activity-linked budget with live PMC, audit and variance guardrails</li>
+              <li>Conditional FMCA due diligence with a live fiduciary risk rating</li>
+              <li>Statutory PDF vault, final checklist and GCF-ready JSON export</li>
+            </ul>
+
+            <div class="avera-readiness-actions">
+              <a routerLink="/readiness" class="avera-btn avera-btn-primary">
+                Start the Readiness wizard <span aria-hidden="true">&rarr;</span>
+              </a>
+              <span class="avera-readiness-note">
+                7 steps &middot; autosaves in your browser &middot; no account required
+              </span>
+            </div>
+          </div>
+
+          <div class="avera-readiness-card" data-reveal aria-hidden="true">
+            <div class="rd-card-head">
+              <span class="rd-mark">AVERA</span>
+              <span class="rd-badge">Draft &middot; autosaved</span>
+            </div>
+
+            <div class="rd-progress"><span></span></div>
+
+            <ol class="rd-steps">
+              <li><em>01</em><span>Eligibility &amp; Readiness setup</span><i class="is-done">Done</i></li>
+              <li><em>02</em><span>Institutional gap matrix</span><i class="is-done">Done</i></li>
+              <li><em>03</em><span>Strategic narrative</span><i class="is-done">Done</i></li>
+              <li class="is-active"><em>04</em><span>Logframe &amp; workplan</span><i>Active</i></li>
+              <li><em>05</em><span>Activity-based budget</span><i>Next</i></li>
+              <li><em>06</em><span>FMCA due diligence</span><i class="is-conditional">Conditional</i></li>
+              <li><em>07</em><span>PDF vault &amp; JSON export</span><i>Next</i></li>
+            </ol>
+
+            <div class="rd-foot">
+              <span>PMC cap 7.5%</span>
+              <span>Risk engine live</span>
+              <span>JSON 1.0</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <!-- ══ FINAL CTA ══ -->
     <section class="avera-final">
       <div class="avera-final-glow" aria-hidden="true"></div>
@@ -593,6 +656,7 @@
         <h4>Access</h4>
         <a routerLink="/login">Client portal</a>
         <a routerLink="/stage1">Initial assessment</a>
+        <a routerLink="/readiness">GCF Readiness wizard</a>
         <a routerLink="/dashboard">Advisor dashboard</a>
       </div>
 

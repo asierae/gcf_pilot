@@ -46,6 +46,10 @@ export class LayoutComponent {
     this.sidebarCollapsed = !this.sidebarCollapsed;
   }
 
+  get chatVisible(): boolean {
+    return !this.router.url.startsWith("/readiness");
+  }
+
   toggleGearMenu(): void {
     this.gearMenuOpen = !this.gearMenuOpen;
   }
