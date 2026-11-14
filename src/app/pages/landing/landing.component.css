@@ -1911,6 +1911,183 @@ a {
   }
 }
 
+/* ═══════════════ CONTACT / PATHWAY GUIDANCE ═══════════════ */
+.avera-contact {
+  background:
+    radial-gradient(760px 520px at 82% 30%, rgba(152, 112, 38, 0.18), transparent 64%),
+    linear-gradient(180deg, #0b1c29 0%, #0a1824 100%);
+}
+
+.avera-contact-inner {
+  display: grid;
+  grid-template-columns: 1.04fr 0.96fr;
+  gap: clamp(32px, 6vw, 80px);
+  align-items: start;
+}
+
+.avera-contact-copy h2 {
+  margin-top: 22px;
+  font-size: clamp(30px, 4vw, 52px);
+  line-height: 1.06;
+  letter-spacing: -0.035em;
+  color: #f4fbff;
+}
+
+.avera-contact-list {
+  margin-top: 28px;
+  margin-bottom: 30px;
+}
+
+.avera-contact-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 14px;
+}
+
+.avera-contact-note {
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(147, 168, 184, 0.72);
+}
+
+.avera-contact-panel {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 24px;
+  border: 1px solid rgba(126, 178, 198, 0.2);
+  border-radius: 18px;
+  background: linear-gradient(170deg, rgba(20, 42, 58, 0.97), rgba(10, 24, 36, 0.98));
+  box-shadow:
+    0 50px 110px rgba(0, 0, 0, 0.5),
+    0 0 60px rgba(232, 192, 106, 0.06);
+}
+
+.avera-contact-panel::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(420px 220px at 0% 100%, rgba(232, 192, 106, 0.08), transparent 70%);
+  pointer-events: none;
+}
+
+.pc-option {
+  position: relative;
+  padding: 18px;
+  border: 1px solid rgba(126, 178, 198, 0.14);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.pc-option-accent {
+  border-color: rgba(232, 192, 106, 0.38);
+  background: linear-gradient(150deg, rgba(232, 192, 106, 0.1), rgba(232, 192, 106, 0.02));
+}
+
+.pc-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.pc-tag {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--teal);
+}
+
+.pc-duration {
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border: 1px solid rgba(126, 178, 198, 0.16);
+  border-radius: 999px;
+  color: rgba(147, 168, 184, 0.8);
+}
+
+.pc-option h3 {
+  margin: 0 0 8px;
+  font-size: 19px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: #f4fbff;
+}
+
+.pc-option > p {
+  margin: 0 0 12px;
+  font-size: 12.5px;
+  line-height: 1.6;
+  color: var(--muted);
+}
+
+.pc-option ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.pc-option li {
+  position: relative;
+  padding-left: 15px;
+  font-size: 11.5px;
+  line-height: 1.5;
+  color: rgba(212, 228, 236, 0.8);
+}
+
+.pc-option li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 6px;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: rgba(232, 192, 106, 0.75);
+}
+
+.pc-note {
+  position: relative;
+  margin: 2px 0 0;
+  padding-top: 14px;
+  border-top: 1px solid rgba(126, 178, 198, 0.12);
+  font-size: 11.5px;
+  line-height: 1.55;
+  color: rgba(147, 168, 184, 0.82);
+}
+
+@media (max-width: 1000px) {
+  .avera-contact-inner {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 620px) {
+  .avera-contact-panel {
+    padding: 18px;
+  }
+
+  .pc-option {
+    padding: 15px;
+  }
+
+  .pc-option h3 {
+    font-size: 17px;
+  }
+}
+
 /* ═══════════════ REVEAL ═══════════════ */
 [data-reveal] {
   opacity: 0;
