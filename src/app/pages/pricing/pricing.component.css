@@ -424,6 +424,7 @@
 
 /* ── Footer note ── */
 .pricing-footer-note {
+  margin-top: 1.5rem;
   padding: 2rem;
   background: rgba(255, 255, 255, 0.02);
   border: 1px solid rgba(255, 255, 255, 0.06);
@@ -483,7 +484,327 @@
   text-decoration: underline;
 }
 
+/* ── Fund commission ── */
+.fund-commission {
+  margin-top: 3rem;
+  padding: 2.25rem;
+  border: 1px solid rgba(212, 169, 78, 0.22);
+  border-radius: 20px;
+  background:
+    radial-gradient(120% 130% at 100% 0%, rgba(212, 169, 78, 0.09), transparent 58%),
+    rgba(255, 255, 255, 0.02);
+}
+
+.fund-head {
+  max-width: 620px;
+  margin-bottom: 1.75rem;
+}
+
+.fund-eyebrow {
+  display: inline-block;
+  padding: 0.28rem 0.8rem;
+  margin-bottom: 0.9rem;
+  background: rgba(212, 169, 78, 0.12);
+  border: 1px solid rgba(212, 169, 78, 0.3);
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #f5dfa8;
+}
+
+.fund-title {
+  margin: 0 0 0.65rem;
+  font-size: clamp(1.3rem, 2.4vw, 1.8rem);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: #f8fafc;
+  line-height: 1.2;
+}
+
+.fund-subtitle {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #64748b;
+  line-height: 1.65;
+}
+
+.fund-table-wrap {
+  max-width: 100%;
+}
+
+.fund-caption {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.fund-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.fund-table thead th {
+  padding: 0 1rem 0.7rem;
+  text-align: left;
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #94a3b8;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.09);
+  white-space: nowrap;
+}
+
+.fund-table thead th:first-child,
+.fund-table tbody td:first-child {
+  padding-left: 0;
+}
+
+.fund-table thead th:last-child,
+.fund-table tbody td:last-child {
+  padding-right: 0;
+}
+
+.fund-table tbody tr {
+  transition: background 0.18s ease;
+}
+
+.fund-table tbody tr:hover {
+  background: rgba(212, 169, 78, 0.05);
+}
+
+.fund-table tbody tr.tier-best {
+  background: rgba(212, 169, 78, 0.045);
+}
+
+.fund-table tbody tr.tier-best:hover {
+  background: rgba(212, 169, 78, 0.08);
+}
+
+.fund-table tbody td {
+  padding: 0.95rem 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  vertical-align: middle;
+}
+
+.fund-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.tier-amount-inner {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  flex-wrap: wrap;
+}
+
+.tier-value {
+  font-weight: 700;
+  color: #f8fafc;
+  font-variant-numeric: tabular-nums;
+}
+
+.tier-tag {
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+  background: rgba(212, 169, 78, 0.14);
+  border: 1px solid rgba(212, 169, 78, 0.32);
+  font-size: 0.62rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #f5dfa8;
+  white-space: nowrap;
+}
+
+.tier-rate {
+  color: #f5dfa8;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.tier-fee {
+  color: #e2e8f0;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.col-scale {
+  width: 34%;
+}
+
+.scale-track {
+  display: block;
+  width: 100%;
+  max-width: 200px;
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(148, 163, 184, 0.14);
+  overflow: hidden;
+}
+
+.scale-fill {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #a8812f, #e8c06a);
+}
+
+.fund-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1.25rem 2rem;
+  margin-top: 1.6rem;
+  padding-top: 1.4rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.fund-notes {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.45rem;
+}
+
+.fund-notes li {
+  position: relative;
+  padding-left: 1.15rem;
+  font-size: 0.78rem;
+  color: #64748b;
+  line-height: 1.5;
+}
+
+.fund-notes li::before {
+  content: "✦";
+  position: absolute;
+  left: 0;
+  top: 0.05rem;
+  font-size: 0.66rem;
+  color: rgba(212, 169, 78, 0.85);
+}
+
+.fund-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.7rem 1.3rem;
+  border-radius: 12px;
+  background: rgba(212, 169, 78, 0.1);
+  border: 1px solid rgba(212, 169, 78, 0.32);
+  color: #f5dfa8;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+  transition:
+    background 0.18s ease,
+    border-color 0.18s ease,
+    transform 0.18s ease;
+}
+
+.fund-cta:hover {
+  background: rgba(212, 169, 78, 0.18);
+  border-color: rgba(212, 169, 78, 0.5);
+  color: #fdf3dc;
+  transform: translateY(-1px);
+}
+
+.fund-cta-arrow {
+  transition: transform 0.18s ease;
+}
+
+.fund-cta:hover .fund-cta-arrow {
+  transform: translateX(3px);
+}
+
 /* ── Responsive ── */
+@media (max-width: 760px) {
+  .fund-commission {
+    margin-top: 2.25rem;
+    padding: 1.5rem 1.25rem;
+  }
+
+  .fund-table thead {
+    display: none;
+  }
+
+  .fund-table,
+  .fund-table tbody,
+  .fund-table tr,
+  .fund-table td {
+    display: block;
+    width: 100%;
+  }
+
+  .fund-table tbody tr {
+    padding: 0.85rem 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    background: transparent;
+  }
+
+  .fund-table tbody tr:last-child {
+    border-bottom: 0;
+  }
+
+  .fund-table tbody tr.tier-best,
+  .fund-table tbody tr.tier-best:hover,
+  .fund-table tbody tr:hover {
+    background: transparent;
+  }
+
+  .fund-table tbody td,
+  .fund-table tbody td:first-child,
+  .fund-table tbody td:last-child {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.2rem 0;
+    border-bottom: 0;
+  }
+
+  .fund-table tbody td::before {
+    content: attr(data-label);
+    flex: 0 0 auto;
+    font-size: 0.66rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: #94a3b8;
+  }
+
+  .tier-amount-inner {
+    justify-content: flex-end;
+    text-align: right;
+  }
+
+  .scale-track {
+    max-width: 130px;
+  }
+
+  .fund-foot {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .fund-cta {
+    justify-content: center;
+  }
+}
+
 @media (max-width: 1100px) {
   .plans-grid {
     grid-template-columns: repeat(2, 1fr);

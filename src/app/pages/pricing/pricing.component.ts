@@ -25,6 +25,14 @@ export interface Plan {
   accentClass: string;
 }
 
+export interface FundTier {
+  amountUSD: number;
+  label: string;
+  rate: number;
+  feeUSD: number;
+  note?: string;
+}
+
 @Component({
   selector: 'app-pricing',
   standalone: true,
@@ -139,4 +147,26 @@ export class PricingComponent implements OnInit, OnDestroy {
       ],
     },
   ];
+
+  readonly fundTiers: FundTier[] = [
+    { amountUSD: 1_000_000, label: '$1,000,000', rate: 3, feeUSD: 30_000 },
+    { amountUSD: 5_000_000, label: '$5,000,000', rate: 2, feeUSD: 100_000 },
+    { amountUSD: 10_000_000, label: '$10,000,000', rate: 1.5, feeUSD: 150_000 },
+    { amountUSD: 25_000_000, label: '$25,000,000', rate: 1, feeUSD: 250_000 },
+    { amountUSD: 50_000_000, label: '$50,000,000', rate: 0.75, feeUSD: 375_000 },
+    {
+      amountUSD: 100_000_000,
+      label: '$100,000,000',
+      rate: 0.5,
+      feeUSD: 500_000,
+      note: 'Lowest rate',
+    },
+  ];
+
+  /** Highest commission rate, used to scale the rate bars in the table. */
+  readonly maxTierRate = Math.max(...this.fundTiers.map((tier) => tier.rate));
+
+  get quoteMailto(): string {
+    return 'mailto:support@avera.capital?subject=Commission%20quote%20for%20a%20GCF%20project';
+  }
 }

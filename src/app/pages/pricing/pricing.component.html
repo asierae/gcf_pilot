@@ -122,6 +122,64 @@
     }
   </div>
 
+  <!-- Fund-size commission -->
+  <section class="fund-commission" aria-labelledby="fund-commission-title">
+    <div class="fund-head">
+      <span class="fund-eyebrow">Project Pricing</span>
+      <h2 id="fund-commission-title" class="fund-title">Commission by Fund Size</h2>
+      <p class="fund-subtitle">
+        Our commission is fixed per fund and steps down as the fund grows — so larger programmes retain a greater share of every dollar raised.
+      </p>
+    </div>
+
+    <div class="fund-table-wrap">
+      <table class="fund-table">
+        <caption class="fund-caption">AVERA fixed commission for project funds from $1M to $100M</caption>
+        <thead>
+          <tr>
+            <th scope="col">Fund size</th>
+            <th scope="col">AVERA commission</th>
+            <th scope="col">Fixed fee</th>
+            <th scope="col" class="col-scale">Rate scale</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (tier of fundTiers; track tier.amountUSD) {
+            <tr [class.tier-best]="!!tier.note">
+              <td class="tier-amount" data-label="Fund size">
+                <span class="tier-amount-inner">
+                  <span class="tier-value">{{ tier.label }}</span>
+                  @if (tier.note) {
+                    <span class="tier-tag">{{ tier.note }}</span>
+                  }
+                </span>
+              </td>
+              <td class="tier-rate" data-label="Commission">{{ tier.rate }}%</td>
+              <td class="tier-fee" data-label="Fixed fee">${{ tier.feeUSD | number }}</td>
+              <td class="tier-scale" data-label="Rate scale">
+                <span class="scale-track" aria-hidden="true">
+                  <span class="scale-fill" [style.width.%]="(tier.rate / maxTierRate) * 100"></span>
+                </span>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <div class="fund-foot">
+      <ul class="fund-notes">
+        <li>Fees are fixed per fund and quoted in US dollars.</li>
+        <li>The percentage steps down slightly as the fund grows.</li>
+        <li>Funds below $1M or above $100M are quoted individually.</li>
+      </ul>
+      <a class="fund-cta" [href]="quoteMailto">
+        Request a tailored quote
+        <span class="fund-cta-arrow" aria-hidden="true">→</span>
+      </a>
+    </div>
+  </section>
+
   <!-- Bottom note -->
   <div class="pricing-footer-note">
     <div class="note-grid">
