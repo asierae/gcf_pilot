@@ -1,7 +1,14 @@
 {
-  // Cloudflare Pages configuration for the "averacapital" project.
+  // Cloudflare Workers static-assets configuration (Workers Builds).
   // Vercel ignores this file; it is only read by Wrangler.
-  "name": "averacapital",
+  //
+  // The Worker name is provided by the Cloudflare build environment
+  // (WRANGLER_CI_OVERRIDE_NAME); locally it falls back to package.json "name".
   "compatibility_date": "2026-11-15",
-  "pages_build_output_dir": "./dist/nuriberry-app/browser"
+  "assets": {
+    "directory": "./dist/nuriberry-app/browser",
+    // Angular is a client-side SPA: serve index.html for unknown routes
+    // so /pricing, /readiness, /dashboard, etc. work on refresh.
+    "not_found_handling": "single-page-application"
+  }
 }
