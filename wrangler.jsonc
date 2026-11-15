@@ -1,0 +1,5 @@
+{
+  // Cloudflare Pages configuration.
+  // Vercel ignores this file; it is only read by Wrangler.
+  "pages_build_output_dir": "./dist/nuriberry-app/browser"
+}

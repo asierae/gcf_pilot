@@ -1,0 +1,3 @@
+# Cloudflare Pages: serve the Angular SPA for every client-side route
+# (e.g. /pricing, /readiness, /dashboard) on direct navigation or refresh.
+/*    /index.html   200
