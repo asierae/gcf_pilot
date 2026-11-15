@@ -1,9 +1,7 @@
 {
   // Cloudflare Workers static-assets configuration (Workers Builds).
   // Vercel ignores this file; it is only read by Wrangler.
-  //
-  // The Worker name is provided by the Cloudflare build environment
-  // (WRANGLER_CI_OVERRIDE_NAME); locally it falls back to package.json "name".
+  "name": "averacapital",
   "compatibility_date": "2026-11-15",
   "assets": {
     "directory": "./dist/nuriberry-app/browser",
