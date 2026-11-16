@@ -1,8 +1,9 @@
 import { Injectable } from "@angular/core";
 import { API_BASE_URL } from "../config/api.config";
 import {
-  CloudinaryResourceType,
+  AttachmentResourceType,
   StoredAttachment,
+  UploadTarget,
 } from "../models/attachment.model";
 
 export interface UploadedFile extends StoredAttachment {}
@@ -12,16 +13,20 @@ interface UploadErrorPayload {
 }
 
 /**
- * Uploads applicant documents to the Worker's R2 bucket.
- * Files are served back through `/api/files/<key>` on the same origin.
+ * Uploads documents to the Worker's R2 bucket under
+ * `<scope>/<entityId>/<section>/<file>` and serves them back through
+ * `/api/files/<key>` on the same origin.
  */
 @Injectable({
   providedIn: "root",
 })
 export class AttachmentService {
-  async uploadFile(file: File): Promise<UploadedFile> {
+  async uploadFile(file: File, target: UploadTarget): Promise<UploadedFile> {
     const formData = new FormData();
     formData.append("file", file);
+    formData.append("scope", target.scope);
+    formData.append("entityId", target.entityId);
+    formData.append("section", target.section);
 
     let response: Response;
     try {
@@ -51,16 +56,12 @@ export class AttachmentService {
     return {
       url: payload.url,
       publicId: payload.publicId,
-      resourceType: (payload.resourceType ?? "raw") as CloudinaryResourceType,
+      resourceType: (payload.resourceType ?? "raw") as AttachmentResourceType,
       name: payload.name ?? file.name,
     };
   }
 
-  async deleteFile(
-    publicId: string,
-    // Kept for signature compatibility; R2 keys are type-agnostic.
-    _resourceType?: CloudinaryResourceType,
-  ): Promise<void> {
+  async deleteFile(publicId: string): Promise<void> {
     if (!publicId) {
       return;
     }

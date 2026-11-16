@@ -35,6 +35,9 @@ export class Stage2Component implements OnInit {
   submitted = false;
   submitSuccess = false;
 
+  /** Generated up-front so uploads use `organizations/<id>/<section>/`. */
+  applicantId = Stage2Component.newApplicantId();
+
   isAdmin = false;
   viewMode: 'grid' | 'form' = 'form';
 
@@ -147,11 +150,21 @@ export class Stage2Component implements OnInit {
 
   private async submitForm(): Promise<void> {
     try {
-      await this.storageService.saveStage2Submission(this.form.value);
+      await this.storageService.saveStage2Submission(
+        this.form.value,
+        this.applicantId,
+      );
       this.submitSuccess = true;
       this.notificationService.success('Application submitted successfully!');
     } catch {
       this.notificationService.error('Could not save application to the server.');
     }
+  }
+
+  private static newApplicantId(): string {
+    if (typeof crypto !== 'undefined' && 'randomUUID' in crypto) {
+      return crypto.randomUUID();
+    }
+    return `local-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
   }
 }

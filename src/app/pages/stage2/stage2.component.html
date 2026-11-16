@@ -102,7 +102,11 @@
 
         <form [formGroup]="form" (ngSubmit)="onSubmit()">
           @if (isStage1Step) {
-            <app-stage1-steps [form]="form" [stepIndex]="currentStep"></app-stage1-steps>
+            <app-stage1-steps
+              [form]="form"
+              [stepIndex]="currentStep"
+              [entityId]="applicantId"
+            ></app-stage1-steps>
           } @else if (currentScreeningStep) {
             <div class="form-step">
               <div class="section-header">
@@ -160,6 +164,8 @@
                   </div>
                   <app-file-upload
                     [formControlName]="question.key + '_files'"
+                    [entityId]="applicantId"
+                    [section]="currentScreeningStep.id"
                     label="Upload mandatory / supplementary evidence"
                     hint="Drag & drop or click to browse"
                   />

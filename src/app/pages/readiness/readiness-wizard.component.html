@@ -1099,8 +1099,8 @@
           <span class="chip">{{ attachedCount }} / {{ requiredDocuments.length }} attached</span>
         </div>
         <p class="card-lede">
-          Drag a PDF into each dropzone or browse your device. Files stay on this device — only the
-          filename is stored in the exported JSON.
+          Drag a PDF into each dropzone or browse your device. Files are uploaded to the
+          organization's document vault and linked from the exported JSON.
         </p>
 
         <div class="doc-grid">
@@ -1127,7 +1127,11 @@
               </div>
               <p class="doc-desc">{{ doc.description }}</p>
 
-              @if (docMeta[doc.key]) {
+              @if (docUploading[doc.key]) {
+                <div class="doc-file">
+                  <span class="doc-file-name">Uploading…</span>
+                </div>
+              } @else if (docMeta[doc.key]) {
                 <div class="doc-file">
                   <span class="doc-file-name">{{ docMeta[doc.key] }}</span>
                   <span class="doc-file-size">{{ fileSizeLabel(doc.key) }}</span>

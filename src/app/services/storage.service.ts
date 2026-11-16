@@ -95,8 +95,11 @@ const STAGE1_FIELD_KEYS = [
 export class StorageService {
   constructor(private apiService: ApiService) {}
 
-  async saveStage1Submission(data: Record<string, unknown>): Promise<void> {
-    await this.apiService.createApplicantStage1(data);
+  async saveStage1Submission(
+    data: Record<string, unknown>,
+    id?: string,
+  ): Promise<void> {
+    await this.apiService.createApplicantStage1(data, id);
   }
 
   async getStage1Submissions(): Promise<FormSubmission[]> {
@@ -161,9 +164,12 @@ export class StorageService {
     await this.apiService.deleteApplicants(ids);
   }
 
-  async saveStage2Submission(data: Record<string, unknown>): Promise<void> {
+  async saveStage2Submission(
+    data: Record<string, unknown>,
+    id?: string,
+  ): Promise<void> {
     const stage1Data = this.extractStage1Data(data);
-    await this.apiService.createApplicantStage2(data, stage1Data);
+    await this.apiService.createApplicantStage2(data, stage1Data, id);
   }
 
   async getStage2Submissions(): Promise<FormSubmission[]> {

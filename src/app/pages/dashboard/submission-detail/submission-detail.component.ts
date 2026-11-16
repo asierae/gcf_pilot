@@ -13,6 +13,7 @@ import { AttachmentService } from "../../../services/attachment.service";
 import {
   MAX_FILES_PER_ATTACHMENT,
   STAGE1_ATTACHMENT_FIELDS,
+  attachmentSection,
   collectAttachmentFields,
   isAttachmentFieldKey,
   normalizeAttachments,
@@ -28,7 +29,7 @@ import {
 } from "../../../shared/data/stage1-display.config";
 import { ApplicantRecord } from "../../../models/applicant.model";
 import { StoredAttachment } from "../../../models/attachment.model";
-import { resolveCloudinaryFileUrl } from "../../../shared/utils/cloudinary-url.util";
+import { resolveAttachmentUrl } from "../../../shared/utils/attachment-url.util";
 import { StepIconComponent } from "../../../shared/components/step-icon/step-icon.component";
 
 type FieldEditType = "text" | "textarea" | "select" | "attachment" | "readonly";
@@ -229,7 +230,11 @@ export class SubmissionDetailComponent implements OnInit {
 
     try {
       for (const file of toUpload) {
-        const uploaded = await this.attachmentService.uploadFile(file);
+        const uploaded = await this.attachmentService.uploadFile(file, {
+          scope: "organizations",
+          entityId: this.submission!.id,
+          section: attachmentSection(key),
+        });
         current.push(uploaded);
       }
       this.editData = { ...this.editData, [key]: current };
@@ -401,7 +406,7 @@ export class SubmissionDetailComponent implements OnInit {
   }
 
   fileUrl(attachment: StoredAttachment | string): string {
-    return resolveCloudinaryFileUrl(attachment);
+    return resolveAttachmentUrl(attachment);
   }
 
   isAttachmentField(key: string): boolean {

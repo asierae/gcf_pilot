@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import {
@@ -22,6 +22,9 @@ import {
   createEmptyApplication,
   createEmptyFmca,
 } from './readiness-application.model';
+import { AttachmentService } from '../../services/attachment.service';
+import { StoredAttachment } from '../../models/attachment.model';
+import { resolveAttachmentUrl } from '../../shared/utils/attachment-url.util';
 
 interface WizardStep {
   n: number;
@@ -158,7 +161,11 @@ export class ReadinessWizardComponent implements OnInit, OnDestroy {
   application: ReadinessApplication = createEmptyApplication();
   currentStep = 1;
   attempted = new Set<number>();
+  /** Organization folder for uploads: `organizations/<readinessId>/readiness/`. */
+  readinessId = ReadinessWizardComponent.newId();
   docMeta: Partial<Record<DocumentKey, string>> = {};
+  docAttachments: Partial<Record<DocumentKey, StoredAttachment>> = {};
+  docUploading: Partial<Record<DocumentKey, boolean>> = {};
   docErrors: Partial<Record<DocumentKey, string>> = {};
   errorSummary = '';
   saveState: 'saved' | 'saving' | 'error' = 'saved';
@@ -166,6 +173,7 @@ export class ReadinessWizardComponent implements OnInit, OnDestroy {
   previewJson = '';
   copyLabel = 'Copy JSON';
 
+  private readonly attachmentService = inject(AttachmentService);
   private saveTimer: ReturnType<typeof setTimeout> | null = null;
   private activitySeq = 100;
 
@@ -174,7 +182,9 @@ export class ReadinessWizardComponent implements OnInit, OnDestroy {
     if (raw) {
       try {
         const saved = JSON.parse(raw) as ReadinessApplication & {
+          __id?: string;
           __docMeta?: Partial<Record<DocumentKey, string>>;
+          __docAttachments?: Partial<Record<DocumentKey, StoredAttachment>>;
         };
         const base = createEmptyApplication();
         this.application = {
@@ -193,7 +203,16 @@ export class ReadinessWizardComponent implements OnInit, OnDestroy {
           fmca: { ...createEmptyFmca(), ...(saved.fmca ?? {}) },
           documents: base.documents,
         };
+        if (typeof saved.__id === 'string' && saved.__id) {
+          this.readinessId = saved.__id;
+        }
+        this.docAttachments = saved.__docAttachments ?? {};
         this.docMeta = saved.__docMeta ?? {};
+        for (const [key, attachment] of Object.entries(this.docAttachments)) {
+          if (attachment && !this.docMeta[key as DocumentKey]) {
+            this.docMeta[key as DocumentKey] = attachment.name;
+          }
+        }
       } catch {
         localStorage.removeItem(STORAGE_KEY);
       }
@@ -225,7 +244,9 @@ export class ReadinessWizardComponent implements OnInit, OnDestroy {
       const { documents: _documents, ...rest } = this.application;
       const payload = {
         ...rest,
+        __id: this.readinessId,
         __docMeta: this.docMeta,
+        __docAttachments: this.docAttachments,
         __savedAt: new Date().toISOString(),
       };
       localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
@@ -863,22 +884,22 @@ export class ReadinessWizardComponent implements OnInit, OnDestroy {
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0];
     if (!file) return;
-    this.acceptFile(file, key);
     input.value = '';
+    void this.acceptFile(file, key);
   }
 
   onDrop(event: DragEvent, key: DocumentKey): void {
     event.preventDefault();
     const file = event.dataTransfer?.files?.[0];
     if (!file) return;
-    this.acceptFile(file, key);
+    void this.acceptFile(file, key);
   }
 
   onDragOver(event: DragEvent): void {
     event.preventDefault();
   }
 
-  private acceptFile(file: File, key: DocumentKey): void {
+  private async acceptFile(file: File, key: DocumentKey): Promise<void> {
     const isPdf = file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf');
     if (!isPdf) {
       this.docErrors[key] = 'Only PDF files are accepted.';
@@ -888,13 +909,44 @@ export class ReadinessWizardComponent implements OnInit, OnDestroy {
       this.docErrors[key] = 'File is larger than 25 MB.';
       return;
     }
+    if (this.docUploading[key]) return;
+
     this.docErrors[key] = undefined;
+    this.docUploading[key] = true;
     this.application.documents[key] = file;
-    this.docMeta[key] = file.name;
-    this.scheduleSave();
+
+    try {
+      const uploaded = await this.attachmentService.uploadFile(file, {
+        scope: 'organizations',
+        entityId: this.readinessId,
+        section: 'readiness',
+      });
+
+      const previous = this.docAttachments[key];
+      if (previous?.publicId) {
+        void this.attachmentService.deleteFile(previous.publicId).catch(() => undefined);
+      }
+
+      this.docAttachments[key] = uploaded;
+      this.docMeta[key] = uploaded.name;
+      this.application.documents[key] = file;
+      this.scheduleSave();
+    } catch (error) {
+      this.application.documents[key] = null;
+      this.docErrors[key] =
+        error instanceof Error ? error.message : 'Could not upload the file.';
+    } finally {
+      this.docUploading[key] = false;
+    }
   }
 
   removeDocument(key: DocumentKey): void {
+    const attachment = this.docAttachments[key];
+    if (attachment?.publicId) {
+      void this.attachmentService.deleteFile(attachment.publicId).catch(() => undefined);
+    }
+
+    delete this.docAttachments[key];
     this.application.documents[key] = null;
     delete this.docMeta[key];
     this.docErrors[key] = undefined;
@@ -925,12 +977,32 @@ export class ReadinessWizardComponent implements OnInit, OnDestroy {
       budget: this.application.budget,
       ...(m.hasExternalDeliveryPartner ? {} : { fmca: f }),
       documents: Object.fromEntries(
-        this.requiredDocuments.map((doc) => [
-          doc.key,
-          this.docMeta[doc.key] ? { fileName: this.docMeta[doc.key] } : null,
-        ]),
+        this.requiredDocuments.map((doc) => {
+          const attachment = this.docAttachments[doc.key];
+          if (!attachment) return [doc.key, null];
+          return [
+            doc.key,
+            {
+              fileName: attachment.name,
+              url: this.absoluteFileUrl(resolveAttachmentUrl(attachment)),
+              publicId: attachment.publicId,
+            },
+          ];
+        }),
       ),
     };
+  }
+
+  private absoluteFileUrl(url: string): string {
+    if (/^https?:\/\//i.test(url)) return url;
+    return typeof location !== 'undefined' ? `${location.origin}${url}` : url;
+  }
+
+  private static newId(): string {
+    if (typeof crypto !== 'undefined' && 'randomUUID' in crypto) {
+      return crypto.randomUUID();
+    }
+    return `local-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
   }
 
   downloadJson(): void {

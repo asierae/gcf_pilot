@@ -78,12 +78,13 @@ export class ApiService {
 
   async createApplicantStage1(
     data: Record<string, unknown>,
+    id?: string,
   ): Promise<ApplicantRecord> {
     const payload = await this.request<{ applicant: ApplicantRecord }>(
       "/api/applicants/stage1",
       {
         method: "POST",
-        body: JSON.stringify({ data }),
+        body: JSON.stringify(id ? { data, id } : { data }),
       },
       false,
     );
@@ -93,12 +94,13 @@ export class ApiService {
   async createApplicantStage2(
     data: Record<string, unknown>,
     stage1Data: Record<string, unknown>,
+    id?: string,
   ): Promise<ApplicantRecord> {
     const payload = await this.request<{ applicant: ApplicantRecord }>(
       "/api/applicants/stage2",
       {
         method: "POST",
-        body: JSON.stringify({ data, stage1Data }),
+        body: JSON.stringify(id ? { data, stage1Data, id } : { data, stage1Data }),
       },
       false,
     );

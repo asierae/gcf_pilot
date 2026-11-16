@@ -14,6 +14,8 @@ import { FileUploadComponent } from '../file-upload/file-upload.component';
 export class Stage1StepsComponent {
   @Input({ required: true }) form!: FormGroup;
   @Input({ required: true }) stepIndex!: number;
+  /** Applicant/organization id used as the R2 folder name for uploads. */
+  @Input() entityId = '';
 
   countries = COUNTRIES;
   private fb = inject(FormBuilder);

@@ -1,5 +1,5 @@
 import { StoredAttachment } from '../models/attachment.model';
-import { attachmentFromLegacyUrl } from '../shared/utils/cloudinary-url.util';
+import { attachmentFromLegacyUrl } from '../shared/utils/attachment-url.util';
 
 export const MAX_FILES_PER_ATTACHMENT = 3;
 
@@ -9,6 +9,21 @@ export const STAGE1_ATTACHMENT_FIELDS: Record<string, string> = {
   legalSupportingDocumentsFiles: 'Legal supporting documents',
   fastTrackAccreditationFiles: 'Fast-track accreditation reference'
 };
+
+/**
+ * Folder inside `organizations/<id>/` for each stage 1 attachment field.
+ * Must match the wizard step ids in `STAGE1_STEPS`.
+ */
+export const STAGE1_ATTACHMENT_SECTIONS: Record<string, string> = {
+  nominationLetterFiles: 'access',
+  consultationSummaryFiles: 'access',
+  legalSupportingDocumentsFiles: 'legal',
+  fastTrackAccreditationFiles: 'fasttrack'
+};
+
+export function attachmentSection(fieldKey: string): string {
+  return STAGE1_ATTACHMENT_SECTIONS[fieldKey] ?? 'general';
+}
 
 export function getAttachmentLabel(key: string, data?: Record<string, unknown>): string {
   if (STAGE1_ATTACHMENT_FIELDS[key]) {

@@ -6,7 +6,7 @@ import { AuthService } from '../../services/auth.service';
 import { NotificationService } from '../../services/notification.service';
 import { StorageService } from '../../services/storage.service';
 import { StoredAttachment } from '../../models/attachment.model';
-import { resolveCloudinaryFileUrl } from '../../shared/utils/cloudinary-url.util';
+import { resolveAttachmentUrl } from '../../shared/utils/attachment-url.util';
 
 @Component({
   selector: 'app-profile',
@@ -32,7 +32,7 @@ export class ProfileComponent implements OnInit {
   }
 
   fileUrl(attachment: StoredAttachment | string): string {
-    return resolveCloudinaryFileUrl(attachment);
+    return resolveAttachmentUrl(attachment);
   }
 
   private async loadProfile(): Promise<void> {

@@ -12,11 +12,14 @@ import {
   NG_VALUE_ACCESSOR
 } from '@angular/forms';
 import { MAX_FILES_PER_ATTACHMENT } from '../../../config/attachments.config';
-import { StoredAttachment } from '../../../models/attachment.model';
+import {
+  StoredAttachment,
+  UploadScope,
+} from '../../../models/attachment.model';
 import { AttachmentService } from '../../../services/attachment.service';
 import { NotificationService } from '../../../services/notification.service';
 import { normalizeAttachments } from '../../../config/attachments.config';
-import { resolveCloudinaryFileUrl } from '../../utils/cloudinary-url.util';
+import { resolveAttachmentUrl } from '../../utils/attachment-url.util';
 
 interface AttachedFileItem extends StoredAttachment {
   id: string;
@@ -42,6 +45,11 @@ export class FileUploadComponent implements ControlValueAccessor {
   @Input() hint = 'Drag & drop or click to browse';
   @Input() maxFiles = MAX_FILES_PER_ATTACHMENT;
   @Input() accept = '.pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg,.webp,.txt,.zip';
+
+  /** R2 folder context: `<scope>/<entityId>/<section>/`. */
+  @Input() scope: UploadScope = 'organizations';
+  @Input() entityId = '';
+  @Input() section = 'general';
 
   @Output() uploadError = new EventEmitter<string>();
 
@@ -151,7 +159,7 @@ export class FileUploadComponent implements ControlValueAccessor {
   }
 
   openUrl(file: AttachedFileItem): string {
-    return resolveCloudinaryFileUrl(file);
+    return resolveAttachmentUrl(file);
   }
 
   isRemoving(file: AttachedFileItem): boolean {
@@ -171,7 +179,7 @@ export class FileUploadComponent implements ControlValueAccessor {
 
     try {
       if (file.publicId) {
-        await this.attachmentService.deleteFile(file.publicId, file.resourceType);
+        await this.attachmentService.deleteFile(file.publicId);
       }
 
       this.files = this.files.filter((item) => item.id !== file.id);
@@ -189,6 +197,13 @@ export class FileUploadComponent implements ControlValueAccessor {
 
   private async handleFiles(selected: File[]): Promise<void> {
     if (!selected.length) {
+      return;
+    }
+
+    if (!this.entityId) {
+      this.notificationService.error(
+        'Missing organization reference. Reload the page and try again.',
+      );
       return;
     }
 
@@ -220,7 +235,11 @@ export class FileUploadComponent implements ControlValueAccessor {
       this.cdr.markForCheck();
 
       try {
-        const uploaded = await this.attachmentService.uploadFile(file);
+        const uploaded = await this.attachmentService.uploadFile(file, {
+          scope: this.scope,
+          entityId: this.entityId,
+          section: this.section,
+        });
         this.files = this.files.map((item) =>
           item.id === pending.id
             ? { ...item, ...uploaded, uploading: false }

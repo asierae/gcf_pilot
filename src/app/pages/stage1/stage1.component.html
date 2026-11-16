@@ -87,6 +87,8 @@
           </div>
           <app-file-upload
             formControlName="nominationLetterFiles"
+            [entityId]="applicantId"
+            section="access"
             label="Upload NDA nomination letter"
             hint="Drag & drop or click to browse"
           />
@@ -152,6 +154,8 @@
           </div>
           <app-file-upload
             formControlName="consultationSummaryFiles"
+            [entityId]="applicantId"
+            section="access"
             label="Upload Consultation Summary and supporting documentation"
             hint="Emails, meeting notes, etc."
           />
@@ -404,6 +408,8 @@
 
           <app-file-upload
             formControlName="legalSupportingDocumentsFiles"
+            [entityId]="applicantId"
+            section="legal"
             label="Upload Supporting Documents"
             hint="Founding/incorporation certificates, Articles of Association, Ownership structure, etc."
           />
@@ -831,6 +837,8 @@
 
           <app-file-upload
             formControlName="fastTrackAccreditationFiles"
+            [entityId]="applicantId"
+            section="fasttrack"
             label="Upload accreditation/assessment reference"
             hint="Supporting documentation for fast-track eligibility"
           />

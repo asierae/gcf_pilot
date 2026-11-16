@@ -16,7 +16,7 @@ import {
   normalizeAttachmentUrls,
 } from "../../config/attachments.config";
 import { StoredAttachment } from "../../models/attachment.model";
-import { resolveCloudinaryFileUrl } from "../utils/cloudinary-url.util";
+import { resolveAttachmentUrl } from "../utils/attachment-url.util";
 
 export const STAGE1_ALL_LABELS: Record<string, string> = {
   organizationType: "Organization Type",
@@ -546,7 +546,7 @@ export function getAttachmentUrls(
   data: Record<string, unknown>,
 ): string[] {
   return getAttachments(key, data).map((item) =>
-    resolveCloudinaryFileUrl(item),
+    resolveAttachmentUrl(item),
   );
 }
 

@@ -24,6 +24,13 @@ export class Stage1Component {
   submitted = false;
   submitSuccess = false;
 
+  /**
+   * Generated up-front so uploads land in `organizations/<id>/<section>/`
+   * before the applicant record exists. Sent with the submission so the
+   * record and the folder share the same id.
+   */
+  applicantId = Stage1Component.newApplicantId();
+
   steps = [
     { id: 'access', title: 'Access Modality', icon: '🌐' },
     { id: 'general', title: 'General Information', icon: '📋' },
@@ -181,11 +188,21 @@ export class Stage1Component {
 
   private async submitForm(): Promise<void> {
     try {
-      await this.storageService.saveStage1Submission(this.form.value);
+      await this.storageService.saveStage1Submission(
+        this.form.value,
+        this.applicantId,
+      );
       this.submitSuccess = true;
       this.notificationService.success('Questionnaire submitted successfully!');
     } catch {
       this.notificationService.error('Could not save submission to the server.');
     }
+  }
+
+  private static newApplicantId(): string {
+    if (typeof crypto !== 'undefined' && 'randomUUID' in crypto) {
+      return crypto.randomUUID();
+    }
+    return `local-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
   }
 }

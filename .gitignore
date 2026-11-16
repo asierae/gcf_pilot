@@ -42,9 +42,12 @@ testem.log
 Thumbs.db
 
 # Secrets
-server/.env
 .env
 .dev.vars
 
 # Wrangler local state
 .wrangler/
+
+# Legacy data migration output (contains applicant PII)
+/firestore-export.json
+/worker/import.sql
