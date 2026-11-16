@@ -1,6 +1,7 @@
 import { Injectable } from "@angular/core";
 import { Router } from "@angular/router";
 import { BehaviorSubject } from "rxjs";
+import { ApiService } from "./api.service";
 import { UserService } from "./user.service";
 
 export interface User {
@@ -8,6 +9,11 @@ export interface User {
   username: string;
   email: string;
   role: "admin" | "applicant";
+}
+
+export interface LoginResult {
+  ok: boolean;
+  message?: string;
 }
 
 const SESSION_USER_KEY = "current_user";
@@ -20,6 +26,7 @@ export class AuthService {
   constructor(
     private router: Router,
     private userService: UserService,
+    private apiService: ApiService,
   ) {
     const saved = sessionStorage.getItem(SESSION_USER_KEY);
     if (saved) {
@@ -31,23 +38,57 @@ export class AuthService {
     }
   }
 
-  login(username: string, pass: string): boolean {
-    const appUser = this.userService.findByCredentials(username, pass);
-    if (!appUser) return false;
+  /**
+   * Admin accounts are validated by the Worker, which returns the API token
+   * used for every admin request. Applicant accounts stay local-only: their
+   * submissions go through the public stage endpoints.
+   */
+  async login(username: string, pass: string): Promise<LoginResult> {
+    const knownUser = this.userService
+      .getUsers()
+      .find((user) => user.username === username && user.status === "active");
 
-    const user: User = {
-      id: appUser.id,
-      username: appUser.username,
-      email: appUser.email,
-      role: appUser.role,
-    };
+    if (knownUser && knownUser.role !== "admin") {
+      if (knownUser.password !== pass) {
+        return { ok: false };
+      }
+      return this.startSession({
+        id: knownUser.id,
+        username: knownUser.username,
+        email: knownUser.email,
+        role: knownUser.role,
+      });
+    }
+
+    try {
+      // The Worker is the source of truth for admin credentials.
+      const token = await this.apiService.login(username, pass);
+      this.apiService.setToken(token);
+    } catch (error) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : "Could not sign in to the server.";
+      return { ok: false, message };
+    }
+
+    return this.startSession({
+      id: knownUser?.id ?? `api-${username}`,
+      username,
+      email: knownUser?.email ?? "",
+      role: "admin",
+    });
+  }
+
+  private startSession(user: User): LoginResult {
     sessionStorage.setItem(SESSION_USER_KEY, JSON.stringify(user));
     this.currentUserSubject.next(user);
-    return true;
+    return { ok: true };
   }
 
   logout(): void {
     sessionStorage.removeItem(SESSION_USER_KEY);
+    this.apiService.clearToken();
     this.currentUserSubject.next(null);
     this.router.navigate(["/login"]);
   }

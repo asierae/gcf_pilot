@@ -44,7 +44,7 @@ export class ProfileComponent implements OnInit {
       this.applicantAcronym = (data['applicantAcronym'] as string) || '';
       this.attachmentFields = collectAttachmentFields(data);
     } catch {
-      this.notificationService.error('Could not load your profile documents from Firebase.');
+      this.notificationService.error('Could not load your profile documents from the server.');
     } finally {
       this.loading = false;
     }

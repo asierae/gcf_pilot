@@ -1,0 +1,1045 @@
+/**
+ * Cloudflare Worker API for the Averacapital GCF portal.
+ *
+ * The Angular SPA is served from the ASSETS binding. Every request to
+ * /api/* is handled here first (see `assets.run_worker_first` in
+ * wrangler.jsonc) and never reaches the static-asset layer.
+ *
+ * Storage layout
+ *  - D1  (binding DB)        -> applicants + leads tables (see worker/schema.sql)
+ *  - R2  (binding DOCUMENTS) -> uploaded PDFs/documents, served via /api/files/*
+ *
+ * Auth
+ *  - POST /api/login exchanges admin credentials for API_TOKEN.
+ *  - Every admin route requires `Authorization: Bearer <API_TOKEN>`.
+ *  - Applicant submissions and file uploads stay public, matching the
+ *    previous direct-to-Firestore/Cloudinary behaviour.
+ */
+
+type JsonObject = Record<string, unknown>;
+
+interface Env {
+  ASSETS: AssetsFetcher;
+  DB: D1DatabaseLike;
+  DOCUMENTS: R2BucketLike;
+  API_TOKEN?: string;
+  ADMIN_USERNAME?: string;
+  ADMIN_PASSWORD?: string;
+  /** JSON map of username -> password, e.g. {"hatyja":"asier"} */
+  ADMIN_ACCOUNTS?: string;
+  /** Comma-separated origins allowed to call this API cross-origin (e.g. the Vercel URL) */
+  CORS_ORIGINS?: string;
+}
+
+/* ------------------------------------------------------------------ *
+ * Minimal Workers runtime types (avoids adding @cloudflare/workers-types)
+ * ------------------------------------------------------------------ */
+
+interface AssetsFetcher {
+  fetch(request: Request): Promise<Response>;
+}
+
+interface D1ResultLike<T> {
+  results?: T[];
+}
+
+interface D1StatementLike {
+  bind(...values: unknown[]): D1StatementLike;
+  first<T = JsonObject>(): Promise<T | null>;
+  all<T = JsonObject>(): Promise<D1ResultLike<T>>;
+  run(): Promise<unknown>;
+}
+
+interface D1DatabaseLike {
+  prepare(query: string): D1StatementLike;
+  batch(statements: D1StatementLike[]): Promise<unknown[]>;
+}
+
+interface R2HttpMetadata {
+  contentType?: string;
+  contentDisposition?: string;
+  cacheControl?: string;
+}
+
+interface R2ObjectBodyLike {
+  body: ReadableStream;
+  size: number;
+  httpMetadata?: R2HttpMetadata;
+}
+
+interface R2BucketLike {
+  put(
+    key: string,
+    value: ArrayBuffer,
+    options?: { httpMetadata?: R2HttpMetadata },
+  ): Promise<unknown>;
+  get(key: string): Promise<R2ObjectBodyLike | null>;
+  delete(key: string): Promise<void>;
+}
+
+/* ------------------------------------------------------------------ *
+ * Domain types (mirror src/app/models/applicant.model.ts)
+ * ------------------------------------------------------------------ */
+
+type SubmissionStatus = 'Pending' | 'Passed' | 'Failed';
+
+const SUBMISSION_STATUSES: SubmissionStatus[] = ['Pending', 'Passed', 'Failed'];
+const LEAD_STATUSES = ['Pending', 'Contacted', 'Qualified', 'Rejected'];
+
+interface StagePayload {
+  submittedAt: string;
+  data: JsonObject;
+}
+
+interface ReviewSentLog {
+  sentAt: string;
+  recipient: string;
+}
+
+interface ApplicantAdmin {
+  status: SubmissionStatus;
+  reviewNotes: Record<string, string>;
+  lastReviewSent: ReviewSentLog | null;
+}
+
+interface ApplicantRecord {
+  id: string;
+  createdAt: string;
+  updatedAt: string;
+  stage1: StagePayload | null;
+  stage2: StagePayload | null;
+  admin: ApplicantAdmin;
+  extensions: JsonObject;
+}
+
+interface ApplicantRow {
+  id: string;
+  created_at: string;
+  updated_at: string;
+  stage1: string | null;
+  stage2: string | null;
+  admin: string | null;
+  extensions: string | null;
+}
+
+interface LeadRecord {
+  id: string;
+  region: string;
+  country: string;
+  organization: string;
+  acronym: string;
+  entityType: string;
+  website: string;
+  contactEmail: string;
+  climateSpecialty: string;
+  comments: string;
+  status: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface LeadRow {
+  id: string;
+  region: string | null;
+  country: string | null;
+  organization: string | null;
+  acronym: string | null;
+  entity_type: string | null;
+  website: string | null;
+  contact_email: string | null;
+  climate_specialty: string | null;
+  comments: string | null;
+  status: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+const DEFAULT_ADMIN: ApplicantAdmin = {
+  status: 'Pending',
+  reviewNotes: {},
+  lastReviewSent: null,
+};
+
+const MAX_UPLOAD_BYTES = 15 * 1024 * 1024;
+const MAX_JSON_BYTES = 4 * 1024 * 1024;
+const MAX_BATCH_IDS = 500;
+const UPLOAD_PREFIX = 'gcf-applicants/';
+
+/* ------------------------------------------------------------------ *
+ * Small helpers
+ * ------------------------------------------------------------------ */
+
+class HttpError extends Error {
+  constructor(
+    readonly status: number,
+    message: string,
+  ) {
+    super(message);
+    this.name = 'HttpError';
+  }
+}
+
+function json(body: unknown, status = 200): Response {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: {
+      'Content-Type': 'application/json; charset=utf-8',
+      'Cache-Control': 'no-store',
+    },
+  });
+}
+
+function empty(status = 204): Response {
+  return new Response(null, { status });
+}
+
+function methodNotAllowed(allow: string): Response {
+  return json({ error: `Method not allowed. Use ${allow}.` }, 405);
+}
+
+function corsHeaders(env: Env, origin: string | null): Record<string, string> {
+  if (!origin) return {};
+
+  const allowed = (env.CORS_ORIGINS ?? '')
+    .split(',')
+    .map((value) => value.trim())
+    .filter(Boolean);
+
+  if (!allowed.includes('*') && !allowed.includes(origin)) {
+    return {};
+  }
+
+  return {
+    'Access-Control-Allow-Origin': origin,
+    'Access-Control-Allow-Methods': 'GET, POST, PATCH, DELETE, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-API-Token',
+    'Access-Control-Max-Age': '86400',
+    Vary: 'Origin',
+  };
+}
+
+async function readJson<T>(request: Request): Promise<T> {
+  const text = await request.text();
+  if (!text) {
+    throw new HttpError(400, 'Request body is required.');
+  }
+  if (text.length > MAX_JSON_BYTES) {
+    throw new HttpError(413, 'Request body is too large.');
+  }
+  try {
+    return JSON.parse(text) as T;
+  } catch {
+    throw new HttpError(400, 'Invalid JSON body.');
+  }
+}
+
+function asObject(value: unknown, field: string): JsonObject {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) {
+    throw new HttpError(400, `"${field}" must be an object.`);
+  }
+  return value as JsonObject;
+}
+
+function asString(value: unknown, field: string): string {
+  if (typeof value !== 'string') {
+    throw new HttpError(400, `"${field}" must be a string.`);
+  }
+  return value;
+}
+
+function parseJson<T>(value: string | null, fallback: T): T {
+  if (!value) return fallback;
+  try {
+    return JSON.parse(value) as T;
+  } catch {
+    return fallback;
+  }
+}
+
+function generateId(): string {
+  return `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
+}
+
+function stripTrailingSlash(path: string): string {
+  if (path.length > 1 && path.endsWith('/')) {
+    return path.slice(0, -1);
+  }
+  return path;
+}
+
+function safeEqual(a: string, b: string): boolean {
+  if (a.length !== b.length) return false;
+  let diff = 0;
+  for (let i = 0; i < a.length; i += 1) {
+    diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  }
+  return diff === 0;
+}
+
+function sanitizeFileName(name: string): string {
+  const base = name.split(/[\\/]/).pop() ?? 'file';
+  const cleaned = base
+    .replace(/[^A-Za-z0-9._-]+/g, '_')
+    .replace(/^_+|_+$/g, '');
+  return (cleaned || 'file').slice(0, 120);
+}
+
+function resourceTypeFor(contentType: string): 'image' | 'video' | 'raw' {
+  if (contentType.startsWith('image/')) return 'image';
+  if (contentType.startsWith('video/')) return 'video';
+  return 'raw';
+}
+
+/* ------------------------------------------------------------------ *
+ * Row <-> record mapping
+ * ------------------------------------------------------------------ */
+
+function normalizeAdmin(raw: unknown): ApplicantAdmin {
+  if (!raw || typeof raw !== 'object') {
+    return { ...DEFAULT_ADMIN };
+  }
+  const admin = raw as Partial<ApplicantAdmin>;
+  const status = SUBMISSION_STATUSES.includes(admin.status as SubmissionStatus)
+    ? (admin.status as SubmissionStatus)
+    : 'Pending';
+  return {
+    status,
+    reviewNotes:
+      admin.reviewNotes && typeof admin.reviewNotes === 'object'
+        ? admin.reviewNotes
+        : {},
+    lastReviewSent: admin.lastReviewSent ?? null,
+  };
+}
+
+function normalizeStage(raw: unknown): StagePayload | null {
+  if (!raw || typeof raw !== 'object') return null;
+  const stage = raw as Partial<StagePayload>;
+  return {
+    submittedAt:
+      typeof stage.submittedAt === 'string'
+        ? stage.submittedAt
+        : new Date().toISOString(),
+    data:
+      stage.data && typeof stage.data === 'object'
+        ? (stage.data as JsonObject)
+        : {},
+  };
+}
+
+function rowToApplicant(row: ApplicantRow): ApplicantRecord {
+  return {
+    id: row.id,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+    stage1: normalizeStage(parseJson<unknown>(row.stage1, null)),
+    stage2: normalizeStage(parseJson<unknown>(row.stage2, null)),
+    admin: normalizeAdmin(parseJson<unknown>(row.admin, null)),
+    extensions: parseJson<JsonObject>(row.extensions, {}),
+  };
+}
+
+function rowToLead(row: LeadRow): LeadRecord {
+  return {
+    id: row.id,
+    region: row.region ?? '',
+    country: row.country ?? '',
+    organization: row.organization ?? '',
+    acronym: row.acronym ?? '',
+    entityType: row.entity_type ?? '',
+    website: row.website ?? '',
+    contactEmail: row.contact_email ?? '',
+    climateSpecialty: row.climate_specialty ?? '',
+    comments: row.comments ?? '',
+    status: row.status ?? 'Pending',
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  };
+}
+
+/* ------------------------------------------------------------------ *
+ * Auth
+ * ------------------------------------------------------------------ */
+
+function parseAdminAccounts(env: Env): Record<string, string> {
+  const accounts = parseJson<Record<string, unknown>>(env.ADMIN_ACCOUNTS ?? null, {});
+  const result: Record<string, string> = {};
+  for (const [key, value] of Object.entries(accounts)) {
+    if (typeof value === 'string') {
+      result[key] = value;
+    }
+  }
+  return result;
+}
+
+function checkCredentials(env: Env, username: string, password: string): boolean {
+  const accounts = parseAdminAccounts(env);
+  if (username in accounts) {
+    return safeEqual(accounts[username], password);
+  }
+  if (env.ADMIN_USERNAME && env.ADMIN_PASSWORD) {
+    return (
+      safeEqual(env.ADMIN_USERNAME, username) &&
+      safeEqual(env.ADMIN_PASSWORD, password)
+    );
+  }
+  return false;
+}
+
+function checkAdmin(env: Env, request: Request): Response | null {
+  if (!env.API_TOKEN) {
+    return json(
+      { error: 'API_TOKEN is not configured on the Worker. Run: wrangler secret put API_TOKEN' },
+      503,
+    );
+  }
+  const header = request.headers.get('Authorization') ?? '';
+  const token = header.toLowerCase().startsWith('bearer ')
+    ? header.slice(7).trim()
+    : (request.headers.get('X-API-Token') ?? '').trim();
+
+  if (!token || !safeEqual(token, env.API_TOKEN)) {
+    return json({ error: 'Unauthorized. Sign in again.' }, 401);
+  }
+  return null;
+}
+
+async function login(request: Request, env: Env): Promise<Response> {
+  if (!env.API_TOKEN) {
+    return json(
+      { error: 'API_TOKEN is not configured on the Worker. Run: wrangler secret put API_TOKEN' },
+      503,
+    );
+  }
+
+  const body = await readJson<{ username?: unknown; password?: unknown }>(request);
+  const username = asString(body.username, 'username');
+  const password = asString(body.password, 'password');
+
+  if (!checkCredentials(env, username, password)) {
+    return json({ error: 'Invalid username or password.' }, 401);
+  }
+
+  return json({ token: env.API_TOKEN, username });
+}
+
+/* ------------------------------------------------------------------ *
+ * Applicants
+ * ------------------------------------------------------------------ */
+
+async function listApplicants(env: Env): Promise<Response> {
+  const { results } = await env.DB.prepare(
+    'SELECT * FROM applicants ORDER BY created_at DESC',
+  ).all<ApplicantRow>();
+
+  return json({ applicants: (results ?? []).map(rowToApplicant) });
+}
+
+async function getApplicant(env: Env, id: string): Promise<Response> {
+  const row = await env.DB.prepare('SELECT * FROM applicants WHERE id = ?')
+    .bind(id)
+    .first<ApplicantRow>();
+
+  return json({ applicant: row ? rowToApplicant(row) : null });
+}
+
+/**
+ * Public endpoint used by the applicant portal to prefill the wizard.
+ * Returns only the stage payload — never admin notes, status or review logs.
+ */
+async function latestSubmission(
+  env: Env,
+  stageParam: string | null,
+): Promise<Response> {
+  const column = stageParam === '2' ? 'stage2' : 'stage1';
+  const row = await env.DB.prepare(
+    `SELECT id, ${column} AS payload
+       FROM applicants
+      WHERE ${column} IS NOT NULL
+      ORDER BY created_at DESC
+      LIMIT 1`,
+  ).first<{ id: string; payload: string | null }>();
+
+  if (!row) {
+    return json({ submission: null });
+  }
+
+  const stage = normalizeStage(parseJson<unknown>(row.payload, null));
+  if (!stage) {
+    return json({ submission: null });
+  }
+
+  return json({
+    submission: { id: row.id, date: stage.submittedAt, data: stage.data },
+  });
+}
+
+async function createStage1(request: Request, env: Env): Promise<Response> {
+  const body = await readJson<{ data?: unknown }>(request);
+  const data = asObject(body.data, 'data');
+  const now = new Date().toISOString();
+
+  const applicant: ApplicantRecord = {
+    id: generateId(),
+    createdAt: now,
+    updatedAt: now,
+    stage1: { submittedAt: now, data },
+    stage2: null,
+    admin: { ...DEFAULT_ADMIN },
+    extensions: {},
+  };
+
+  await env.DB.prepare(
+    `INSERT INTO applicants (id, created_at, updated_at, stage1, stage2, admin, extensions)
+     VALUES (?, ?, ?, ?, ?, ?, ?)`,
+  )
+    .bind(
+      applicant.id,
+      applicant.createdAt,
+      applicant.updatedAt,
+      JSON.stringify(applicant.stage1),
+      null,
+      JSON.stringify(applicant.admin),
+      JSON.stringify(applicant.extensions),
+    )
+    .run();
+
+  return json({ applicant }, 201);
+}
+
+async function createStage2(request: Request, env: Env): Promise<Response> {
+  const body = await readJson<{ data?: unknown; stage1Data?: unknown }>(request);
+  const data = asObject(body.data, 'data');
+  const stage1Data = body.stage1Data ? asObject(body.stage1Data, 'stage1Data') : {};
+  const now = new Date().toISOString();
+
+  const applicant: ApplicantRecord = {
+    id: generateId(),
+    createdAt: now,
+    updatedAt: now,
+    stage1: { submittedAt: now, data: stage1Data },
+    stage2: { submittedAt: now, data },
+    admin: { ...DEFAULT_ADMIN },
+    extensions: {},
+  };
+
+  await env.DB.prepare(
+    `INSERT INTO applicants (id, created_at, updated_at, stage1, stage2, admin, extensions)
+     VALUES (?, ?, ?, ?, ?, ?, ?)`,
+  )
+    .bind(
+      applicant.id,
+      applicant.createdAt,
+      applicant.updatedAt,
+      JSON.stringify(applicant.stage1),
+      JSON.stringify(applicant.stage2),
+      JSON.stringify(applicant.admin),
+      JSON.stringify(applicant.extensions),
+    )
+    .run();
+
+  return json({ applicant }, 201);
+}
+
+async function deleteApplicants(request: Request, env: Env): Promise<Response> {
+  const body = await readJson<{ ids?: unknown }>(request);
+  const ids = readIdList(body.ids);
+
+  const statements = ids.map((id) =>
+    env.DB.prepare('DELETE FROM applicants WHERE id = ?').bind(id),
+  );
+  await env.DB.batch(statements);
+  return empty();
+}
+
+async function updateApplicantStatus(
+  request: Request,
+  env: Env,
+  id: string,
+): Promise<Response> {
+  const body = await readJson<{ status?: unknown }>(request);
+  const status = asString(body.status, 'status') as SubmissionStatus;
+
+  if (!SUBMISSION_STATUSES.includes(status)) {
+    throw new HttpError(400, `"status" must be one of ${SUBMISSION_STATUSES.join(', ')}.`);
+  }
+
+  return patchApplicant(env, id, (applicant, now) => ({
+    ...applicant,
+    updatedAt: now,
+    admin: { ...applicant.admin, status },
+  }));
+}
+
+async function updateApplicantStage1(
+  request: Request,
+  env: Env,
+  id: string,
+): Promise<Response> {
+  const body = await readJson<{ data?: unknown; updatedAt?: unknown }>(request);
+  const data = asObject(body.data, 'data');
+  const requestedUpdatedAt =
+    typeof body.updatedAt === 'string' ? body.updatedAt : null;
+
+  return patchApplicant(env, id, (applicant, now) => ({
+    ...applicant,
+    updatedAt: requestedUpdatedAt ?? now,
+    stage1: applicant.stage1
+      ? { ...applicant.stage1, data }
+      : { submittedAt: now, data },
+  }));
+}
+
+async function updateApplicantReviewNote(
+  request: Request,
+  env: Env,
+  id: string,
+): Promise<Response> {
+  const body = await readJson<{ sectionId?: unknown; note?: unknown }>(request);
+  const sectionId = asString(body.sectionId, 'sectionId');
+  const note = asString(body.note, 'note');
+
+  return patchApplicant(env, id, (applicant, now) => ({
+    ...applicant,
+    updatedAt: now,
+    admin: {
+      ...applicant.admin,
+      reviewNotes: { ...applicant.admin.reviewNotes, [sectionId]: note },
+    },
+  }));
+}
+
+async function markApplicantReviewSent(
+  request: Request,
+  env: Env,
+  id: string,
+): Promise<Response> {
+  const body = await readJson<{ recipient?: unknown }>(request);
+  const recipient = asString(body.recipient, 'recipient');
+  const now = new Date().toISOString();
+
+  return patchApplicant(env, id, (applicant) => ({
+    ...applicant,
+    updatedAt: now,
+    admin: {
+      ...applicant.admin,
+      lastReviewSent: { sentAt: now, recipient },
+    },
+  }));
+}
+
+/**
+ * Read-modify-write helper for the JSON columns. Admin traffic is low
+ * volume, so a race here is not a practical concern.
+ */
+async function patchApplicant(
+  env: Env,
+  id: string,
+  mutate: (applicant: ApplicantRecord, now: string) => ApplicantRecord,
+): Promise<Response> {
+  const row = await env.DB.prepare('SELECT * FROM applicants WHERE id = ?')
+    .bind(id)
+    .first<ApplicantRow>();
+
+  if (!row) {
+    return json({ error: 'Applicant not found.' }, 404);
+  }
+
+  const updated = mutate(rowToApplicant(row), new Date().toISOString());
+
+  await env.DB.prepare(
+    `UPDATE applicants
+        SET updated_at = ?, stage1 = ?, stage2 = ?, admin = ?, extensions = ?
+      WHERE id = ?`,
+  )
+    .bind(
+      updated.updatedAt,
+      updated.stage1 ? JSON.stringify(updated.stage1) : null,
+      updated.stage2 ? JSON.stringify(updated.stage2) : null,
+      JSON.stringify(updated.admin),
+      JSON.stringify(updated.extensions),
+      id,
+    )
+    .run();
+
+  return json({ applicant: updated });
+}
+
+/* ------------------------------------------------------------------ *
+ * Leads
+ * ------------------------------------------------------------------ */
+
+function normalizeLeadInput(raw: unknown): Omit<LeadRecord, 'id' | 'createdAt' | 'updatedAt'> {
+  const lead = asObject(raw, 'lead');
+  const read = (key: string): string =>
+    typeof lead[key] === 'string' ? (lead[key] as string) : '';
+
+  const status = read('status');
+
+  return {
+    region: read('region'),
+    country: read('country'),
+    organization: read('organization'),
+    acronym: read('acronym'),
+    entityType: read('entityType'),
+    website: read('website'),
+    contactEmail: read('contactEmail'),
+    climateSpecialty: read('climateSpecialty'),
+    comments: read('comments'),
+    status: LEAD_STATUSES.includes(status) ? status : 'Pending',
+  };
+}
+
+async function listLeads(env: Env): Promise<Response> {
+  const { results } = await env.DB.prepare(
+    'SELECT * FROM leads ORDER BY created_at DESC',
+  ).all<LeadRow>();
+
+  return json({ leads: (results ?? []).map(rowToLead) });
+}
+
+async function createLeads(request: Request, env: Env): Promise<Response> {
+  const body = await readJson<{ leads?: unknown }>(request);
+  if (!Array.isArray(body.leads)) {
+    throw new HttpError(400, '"leads" must be an array.');
+  }
+  if (body.leads.length === 0) {
+    return json({ leads: [] }, 201);
+  }
+  if (body.leads.length > MAX_BATCH_IDS) {
+    throw new HttpError(413, `A maximum of ${MAX_BATCH_IDS} leads can be imported at once.`);
+  }
+
+  const now = new Date().toISOString();
+  const created: LeadRecord[] = body.leads.map((raw) => {
+    const lead = normalizeLeadInput(raw);
+    return { ...lead, id: generateId(), createdAt: now, updatedAt: now };
+  });
+
+  await env.DB.batch(
+    created.map((lead) =>
+      env.DB.prepare(
+        `INSERT INTO leads
+           (id, region, country, organization, acronym, entity_type, website,
+            contact_email, climate_specialty, comments, status, created_at, updated_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      ).bind(
+        lead.id,
+        lead.region,
+        lead.country,
+        lead.organization,
+        lead.acronym,
+        lead.entityType,
+        lead.website,
+        lead.contactEmail,
+        lead.climateSpecialty,
+        lead.comments,
+        lead.status,
+        lead.createdAt,
+        lead.updatedAt,
+      ),
+    ),
+  );
+
+  return json({ leads: created }, 201);
+}
+
+async function updateLead(
+  request: Request,
+  env: Env,
+  id: string,
+): Promise<Response> {
+  const body = await readJson<{ lead?: unknown }>(request);
+  const lead = normalizeLeadInput(body.lead);
+  const now = new Date().toISOString();
+
+  await env.DB.prepare(
+    `UPDATE leads
+        SET region = ?, country = ?, organization = ?, acronym = ?, entity_type = ?,
+            website = ?, contact_email = ?, climate_specialty = ?, comments = ?,
+            status = ?, updated_at = ?
+      WHERE id = ?`,
+  )
+    .bind(
+      lead.region,
+      lead.country,
+      lead.organization,
+      lead.acronym,
+      lead.entityType,
+      lead.website,
+      lead.contactEmail,
+      lead.climateSpecialty,
+      lead.comments,
+      lead.status,
+      now,
+      id,
+    )
+    .run();
+
+  return empty();
+}
+
+async function deleteLeads(request: Request, env: Env): Promise<Response> {
+  const body = await readJson<{ ids?: unknown }>(request);
+  const ids = readIdList(body.ids);
+
+  await env.DB.batch(
+    ids.map((id) => env.DB.prepare('DELETE FROM leads WHERE id = ?').bind(id)),
+  );
+  return empty();
+}
+
+function readIdList(raw: unknown): string[] {
+  if (!Array.isArray(raw)) {
+    throw new HttpError(400, '"ids" must be an array of strings.');
+  }
+
+  const ids = raw.filter((id): id is string => typeof id === 'string' && id.length > 0);
+  if (ids.length !== raw.length) {
+    throw new HttpError(400, '"ids" must contain only non-empty strings.');
+  }
+  if (ids.length > MAX_BATCH_IDS) {
+    throw new HttpError(413, `A maximum of ${MAX_BATCH_IDS} ids can be deleted at once.`);
+  }
+  return ids;
+}
+
+/* ------------------------------------------------------------------ *
+ * Uploads (R2)
+ * ------------------------------------------------------------------ */
+
+async function uploadFile(request: Request, env: Env): Promise<Response> {
+  let form: FormData;
+  try {
+    form = await request.formData();
+  } catch {
+    throw new HttpError(400, 'Expected a multipart/form-data upload.');
+  }
+
+  const file = form.get('file');
+  if (!(file instanceof File)) {
+    throw new HttpError(400, 'No file provided.');
+  }
+  if (file.size === 0) {
+    throw new HttpError(400, 'The uploaded file is empty.');
+  }
+  if (file.size > MAX_UPLOAD_BYTES) {
+    throw new HttpError(413, `Files must be 15 MB or smaller.`);
+  }
+
+  const contentType = file.type || 'application/octet-stream';
+  const key = `${UPLOAD_PREFIX}${new Date().toISOString().slice(0, 10)}/${crypto.randomUUID()}-${sanitizeFileName(file.name)}`;
+
+  await env.DOCUMENTS.put(key, await file.arrayBuffer(), {
+    httpMetadata: {
+      contentType,
+      contentDisposition: `inline; filename="${sanitizeFileName(file.name)}"`,
+    },
+  });
+
+  return json(
+    {
+      url: `/api/files/${key}`,
+      publicId: key,
+      resourceType: resourceTypeFor(contentType),
+      name: file.name,
+    },
+    201,
+  );
+}
+
+async function deleteFile(request: Request, env: Env): Promise<Response> {
+  const body = await readJson<{ publicId?: unknown }>(request);
+  const publicId = asString(body.publicId, 'publicId');
+
+  if (!publicId.startsWith(UPLOAD_PREFIX) || publicId.includes('..')) {
+    throw new HttpError(400, 'Invalid file key.');
+  }
+
+  await env.DOCUMENTS.delete(publicId);
+  return empty();
+}
+
+async function serveFile(env: Env, key: string, method: string): Promise<Response> {
+  const decoded = decodeURIComponent(key);
+  const object = await env.DOCUMENTS.get(decoded);
+
+  if (!object) {
+    return json({ error: 'File not found.' }, 404);
+  }
+
+  const headers = new Headers();
+  const contentType = object.httpMetadata?.contentType ?? 'application/octet-stream';
+  headers.set('Content-Type', contentType);
+  headers.set('Content-Length', String(object.size));
+  headers.set('Cache-Control', 'private, max-age=3600');
+  headers.set('X-Content-Type-Options', 'nosniff');
+  // Neutralises any HTML/SVG that might have been uploaded.
+  headers.set('Content-Security-Policy', "default-src 'none'; sandbox");
+
+  if (object.httpMetadata?.contentDisposition) {
+    headers.set('Content-Disposition', object.httpMetadata.contentDisposition);
+  }
+
+  return new Response(method === 'HEAD' ? null : object.body, { headers });
+}
+
+/* ------------------------------------------------------------------ *
+ * Router
+ * ------------------------------------------------------------------ */
+
+async function withAdmin(
+  env: Env,
+  request: Request,
+  handler: () => Promise<Response>,
+): Promise<Response> {
+  const authError = checkAdmin(env, request);
+  if (authError) return authError;
+  return handler();
+}
+
+async function handleApi(request: Request, env: Env, path: string): Promise<Response> {
+  const method = request.method.toUpperCase();
+
+  if (path === '/api' || path === '/api/health') {
+    return json({ ok: true, service: 'averacapital-api' });
+  }
+
+  if (path === '/api/login') {
+    if (method !== 'POST') return methodNotAllowed('POST');
+    return login(request, env);
+  }
+
+  if (path === '/api/send-review-email') {
+    if (method !== 'POST') return methodNotAllowed('POST');
+    return json(
+      {
+        error:
+          'Automatic email sending is not configured. Review emails open in Gmail compose instead.',
+      },
+      501,
+    );
+  }
+
+  if (path.startsWith('/api/files/')) {
+    if (method !== 'GET' && method !== 'HEAD') return methodNotAllowed('GET, HEAD');
+    return serveFile(env, path.slice('/api/files/'.length), method);
+  }
+
+  if (path === '/api/upload') {
+    if (method === 'POST') return uploadFile(request, env);
+    if (method === 'DELETE') return deleteFile(request, env);
+    return methodNotAllowed('POST, DELETE');
+  }
+
+  if (path === '/api/applicants') {
+    if (method === 'GET') return withAdmin(env, request, () => listApplicants(env));
+    if (method === 'DELETE') {
+      return withAdmin(env, request, () => deleteApplicants(request, env));
+    }
+    return methodNotAllowed('GET, DELETE');
+  }
+
+  if (path === '/api/applicants/stage1') {
+    if (method !== 'POST') return methodNotAllowed('POST');
+    return createStage1(request, env);
+  }
+
+  if (path === '/api/applicants/stage2') {
+    if (method !== 'POST') return methodNotAllowed('POST');
+    return createStage2(request, env);
+  }
+
+  if (path === '/api/applicants/latest') {
+    if (method !== 'GET') return methodNotAllowed('GET');
+    return latestSubmission(env, new URL(request.url).searchParams.get('stage'));
+  }
+
+  const applicantMatch = /^\/api\/applicants\/([^/]+)(?:\/(status|stage1|review-notes|review-sent))?$/.exec(
+    path,
+  );
+  if (applicantMatch) {
+    const id = decodeURIComponent(applicantMatch[1]);
+    const action = applicantMatch[2];
+
+    if (!action) {
+      if (method !== 'GET') return methodNotAllowed('GET');
+      return withAdmin(env, request, () => getApplicant(env, id));
+    }
+
+    if (method !== 'PATCH' && method !== 'PUT') return methodNotAllowed('PATCH');
+
+    if (action === 'status') {
+      return withAdmin(env, request, () => updateApplicantStatus(request, env, id));
+    }
+    if (action === 'stage1') {
+      return withAdmin(env, request, () => updateApplicantStage1(request, env, id));
+    }
+    if (action === 'review-notes') {
+      return withAdmin(env, request, () =>
+        updateApplicantReviewNote(request, env, id),
+      );
+    }
+    return withAdmin(env, request, () => markApplicantReviewSent(request, env, id));
+  }
+
+  if (path === '/api/leads') {
+    if (method === 'GET') return withAdmin(env, request, () => listLeads(env));
+    if (method === 'POST') return withAdmin(env, request, () => createLeads(request, env));
+    if (method === 'DELETE') return withAdmin(env, request, () => deleteLeads(request, env));
+    return methodNotAllowed('GET, POST, DELETE');
+  }
+
+  const leadMatch = /^\/api\/leads\/([^/]+)$/.exec(path);
+  if (leadMatch) {
+    if (method !== 'PATCH' && method !== 'PUT') return methodNotAllowed('PATCH');
+    const id = decodeURIComponent(leadMatch[1]);
+    return withAdmin(env, request, () => updateLead(request, env, id));
+  }
+
+  return json({ error: 'Not found.' }, 404);
+}
+
+export default {
+  async fetch(request: Request, env: Env): Promise<Response> {
+    const url = new URL(request.url);
+    const path = stripTrailingSlash(url.pathname);
+
+    if (path !== '/api' && !path.startsWith('/api/')) {
+      return env.ASSETS.fetch(request);
+    }
+
+    const cors = corsHeaders(env, request.headers.get('Origin'));
+
+    // Browser preflight: answer before auth, since it carries no credentials.
+    if (request.method.toUpperCase() === 'OPTIONS') {
+      return new Response(null, { status: 204, headers: cors });
+    }
+
+    let response: Response;
+    try {
+      response = await handleApi(request, env, path);
+    } catch (error) {
+      if (error instanceof HttpError) {
+        response = json({ error: error.message }, error.status);
+      } else {
+        console.error('Unhandled API error', error);
+        response = json({ error: 'Unexpected server error.' }, 500);
+      }
+    }
+
+    if (Object.keys(cors).length === 0) {
+      return response;
+    }
+
+    const headers = new Headers(response.headers);
+    for (const [key, value] of Object.entries(cors)) {
+      headers.set(key, value);
+    }
+
+    const body =
+      response.status === 204 || response.status === 304 ? null : response.body;
+
+    return new Response(body, { status: response.status, headers });
+  },
+};

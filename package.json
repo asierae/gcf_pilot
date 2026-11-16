@@ -4,8 +4,12 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
-    "start:all": "concurrently \"npm run server\" \"npm run start\"",
+    "start:all": "concurrently \"npm run worker:dev\" \"npm run start\"",
     "server": "node server/index.js",
+    "worker:dev": "npx --yes wrangler dev",
+    "worker:schema": "npx --yes wrangler d1 execute averacapital-db --local --file=worker/schema.sql",
+    "worker:typecheck": "tsc -p tsconfig.worker.json",
+    "deploy": "npx --yes wrangler deploy",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test"

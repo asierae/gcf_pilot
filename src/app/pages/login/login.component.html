@@ -36,7 +36,9 @@
         />
       </div>
 
-      <button type="submit" class="btn-submit">Sign In</button>
+      <button type="submit" class="btn-submit" [disabled]="submitting">
+        {{ submitting ? 'Signing in…' : 'Sign In' }}
+      </button>
     </form>
 
     <div class="login-hint">

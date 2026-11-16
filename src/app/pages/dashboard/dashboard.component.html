@@ -3,7 +3,7 @@
     <div class="dashboard-header-copy">
       <p class="page-eyebrow">Admin overview</p>
       <h2>Stage 1 submissions</h2>
-      <p>All pre-screening questionnaire submissions stored in Firebase.</p>
+      <p>All pre-screening questionnaire submissions stored on the server.</p>
     </div>
     <div class="header-actions">
       <span class="count-badge">
@@ -25,7 +25,7 @@
   @if (loading) {
     <div class="empty-state">
       <span class="empty-icon">⏳</span>
-      <p>Loading submissions from Firebase…</p>
+      <p>Loading submissions…</p>
     </div>
   } @else if (loadError) {
     <div class="empty-state">

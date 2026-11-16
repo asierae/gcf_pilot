@@ -58,7 +58,7 @@ export class DashboardComponent implements OnInit {
       );
       this.clampCurrentPage();
     } catch {
-      this.loadError = "Could not load submissions from Firebase.";
+      this.loadError = "Could not load submissions from the server.";
       this.notificationService.error(this.loadError);
     } finally {
       this.loading = false;
@@ -170,7 +170,7 @@ export class DashboardComponent implements OnInit {
       await this.storageService.setSubmissionStatus(submissionId, value);
     } catch {
       this.statusById[submissionId] = previous;
-      this.notificationService.error("Could not update status in Firebase.");
+      this.notificationService.error("Could not update status on the server.");
     }
   }
 
@@ -287,7 +287,7 @@ export class DashboardComponent implements OnInit {
       );
     } catch {
       this.notificationService.error(
-        "Could not delete submissions from Firebase.",
+        "Could not delete submissions from the server.",
       );
     }
   }

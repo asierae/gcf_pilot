@@ -10,7 +10,7 @@ export type {
   SubmissionStatus,
 } from "../models/applicant.model";
 export { SUBMISSION_STATUSES } from "../models/applicant.model";
-import { FirebaseService } from "./firebase.service";
+import { ApiService } from "./api.service";
 
 export interface FormSubmission {
   id: string;
@@ -93,10 +93,10 @@ const STAGE1_FIELD_KEYS = [
   providedIn: "root",
 })
 export class StorageService {
-  constructor(private firebaseService: FirebaseService) {}
+  constructor(private apiService: ApiService) {}
 
   async saveStage1Submission(data: Record<string, unknown>): Promise<void> {
-    await this.firebaseService.createApplicantStage1(data);
+    await this.apiService.createApplicantStage1(data);
   }
 
   async getStage1Submissions(): Promise<FormSubmission[]> {
@@ -108,7 +108,7 @@ export class StorageService {
     submissions: FormSubmission[];
     statusById: Record<string, SubmissionStatus>;
   }> {
-    const applicants = await this.firebaseService.getAllApplicants();
+    const applicants = await this.apiService.getAllApplicants();
     const submissions: FormSubmission[] = [];
     const statusById: Record<string, SubmissionStatus> = {};
 
@@ -124,12 +124,11 @@ export class StorageService {
   }
 
   async getLatestStage1Submission(): Promise<FormSubmission | null> {
-    const applicant = await this.firebaseService.getLatestApplicantWithStage1();
-    return applicant ? this.toStage1Submission(applicant) : null;
+    return this.apiService.getLatestSubmission(1);
   }
 
   async getStage1SubmissionById(id: string): Promise<FormSubmission | null> {
-    const applicant = await this.firebaseService.getApplicantById(id);
+    const applicant = await this.apiService.getApplicantById(id);
     if (!applicant) {
       return null;
     }
@@ -138,7 +137,7 @@ export class StorageService {
   }
 
   async getSubmissionStatus(submissionId: string): Promise<SubmissionStatus> {
-    const applicant = await this.firebaseService.getApplicantById(submissionId);
+    const applicant = await this.apiService.getApplicantById(submissionId);
     return applicant?.admin.status ?? "Pending";
   }
 
@@ -146,7 +145,7 @@ export class StorageService {
     submissionId: string,
     status: SubmissionStatus,
   ): Promise<void> {
-    await this.firebaseService.updateApplicantStatus(submissionId, status);
+    await this.apiService.updateApplicantStatus(submissionId, status);
   }
 
   async updateStage1Data(
@@ -154,21 +153,21 @@ export class StorageService {
     data: Record<string, unknown>,
   ): Promise<string> {
     const now = new Date().toISOString();
-    await this.firebaseService.updateApplicantStage1Data(id, data, now);
+    await this.apiService.updateApplicantStage1Data(id, data, now);
     return now;
   }
 
   async deleteStage1Submissions(ids: string[]): Promise<void> {
-    await this.firebaseService.deleteApplicants(ids);
+    await this.apiService.deleteApplicants(ids);
   }
 
   async saveStage2Submission(data: Record<string, unknown>): Promise<void> {
     const stage1Data = this.extractStage1Data(data);
-    await this.firebaseService.createApplicantStage2(data, stage1Data);
+    await this.apiService.createApplicantStage2(data, stage1Data);
   }
 
   async getStage2Submissions(): Promise<FormSubmission[]> {
-    const applicants = await this.firebaseService.getAllApplicants();
+    const applicants = await this.apiService.getAllApplicants();
     return applicants
       .map((applicant) => this.toStage2Submission(applicant))
       .filter(
@@ -177,8 +176,7 @@ export class StorageService {
   }
 
   async getLatestStage2Submission(): Promise<FormSubmission | null> {
-    const applicant = await this.firebaseService.getLatestApplicantWithStage2();
-    return applicant ? this.toStage2Submission(applicant) : null;
+    return this.apiService.getLatestSubmission(2);
   }
 
   extractStage1Data(data: Record<string, unknown>): Record<string, unknown> {
@@ -194,7 +192,7 @@ export class StorageService {
   async getSubmissionReviewNotes(
     submissionId: string,
   ): Promise<Record<string, string>> {
-    const applicant = await this.firebaseService.getApplicantById(submissionId);
+    const applicant = await this.apiService.getApplicantById(submissionId);
     return applicant?.admin.reviewNotes ?? {};
   }
 
@@ -203,7 +201,7 @@ export class StorageService {
     sectionId: string,
     note: string,
   ): Promise<void> {
-    await this.firebaseService.updateApplicantReviewNote(
+    await this.apiService.updateApplicantReviewNote(
       submissionId,
       sectionId,
       note,
@@ -211,16 +209,16 @@ export class StorageService {
   }
 
   async getLastReviewSentAt(submissionId: string): Promise<string | null> {
-    const applicant = await this.firebaseService.getApplicantById(submissionId);
+    const applicant = await this.apiService.getApplicantById(submissionId);
     return applicant?.admin.lastReviewSent?.sentAt ?? null;
   }
 
   async markReviewSent(submissionId: string, recipient: string): Promise<void> {
-    await this.firebaseService.markApplicantReviewSent(submissionId, recipient);
+    await this.apiService.markApplicantReviewSent(submissionId, recipient);
   }
 
   async getApplicantRecord(id: string): Promise<ApplicantRecord | null> {
-    return this.firebaseService.getApplicantById(id);
+    return this.apiService.getApplicantById(id);
   }
 
   async getLatestApplicantData(): Promise<Record<string, unknown>> {
@@ -234,24 +232,24 @@ export class StorageService {
   }
 
   async getLeads(): Promise<LeadRecord[]> {
-    return this.firebaseService.getAllLeads();
+    return this.apiService.getAllLeads();
   }
 
   async saveLeads(
     leads: Omit<LeadRecord, "id" | "createdAt" | "updatedAt">[],
   ): Promise<LeadRecord[]> {
-    return this.firebaseService.createLeads(leads);
+    return this.apiService.createLeads(leads);
   }
 
   async updateLead(
     id: string,
     lead: Omit<LeadRecord, "id" | "createdAt" | "updatedAt">,
   ): Promise<void> {
-    await this.firebaseService.updateLead(id, lead);
+    await this.apiService.updateLead(id, lead);
   }
 
   async deleteLeads(ids: string[]): Promise<void> {
-    await this.firebaseService.deleteLeads(ids);
+    await this.apiService.deleteLeads(ids);
   }
 
   private toStage1Submission(

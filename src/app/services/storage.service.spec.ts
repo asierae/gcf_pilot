@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { FirebaseService } from './firebase.service';
+import { ApiService } from './api.service';
 import { StorageService } from './storage.service';
 
 describe('StorageService', () => {
@@ -10,7 +10,7 @@ describe('StorageService', () => {
       providers: [
         StorageService,
         {
-          provide: FirebaseService,
+          provide: ApiService,
           useValue: {
             getAllApplicants: jasmine.createSpy('getAllApplicants').and.resolveTo([]),
             getApplicantById: jasmine.createSpy('getApplicantById').and.resolveTo(null),
@@ -18,6 +18,7 @@ describe('StorageService', () => {
             createApplicantStage2: jasmine.createSpy('createApplicantStage2').and.resolveTo({}),
             deleteApplicants: jasmine.createSpy('deleteApplicants').and.resolveTo(undefined),
             updateApplicantStatus: jasmine.createSpy('updateApplicantStatus').and.resolveTo(undefined),
+            updateApplicantStage1Data: jasmine.createSpy('updateApplicantStage1Data').and.resolveTo(undefined),
             updateApplicantReviewNote: jasmine.createSpy('updateApplicantReviewNote').and.resolveTo(undefined),
             markApplicantReviewSent: jasmine.createSpy('markApplicantReviewSent').and.resolveTo(undefined),
             getLatestApplicantWithStage1: jasmine.createSpy('getLatestApplicantWithStage1').and.resolveTo(null),

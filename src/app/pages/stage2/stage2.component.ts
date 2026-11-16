@@ -86,7 +86,7 @@ export class Stage2Component implements OnInit {
         this.form.patchValue(stage1Data);
       }
     } catch {
-      this.notificationService.error('Could not load saved data from Firebase.');
+      this.notificationService.error('Could not load saved data from the server.');
     }
   }
 
@@ -151,7 +151,7 @@ export class Stage2Component implements OnInit {
       this.submitSuccess = true;
       this.notificationService.success('Application submitted successfully!');
     } catch {
-      this.notificationService.error('Could not save application to Firebase.');
+      this.notificationService.error('Could not save application to the server.');
     }
   }
 }

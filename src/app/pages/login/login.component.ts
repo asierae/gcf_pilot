@@ -31,17 +31,34 @@ export class LoginComponent {
     }
   }
 
-  onSubmit(): void {
-    if (this.loginForm.valid) {
+  submitting = false;
+
+  async onSubmit(): Promise<void> {
+    if (!this.loginForm.valid) {
+      this.notificationService.warning('Please enter username and password');
+      return;
+    }
+
+    if (this.submitting) {
+      return;
+    }
+
+    this.submitting = true;
+
+    try {
       const { username, password } = this.loginForm.value;
-      if (this.authService.login(username, password)) {
+      const result = await this.authService.login(username, password);
+
+      if (result.ok) {
         this.notificationService.success('Login successful');
         this.redirectUser();
       } else {
-        this.notificationService.error('Invalid username or password');
+        this.notificationService.error(
+          result.message ?? 'Invalid username or password'
+        );
       }
-    } else {
-      this.notificationService.warning('Please enter username and password');
+    } finally {
+      this.submitting = false;
     }
   }
 

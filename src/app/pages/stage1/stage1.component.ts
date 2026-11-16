@@ -185,7 +185,7 @@ export class Stage1Component {
       this.submitSuccess = true;
       this.notificationService.success('Questionnaire submitted successfully!');
     } catch {
-      this.notificationService.error('Could not save submission to Firebase.');
+      this.notificationService.error('Could not save submission to the server.');
     }
   }
 }

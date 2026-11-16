@@ -44,3 +44,7 @@ Thumbs.db
 # Secrets
 server/.env
 .env
+.dev.vars
+
+# Wrangler local state
+.wrangler/

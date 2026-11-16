@@ -1,4 +1,5 @@
 import { CloudinaryResourceType, StoredAttachment } from '../../models/attachment.model';
+import { resolveApiUrl } from '../../config/api.config';
 
 const DOCUMENT_EXTENSION = /\.(pdf|doc|docx|xls|xlsx|ppt|pptx|zip|txt|csv)(\?|#|$)/i;
 
@@ -41,10 +42,10 @@ export function guessResourceTypeFromUrl(url: string): CloudinaryResourceType {
 /** Use the stored URL as-is — do not add transformations that can cause 401 */
 export function resolveCloudinaryFileUrl(attachment: StoredAttachment | string): string {
   if (typeof attachment === 'string') {
-    return attachment;
+    return resolveApiUrl(attachment);
   }
 
-  return attachment.url;
+  return resolveApiUrl(attachment.url);
 }
 
 export function attachmentFromLegacyUrl(url: string): StoredAttachment {

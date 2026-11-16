@@ -13,7 +13,7 @@ import {
 } from '@angular/forms';
 import { MAX_FILES_PER_ATTACHMENT } from '../../../config/attachments.config';
 import { StoredAttachment } from '../../../models/attachment.model';
-import { CloudinaryService } from '../../../services/cloudinary.service';
+import { AttachmentService } from '../../../services/attachment.service';
 import { NotificationService } from '../../../services/notification.service';
 import { normalizeAttachments } from '../../../config/attachments.config';
 import { resolveCloudinaryFileUrl } from '../../utils/cloudinary-url.util';
@@ -56,7 +56,7 @@ export class FileUploadComponent implements ControlValueAccessor {
   private nextId = 0;
 
   constructor(
-    private cloudinaryService: CloudinaryService,
+    private attachmentService: AttachmentService,
     private notificationService: NotificationService,
     private cdr: ChangeDetectorRef
   ) {}
@@ -171,7 +171,7 @@ export class FileUploadComponent implements ControlValueAccessor {
 
     try {
       if (file.publicId) {
-        await this.cloudinaryService.deleteFile(file.publicId, file.resourceType);
+        await this.attachmentService.deleteFile(file.publicId, file.resourceType);
       }
 
       this.files = this.files.filter((item) => item.id !== file.id);
@@ -220,7 +220,7 @@ export class FileUploadComponent implements ControlValueAccessor {
       this.cdr.markForCheck();
 
       try {
-        const uploaded = await this.cloudinaryService.uploadFile(file);
+        const uploaded = await this.attachmentService.uploadFile(file);
         this.files = this.files.map((item) =>
           item.id === pending.id
             ? { ...item, ...uploaded, uploading: false }

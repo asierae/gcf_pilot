@@ -124,7 +124,7 @@ export class LeadsImportComponent implements OnInit, OnDestroy {
       this.resetAddForm();
       this.successMessage = `Lead "${org}" added successfully.`;
     } catch {
-      this.addFormError = "Could not save lead to Firebase. Please try again.";
+      this.addFormError = "Could not save lead to the server. Please try again.";
     } finally {
       this.addFormSaving = false;
     }
@@ -149,7 +149,7 @@ export class LeadsImportComponent implements OnInit, OnDestroy {
       );
       this.clampCurrentPage();
     } catch {
-      this.loadError = "Could not load leads from Firebase.";
+      this.loadError = "Could not load leads from the server.";
     } finally {
       this.tableLoading = false;
     }
@@ -268,7 +268,7 @@ export class LeadsImportComponent implements OnInit, OnDestroy {
       this.pendingLeads = [];
       this.fileName = "";
     } catch {
-      this.parseError = "Could not save leads to Firebase. Please try again.";
+      this.parseError = "Could not save leads to the server. Please try again.";
     } finally {
       this.loading = false;
     }
@@ -304,7 +304,7 @@ export class LeadsImportComponent implements OnInit, OnDestroy {
       await this.storageService.updateLead(lead.id, payload);
     } catch {
       this.savedLeads[index] = { ...lead, [field]: previous };
-      this.parseError = "Could not update the row in Firebase.";
+      this.parseError = "Could not update the row on the server.";
     } finally {
       this.savingFieldId = null;
     }
@@ -461,7 +461,7 @@ export class LeadsImportComponent implements OnInit, OnDestroy {
       await this.loadSavedLeads();
       this.successMessage = `${count} lead${count === 1 ? "" : "s"} deleted.`;
     } catch {
-      this.parseError = "Could not delete leads from Firebase.";
+      this.parseError = "Could not delete leads from the server.";
     } finally {
       this.loading = false;
     }

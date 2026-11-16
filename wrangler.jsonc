@@ -1,12 +1,50 @@
 {
-  // Cloudflare Workers static-assets configuration (Workers Builds).
+  // Cloudflare Workers configuration (Workers Builds).
   // Vercel ignores this file; it is only read by Wrangler.
+  //
+  // Setup steps (run once, from the repo root):
+  //   1. npx wrangler login
+  //   2. npx wrangler d1 create averacapital-db      <-- paste the id below
+  //   3. npx wrangler r2 bucket create averacapital-documents
+  //   4. npx wrangler d1 execute averacapital-db --remote --file=worker/schema.sql
+  //   5. npx wrangler secret put API_TOKEN
+  //   6. npx wrangler secret put ADMIN_ACCOUNTS     <-- {"hatyja":"<password>"}
+  // See worker/README.md for the full runbook.
   "name": "averacapital",
+  "main": "worker/index.ts",
   "compatibility_date": "2026-11-15",
   "assets": {
     "directory": "./dist/nuriberry-app/browser",
     // Angular is a client-side SPA: serve index.html for unknown routes
     // so /pricing, /readiness, /dashboard, etc. work on refresh.
-    "not_found_handling": "single-page-application"
+    "not_found_handling": "single-page-application",
+    // Send /api/* to worker/index.ts instead of the static-asset handler.
+    "run_worker_first": ["/api/*"]
+  },
+  "d1_databases": [
+    {
+      // Binding used by worker/index.ts (env.DB)
+      "binding": "DB",
+      "database_name": "averacapital-db",
+      "database_id": "79f85243-8fdb-45dd-9934-785af27001b1"
+    }
+  ],
+  "r2_buckets": [
+    {
+      // Binding used by worker/index.ts (env.DOCUMENTS)
+      "binding": "DOCUMENTS",
+      "bucket_name": "averacapital-documents"
+    }
+  ],
+  "vars": {
+    // Fallback admin username. Passwords and the API token are Worker secrets.
+    "ADMIN_USERNAME": "hatyja",
+    // Comma-separated origins allowed to call /api/* from another domain.
+    // Set this to your Vercel URL (plus REMOTE_API_BASE_URL in api.config.ts)
+    // to keep the Vercel deployment working. Empty = same-origin only.
+    "CORS_ORIGINS": ""
+  },
+  "observability": {
+    "enabled": true
   }
 }

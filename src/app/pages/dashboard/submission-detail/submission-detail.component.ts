@@ -9,7 +9,7 @@ import {
 } from "../../../services/storage.service";
 import { NotificationService } from "../../../services/notification.service";
 import { EmailService } from "../../../services/email.service";
-import { CloudinaryService } from "../../../services/cloudinary.service";
+import { AttachmentService } from "../../../services/attachment.service";
 import {
   MAX_FILES_PER_ATTACHMENT,
   STAGE1_ATTACHMENT_FIELDS,
@@ -82,7 +82,7 @@ export class SubmissionDetailComponent implements OnInit {
     private route: ActivatedRoute,
     private storageService: StorageService,
     private notificationService: NotificationService,
-    private cloudinaryService: CloudinaryService,
+    private attachmentService: AttachmentService,
     public emailService: EmailService,
   ) {}
 
@@ -110,7 +110,7 @@ export class SubmissionDetailComponent implements OnInit {
       }
     } catch {
       this.notificationService.error(
-        "Could not load submission from Firebase.",
+        "Could not load submission from the server.",
       );
     }
   }
@@ -148,7 +148,7 @@ export class SubmissionDetailComponent implements OnInit {
       this.editData = {};
       this.notificationService.success("Submission updated successfully.");
     } catch {
-      this.notificationService.error("Could not save changes to Firebase.");
+      this.notificationService.error("Could not save changes to the server.");
     } finally {
       this.saving = false;
     }
@@ -229,7 +229,7 @@ export class SubmissionDetailComponent implements OnInit {
 
     try {
       for (const file of toUpload) {
-        const uploaded = await this.cloudinaryService.uploadFile(file);
+        const uploaded = await this.attachmentService.uploadFile(file);
         current.push(uploaded);
       }
       this.editData = { ...this.editData, [key]: current };
@@ -267,7 +267,7 @@ export class SubmissionDetailComponent implements OnInit {
       await this.storageService.setSubmissionStatus(this.submission.id, value);
     } catch {
       this.status = previous;
-      this.notificationService.error("Could not update status in Firebase.");
+      this.notificationService.error("Could not update status on the server.");
     }
   }
 
@@ -307,7 +307,7 @@ export class SubmissionDetailComponent implements OnInit {
     void this.storageService
       .saveSubmissionReviewNote(this.submission.id, sectionId, value)
       .catch(() =>
-        this.notificationService.error("Could not save note to Firebase."),
+        this.notificationService.error("Could not save note to the server."),
       );
   }
 
