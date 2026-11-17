@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Cloudflare Worker API for the Averacapital GCF portal.
  *
  * The Angular SPA is served from the ASSETS binding. Every request to
@@ -18,6 +18,12 @@
 
 type JsonObject = Record<string, unknown>;
 
+import {
+  renderEmailHtml,
+  renderEmailText,
+  type EmailContent,
+} from './email';
+
 interface Env {
   ASSETS: AssetsFetcher;
   DB: D1DatabaseLike;
@@ -35,6 +41,8 @@ interface Env {
   CONTACT_EMAIL?: string;
   /** Sender for automatic emails (defaults to noreply@averacapitalaccess.com). */
   NOREPLY_EMAIL?: string;
+  /** Public site origin used for logo, CTA links and the footer (defaults to https://averacapitalaccess.com). */
+  SITE_URL?: string;
 }
 
 /* ------------------------------------------------------------------ *
@@ -915,6 +923,7 @@ async function organizationForms(env: Env, orgId: string): Promise<Response> {
 
 const DEFAULT_CONTACT_EMAIL = 'contact@averacapitalaccess.com';
 const DEFAULT_NOREPLY_EMAIL = 'noreply@averacapitalaccess.com';
+const DEFAULT_SITE_URL = 'https://averacapitalaccess.com';
 const RESEND_ENDPOINT = 'https://api.resend.com/emails';
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
@@ -926,13 +935,8 @@ function noreplyEmail(env: Env): string {
   return env.NOREPLY_EMAIL?.trim() || DEFAULT_NOREPLY_EMAIL;
 }
 
-function escapeHtml(value: string): string {
-  return value
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;');
+function siteUrl(env: Env): string {
+  return (env.SITE_URL?.trim() || DEFAULT_SITE_URL).replace(/\/+$/, '');
 }
 
 interface OutgoingEmail {
@@ -990,37 +994,6 @@ interface SubmissionNotice {
   details: { label: string; value: string }[];
 }
 
-function emailLayout(
-  title: string,
-  intro: string,
-  rows: { label: string; value: string }[],
-  footerEmail = DEFAULT_CONTACT_EMAIL,
-): string {
-  const body = rows
-    .filter((row) => row.value)
-    .map(
-      (row) =>
-        `<tr><td style="padding:4px 12px 4px 0;color:#64748b;font-size:13px">${escapeHtml(
-          row.label,
-        )}</td><td style="padding:4px 0;color:#0f172a;font-size:13px">${escapeHtml(
-          row.value,
-        )}</td></tr>`,
-    )
-    .join('');
-
-  return `<div style="font-family:Inter,Segoe UI,Arial,sans-serif;background:#f8fafc;padding:24px">
-  <div style="max-width:560px;margin:0 auto;background:#ffffff;border:1px solid #e2e8f0;border-radius:14px;padding:24px">
-    <p style="margin:0 0 4px;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#94a3b8">Avera Capital Access</p>
-    <h1 style="margin:0 0 12px;font-size:19px;color:#0f172a">${escapeHtml(title)}</h1>
-    <p style="margin:0 0 16px;font-size:14px;line-height:1.6;color:#334155">${escapeHtml(intro)}</p>
-    <table style="border-collapse:collapse">${body}</table>
-    <p style="margin:20px 0 0;font-size:12px;color:#94a3b8">Questions? Reply to this email or write to ${escapeHtml(
-      footerEmail,
-    )}.</p>
-  </div>
-</div>`;
-}
-
 /** Confirmation to the applicant plus a copy for the team. Never throws. */
 async function notifySubmission(env: Env, notice: SubmissionNotice): Promise<void> {
   if (!env.RESEND_API_KEY) return;
@@ -1032,35 +1005,58 @@ async function notifySubmission(env: Env, notice: SubmissionNotice): Promise<voi
         ? 'stage 2 application'
         : 'pre-screening questionnaire';
   const org = notice.organizationName || 'your organization';
+  const site = siteUrl(env);
+  const brand = { site, inbox: contactEmail(env) };
+  const wizardPath = notice.form === 'readiness' ? '/readiness' : '/stage1';
 
   try {
     if (EMAIL_PATTERN.test(notice.contactEmail)) {
+      const receipt: EmailContent = {
+        kicker: 'Submission received',
+        title: `Thank you, ${notice.contactName || 'there'}`,
+        intro: `We received the ${label} for ${org}. Our team will review it and come back to you if anything else is needed.`,
+        paragraphs: [
+          'You can keep working on your submission at any time — drafts are saved to your organization so nothing is lost between sessions.',
+        ],
+        rows: notice.details,
+        cta: {
+          label: 'Continue in the portal',
+          href: `${site}${wizardPath}`,
+        },
+        footnote: 'Typical first response: 2 business days.',
+        audience: 'applicant',
+      };
+
       await sendEmail(env, {
         to: notice.contactEmail,
         subject: `We received the ${label} for ${org}`,
-        html: emailLayout(
-          `Thank you, ${notice.contactName || 'there'}`,
-          `We received the ${label} for ${org}. Our team will review it and get back to you if anything else is needed. You can keep working on it from your organization dashboard.`,
-          notice.details,
-          contactEmail(env),
-        ),
-        text: `We received the ${label} for ${org}.`,
+        html: renderEmailHtml(receipt, brand),
+        text: renderEmailText(receipt, brand),
       });
     }
+
+    const internal: EmailContent = {
+      kicker: 'New submission',
+      title: `New ${label}`,
+      intro: `${org} submitted a ${label} through the portal.`,
+      rows: [
+        ...notice.details,
+        { label: 'Contact', value: notice.contactName },
+        { label: 'Email', value: notice.contactEmail },
+      ],
+      cta: {
+        label: 'Open the advisor dashboard',
+        href: `${site}/dashboard`,
+      },
+      footnote: 'Reply to this email to answer the applicant directly.',
+      audience: 'team',
+    };
 
     await sendEmail(env, {
       to: contactEmail(env),
       subject: `New ${label}: ${org}`,
-      html: emailLayout(
-        `New ${label}`,
-        `${org} submitted a ${label} through the portal.`,
-        [
-          ...notice.details,
-          { label: 'Contact', value: notice.contactName },
-          { label: 'Email', value: notice.contactEmail },
-        ],
-        contactEmail(env),
-      ),
+      html: renderEmailHtml(internal, brand),
+      text: renderEmailText(internal, brand),
       replyTo: EMAIL_PATTERN.test(notice.contactEmail)
         ? notice.contactEmail
         : contactEmail(env),
@@ -1096,11 +1092,25 @@ async function sendReviewEmail(request: Request, env: Env): Promise<Response> {
     throw new HttpError(400, '"body" is required.');
   }
 
+  const [firstLine, ...rest] = text.split(/\n{2,}/);
+  const review: EmailContent = {
+    kicker: 'Advisory message',
+    title: subject,
+    intro: firstLine,
+    paragraphs: rest,
+    cta: {
+      label: 'Reply to our advisory team',
+      href: `mailto:${contactEmail(env)}?subject=${encodeURIComponent(`Re: ${subject}`)}`,
+    },
+    footnote: 'Your organization dashboard keeps every milestone and document in one place.',
+    audience: 'applicant',
+  };
+
   const delivered = await sendEmail(env, {
     to,
     subject,
-    text,
-    html: emailLayout(subject, text, []),
+    text: renderEmailText(review, { site: siteUrl(env), inbox: contactEmail(env) }),
+    html: renderEmailHtml(review, { site: siteUrl(env), inbox: contactEmail(env) }),
   });
 
   if (!delivered) {

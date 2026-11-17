@@ -46,7 +46,9 @@
     // Public inbox shown on the site and used as reply-to on automatic emails.
     "CONTACT_EMAIL": "contact@averacapitalaccess.com",
     // Sender of automatic emails. Replies are routed to CONTACT_EMAIL.
-    "NOREPLY_EMAIL": "noreply@averacapitalaccess.com"
+    "NOREPLY_EMAIL": "noreply@averacapitalaccess.com",
+    // Public origin used for the email header logo and CTA links.
+    "SITE_URL": "https://averacapitalaccess.com"
     // Resend key is a secret: npx wrangler secret put RESEND_API_KEY
   },
   "observability": {
