@@ -1,0 +1,28 @@
+{
+  "name": "Avera Capital Access — GCF Accreditation Portal",
+  "short_name": "Avera",
+  "description": "Climate finance advisory for organizations seeking Green Climate Fund accreditation and funding.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#0a1824",
+  "theme_color": "#0a1824",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

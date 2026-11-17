@@ -14,6 +14,16 @@ Run `ng generate component component-name` to generate a new component. You can 
 
 Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory.
 
+## Brand assets
+
+`public/` holds the favicon set (`favicon.svg`, `favicon.ico`, PNG sizes,
+`apple-touch-icon.png`, `icon-192.png`, `icon-512.png`) and `site.webmanifest`.
+They are generated from the master logo with:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts/generate-favicons.ps1 -Source path\to\AVERA_logo_512x512.png
+```
+
 ## Running unit tests
 
 Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
