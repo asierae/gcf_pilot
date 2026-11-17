@@ -100,6 +100,23 @@
       }
     </div>
 
+    <!-- ── Submitted banner ── -->
+    @if (submittedAt) {
+      <div class="alert alert-success" role="status">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="12" cy="12" r="9" />
+          <path d="m8.5 12 2.5 2.5 4.5-5" />
+        </svg>
+        <div>
+          <p class="alert-title">Application submitted</p>
+          <p>
+            Saved to your organization workspace on {{ submittedAt | date: 'medium' }}. You can track
+            it from the organization dashboard.
+          </p>
+        </div>
+      </div>
+    }
+
     <!-- ── Error banner ── -->
     @if (errorSummary || showIssues) {
       <div class="alert alert-error" role="alert">
@@ -153,7 +170,34 @@
               [(ngModel)]="application.metadata.organizationLegalName"
               (ngModelChange)="onUserInput()"
               placeholder="Registered legal name of the applicant"
+              [readOnly]="identityLocked"
             />
+            @if (identityLocked) {
+              <span class="field-hint">Locked to the organization on your account.</span>
+            }
+          </label>
+
+          <label class="field">
+            <span class="field-label">Organization acronym <em>*</em></span>
+            <input
+              type="text"
+              [(ngModel)]="application.metadata.organizationAcronym"
+              (ngModelChange)="onAcronymChange()"
+              placeholder="e.g. KNCFA"
+              [readOnly]="identityLocked"
+            />
+            @if (acronymTaken) {
+              <span class="field-error">
+                This acronym is already registered. Please register the organization under a
+                different acronym.
+              </span>
+            } @else if (identityLocked) {
+              <span class="field-hint">Acronyms are unique and cannot be changed.</span>
+            } @else if (acronymChecking) {
+              <span class="field-hint">Checking availability…</span>
+            } @else {
+              <span class="field-hint">Must be unique across all registered organizations.</span>
+            }
           </label>
 
           <label class="field">
@@ -1206,14 +1250,26 @@
         }
 
         <div class="export-actions">
-          <button type="button" class="btn btn-primary btn-lg" (click)="downloadJson()">
+          <button
+            type="button"
+            class="btn btn-primary btn-lg"
+            (click)="submitReadiness()"
+            [disabled]="submitting"
+          >
+            {{ submitting ? 'Submitting…' : 'Submit application' }}
+          </button>
+          <button type="button" class="btn btn-ghost" (click)="downloadJson()">
             Download Application JSON
           </button>
           <button type="button" class="btn btn-ghost" (click)="openPreview()">Preview JSON</button>
         </div>
+        @if (submitError) {
+          <p class="field-error" role="alert">{{ submitError }}</p>
+        }
         <p class="export-note">
-          Official GCF proposals are submitted through the GCF Partner Portal. This export is
-          structured for direct population of the Readiness template.
+          Submitting stores the application in your organization workspace, where the GCF team and
+          your organization dashboard can review it. Official GCF proposals are still submitted
+          through the GCF Partner Portal.
         </p>
       </section>
     }
@@ -1249,9 +1305,9 @@
         @if (currentStep === 5) {
           {{ application.metadata.hasExternalDeliveryPartner ? 'Step 6 is skipped for this pathway.' : 'Next: FMCA fiduciary due diligence.' }}
         } @else if (currentStep === 7) {
-          Review the checklist, then export your application package.
+          Review the checklist, then submit your application.
         } @else {
-          Progress saves automatically in this browser.
+          Progress saves automatically in your organization workspace.
         }
       </span>
 
@@ -1260,8 +1316,13 @@
           Continue →
         </button>
       } @else {
-        <button type="button" class="btn btn-primary" (click)="downloadJson()">
-          Download JSON
+        <button
+          type="button"
+          class="btn btn-primary"
+          (click)="submitReadiness()"
+          [disabled]="submitting"
+        >
+          {{ submitting ? 'Submitting…' : 'Submit application' }}
         </button>
       }
     </div>

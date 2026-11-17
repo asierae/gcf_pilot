@@ -154,6 +154,46 @@ interface LeadRow {
   updated_at: string;
 }
 
+interface OrganizationRow {
+  id: string;
+  name: string | null;
+  acronym: string | null;
+  acronym_norm: string | null;
+  legal_address: string | null;
+  operational_address: string | null;
+  website: string | null;
+  country: string | null;
+  entity_type: string | null;
+  contact_name: string | null;
+  contact_email: string | null;
+  contact_phone: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+interface OrganizationRecord {
+  id: string;
+  name: string;
+  acronym: string;
+  legalAddress: string;
+  operationalAddress: string;
+  website: string;
+  country: string;
+  entityType: string;
+  contactName: string;
+  contactEmail: string;
+  contactPhone: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+type DraftForm = 'stage1' | 'readiness';
+
+const DRAFT_TABLES: Record<DraftForm, string> = {
+  stage1: 'stage1_drafts',
+  readiness: 'readiness_drafts',
+};
+
 const DEFAULT_ADMIN: ApplicantAdmin = {
   status: 'Pending',
   reviewNotes: {},
@@ -232,7 +272,7 @@ function corsHeaders(env: Env, origin: string | null): Record<string, string> {
 
   return {
     'Access-Control-Allow-Origin': origin,
-    'Access-Control-Allow-Methods': 'GET, POST, PATCH, DELETE, OPTIONS',
+    'Access-Control-Allow-Methods': 'GET, POST, PUT, PATCH, DELETE, OPTIONS',
     'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-API-Token',
     'Access-Control-Max-Age': '86400',
     Vary: 'Origin',
@@ -281,31 +321,23 @@ function generateId(): string {
   return `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
 }
 
-/**
- * The applicant wizard generates the id up-front so uploaded documents can be
- * stored under `organizations/<id>/...` before the record exists. Older
- * clients omit it and the Worker generates one as before.
- */
-async function readApplicantId(raw: unknown, env: Env): Promise<string> {
+/** Validates an organization / applicant id coming from the client. */
+function assertEntityId(id: string): void {
+  if (!APPLICANT_ID_PATTERN.test(id) || id.includes('..')) {
+    throw new HttpError(400, '"id" is not valid.');
+  }
+}
+
+/** Reads an entity id, generating one when the client omits it. */
+function readEntityId(raw: unknown): string {
   if (raw === undefined || raw === null) {
     return generateId();
   }
   if (typeof raw !== 'string') {
     throw new HttpError(400, '"id" must be a string.');
   }
-
   const id = raw.trim();
-  if (!APPLICANT_ID_PATTERN.test(id)) {
-    throw new HttpError(400, '"id" is not valid.');
-  }
-
-  const existing = await env.DB.prepare('SELECT id FROM applicants WHERE id = ?')
-    .bind(id)
-    .first<{ id: string }>();
-  if (existing) {
-    throw new HttpError(409, 'This submission has already been received.');
-  }
-
+  assertEntityId(id);
   return id;
 }
 
@@ -404,6 +436,430 @@ function rowToLead(row: LeadRow): LeadRecord {
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
+}
+
+/* ------------------------------------------------------------------ *
+ * Organizations
+ * ------------------------------------------------------------------ */
+
+function rowToOrganization(row: OrganizationRow): OrganizationRecord {
+  return {
+    id: row.id,
+    name: row.name ?? '',
+    acronym: row.acronym ?? '',
+    legalAddress: row.legal_address ?? '',
+    operationalAddress: row.operational_address ?? '',
+    website: row.website ?? '',
+    country: row.country ?? '',
+    entityType: row.entity_type ?? '',
+    contactName: row.contact_name ?? '',
+    contactEmail: row.contact_email ?? '',
+    contactPhone: row.contact_phone ?? '',
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  };
+}
+
+function normalizeAcronym(value: string): string {
+  return value.trim().toLowerCase();
+}
+
+function readOrgFields(body: JsonObject): OrganizationRecord {
+  const pick = (key: string): string => {
+    const value = body[key];
+    return typeof value === 'string' ? value.trim() : '';
+  };
+
+  const organization: OrganizationRecord = {
+    id: '',
+    name: pick('name'),
+    acronym: pick('acronym'),
+    legalAddress: pick('legalAddress'),
+    operationalAddress: pick('operationalAddress'),
+    website: pick('website'),
+    country: pick('country'),
+    entityType: pick('entityType'),
+    contactName: pick('contactName'),
+    contactEmail: pick('contactEmail'),
+    contactPhone: pick('contactPhone'),
+    createdAt: '',
+    updatedAt: '',
+  };
+
+  return organization;
+}
+
+async function findAcronymOwner(
+  env: Env,
+  acronym: string,
+  excludeId: string,
+): Promise<string | null> {
+  const row = await env.DB.prepare(
+    'SELECT id FROM organizations WHERE acronym_norm = ?',
+  )
+    .bind(normalizeAcronym(acronym))
+    .first<{ id: string }>();
+
+  if (!row || row.id === excludeId) return null;
+  return row.id;
+}
+
+/**
+ * Creates the organization on first write and keeps its profile in sync on
+ * later writes. `name` and `acronym` are immutable once the organization
+ * exists: they identify it and the acronym is unique across the platform.
+ */
+async function saveOrganization(
+  env: Env,
+  id: string,
+  input: OrganizationRecord,
+): Promise<OrganizationRecord> {
+  const now = new Date().toISOString();
+  const existing = await env.DB.prepare('SELECT * FROM organizations WHERE id = ?')
+    .bind(id)
+    .first<OrganizationRow>();
+
+  if (!existing) {
+    if (!input.name) {
+      throw new HttpError(400, 'Organization name is required.');
+    }
+    if (!input.acronym) {
+      throw new HttpError(400, 'Organization acronym is required.');
+    }
+    if (await findAcronymOwner(env, input.acronym, id)) {
+      throw new HttpError(
+        409,
+        `The acronym "${input.acronym}" is already registered. Please use a different one.`,
+      );
+    }
+
+    await env.DB.prepare(
+      `INSERT INTO organizations (
+         id, name, acronym, acronym_norm, legal_address, operational_address,
+         website, country, entity_type, contact_name, contact_email,
+         contact_phone, created_at, updated_at
+       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    )
+      .bind(
+        id,
+        input.name,
+        input.acronym,
+        normalizeAcronym(input.acronym),
+        input.legalAddress,
+        input.operationalAddress,
+        input.website,
+        input.country,
+        input.entityType,
+        input.contactName,
+        input.contactEmail,
+        input.contactPhone,
+        now,
+        now,
+      )
+      .run();
+
+    return { ...input, id, createdAt: now, updatedAt: now };
+  }
+
+  await env.DB.prepare(
+    `UPDATE organizations
+        SET legal_address = ?, operational_address = ?, website = ?,
+            country = ?, entity_type = ?, contact_name = ?,
+            contact_email = ?, contact_phone = ?, updated_at = ?
+      WHERE id = ?`,
+  )
+    .bind(
+      input.legalAddress || existing.legal_address || '',
+      input.operationalAddress || existing.operational_address || '',
+      input.website || existing.website || '',
+      input.country || existing.country || '',
+      input.entityType || existing.entity_type || '',
+      input.contactName || existing.contact_name || '',
+      input.contactEmail || existing.contact_email || '',
+      input.contactPhone || existing.contact_phone || '',
+      now,
+      id,
+    )
+    .run();
+
+  const updated = await env.DB.prepare('SELECT * FROM organizations WHERE id = ?')
+    .bind(id)
+    .first<OrganizationRow>();
+
+  return updated ? rowToOrganization(updated) : { ...input, id, createdAt: now, updatedAt: now };
+}
+
+/** Organization profile derived from a pre-screening (stage 1) payload. */
+function organizationFromStage1(data: JsonObject): OrganizationRecord {
+  const read = (key: string): string => {
+    const value = data[key];
+    return typeof value === 'string' ? value.trim() : '';
+  };
+
+  return {
+    id: '',
+    name: read('applicantName'),
+    acronym: read('applicantAcronym'),
+    legalAddress: read('legalAddress'),
+    operationalAddress: read('operationalAddress'),
+    website: read('website'),
+    country: read('headquartersCountry'),
+    entityType: read('typeOfEntity'),
+    contactName: read('primaryContactName'),
+    contactEmail: read('primaryContactEmail'),
+    contactPhone: read('primaryContactPhone'),
+    createdAt: '',
+    updatedAt: '',
+  };
+}
+
+/** Organization profile derived from a readiness payload. */
+function organizationFromReadiness(data: JsonObject): OrganizationRecord {
+  const metadata =
+    data.metadata && typeof data.metadata === 'object'
+      ? (data.metadata as JsonObject)
+      : {};
+  const read = (key: string): string => {
+    const value = metadata[key];
+    return typeof value === 'string' ? value.trim() : '';
+  };
+
+  return {
+    id: '',
+    name: read('organizationLegalName'),
+    acronym: read('organizationAcronym'),
+    legalAddress: '',
+    operationalAddress: '',
+    website: '',
+    country: read('country'),
+    entityType: read('entityType'),
+    contactName: '',
+    contactEmail: '',
+    contactPhone: '',
+    createdAt: '',
+    updatedAt: '',
+  };
+}
+
+async function getOrganization(env: Env, id: string): Promise<Response> {
+  assertEntityId(id);
+  const row = await env.DB.prepare('SELECT * FROM organizations WHERE id = ?')
+    .bind(id)
+    .first<OrganizationRow>();
+
+  return json({ organization: row ? rowToOrganization(row) : null });
+}
+
+async function putOrganization(
+  request: Request,
+  env: Env,
+  id: string,
+): Promise<Response> {
+  assertEntityId(id);
+  const body = await readJson<JsonObject>(request);
+  const organization = await saveOrganization(env, id, readOrgFields(body));
+  return json({ organization });
+}
+
+async function acronymAvailable(
+  env: Env,
+  acronym: string,
+  excludeId: string,
+): Promise<Response> {
+  const trimmed = acronym.trim();
+  if (!trimmed) {
+    return json({ available: false, acronym: '' });
+  }
+
+  const owner = await findAcronymOwner(env, trimmed, excludeId);
+  return json({ available: owner === null, acronym: trimmed });
+}
+
+/* ------------------------------------------------------------------ *
+ * Drafts
+ * ------------------------------------------------------------------ */
+
+function readDraftForm(raw: string): DraftForm {
+  if (raw !== 'stage1' && raw !== 'readiness') {
+    throw new HttpError(400, 'Unknown draft form.');
+  }
+  return raw;
+}
+
+async function getDraft(env: Env, form: DraftForm, orgId: string): Promise<Response> {
+  assertEntityId(orgId);
+  const row = await env.DB.prepare(
+    `SELECT data, updated_at FROM ${DRAFT_TABLES[form]} WHERE organization_id = ?`,
+  )
+    .bind(orgId)
+    .first<{ data: string; updated_at: string }>();
+
+  return json({
+    draft: row
+      ? { data: parseJson<JsonObject>(row.data, {}), updatedAt: row.updated_at }
+      : null,
+  });
+}
+
+async function putDraft(
+  request: Request,
+  env: Env,
+  form: DraftForm,
+  orgId: string,
+): Promise<Response> {
+  assertEntityId(orgId);
+  const body = await readJson<{ data?: unknown }>(request);
+  const data = asObject(body.data, 'data');
+  const now = new Date().toISOString();
+  const table = DRAFT_TABLES[form];
+
+  await env.DB.prepare(
+    `INSERT INTO ${table} (organization_id, data, updated_at)
+     VALUES (?, ?, ?)
+     ON CONFLICT(organization_id) DO UPDATE SET data = excluded.data, updated_at = excluded.updated_at`,
+  )
+    .bind(orgId, JSON.stringify(data), now)
+    .run();
+
+  return json({ updatedAt: now });
+}
+
+async function deleteDraft(
+  env: Env,
+  form: DraftForm,
+  orgId: string,
+): Promise<Response> {
+  assertEntityId(orgId);
+  await deleteDraftRow(env, form, orgId);
+  return empty();
+}
+
+/* ------------------------------------------------------------------ *
+ * Readiness submissions
+ * ------------------------------------------------------------------ */
+
+async function putReadiness(
+  request: Request,
+  env: Env,
+  orgId: string,
+): Promise<Response> {
+  assertEntityId(orgId);
+  const body = await readJson<{ data?: unknown }>(request);
+  const data = asObject(body.data, 'data');
+  const now = new Date().toISOString();
+
+  // The readiness answers also register/refresh the organization profile.
+  const organization = await saveOrganization(env, orgId, organizationFromReadiness(data));
+
+  const existing = await env.DB.prepare(
+    'SELECT submitted_at FROM readiness_applications WHERE organization_id = ?',
+  )
+    .bind(orgId)
+    .first<{ submitted_at: string }>();
+
+  await env.DB.prepare(
+    `INSERT INTO readiness_applications (organization_id, submitted_at, updated_at, data)
+     VALUES (?, ?, ?, ?)
+     ON CONFLICT(organization_id) DO UPDATE SET
+       submitted_at = excluded.submitted_at,
+       updated_at = excluded.updated_at,
+       data = excluded.data`,
+  )
+    .bind(orgId, now, now, JSON.stringify(data))
+    .run();
+
+  await deleteDraftRow(env, 'readiness', orgId);
+
+  return json(
+    {
+      submission: { organizationId: orgId, submittedAt: now, data },
+      organization,
+      created: existing === null,
+    },
+    existing === null ? 201 : 200,
+  );
+}
+
+async function getReadiness(env: Env, orgId: string): Promise<Response> {
+  assertEntityId(orgId);
+  const row = await env.DB.prepare(
+    'SELECT submitted_at, data FROM readiness_applications WHERE organization_id = ?',
+  )
+    .bind(orgId)
+    .first<{ submitted_at: string; data: string }>();
+
+  return json({
+    submission: row
+      ? {
+          organizationId: orgId,
+          submittedAt: row.submitted_at,
+          data: parseJson<JsonObject>(row.data, {}),
+        }
+      : null,
+  });
+}
+
+async function deleteDraftRow(
+  env: Env,
+  form: DraftForm,
+  orgId: string,
+): Promise<void> {
+  await env.DB.prepare(
+    `DELETE FROM ${DRAFT_TABLES[form]} WHERE organization_id = ?`,
+  )
+    .bind(orgId)
+    .run();
+}
+
+/**
+ * Everything an organization has filled in, used by the organization
+ * dashboard and by the wizards to prefill themselves.
+ */
+async function organizationForms(env: Env, orgId: string): Promise<Response> {
+  assertEntityId(orgId);
+  const orgRow = await env.DB.prepare('SELECT * FROM organizations WHERE id = ?')
+    .bind(orgId)
+    .first<OrganizationRow>();
+
+  const applicant = await env.DB.prepare('SELECT * FROM applicants WHERE id = ?')
+    .bind(orgId)
+    .first<ApplicantRow>();
+
+  const readinessRow = await env.DB.prepare(
+    'SELECT submitted_at, data FROM readiness_applications WHERE organization_id = ?',
+  )
+    .bind(orgId)
+    .first<{ submitted_at: string; data: string }>();
+
+  const drafts: Record<string, string | null> = { stage1: null, readiness: null };
+  for (const form of ['stage1', 'readiness'] as DraftForm[]) {
+    const row = await env.DB.prepare(
+      `SELECT updated_at FROM ${DRAFT_TABLES[form]} WHERE organization_id = ?`,
+    )
+      .bind(orgId)
+      .first<{ updated_at: string }>();
+    drafts[form] = row?.updated_at ?? null;
+  }
+
+  if (!orgRow && !applicant && !readinessRow) {
+    return json({ organization: null, stage1: null, stage2: null, readiness: null, drafts });
+  }
+
+  const stage1 = applicant ? normalizeStage(parseJson<unknown>(applicant.stage1, null)) : null;
+  const stage2 = applicant ? normalizeStage(parseJson<unknown>(applicant.stage2, null)) : null;
+
+  return json({
+    organization: orgRow ? rowToOrganization(orgRow) : null,
+    stage1: stage1 ? { submittedAt: stage1.submittedAt, data: stage1.data } : null,
+    stage2: stage2 ? { submittedAt: stage2.submittedAt, data: stage2.data } : null,
+    readiness: readinessRow
+      ? {
+          submittedAt: readinessRow.submitted_at,
+          data: parseJson<JsonObject>(readinessRow.data, {}),
+        }
+      : null,
+    drafts,
+  });
 }
 
 /* ------------------------------------------------------------------ *
@@ -526,8 +982,32 @@ async function latestSubmission(
 async function createStage1(request: Request, env: Env): Promise<Response> {
   const body = await readJson<{ data?: unknown; id?: unknown }>(request);
   const data = asObject(body.data, 'data');
-  const id = await readApplicantId(body.id, env);
+  const id = readEntityId(body.id);
   const now = new Date().toISOString();
+
+  // The pre-screening answers create/refresh the organization profile.
+  const organization = await saveOrganization(env, id, organizationFromStage1(data));
+
+  const existing = await env.DB.prepare('SELECT * FROM applicants WHERE id = ?')
+    .bind(id)
+    .first<ApplicantRow>();
+
+  // Signed-in organizations resubmit on top of their existing record.
+  if (existing) {
+    const applicant = rowToApplicant(existing);
+    applicant.updatedAt = now;
+    applicant.stage1 = { submittedAt: now, data };
+
+    await env.DB.prepare(
+      `UPDATE applicants SET updated_at = ?, stage1 = ? WHERE id = ?`,
+    )
+      .bind(now, JSON.stringify(applicant.stage1), id)
+      .run();
+
+    await deleteDraftRow(env, 'stage1', id);
+
+    return json({ applicant, organization }, 200);
+  }
 
   const applicant: ApplicantRecord = {
     id,
@@ -554,7 +1034,9 @@ async function createStage1(request: Request, env: Env): Promise<Response> {
     )
     .run();
 
-  return json({ applicant }, 201);
+  await deleteDraftRow(env, 'stage1', id);
+
+  return json({ applicant, organization }, 201);
 }
 
 async function createStage2(request: Request, env: Env): Promise<Response> {
@@ -563,8 +1045,41 @@ async function createStage2(request: Request, env: Env): Promise<Response> {
   );
   const data = asObject(body.data, 'data');
   const stage1Data = body.stage1Data ? asObject(body.stage1Data, 'stage1Data') : {};
-  const id = await readApplicantId(body.id, env);
+  const id = readEntityId(body.id);
   const now = new Date().toISOString();
+
+  const existing = await env.DB.prepare('SELECT * FROM applicants WHERE id = ?')
+    .bind(id)
+    .first<ApplicantRow>();
+
+  // A signed-in organization submits stage 2 on top of its existing record.
+  if (existing) {
+    const applicant = rowToApplicant(existing);
+    applicant.updatedAt = now;
+    applicant.stage2 = { submittedAt: now, data };
+    if (!applicant.stage1 && Object.keys(stage1Data).length) {
+      applicant.stage1 = { submittedAt: now, data: stage1Data };
+    }
+
+    await env.DB.prepare(
+      `UPDATE applicants
+          SET updated_at = ?, stage1 = ?, stage2 = ?
+        WHERE id = ?`,
+    )
+      .bind(
+        now,
+        applicant.stage1 ? JSON.stringify(applicant.stage1) : null,
+        JSON.stringify(applicant.stage2),
+        id,
+      )
+      .run();
+
+    return json({ applicant }, 200);
+  }
+
+  if (Object.keys(stage1Data).length) {
+    await saveOrganization(env, id, organizationFromStage1(stage1Data));
+  }
 
   const applicant: ApplicantRecord = {
     id,
@@ -1033,6 +1548,48 @@ async function handleApi(request: Request, env: Env, path: string): Promise<Resp
   if (path === '/api/applicants/latest') {
     if (method !== 'GET') return methodNotAllowed('GET');
     return latestSubmission(env, new URL(request.url).searchParams.get('stage'));
+  }
+
+  if (path === '/api/organizations/acronym-available') {
+    if (method !== 'GET') return methodNotAllowed('GET');
+    const params = new URL(request.url).searchParams;
+    return acronymAvailable(
+      env,
+      params.get('acronym') ?? '',
+      params.get('exclude') ?? '',
+    );
+  }
+
+  const orgFormsMatch = /^\/api\/organizations\/([^/]+)\/forms$/.exec(path);
+  if (orgFormsMatch) {
+    if (method !== 'GET') return methodNotAllowed('GET');
+    return organizationForms(env, decodeURIComponent(orgFormsMatch[1]));
+  }
+
+  const organizationMatch = /^\/api\/organizations\/([^/]+)$/.exec(path);
+  if (organizationMatch) {
+    const id = decodeURIComponent(organizationMatch[1]);
+    if (method === 'GET') return getOrganization(env, id);
+    if (method === 'PUT' || method === 'PATCH') return putOrganization(request, env, id);
+    return methodNotAllowed('GET, PUT');
+  }
+
+  const draftMatch = /^\/api\/drafts\/(stage1|readiness)\/([^/]+)$/.exec(path);
+  if (draftMatch) {
+    const form = readDraftForm(draftMatch[1]);
+    const orgId = decodeURIComponent(draftMatch[2]);
+    if (method === 'GET') return getDraft(env, form, orgId);
+    if (method === 'PUT' || method === 'POST') return putDraft(request, env, form, orgId);
+    if (method === 'DELETE') return deleteDraft(env, form, orgId);
+    return methodNotAllowed('GET, PUT, DELETE');
+  }
+
+  const readinessMatch = /^\/api\/readiness\/([^/]+)$/.exec(path);
+  if (readinessMatch) {
+    const orgId = decodeURIComponent(readinessMatch[1]);
+    if (method === 'GET') return getReadiness(env, orgId);
+    if (method === 'PUT' || method === 'POST') return putReadiness(request, env, orgId);
+    return methodNotAllowed('GET, PUT');
   }
 
   const applicantMatch = /^\/api\/applicants\/([^/]+)(?:\/(status|stage1|review-notes|review-sent))?$/.exec(

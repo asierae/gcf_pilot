@@ -67,7 +67,7 @@ export class LoginComponent {
     if (user?.role === 'admin') {
       this.router.navigate(['/dashboard']);
     } else {
-      this.router.navigate(['/stage2']);
+      this.router.navigate(['/my-forms']);
     }
   }
 }

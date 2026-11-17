@@ -95,9 +95,21 @@ The SPA resolves relative `/api/files/...` URLs against the Worker when
 Public (no token):
 
 - `POST /api/applicants/stage1` — `{ data, id? }` (`id` keeps the record in
-  sync with the `organizations/<id>/...` upload folder)
-- `POST /api/applicants/stage2` — `{ data, stage1Data, id? }`
+  sync with the `organizations/<id>/...` upload folder and creates/updates the
+  organization profile)
+- `POST /api/applicants/stage2` — `{ data, stage1Data, id? }` (upserts into the
+  existing applicant/organization row when `id` already exists)
 - `GET /api/applicants/latest?stage=1|2` — latest stage payload (wizard prefill)
+- `GET /api/organizations/:id` — organization profile (public by design: the
+  applicant accounts live in the browser, so there is no token to send)
+- `PUT /api/organizations/:id` — create on first write, then update every field
+  except `name` / `acronym` (they identify the organization)
+- `GET /api/organizations/:id/forms` — everything the organization has filled
+  in: profile, stage 1, stage 2, readiness and the last draft timestamp per form
+- `GET /api/organizations/acronym-available?acronym=&exclude=` — uniqueness check
+- `GET | PUT | DELETE /api/drafts/(stage1|readiness)/:organizationId` — draft
+  autosave, keyed by the organization id
+- `GET | PUT /api/readiness/:organizationId` — submitted readiness application
 - `POST /api/upload` — multipart `file`, `scope`, `entityId`, `section` (max 15 MB)
 - `DELETE /api/upload` — `{ publicId }`
 - `GET /api/files/<key>` — streams an R2 object
@@ -127,18 +139,35 @@ Every uploaded file is stored as:
 <scope>/<entityId>/<section>/<uuid>-<file name>
 ```
 
-| scope           | entityId                                     | sections                                             |
-| --------------- | -------------------------------------------- | ---------------------------------------------------- |
-| `organizations` | applicant id / readiness application id      | `access`, `legal`, `fasttrack`, `s4`…`s13`, `readiness` |
-| `leads`         | lead id                                      | `documents` (reserved)                                |
+| scope           | entityId                                      | sections                                             |
+| --------------- | --------------------------------------------- | ---------------------------------------------------- |
+| `organizations` | organization id (== applicant / readiness id)  | `access`, `legal`, `fasttrack`, `s4`…`s13`, `readiness` |
+| `leads`         | lead id                                       | `documents` (reserved)                                |
 
 `section` comes from the form step (`STAGE1_STEPS` / `STAGE2_SCREENING_STEPS`
 ids), so the bucket mirrors the wizard. Files uploaded before this layout lived
 under `gcf-applicants/`; they stay readable and deletable.
 
-The wizard generates the applicant id in the browser so uploads can happen
+The wizard generates the organization id in the browser so uploads can happen
 before the record exists. The same id is sent with the submission, and the
-Worker rejects a duplicate (HTTP 409).
+Worker rejects a duplicate stage 1 submission (HTTP 409).
+
+## Organizations, drafts and readiness
+
+The organization id is the single identifier across the whole stack:
+
+- `organizations.id`
+- the pre-screening row `applicants.id`
+- the R2 folder `organizations/<id>/...`
+- both draft tables (`stage1_drafts`, `readiness_drafts`)
+- `readiness_applications.organization_id`
+
+Anonymous visitors get a generated id in the URL (`?org=<id>`), so the same link
+restores their draft. Signed-in applicants always use their account's
+`organizationId`; the forms prefill every known field and lock the legal name and
+acronym, because acronyms are unique (`idx_organizations_acronym` on
+`acronym_norm`). Organizations are only created on submit (or lazily on first
+visit for signed-in users), so the name/acronym are not locked mid-typing.
 
 ## Migrating existing Firestore data
 

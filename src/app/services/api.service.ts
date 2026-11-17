@@ -5,6 +5,12 @@ import {
   LeadRecord,
   SubmissionStatus,
 } from "../models/applicant.model";
+import {
+  DraftForm,
+  OrganizationDraft,
+  OrganizationForms,
+  OrganizationRecord,
+} from "../models/organization.model";
 
 interface ApiErrorPayload {
   error?: string;
@@ -185,6 +191,103 @@ export class ApiService {
       submission?: LatestSubmission | null;
     }>(`/api/applicants/latest?stage=${stage}`, { method: "GET" }, false);
     return payload.submission ?? null;
+  }
+
+  // ── Organizations ───────────────────────────────────────────────────────
+
+  async getOrganization(id: string): Promise<OrganizationRecord | null> {
+    const payload = await this.request<{
+      organization?: OrganizationRecord | null;
+    }>(
+      `/api/organizations/${encodeURIComponent(id)}`,
+      { method: "GET" },
+      false,
+    );
+    return payload.organization ?? null;
+  }
+
+  async saveOrganization(
+    id: string,
+    organization: Partial<OrganizationRecord>,
+  ): Promise<OrganizationRecord> {
+    const payload = await this.request<{ organization: OrganizationRecord }>(
+      `/api/organizations/${encodeURIComponent(id)}`,
+      { method: "PUT", body: JSON.stringify(organization) },
+      false,
+    );
+    return payload.organization;
+  }
+
+  async isAcronymAvailable(
+    acronym: string,
+    excludeId: string,
+  ): Promise<boolean> {
+    const query = new URLSearchParams({ acronym, exclude: excludeId });
+    const payload = await this.request<{ available?: boolean }>(
+      `/api/organizations/acronym-available?${query.toString()}`,
+      { method: "GET" },
+      false,
+    );
+    return payload.available === true;
+  }
+
+  async getOrganizationForms(id: string): Promise<OrganizationForms> {
+    return this.request<OrganizationForms>(
+      `/api/organizations/${encodeURIComponent(id)}/forms`,
+      { method: "GET" },
+      false,
+    );
+  }
+
+  // ── Drafts ──────────────────────────────────────────────────────────────
+
+  async getDraft(
+    form: DraftForm,
+    organizationId: string,
+  ): Promise<OrganizationDraft | null> {
+    const payload = await this.request<{ draft?: OrganizationDraft | null }>(
+      `/api/drafts/${form}/${encodeURIComponent(organizationId)}`,
+      { method: "GET" },
+      false,
+    );
+    return payload.draft ?? null;
+  }
+
+  async saveDraft(
+    form: DraftForm,
+    organizationId: string,
+    data: Record<string, unknown>,
+  ): Promise<string> {
+    const payload = await this.request<{ updatedAt: string }>(
+      `/api/drafts/${form}/${encodeURIComponent(organizationId)}`,
+      { method: "PUT", body: JSON.stringify({ data }) },
+      false,
+    );
+    return payload.updatedAt;
+  }
+
+  async deleteDraft(form: DraftForm, organizationId: string): Promise<void> {
+    await this.request<void>(
+      `/api/drafts/${form}/${encodeURIComponent(organizationId)}`,
+      { method: "DELETE" },
+      false,
+    );
+  }
+
+  // ── Readiness ───────────────────────────────────────────────────────────
+
+  async submitReadiness(
+    organizationId: string,
+    data: Record<string, unknown>,
+  ): Promise<{ submittedAt: string }> {
+    const payload = await this.request<{
+      submission: { submittedAt: string };
+    }>(
+      `/api/readiness/${encodeURIComponent(organizationId)}`,
+      { method: "PUT", body: JSON.stringify({ data }) },
+      false,
+    );
+    return { submittedAt: payload.submission.submittedAt };
   }
 
   // ── Leads ───────────────────────────────────────────────────────────────

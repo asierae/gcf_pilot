@@ -1,7 +1,7 @@
-import { CommonModule } from '@angular/common';
+import { CommonModule, Location } from '@angular/common';
 import { Component, OnDestroy, OnInit, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { RouterModule } from '@angular/router';
+import { ActivatedRoute, RouterModule } from '@angular/router';
 import {
   ACCOUNTING_STANDARD_OPTIONS,
   AUDIT_OPINION_OPTIONS,
@@ -23,8 +23,17 @@ import {
   createEmptyFmca,
 } from './readiness-application.model';
 import { AttachmentService } from '../../services/attachment.service';
+import { AuthService } from '../../services/auth.service';
+import { OrganizationService } from '../../services/organization.service';
 import { StoredAttachment } from '../../models/attachment.model';
+import { OrganizationRecord } from '../../models/organization.model';
 import { resolveAttachmentUrl } from '../../shared/utils/attachment-url.util';
+import {
+  isOrganizationId,
+  newOrganizationId,
+  ORG_QUERY_PARAM,
+  syncOrganizationId,
+} from '../../shared/utils/organization.util';
 
 interface WizardStep {
   n: number;
@@ -161,8 +170,19 @@ export class ReadinessWizardComponent implements OnInit, OnDestroy {
   application: ReadinessApplication = createEmptyApplication();
   currentStep = 1;
   attempted = new Set<number>();
-  /** Organization folder for uploads: `organizations/<readinessId>/readiness/`. */
-  readinessId = ReadinessWizardComponent.newId();
+  /**
+   * Organization id. It is the R2 folder (`organizations/<id>/readiness/`),
+   * the draft key and the readiness record key.
+   */
+  organizationId = newOrganizationId();
+  organization: OrganizationRecord | null = null;
+  /** True once the organization exists: name and acronym are read-only. */
+  identityLocked = false;
+  acronymTaken = false;
+  acronymChecking = false;
+  submitting = false;
+  submittedAt: string | null = null;
+  submitError = '';
   docMeta: Partial<Record<DocumentKey, string>> = {};
   docAttachments: Partial<Record<DocumentKey, StoredAttachment>> = {};
   docUploading: Partial<Record<DocumentKey, boolean>> = {};
@@ -174,83 +194,240 @@ export class ReadinessWizardComponent implements OnInit, OnDestroy {
   copyLabel = 'Copy JSON';
 
   private readonly attachmentService = inject(AttachmentService);
+  private readonly authService = inject(AuthService);
+  private readonly organizationService = inject(OrganizationService);
+  private readonly route = inject(ActivatedRoute);
+  private readonly location = inject(Location);
   private saveTimer: ReturnType<typeof setTimeout> | null = null;
+  private acronymTimer: ReturnType<typeof setTimeout> | null = null;
   private activitySeq = 100;
+  private draftReady = false;
+  private localSavedAt: string | null = null;
 
-  ngOnInit(): void {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) {
-      try {
-        const saved = JSON.parse(raw) as ReadinessApplication & {
-          __id?: string;
-          __docMeta?: Partial<Record<DocumentKey, string>>;
-          __docAttachments?: Partial<Record<DocumentKey, StoredAttachment>>;
-        };
-        const base = createEmptyApplication();
-        this.application = {
-          metadata: { ...base.metadata, ...(saved.metadata ?? {}) },
-          institutionalProfile: {
-            ...base.institutionalProfile,
-            ...(saved.institutionalProfile ?? {}),
-            gapMatrix: {
-              ...base.institutionalProfile.gapMatrix,
-              ...(saved.institutionalProfile?.gapMatrix ?? {}),
-            },
-          },
-          narrative: { ...base.narrative, ...(saved.narrative ?? {}) },
-          logframe: saved.logframe ?? base.logframe,
-          budget: { ...base.budget, ...(saved.budget ?? {}) },
-          fmca: { ...createEmptyFmca(), ...(saved.fmca ?? {}) },
-          documents: base.documents,
-        };
-        if (typeof saved.__id === 'string' && saved.__id) {
-          this.readinessId = saved.__id;
-        }
-        this.docAttachments = saved.__docAttachments ?? {};
-        this.docMeta = saved.__docMeta ?? {};
-        for (const [key, attachment] of Object.entries(this.docAttachments)) {
-          if (attachment && !this.docMeta[key as DocumentKey]) {
-            this.docMeta[key as DocumentKey] = attachment.name;
-          }
-        }
-      } catch {
-        localStorage.removeItem(STORAGE_KEY);
-      }
-    }
+  async ngOnInit(): Promise<void> {
+    this.organizationId = this.resolveOrganizationId();
+    syncOrganizationId(this.location, this.organizationId);
+
+    this.restoreLocalDraft();
     this.refreshActivitySequence();
+
+    await this.loadServerState();
+    this.draftReady = true;
   }
 
   ngOnDestroy(): void {
     if (this.saveTimer) {
       clearTimeout(this.saveTimer);
+      clearTimeout(this.acronymTimer ?? undefined);
       this.persist();
     }
+  }
+
+  /**
+   * Signed-in applicants work on their organization. Anonymous visitors get a
+   * generated id in the URL (`?org=...`) that also restores their draft.
+   */
+  private resolveOrganizationId(): string {
+    const user = this.authService.currentUserValue;
+    if (user?.organizationId) {
+      return user.organizationId;
+    }
+
+    const fromUrl = this.route.snapshot.queryParamMap.get(ORG_QUERY_PARAM);
+    if (isOrganizationId(fromUrl)) {
+      return fromUrl as string;
+    }
+
+    const stored = this.readLocalDraft()?.__id;
+    return isOrganizationId(stored) ? (stored as string) : newOrganizationId();
+  }
+
+  private readLocalDraft():
+    | (Partial<ReadinessApplication> & {
+        __id?: string;
+        __docMeta?: Partial<Record<DocumentKey, string>>;
+        __docAttachments?: Partial<Record<DocumentKey, StoredAttachment>>;
+        __savedAt?: string;
+      })
+    | null {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return null;
+    try {
+      return JSON.parse(raw);
+    } catch {
+      localStorage.removeItem(STORAGE_KEY);
+      return null;
+    }
+  }
+
+  private restoreLocalDraft(): void {
+    const saved = this.readLocalDraft();
+    if (!saved) return;
+
+    // Ignore a cache that belongs to a different organization link.
+    if (
+      saved.__id &&
+      saved.__id !== this.organizationId &&
+      !this.authService.currentUserValue?.organizationId
+    ) {
+      localStorage.removeItem(STORAGE_KEY);
+      return;
+    }
+
+    this.applySavedApplication(saved);
+    this.localSavedAt = saved.__savedAt ?? null;
+  }
+
+  private async loadServerState(): Promise<void> {
+    const [forms, draft] = await Promise.all([
+      this.organizationService.forms(this.organizationId),
+      this.organizationService.loadDraft('readiness', this.organizationId),
+    ]);
+
+    const organization = forms.organization;
+    if (organization) {
+      this.organization = organization;
+      this.identityLocked = true;
+      this.applyOrganizationProfile(organization);
+    }
+
+    if (forms.readiness?.submittedAt) {
+      this.submittedAt = forms.readiness.submittedAt;
+    }
+
+    if (draft?.data) {
+      const serverIsNewer =
+        !this.localSavedAt || new Date(draft.updatedAt) >= new Date(this.localSavedAt);
+      if (serverIsNewer) {
+        this.applySavedApplication(draft.data as Partial<ReadinessApplication>);
+      }
+    }
+  }
+
+  private applySavedApplication(
+    saved: Partial<ReadinessApplication> & {
+      __docMeta?: Partial<Record<DocumentKey, string>>;
+      __docAttachments?: Partial<Record<DocumentKey, StoredAttachment>>;
+    },
+  ): void {
+    const base = createEmptyApplication();
+    this.application = {
+      metadata: { ...base.metadata, ...(saved.metadata ?? {}) },
+      institutionalProfile: {
+        ...base.institutionalProfile,
+        ...(saved.institutionalProfile ?? {}),
+        gapMatrix: {
+          ...base.institutionalProfile.gapMatrix,
+          ...(saved.institutionalProfile?.gapMatrix ?? {}),
+        },
+      },
+      narrative: { ...base.narrative, ...(saved.narrative ?? {}) },
+      logframe: saved.logframe ?? base.logframe,
+      budget: { ...base.budget, ...(saved.budget ?? {}) },
+      fmca: { ...createEmptyFmca(), ...(saved.fmca ?? {}) },
+      documents: base.documents,
+    };
+
+    this.docAttachments = saved.__docAttachments ?? {};
+    this.docMeta = saved.__docMeta ?? {};
+    for (const [key, attachment] of Object.entries(this.docAttachments)) {
+      if (attachment && !this.docMeta[key as DocumentKey]) {
+        this.docMeta[key as DocumentKey] = attachment.name;
+      }
+    }
+  }
+
+  private applyOrganizationProfile(org: OrganizationRecord): void {
+    const metadata = this.application.metadata;
+    this.application.metadata = {
+      ...metadata,
+      organizationLegalName: org.name || metadata.organizationLegalName,
+      organizationAcronym: org.acronym || metadata.organizationAcronym,
+      country: org.country || metadata.country,
+      entityType: (org.entityType as ReadinessApplication['metadata']['entityType']) || metadata.entityType,
+    };
   }
 
   // ── Persistence ──────────────────────────────────────────────
   onUserInput(): void {
     this.errorSummary = '';
+    this.submitError = '';
     this.scheduleSave();
+  }
+
+  onAcronymChange(): void {
+    this.onUserInput();
+
+    if (this.identityLocked) {
+      this.acronymTaken = false;
+      return;
+    }
+
+    const acronym = this.application.metadata.organizationAcronym.trim();
+    if (this.acronymTimer) clearTimeout(this.acronymTimer);
+    if (!acronym) {
+      this.acronymTaken = false;
+      return;
+    }
+
+    this.acronymChecking = true;
+    this.acronymTimer = setTimeout(async () => {
+      const available = await this.organizationService.isAcronymAvailable(
+        acronym,
+        this.organizationId,
+      );
+      // Ignore stale responses.
+      if (this.application.metadata.organizationAcronym.trim() === acronym) {
+        this.acronymTaken = !available;
+        this.acronymChecking = false;
+      }
+    }, 450);
   }
 
   scheduleSave(): void {
     this.saveState = 'saving';
     if (this.saveTimer) clearTimeout(this.saveTimer);
-    this.saveTimer = setTimeout(() => this.persist(), 450);
+    this.saveTimer = setTimeout(() => void this.persist(), 450);
   }
 
   persist(): void {
     try {
-      const { documents: _documents, ...rest } = this.application;
       const payload = {
-        ...rest,
-        __id: this.readinessId,
-        __docMeta: this.docMeta,
-        __docAttachments: this.docAttachments,
+        ...this.draftPayload(),
+        __id: this.organizationId,
         __savedAt: new Date().toISOString(),
       };
       localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+      this.localSavedAt = payload.__savedAt;
       this.saveState = 'saved';
+    } catch {
+      this.saveState = 'error';
+    }
+
+    if (this.draftReady) {
+      void this.saveServerDraft();
+    }
+  }
+
+  private draftPayload(): Record<string, unknown> {
+    const { documents: _documents, ...rest } = this.application;
+    return {
+      ...rest,
+      __docMeta: this.docMeta,
+      __docAttachments: this.docAttachments,
+    };
+  }
+
+  private async saveServerDraft(): Promise<void> {
+    try {
+      await this.organizationService.saveDraft(
+        'readiness',
+        this.organizationId,
+        this.draftPayload(),
+      );
+      if (this.saveState !== 'error') {
+        this.saveState = 'saved';
+      }
     } catch {
       this.saveState = 'error';
     }
@@ -258,8 +435,8 @@ export class ReadinessWizardComponent implements OnInit, OnDestroy {
 
   get saveText(): string {
     if (this.saveState === 'saving') return 'Saving…';
-    if (this.saveState === 'error') return 'Could not save locally';
-    return 'All changes saved locally';
+    if (this.saveState === 'error') return 'Saved locally — cloud save failed';
+    return 'Draft saved to your organization workspace';
   }
 
   // ── Navigation ───────────────────────────────────────────────
@@ -371,6 +548,9 @@ export class ReadinessWizardComponent implements OnInit, OnDestroy {
       if (m.proposalTitle.trim().length < 5) issues.push('Proposal title is required.');
       if (!m.country.trim()) issues.push('Country is required.');
       if (!m.organizationLegalName.trim()) issues.push('Organization legal name is required.');
+      if (!m.organizationAcronym.trim()) issues.push('Organization acronym is required.');
+      if (this.acronymTaken)
+        issues.push('That acronym is already registered. Please use a different one.');
       if (!m.requestedAmountUSD || m.requestedAmountUSD <= 0)
         issues.push('Requested grant amount must be greater than zero.');
       if (!m.readinessObjectives.length)
@@ -918,7 +1098,7 @@ export class ReadinessWizardComponent implements OnInit, OnDestroy {
     try {
       const uploaded = await this.attachmentService.uploadFile(file, {
         scope: 'organizations',
-        entityId: this.readinessId,
+        entityId: this.organizationId,
         section: 'readiness',
       });
 
@@ -970,6 +1150,7 @@ export class ReadinessWizardComponent implements OnInit, OnDestroy {
     return {
       schemaVersion: 'gcf-readiness-intake-1.0',
       generatedAt: new Date().toISOString(),
+      organizationId: this.organizationId,
       metadata: m,
       institutionalProfile: this.application.institutionalProfile,
       narrative: this.application.narrative,
@@ -998,11 +1179,60 @@ export class ReadinessWizardComponent implements OnInit, OnDestroy {
     return typeof location !== 'undefined' ? `${location.origin}${url}` : url;
   }
 
-  private static newId(): string {
-    if (typeof crypto !== 'undefined' && 'randomUUID' in crypto) {
-      return crypto.randomUUID();
+  /** Persists the readiness application in D1 under the organization id. */
+  async submitReadiness(): Promise<void> {
+    if (this.submitting) return;
+
+    if (!this.allStepsValid) {
+      const step = this.firstInvalidStep();
+      this.currentStep = step;
+      this.attempted.add(step);
+      this.errorSummary = 'Complete the remaining requirements before submitting.';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
     }
-    return `local-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+
+    this.submitting = true;
+    this.submitError = '';
+
+    try {
+      const data = this.buildExportObject();
+
+      // Register/refresh the organization so the dashboard can list the form.
+      await this.organizationService.save(this.organizationId, {
+        name: this.application.metadata.organizationLegalName,
+        acronym: this.application.metadata.organizationAcronym,
+        country: this.application.metadata.country,
+        entityType: this.application.metadata.entityType,
+        contactEmail: this.application.metadata.ndaEmail,
+        contactName: this.application.metadata.ndaFocalPointName,
+      });
+      this.identityLocked = true;
+
+      const { submittedAt } = await this.organizationService.submitReadiness(
+        this.organizationId,
+        data,
+      );
+
+      await this.organizationService.clearDraft('readiness', this.organizationId);
+      localStorage.removeItem(STORAGE_KEY);
+
+      this.submittedAt = submittedAt;
+      this.saveState = 'saved';
+    } catch (error) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : 'Could not submit the readiness application.';
+      this.submitError = message;
+
+      if (message.toLowerCase().includes('acronym')) {
+        this.acronymTaken = true;
+        this.currentStep = 1;
+      }
+    } finally {
+      this.submitting = false;
+    }
   }
 
   downloadJson(): void {
@@ -1048,6 +1278,7 @@ export class ReadinessWizardComponent implements OnInit, OnDestroy {
         'Building GCF Direct Access Readiness for the Kenya National Climate Finance Authority',
       country: 'Kenya',
       organizationLegalName: 'Kenya National Climate Finance Authority',
+      organizationAcronym: 'KNCFA',
       entityType: 'public',
       requestedAmountUSD: 950000,
       durationMonths: 24,
@@ -1468,6 +1699,10 @@ export class ReadinessWizardComponent implements OnInit, OnDestroy {
     }
 
     this.application = demo;
+    if (this.organization) {
+      // Keep the signed-in organization's locked identity.
+      this.applyOrganizationProfile(this.organization);
+    }
     this.docErrors = {};
     this.attempted.clear();
     this.errorSummary = '';

@@ -9,6 +9,10 @@ export interface User {
   username: string;
   email: string;
   role: "admin" | "applicant";
+  /** Organization the account belongs to (applicant accounts only). */
+  organizationId?: string;
+  organizationName?: string;
+  organizationAcronym?: string;
 }
 
 export interface LoginResult {
@@ -57,6 +61,9 @@ export class AuthService {
         username: knownUser.username,
         email: knownUser.email,
         role: knownUser.role,
+        organizationId: knownUser.organizationId,
+        organizationName: knownUser.organizationName,
+        organizationAcronym: knownUser.organizationAcronym,
       });
     }
 

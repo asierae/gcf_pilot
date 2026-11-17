@@ -40,6 +40,7 @@ export interface ReadinessApplication {
     proposalTitle: string;
     country: string;
     organizationLegalName: string;
+    organizationAcronym: string;
     entityType: EntityType;
     requestedAmountUSD: number;
     durationMonths: 12 | 18 | 24 | 36;
@@ -282,6 +283,7 @@ export function createEmptyApplication(): ReadinessApplication {
       proposalTitle: '',
       country: '',
       organizationLegalName: '',
+      organizationAcronym: '',
       entityType: 'public',
       requestedAmountUSD: 0,
       durationMonths: 24,

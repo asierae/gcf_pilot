@@ -1,0 +1,86 @@
+<div class="my-forms">
+  <header class="page-head">
+    <div>
+      <p class="eyebrow">Organization workspace</p>
+      <h1>{{ organizationName || "My organization" }}</h1>
+      <p class="page-sub">
+        @if (organizationAcronym) {
+          <span class="chip">{{ organizationAcronym }}</span>
+        }
+        Track every form your organization has submitted or saved as a draft.
+      </p>
+    </div>
+    <button type="button" class="btn btn-ghost" (click)="reload()" [disabled]="loading">
+      Refresh
+    </button>
+  </header>
+
+  @if (error) {
+    <div class="alert" role="alert">{{ error }}</div>
+  }
+
+  @if (loading) {
+    <p class="muted">Loading your forms…</p>
+  } @else if (!error) {
+    <div class="form-grid">
+      @for (card of cards; track card.key) {
+        <article class="form-card" [class.is-submitted]="statusOf(card) === 'submitted'">
+          <div class="form-card-head">
+            <div>
+              <h2>{{ card.title }}</h2>
+              <p class="form-desc">{{ card.description }}</p>
+            </div>
+            <span class="status status-{{ statusOf(card) }}">{{ statusLabel(card) }}</span>
+          </div>
+
+          <dl class="form-meta">
+            <div>
+              <dt>Last submission</dt>
+              <dd>{{ card.submittedAt ? (card.submittedAt | date: "medium") : "—" }}</dd>
+            </div>
+            <div>
+              <dt>Draft saved</dt>
+              <dd>{{ card.draftAt ? (card.draftAt | date: "medium") : "—" }}</dd>
+            </div>
+          </dl>
+
+          @if (card.summary.length) {
+            <dl class="form-summary">
+              @for (row of card.summary; track row.label) {
+                <div>
+                  <dt>{{ row.label }}</dt>
+                  <dd>{{ row.value }}</dd>
+                </div>
+              }
+            </dl>
+          }
+
+          <div class="form-actions">
+            @if (statusOf(card) === "submitted") {
+              <button type="button" class="btn btn-ghost" (click)="toggle(card)">
+                {{ isExpanded(card) ? "Hide details" : "View details" }}
+              </button>
+            }
+            <a class="btn btn-primary" [routerLink]="card.route">
+              {{ statusOf(card) === "empty" ? "Start" : "Open form" }}
+            </a>
+          </div>
+
+          @if (isExpanded(card) && card.json) {
+            <div class="form-detail">
+              <p class="detail-caption">
+                Submitted payload, exactly as stored for your organization.
+              </p>
+              <pre class="json">{{ card.json }}</pre>
+            </div>
+          }
+        </article>
+      }
+    </div>
+
+    <p class="foot-note">
+      Need to change a submitted form? Open it and submit again — the latest version replaces the
+      previous one for your organization.
+    </p>
+  }
+</div>

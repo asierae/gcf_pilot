@@ -1,0 +1,238 @@
+:host {
+  display: block;
+}
+
+.my-forms {
+  padding: 2rem clamp(1rem, 3vw, 2.5rem) 3rem;
+  max-width: 1100px;
+  margin: 0 auto;
+  color: var(--app-text);
+}
+
+.page-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.75rem;
+}
+
+.eyebrow {
+  margin: 0 0 0.35rem;
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--app-subtle);
+}
+
+.page-head h1 {
+  margin: 0;
+  font-size: 1.6rem;
+  color: var(--app-text-strong);
+}
+
+.page-sub {
+  margin: 0.5rem 0 0;
+  color: var(--app-muted);
+  font-size: 0.9rem;
+}
+
+.chip {
+  display: inline-block;
+  margin-right: 0.5rem;
+  padding: 0.1rem 0.5rem;
+  border-radius: 999px;
+  border: 1px solid var(--app-accent-line);
+  background: var(--app-accent-soft);
+  color: var(--app-accent);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+}
+
+.form-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+}
+
+.form-card {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1.25rem 1.35rem;
+  border-radius: var(--app-radius);
+  border: 1px solid var(--app-line);
+  background: var(--app-surface);
+}
+
+.form-card.is-submitted {
+  border-color: rgba(16, 185, 129, 0.28);
+}
+
+.form-card-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.form-card-head h2 {
+  margin: 0 0 0.3rem;
+  font-size: 1.05rem;
+  color: var(--app-text-strong);
+}
+
+.form-desc {
+  margin: 0;
+  font-size: 0.83rem;
+  color: var(--app-muted);
+  line-height: 1.5;
+}
+
+.status {
+  flex: none;
+  padding: 0.25rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  border: 1px solid var(--app-line-strong);
+  color: var(--app-muted);
+}
+
+.status-submitted {
+  border-color: rgba(16, 185, 129, 0.4);
+  background: rgba(16, 185, 129, 0.12);
+  color: #6ee7b7;
+}
+
+.status-draft {
+  border-color: var(--app-accent-line);
+  background: var(--app-accent-soft);
+  color: var(--app-accent);
+}
+
+.form-meta,
+.form-summary {
+  display: grid;
+  gap: 0.6rem;
+  margin: 0;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+}
+
+.form-meta dt,
+.form-summary dt {
+  margin: 0;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--app-subtle);
+}
+
+.form-meta dd,
+.form-summary dd {
+  margin: 0.15rem 0 0;
+  font-size: 0.85rem;
+  color: var(--app-text);
+  overflow-wrap: anywhere;
+}
+
+.form-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: auto;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem 0.95rem;
+  border-radius: 10px;
+  font-size: 0.83rem;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.btn-primary {
+  background: var(--app-accent);
+  color: var(--app-on-accent);
+}
+
+.btn-primary:hover {
+  background: var(--app-accent-strong);
+}
+
+.btn-ghost {
+  background: transparent;
+  border-color: var(--app-line-strong);
+  color: var(--app-text);
+}
+
+.btn-ghost:hover {
+  background: var(--app-surface-strong);
+}
+
+.btn[disabled] {
+  opacity: 0.55;
+  cursor: default;
+}
+
+.form-detail {
+  border-top: 1px dashed var(--app-line);
+  padding-top: 0.9rem;
+}
+
+.detail-caption {
+  margin: 0 0 0.5rem;
+  font-size: 0.78rem;
+  color: var(--app-subtle);
+}
+
+.json {
+  margin: 0;
+  max-height: 320px;
+  overflow: auto;
+  padding: 0.85rem;
+  border-radius: 10px;
+  background: rgba(2, 6, 23, 0.65);
+  border: 1px solid var(--app-line);
+  font-size: 0.72rem;
+  line-height: 1.5;
+  color: #cbd5e1;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.alert {
+  margin-bottom: 1rem;
+  padding: 0.85rem 1rem;
+  border-radius: 12px;
+  border: 1px solid rgba(248, 113, 113, 0.32);
+  background: rgba(248, 113, 113, 0.08);
+  color: #fecaca;
+  font-size: 0.85rem;
+}
+
+.muted {
+  color: var(--app-muted);
+  font-size: 0.9rem;
+}
+
+.foot-note {
+  margin-top: 1.5rem;
+  font-size: 0.78rem;
+  color: var(--app-subtle);
+}
+
+@media (max-width: 640px) {
+  .page-head {
+    flex-direction: column;
+  }
+}

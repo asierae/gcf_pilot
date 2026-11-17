@@ -1,10 +1,26 @@
-import { Component } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { CommonModule, Location } from '@angular/common';
+import { ActivatedRoute } from '@angular/router';
+import {
+  ReactiveFormsModule,
+  FormBuilder,
+  FormGroup,
+  Validators,
+} from '@angular/forms';
 import { StorageService } from '../../services/storage.service';
 import { NotificationService } from '../../services/notification.service';
+import { AuthService } from '../../services/auth.service';
+import { OrganizationService } from '../../services/organization.service';
+import { OrganizationRecord } from '../../models/organization.model';
 import { FileUploadComponent } from '../../shared/components/file-upload/file-upload.component';
 import { StepIconComponent } from '../../shared/components/step-icon/step-icon.component';
+import {
+  acronymAvailabilityValidator,
+  isOrganizationId,
+  newOrganizationId,
+  ORG_QUERY_PARAM,
+  syncOrganizationId,
+} from '../../shared/utils/organization.util';
 import {
   buildMissingFieldsMessage,
   collectInvalidFields,
@@ -18,18 +34,26 @@ import {
   templateUrl: './stage1.component.html',
   styleUrl: './stage1.component.css'
 })
-export class Stage1Component {
+export class Stage1Component implements OnInit, OnDestroy {
   currentStep = 0;
   form: FormGroup;
   submitted = false;
   submitSuccess = false;
 
   /**
-   * Generated up-front so uploads land in `organizations/<id>/<section>/`
-   * before the applicant record exists. Sent with the submission so the
-   * record and the folder share the same id.
+   * Organization id. It is the R2 folder (`organizations/<id>/...`), the draft
+   * key and the applicant id sent with the submission.
    */
-  applicantId = Stage1Component.newApplicantId();
+  applicantId = newOrganizationId();
+  organization: OrganizationRecord | null = null;
+  /** True once the organization exists: name and acronym are read-only. */
+  identityLocked = false;
+  draftSaving = false;
+  draftSavedAt: string | null = null;
+
+  private draftTimer: ReturnType<typeof setTimeout> | null = null;
+  private draftLoaded = false;
+  private pendingSave = false;
 
   steps = [
     { id: 'access', title: 'Access Modality', icon: '🌐' },
@@ -71,7 +95,11 @@ export class Stage1Component {
   constructor(
     private fb: FormBuilder,
     private storageService: StorageService,
-    private notificationService: NotificationService
+    private notificationService: NotificationService,
+    private authService: AuthService,
+    private organizationService: OrganizationService,
+    private route: ActivatedRoute,
+    private location: Location,
   ) {
     this.form = this.fb.group({
       organizationType: ['', Validators.required],
@@ -150,6 +178,183 @@ export class Stage1Component {
     });
   }
 
+  async ngOnInit(): Promise<void> {
+    // Subscribe before the initial state arrives so edits made while the
+    // organization/draft is still loading are not lost.
+    this.form.valueChanges.subscribe(() => this.scheduleDraftSave());
+
+    this.applicantId = this.resolveOrganizationId();
+    syncOrganizationId(this.location, this.applicantId);
+
+    await this.loadOrganizationAndDraft();
+
+    this.draftLoaded = true;
+    if (this.pendingSave) {
+      this.pendingSave = false;
+      this.scheduleDraftSave();
+    }
+  }
+
+  ngOnDestroy(): void {
+    if (this.draftTimer) {
+      clearTimeout(this.draftTimer);
+      void this.saveDraft();
+    }
+  }
+
+  /**
+   * Signed-in applicants always work on their own organization. Anonymous
+   * visitors keep the id in the URL (`?org=...`) so the link restores the
+   * draft later.
+   */
+  private resolveOrganizationId(): string {
+    const user = this.authService.currentUserValue;
+    if (user?.organizationId) {
+      return user.organizationId;
+    }
+
+    const fromUrl = this.route.snapshot.queryParamMap.get(ORG_QUERY_PARAM);
+    return isOrganizationId(fromUrl) ? (fromUrl as string) : newOrganizationId();
+  }
+
+  private async loadOrganizationAndDraft(): Promise<void> {
+    const user = this.authService.currentUserValue;
+
+    this.organization = await this.organizationService.load(this.applicantId);
+
+    if (!this.organization && user?.organizationId === this.applicantId && user.organizationName) {
+      // First visit for a signed-in applicant: register the organization with
+      // the details we already know.
+      try {
+        this.organization = await this.organizationService.save(this.applicantId, {
+          name: user.organizationName,
+          acronym: user.organizationAcronym ?? '',
+          contactEmail: user.email,
+        });
+      } catch (error) {
+        this.notificationService.error(
+          error instanceof Error
+            ? error.message
+            : 'Could not register your organization.',
+        );
+      }
+    }
+
+    this.identityLocked = Boolean(this.organization);
+
+    if (this.organization) {
+      this.applyServerValues(this.profileForForm(this.organization));
+    }
+
+    const draft = await this.organizationService.loadDraft('stage1', this.applicantId);
+    if (draft?.data) {
+      this.applyServerValues(draft.data);
+      this.restoreTrackRecord(draft.data);
+      this.draftSavedAt = draft.updatedAt;
+    }
+
+    this.configureAcronymValidator();
+  }
+
+  /**
+   * Restores server state without overwriting fields the visitor already
+   * edited while the load was in flight.
+   */
+  private applyServerValues(values: Record<string, unknown>): void {
+    const patch = Object.fromEntries(
+      Object.entries(values).filter(([key]) => {
+        const control = this.form.get(key);
+        return control !== null && !control.dirty;
+      }),
+    );
+    this.form.patchValue(patch, { emitEvent: false });
+  }
+
+  private configureAcronymValidator(): void {
+    const control = this.form.get('applicantAcronym');
+    if (!control) return;
+
+    if (this.identityLocked) {
+      control.clearAsyncValidators();
+    } else {
+      control.setAsyncValidators(
+        acronymAvailabilityValidator(
+          this.organizationService,
+          () => this.applicantId,
+        ),
+      );
+    }
+    control.updateValueAndValidity({ emitEvent: false });
+  }
+
+  private profileForForm(org: OrganizationRecord): Record<string, string> {
+    const pairs: Record<string, string> = {
+      applicantName: org.name,
+      applicantAcronym: org.acronym,
+      legalAddress: org.legalAddress,
+      operationalAddress: org.operationalAddress,
+      website: org.website,
+      headquartersCountry: org.country,
+      typeOfEntity: org.entityType,
+      primaryContactName: org.contactName,
+      primaryContactEmail: org.contactEmail,
+      primaryContactPhone: org.contactPhone,
+    };
+
+    return Object.fromEntries(
+      Object.entries(pairs).filter(([, value]) => Boolean(value)),
+    );
+  }
+
+  private restoreTrackRecord(data: Record<string, unknown>): void {
+    const rows = data['climateTrackRecord'];
+    if (!Array.isArray(rows)) return;
+
+    const array = this.form.get('climateTrackRecord') as unknown as {
+      clear: () => void;
+      push: (control: unknown) => void;
+    };
+    array.clear();
+    for (const row of rows) {
+      array.push(this.fb.group(row as Record<string, unknown>));
+    }
+  }
+
+  private scheduleDraftSave(): void {
+    // Queue edits made before the organization/draft finished loading.
+    if (!this.draftLoaded) {
+      this.pendingSave = true;
+      return;
+    }
+    if (this.draftTimer) {
+      clearTimeout(this.draftTimer);
+    }
+    this.draftSaving = true;
+    this.draftTimer = setTimeout(() => void this.saveDraft(), 800);
+  }
+
+  private async saveDraft(): Promise<void> {
+    this.draftTimer = null;
+    if (!this.draftLoaded) return;
+
+    try {
+      const updatedAt = await this.organizationService.saveDraft(
+        'stage1',
+        this.applicantId,
+        this.form.getRawValue(),
+      );
+      this.draftSavedAt = updatedAt;
+    } catch {
+      // Drafts are best-effort; the form itself stays usable.
+    } finally {
+      this.draftSaving = false;
+    }
+  }
+
+  get identityFieldsLocked(): boolean {
+    return this.identityLocked;
+  }
+
   goToStep(step: number): void {
     if (step >= 0 && step < this.steps.length) {
       this.currentStep = step;
@@ -187,22 +392,31 @@ export class Stage1Component {
   }
 
   private async submitForm(): Promise<void> {
+    if (this.draftTimer) {
+      clearTimeout(this.draftTimer);
+      this.draftTimer = null;
+    }
+
     try {
       await this.storageService.saveStage1Submission(
         this.form.value,
         this.applicantId,
       );
+      await this.organizationService.clearDraft('stage1', this.applicantId);
       this.submitSuccess = true;
       this.notificationService.success('Questionnaire submitted successfully!');
-    } catch {
-      this.notificationService.error('Could not save submission to the server.');
-    }
-  }
+    } catch (error) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : 'Could not save submission to the server.';
 
-  private static newApplicantId(): string {
-    if (typeof crypto !== 'undefined' && 'randomUUID' in crypto) {
-      return crypto.randomUUID();
+      if (message.toLowerCase().includes('acronym')) {
+        this.form.get('applicantAcronym')?.setErrors({ acronymTaken: true });
+        this.currentStep = 1;
+      }
+
+      this.notificationService.error(message);
     }
-    return `local-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
   }
 }

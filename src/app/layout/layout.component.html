@@ -216,6 +216,24 @@
               <span class="nav-label">Readiness Intake</span>
             </a>
           </li>
+          @if (authService.currentUserValue?.role === "applicant") {
+            <li>
+              <a
+                routerLink="/my-forms"
+                routerLinkActive="active"
+                class="nav-link"
+                [title]="sidebarCollapsed ? 'My forms' : ''"
+              >
+                <span class="nav-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M4 4h11l5 5v11a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1Z" />
+                    <path d="M15 4v5h5M7 13h8M7 17h5" />
+                  </svg>
+                </span>
+                <span class="nav-label">My forms</span>
+              </a>
+            </li>
+          }
           @if (authService.currentUserValue?.role === "admin") {
             <li>
               <a

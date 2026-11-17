@@ -12,6 +12,9 @@ export interface AppUser {
   role: UserRole;
   status: UserStatus;
   organizationName?: string;
+  /** Organization the account is linked to (applicant accounts). */
+  organizationId?: string;
+  organizationAcronym?: string;
   linkedSubmissionIds: string[];
   createdAt: string;
 }
@@ -46,6 +49,8 @@ const SEED_USERS: AppUser[] = [
     role: 'applicant',
     status: 'active',
     organizationName: 'Green Energy Corp',
+    organizationId: 'org-green-energy-corp',
+    organizationAcronym: 'GEC',
     linkedSubmissionIds: ['sub-2024-001'],
     createdAt: '2024-03-10T14:00:00.000Z',
   },
@@ -57,6 +62,8 @@ const SEED_USERS: AppUser[] = [
     role: 'applicant',
     status: 'active',
     organizationName: 'Amazon Basin Climate Fund',
+    organizationId: 'org-amazon-basin',
+    organizationAcronym: 'ABCF',
     linkedSubmissionIds: ['sub-2024-002'],
     createdAt: '2024-03-22T11:15:00.000Z',
   },
@@ -68,6 +75,8 @@ const SEED_USERS: AppUser[] = [
     role: 'applicant',
     status: 'pending',
     organizationName: 'South Asia Resilience Initiative',
+    organizationId: 'org-south-asia',
+    organizationAcronym: 'SARI',
     linkedSubmissionIds: ['sub-2024-003'],
     createdAt: '2024-04-05T16:45:00.000Z',
   },
@@ -79,6 +88,8 @@ const SEED_USERS: AppUser[] = [
     role: 'applicant',
     status: 'active',
     organizationName: 'West Africa Green Alliance',
+    organizationId: 'org-west-africa',
+    organizationAcronym: 'WAGA',
     linkedSubmissionIds: ['sub-2024-004', 'sub-2024-006'],
     createdAt: '2024-04-18T09:30:00.000Z',
   },
@@ -90,6 +101,8 @@ const SEED_USERS: AppUser[] = [
     role: 'applicant',
     status: 'pending',
     organizationName: 'Gulf Region Climate Center',
+    organizationId: 'org-gulf-climate',
+    organizationAcronym: 'GRCC',
     linkedSubmissionIds: ['sub-2024-005'],
     createdAt: '2024-05-02T12:00:00.000Z',
   },

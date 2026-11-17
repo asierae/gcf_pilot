@@ -10,6 +10,7 @@ import { LeadsImportComponent } from "./pages/dashboard/leads-import/leads-impor
 import { UserManagementComponent } from "./pages/settings/user-management/user-management.component";
 import { PricingComponent } from "./pages/pricing/pricing.component";
 import { ReadinessWizardComponent } from "./pages/readiness/readiness-wizard.component";
+import { MyFormsComponent } from "./pages/my-forms/my-forms.component";
 import { adminGuard, authGuard } from "./guards/auth.guard";
 
 export const routes: Routes = [
@@ -44,6 +45,7 @@ export const routes: Routes = [
       },
       { path: "pricing", component: PricingComponent },
       { path: "readiness", component: ReadinessWizardComponent },
+      { path: "my-forms", component: MyFormsComponent, canActivate: [authGuard] },
     ],
   },
   { path: "**", redirectTo: "stage1" },

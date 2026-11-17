@@ -1,9 +1,18 @@
 import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, Location } from '@angular/common';
+import { ActivatedRoute } from '@angular/router';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { StorageService } from '../../services/storage.service';
 import { NotificationService } from '../../services/notification.service';
 import { AuthService } from '../../services/auth.service';
+import { OrganizationService } from '../../services/organization.service';
+import { OrganizationRecord } from '../../models/organization.model';
+import {
+  isOrganizationId,
+  newOrganizationId,
+  ORG_QUERY_PARAM,
+  syncOrganizationId,
+} from '../../shared/utils/organization.util';
 import { addStage1FormControls } from '../../shared/forms/stage1-form.builder';
 import { STAGE2_ENTRY_STEP } from '../../shared/data/form-steps.config';
 import {
@@ -35,8 +44,9 @@ export class Stage2Component implements OnInit {
   submitted = false;
   submitSuccess = false;
 
-  /** Generated up-front so uploads use `organizations/<id>/<section>/`. */
-  applicantId = Stage2Component.newApplicantId();
+  /** Organization id (also the R2 folder for uploads). */
+  applicantId = newOrganizationId();
+  identityLocked = false;
 
   isAdmin = false;
   viewMode: 'grid' | 'form' = 'form';
@@ -45,7 +55,10 @@ export class Stage2Component implements OnInit {
     private fb: FormBuilder,
     private storageService: StorageService,
     private notificationService: NotificationService,
-    private authService: AuthService
+    private authService: AuthService,
+    private organizationService: OrganizationService,
+    private route: ActivatedRoute,
+    private location: Location,
   ) {}
 
   ngOnInit(): void {
@@ -75,22 +88,61 @@ export class Stage2Component implements OnInit {
       this.viewMode = 'grid';
     }
 
+    this.applicantId = this.resolveOrganizationId();
+    syncOrganizationId(this.location, this.applicantId);
+
     void this.loadSavedData();
+  }
+
+  private resolveOrganizationId(): string {
+    const user = this.authService.currentUserValue;
+    if (user?.organizationId) {
+      return user.organizationId;
+    }
+    const fromUrl = this.route.snapshot.queryParamMap.get(ORG_QUERY_PARAM);
+    return isOrganizationId(fromUrl) ? (fromUrl as string) : newOrganizationId();
   }
 
   private async loadSavedData(): Promise<void> {
     try {
-      const stage2Data = (await this.storageService.getLatestStage2Submission())?.data;
-      const stage1Data = (await this.storageService.getLatestStage1Submission())?.data;
+      const [organization, forms] = await Promise.all([
+        this.organizationService.load(this.applicantId),
+        this.organizationService.forms(this.applicantId),
+      ]);
 
-      if (stage2Data) {
-        this.form.patchValue(stage2Data);
-      } else if (stage1Data) {
-        this.form.patchValue(stage1Data);
+      this.identityLocked = Boolean(organization);
+
+      // Prefill from the organization's previous submissions, then overwrite
+      // the identity fields with the canonical organization profile.
+      const data = forms.stage2?.data ?? forms.stage1?.data ?? null;
+      if (data) {
+        this.form.patchValue(data);
+      }
+      if (organization) {
+        this.form.patchValue(this.profileForForm(organization));
       }
     } catch {
       this.notificationService.error('Could not load saved data from the server.');
     }
+  }
+
+  private profileForForm(org: OrganizationRecord): Record<string, string> {
+    const pairs: Record<string, string> = {
+      applicantName: org.name,
+      applicantAcronym: org.acronym,
+      legalAddress: org.legalAddress,
+      operationalAddress: org.operationalAddress,
+      website: org.website,
+      headquartersCountry: org.country,
+      typeOfEntity: org.entityType,
+      primaryContactName: org.contactName,
+      primaryContactEmail: org.contactEmail,
+      primaryContactPhone: org.contactPhone,
+    };
+
+    return Object.fromEntries(
+      Object.entries(pairs).filter(([, value]) => Boolean(value)),
+    );
   }
 
   get isStage1Step(): boolean {
@@ -156,15 +208,12 @@ export class Stage2Component implements OnInit {
       );
       this.submitSuccess = true;
       this.notificationService.success('Application submitted successfully!');
-    } catch {
-      this.notificationService.error('Could not save application to the server.');
+    } catch (error) {
+      this.notificationService.error(
+        error instanceof Error
+          ? error.message
+          : 'Could not save application to the server.',
+      );
     }
-  }
-
-  private static newApplicantId(): string {
-    if (typeof crypto !== 'undefined' && 'randomUUID' in crypto) {
-      return crypto.randomUUID();
-    }
-    return `local-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
   }
 }
