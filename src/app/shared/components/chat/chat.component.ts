@@ -16,7 +16,7 @@ const STUB_RESPONSES: { keywords: string[]; response: string }[] = [
   },
   {
     keywords: ['price', 'pricing', 'cost', 'fee', 'fees', 'service', 'package', 'plan'],
-    response: `We offer three service tiers:\n\n• **Advisory** — Document review & feedback\n• **Full Support** — End-to-end application management\n• **Premium** — Dedicated consultant + Stage 2 preparation\n\nContact us at support@avera.capital for a tailored quote.`,
+    response: `We offer three service tiers:\n\n• **Advisory** — Document review & feedback\n• **Full Support** — End-to-end application management\n• **Premium** — Dedicated consultant + Stage 2 preparation\n\nContact us at contact@averacapitalaccess.com for a tailored quote.`,
   },
   {
     keywords: ['stage 1', 'stage1', 'pre-screening', 'prescreening', 'questionnaire'],
@@ -44,7 +44,7 @@ const STUB_RESPONSES: { keywords: string[]; response: string }[] = [
   },
 ];
 
-const FALLBACK = `I don't have a specific answer for that yet. Our team will be happy to help — please contact us at **support@avera.capital** or use the form on our website.\n\nI can answer questions about eligibility requirements, application stages, required documents, timelines, and service pricing.`;
+const FALLBACK = `I don't have a specific answer for that yet. Our team will be happy to help — please contact us at **contact@averacapitalaccess.com** or use the form on our website.\n\nI can answer questions about eligibility requirements, application stages, required documents, timelines, and service pricing.`;
 
 @Component({
   selector: 'app-chat',

@@ -29,6 +29,12 @@ interface Env {
   ADMIN_ACCOUNTS?: string;
   /** Comma-separated origins allowed to call this API cross-origin (e.g. the Vercel URL) */
   CORS_ORIGINS?: string;
+  /** Resend API key. When missing, emails fall back to Gmail compose in the UI. */
+  RESEND_API_KEY?: string;
+  /** Public contact inbox (defaults to contact@averacapitalaccess.com). */
+  CONTACT_EMAIL?: string;
+  /** Sender for automatic emails (defaults to noreply@averacapitalaccess.com). */
+  NOREPLY_EMAIL?: string;
 }
 
 /* ------------------------------------------------------------------ *
@@ -306,6 +312,12 @@ function asString(value: unknown, field: string): string {
     throw new HttpError(400, `"${field}" must be a string.`);
   }
   return value;
+}
+
+/** Reads an optional string field, returning '' when absent or not a string. */
+function readText(source: JsonObject, key: string): string {
+  const value = source[key];
+  return typeof value === 'string' ? value.trim() : '';
 }
 
 function parseJson<T>(value: string | null, fallback: T): T {
@@ -770,6 +782,35 @@ async function putReadiness(
 
   await deleteDraftRow(env, 'readiness', orgId);
 
+  const metadata =
+    data.metadata && typeof data.metadata === 'object'
+      ? (data.metadata as JsonObject)
+      : {};
+  const amount = metadata.requestedAmountUSD;
+  await notifySubmission(env, {
+    form: 'readiness',
+    organizationName: readText(metadata, 'organizationLegalName') || organization.name,
+    contactName: readText(metadata, 'ndaFocalPointName'),
+    contactEmail: readText(metadata, 'ndaEmail'),
+    details: [
+      {
+        label: 'Organization',
+        value: readText(metadata, 'organizationLegalName') || organization.name,
+      },
+      { label: 'Acronym', value: organization.acronym },
+      { label: 'Proposal', value: readText(metadata, 'proposalTitle') },
+      { label: 'Country', value: readText(metadata, 'country') },
+      {
+        label: 'Requested amount',
+        value:
+          typeof amount === 'number'
+            ? `USD ${amount.toLocaleString('en-US')}`
+            : readText(metadata, 'requestedAmountUSD'),
+      },
+      { label: 'Submitted', value: now },
+    ],
+  });
+
   return json(
     {
       submission: { organizationId: orgId, submittedAt: now, data },
@@ -860,6 +901,219 @@ async function organizationForms(env: Env, orgId: string): Promise<Response> {
       : null,
     drafts,
   });
+}
+
+/* ------------------------------------------------------------------ *
+ * Email (Resend)
+ *
+ *  - contact@averacapitalaccess.com -> public inbox, also the reply-to
+ *  - noreply@averacapitalaccess.com -> sender of automatic notifications
+ *
+ * Without RESEND_API_KEY every send is a no-op and the review endpoint
+ * answers 501 so the UI can fall back to Gmail compose.
+ * ------------------------------------------------------------------ */
+
+const DEFAULT_CONTACT_EMAIL = 'contact@averacapitalaccess.com';
+const DEFAULT_NOREPLY_EMAIL = 'noreply@averacapitalaccess.com';
+const RESEND_ENDPOINT = 'https://api.resend.com/emails';
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+
+function contactEmail(env: Env): string {
+  return env.CONTACT_EMAIL?.trim() || DEFAULT_CONTACT_EMAIL;
+}
+
+function noreplyEmail(env: Env): string {
+  return env.NOREPLY_EMAIL?.trim() || DEFAULT_NOREPLY_EMAIL;
+}
+
+function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+interface OutgoingEmail {
+  to: string | string[];
+  subject: string;
+  html: string;
+  text?: string;
+  replyTo?: string;
+  fromName?: string;
+}
+
+async function sendEmail(env: Env, message: OutgoingEmail): Promise<boolean> {
+  if (!env.RESEND_API_KEY) return false;
+
+  const recipients = (Array.isArray(message.to) ? message.to : [message.to])
+    .map((value) => value.trim())
+    .filter((value) => EMAIL_PATTERN.test(value));
+  if (!recipients.length) return false;
+
+  try {
+    const response = await fetch(RESEND_ENDPOINT, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${env.RESEND_API_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        from: `${message.fromName ?? 'Avera Capital Access'} <${noreplyEmail(env)}>`,
+        to: recipients,
+        subject: message.subject,
+        html: message.html,
+        ...(message.text ? { text: message.text } : {}),
+        reply_to: message.replyTo ?? contactEmail(env),
+      }),
+    });
+
+    if (!response.ok) {
+      console.error('Resend rejected the email', response.status, await response.text());
+      return false;
+    }
+    return true;
+  } catch (error) {
+    console.error('Resend request failed', error);
+    return false;
+  }
+}
+
+type SubmissionForm = 'pre-screening' | 'stage 2' | 'readiness';
+
+interface SubmissionNotice {
+  form: SubmissionForm;
+  organizationName: string;
+  contactName: string;
+  contactEmail: string;
+  details: { label: string; value: string }[];
+}
+
+function emailLayout(
+  title: string,
+  intro: string,
+  rows: { label: string; value: string }[],
+  footerEmail = DEFAULT_CONTACT_EMAIL,
+): string {
+  const body = rows
+    .filter((row) => row.value)
+    .map(
+      (row) =>
+        `<tr><td style="padding:4px 12px 4px 0;color:#64748b;font-size:13px">${escapeHtml(
+          row.label,
+        )}</td><td style="padding:4px 0;color:#0f172a;font-size:13px">${escapeHtml(
+          row.value,
+        )}</td></tr>`,
+    )
+    .join('');
+
+  return `<div style="font-family:Inter,Segoe UI,Arial,sans-serif;background:#f8fafc;padding:24px">
+  <div style="max-width:560px;margin:0 auto;background:#ffffff;border:1px solid #e2e8f0;border-radius:14px;padding:24px">
+    <p style="margin:0 0 4px;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#94a3b8">Avera Capital Access</p>
+    <h1 style="margin:0 0 12px;font-size:19px;color:#0f172a">${escapeHtml(title)}</h1>
+    <p style="margin:0 0 16px;font-size:14px;line-height:1.6;color:#334155">${escapeHtml(intro)}</p>
+    <table style="border-collapse:collapse">${body}</table>
+    <p style="margin:20px 0 0;font-size:12px;color:#94a3b8">Questions? Reply to this email or write to ${escapeHtml(
+      footerEmail,
+    )}.</p>
+  </div>
+</div>`;
+}
+
+/** Confirmation to the applicant plus a copy for the team. Never throws. */
+async function notifySubmission(env: Env, notice: SubmissionNotice): Promise<void> {
+  if (!env.RESEND_API_KEY) return;
+
+  const label =
+    notice.form === 'readiness'
+      ? 'readiness application'
+      : notice.form === 'stage 2'
+        ? 'stage 2 application'
+        : 'pre-screening questionnaire';
+  const org = notice.organizationName || 'your organization';
+
+  try {
+    if (EMAIL_PATTERN.test(notice.contactEmail)) {
+      await sendEmail(env, {
+        to: notice.contactEmail,
+        subject: `We received the ${label} for ${org}`,
+        html: emailLayout(
+          `Thank you, ${notice.contactName || 'there'}`,
+          `We received the ${label} for ${org}. Our team will review it and get back to you if anything else is needed. You can keep working on it from your organization dashboard.`,
+          notice.details,
+          contactEmail(env),
+        ),
+        text: `We received the ${label} for ${org}.`,
+      });
+    }
+
+    await sendEmail(env, {
+      to: contactEmail(env),
+      subject: `New ${label}: ${org}`,
+      html: emailLayout(
+        `New ${label}`,
+        `${org} submitted a ${label} through the portal.`,
+        [
+          ...notice.details,
+          { label: 'Contact', value: notice.contactName },
+          { label: 'Email', value: notice.contactEmail },
+        ],
+        contactEmail(env),
+      ),
+      replyTo: EMAIL_PATTERN.test(notice.contactEmail)
+        ? notice.contactEmail
+        : contactEmail(env),
+    });
+  } catch (error) {
+    console.error('Submission notification failed', error);
+  }
+}
+
+async function sendReviewEmail(request: Request, env: Env): Promise<Response> {
+  if (!env.RESEND_API_KEY) {
+    return json(
+      {
+        error:
+          'Automatic email sending is not configured. Review emails open in Gmail compose instead.',
+      },
+      501,
+    );
+  }
+
+  const body = await readJson<{ to?: unknown; subject?: unknown; body?: unknown }>(request);
+  const to = asString(body.to, 'to').trim();
+  const subject = asString(body.subject, 'subject').trim();
+  const text = asString(body.body, 'body').trim();
+
+  if (!EMAIL_PATTERN.test(to)) {
+    throw new HttpError(400, '"to" must be a valid email address.');
+  }
+  if (!subject) {
+    throw new HttpError(400, '"subject" is required.');
+  }
+  if (!text) {
+    throw new HttpError(400, '"body" is required.');
+  }
+
+  const delivered = await sendEmail(env, {
+    to,
+    subject,
+    text,
+    html: emailLayout(subject, text, []),
+  });
+
+  if (!delivered) {
+    return json(
+      {
+        error:
+          'The email provider rejected the message. Review emails open in Gmail compose instead.',
+      },
+      502,
+    );
+  }
+
+  return json({ delivered: true });
 }
 
 /* ------------------------------------------------------------------ *
@@ -979,6 +1233,26 @@ async function latestSubmission(
   });
 }
 
+/** Notice built from the shared pre-screening / stage 2 fields. */
+function applicantSubmissionNotice(
+  form: SubmissionForm,
+  data: JsonObject,
+  submittedAt: string,
+): SubmissionNotice {
+  return {
+    form,
+    organizationName: readText(data, 'applicantName'),
+    contactName: readText(data, 'primaryContactName'),
+    contactEmail: readText(data, 'primaryContactEmail'),
+    details: [
+      { label: 'Organization', value: readText(data, 'applicantName') },
+      { label: 'Acronym', value: readText(data, 'applicantAcronym') },
+      { label: 'Country', value: readText(data, 'headquartersCountry') },
+      { label: 'Submitted', value: submittedAt },
+    ],
+  };
+}
+
 async function createStage1(request: Request, env: Env): Promise<Response> {
   const body = await readJson<{ data?: unknown; id?: unknown }>(request);
   const data = asObject(body.data, 'data');
@@ -1005,6 +1279,8 @@ async function createStage1(request: Request, env: Env): Promise<Response> {
       .run();
 
     await deleteDraftRow(env, 'stage1', id);
+
+    await notifySubmission(env, applicantSubmissionNotice('pre-screening', data, now));
 
     return json({ applicant, organization }, 200);
   }
@@ -1035,6 +1311,8 @@ async function createStage1(request: Request, env: Env): Promise<Response> {
     .run();
 
   await deleteDraftRow(env, 'stage1', id);
+
+  await notifySubmission(env, applicantSubmissionNotice('pre-screening', data, now));
 
   return json({ applicant, organization }, 201);
 }
@@ -1074,6 +1352,8 @@ async function createStage2(request: Request, env: Env): Promise<Response> {
       )
       .run();
 
+    await notifySubmission(env, applicantSubmissionNotice('stage 2', data, now));
+
     return json({ applicant }, 200);
   }
 
@@ -1105,6 +1385,8 @@ async function createStage2(request: Request, env: Env): Promise<Response> {
       JSON.stringify(applicant.extensions),
     )
     .run();
+
+  await notifySubmission(env, applicantSubmissionNotice('stage 2', data, now));
 
   return json({ applicant }, 201);
 }
@@ -1507,13 +1789,7 @@ async function handleApi(request: Request, env: Env, path: string): Promise<Resp
 
   if (path === '/api/send-review-email') {
     if (method !== 'POST') return methodNotAllowed('POST');
-    return json(
-      {
-        error:
-          'Automatic email sending is not configured. Review emails open in Gmail compose instead.',
-      },
-      501,
-    );
+    return sendReviewEmail(request, env);
   }
 
   if (path.startsWith('/api/files/')) {

@@ -46,6 +46,24 @@ npx wrangler secret put ADMIN_ACCOUNTS
 Optional single-account alternative: set `ADMIN_USERNAME` (already in
 `wrangler.jsonc → vars`) plus `npx wrangler secret put ADMIN_PASSWORD`.
 
+Transactional email uses [Resend](https://resend.com):
+
+```powershell
+# Without this secret the API answers 501 on /api/send-review-email and the
+# UI falls back to Gmail compose. Submission receipts are simply skipped.
+npx wrangler secret put RESEND_API_KEY
+```
+
+The sender and inbox are plain vars in `wrangler.jsonc → vars`:
+
+| Var             | Default                          | Used for                                     |
+| --------------- | -------------------------------- | -------------------------------------------- |
+| `NOREPLY_EMAIL` | `noreply@averacapitalaccess.com` | `from` on every automatic email              |
+| `CONTACT_EMAIL` | `contact@averacapitalaccess.com` | internal copy + `reply_to` on automatic mail |
+
+`averacapitalaccess.com` (or whichever domain you verify in Resend) needs the
+DKIM/SPF records Resend prints; sending from it otherwise fails.
+
 Secrets are per-environment: repeat the commands with `--env production`
 only if you add environments later.
 
@@ -56,6 +74,8 @@ only if you add environments later.
 ```ini
 API_TOKEN=local-dev-token
 ADMIN_ACCOUNTS={"hatyja":"asier"}
+# optional: enables real emails in local dev
+# RESEND_API_KEY=re_xxxxxxxx
 ```
 
 ```powershell
@@ -113,7 +133,9 @@ Public (no token):
 - `POST /api/upload` — multipart `file`, `scope`, `entityId`, `section` (max 15 MB)
 - `DELETE /api/upload` — `{ publicId }`
 - `GET /api/files/<key>` — streams an R2 object
-- `POST /api/send-review-email` — returns 501 so the UI falls back to Gmail
+- `POST /api/send-review-email` — `{ to, subject, body }`; sends from
+  `NOREPLY_EMAIL` with `reply_to: CONTACT_EMAIL`. Returns 501 when
+  `RESEND_API_KEY` is missing so the UI falls back to Gmail compose.
 
 Admin (`Authorization: Bearer <API_TOKEN>`):
 
@@ -149,8 +171,21 @@ ids), so the bucket mirrors the wizard. Files uploaded before this layout lived
 under `gcf-applicants/`; they stay readable and deletable.
 
 The wizard generates the organization id in the browser so uploads can happen
-before the record exists. The same id is sent with the submission, and the
-Worker rejects a duplicate stage 1 submission (HTTP 409).
+before the record exists. The same id is sent with the submission, so a
+resubmission updates the existing row instead of creating a duplicate.
+
+## Automatic emails
+
+Every accepted submission (pre-screening, stage 2, readiness) triggers two
+Resend messages, both best-effort — a provider failure never fails the request:
+
+1. **Requester receipt** → the contact email in the form, from
+   `NOREPLY_EMAIL`, `reply_to: CONTACT_EMAIL`.
+2. **Internal notice** → `CONTACT_EMAIL`, listing the organization, acronym,
+   country, submitted timestamp and the form-specific details.
+
+Review-notes emails from the admin dashboard use the same transport, but if
+`RESEND_API_KEY` is not configured the UI opens Gmail compose instead.
 
 ## Organizations, drafts and readiness
 

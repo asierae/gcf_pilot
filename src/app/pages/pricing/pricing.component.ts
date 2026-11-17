@@ -132,7 +132,7 @@ export class PricingComponent implements OnInit, OnDestroy {
       currency: null,
       featured: false,
       ctaLabel: 'Schedule Consultation',
-      ctaLink: 'mailto:support@avera.capital',
+      ctaLink: 'mailto:contact@averacapitalaccess.com',
       ctaExternal: true,
       accentClass: 'plan-enterprise',
       features: [
@@ -167,6 +167,6 @@ export class PricingComponent implements OnInit, OnDestroy {
   readonly maxTierRate = Math.max(...this.fundTiers.map((tier) => tier.rate));
 
   get quoteMailto(): string {
-    return 'mailto:support@avera.capital?subject=Commission%20quote%20for%20a%20GCF%20project';
+    return 'mailto:contact@averacapitalaccess.com?subject=Commission%20quote%20for%20a%20GCF%20project';
   }
 }

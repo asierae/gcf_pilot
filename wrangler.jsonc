@@ -42,7 +42,12 @@
     // Comma-separated origins allowed to call /api/* from another domain.
     // Set this to your Vercel URL (plus REMOTE_API_BASE_URL in api.config.ts)
     // to keep the Vercel deployment working. Empty = same-origin only.
-    "CORS_ORIGINS": ""
+    "CORS_ORIGINS": "",
+    // Public inbox shown on the site and used as reply-to on automatic emails.
+    "CONTACT_EMAIL": "contact@averacapitalaccess.com",
+    // Sender of automatic emails. Replies are routed to CONTACT_EMAIL.
+    "NOREPLY_EMAIL": "noreply@averacapitalaccess.com"
+    // Resend key is a secret: npx wrangler secret put RESEND_API_KEY
   },
   "observability": {
     "enabled": true
