@@ -27,19 +27,44 @@
       </span>
     </a>
 
-    <nav class="avera-nav-links" aria-label="Primary">
-      <a href="#methodology" (click)="closeMenu()">Methodology</a>
-      <a href="#edge" (click)="closeMenu()">The Avera Edge</a>
-      <a href="#reach" (click)="closeMenu()">Global Reach</a>
-      <a href="#portal" (click)="closeMenu()">Client Portal</a>
-      <a href="#readiness" (click)="closeMenu()">Readiness Intake</a>
-      <a href="#contact" (click)="closeMenu()">Contact</a>
+    <nav class="avera-nav-links" [attr.aria-label]="'LANDING.NAV.METHODOLOGY' | translate">
+      <a href="#methodology" (click)="closeMenu()">{{ 'LANDING.NAV.METHODOLOGY' | translate }}</a>
+      <a href="#edge" (click)="closeMenu()">{{ 'LANDING.NAV.EDGE' | translate }}</a>
+      <a href="#reach" (click)="closeMenu()">{{ 'LANDING.NAV.REACH' | translate }}</a>
+      <a href="#portal" (click)="closeMenu()">{{ 'LANDING.NAV.PORTAL' | translate }}</a>
+      <a href="#readiness" (click)="closeMenu()">{{ 'LANDING.NAV.READINESS' | translate }}</a>
+      <a href="#contact" (click)="closeMenu()">{{ 'LANDING.NAV.CONTACT' | translate }}</a>
     </nav>
 
     <div class="avera-nav-actions">
-      <a routerLink="/login" class="avera-nav-login">Sign in</a>
+      <div class="avera-lang">
+        <span class="avera-lang-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <circle cx="12" cy="12" r="8.5" />
+            <path
+              d="M3.5 12h17M12 3.5c2.3 2.3 3.5 5.2 3.5 8.5S14.3 18.2 12 20.5c-2.3-2.3-3.5-5.2-3.5-8.5S9.7 5.8 12 3.5Z"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+        </span>
+        <select
+          class="avera-lang-select"
+          [attr.aria-label]="'LANDING.NAV.LANGUAGE' | translate"
+          [value]="languageService.currentLanguage"
+          (change)="changeLanguage($event)"
+        >
+          @for (language of languageService.languages; track language.code) {
+            <option [value]="language.code" [selected]="language.code === languageService.currentLanguage">
+              {{ language.label }}
+            </option>
+          }
+        </select>
+      </div>
+
+      <a routerLink="/login" class="avera-nav-login">{{ 'LANDING.NAV.SIGN_IN' | translate }}</a>
       <a routerLink="/stage1" class="avera-btn avera-btn-nav">
-        Get an Initial Assessment <span aria-hidden="true">→</span>
+        {{ 'LANDING.NAV.CTA' | translate }} <span aria-hidden="true">→</span>
       </a>
     </div>
 
@@ -47,7 +72,7 @@
       type="button"
       class="avera-burger"
       [attr.aria-expanded]="menuOpen"
-      aria-label="Toggle navigation"
+      [attr.aria-label]="'LANDING.NAV.MENU' | translate"
       (click)="toggleMenu()"
     >
       <span></span><span></span><span></span>
@@ -64,45 +89,44 @@
           <div class="avera-hero-copy">
             <p class="avera-eyebrow">
               <span class="avera-pulse" aria-hidden="true"></span>
-              Green Climate Fund Advisory &middot; Global
+              {{ 'LANDING.HERO.EYEBROW' | translate }}
             </p>
 
             <h1>
               <span class="avera-hero-brand">AVERA CAPITAL ACCESS</span>
-              <span class="avera-hero-title">
-                Bridging global capital to
-                <em>high&#8209;impact</em> climate projects.
-              </span>
+              <span
+                class="avera-hero-title"
+                [innerHTML]="'LANDING.HERO.TITLE' | translate"
+              ></span>
             </h1>
 
             <p class="avera-hero-sub">
-              Expert guidance for public and private organizations to secure
-              Green Climate Fund (GCF) accreditation and funding.
+              {{ 'LANDING.HERO.SUB' | translate }}
             </p>
 
             <div class="avera-hero-actions">
               <a routerLink="/stage1" class="avera-btn avera-btn-primary">
-                Get an Initial Assessment <span aria-hidden="true">→</span>
+                {{ 'LANDING.HERO.CTA_PRIMARY' | translate }} <span aria-hidden="true">→</span>
               </a>
               <a href="#methodology" class="avera-btn avera-btn-ghost">
-                Explore our methodology
+                {{ 'LANDING.HERO.CTA_SECONDARY' | translate }}
               </a>
             </div>
 
             <ul class="avera-hero-meta">
               <li>
                 <strong data-count="4" data-decimals="0">4</strong>
-                <span>continents</span>
+                <span>{{ 'LANDING.HERO.STAT_CONTINENTS' | translate }}</span>
               </li>
               <li>
                 <strong data-count="38" data-decimals="0">38</strong>
-                <span>institutions advised</span>
+                <span>{{ 'LANDING.HERO.STAT_INSTITUTIONS' | translate }}</span>
               </li>
               <li>
                 <strong data-count="2.4" data-decimals="1" data-prefix="€" data-suffix="B"
                   >€2.4B</strong
                 >
-                <span>capital bridged</span>
+                <span>{{ 'LANDING.HERO.STAT_CAPITAL' | translate }}</span>
               </li>
             </ul>
           </div>
@@ -110,7 +134,7 @@
 
         <div class="avera-hero-cards" aria-hidden="true">
           <article class="avera-data-card avera-card-a">
-            <p class="dc-label">Capital bridged</p>
+            <p class="dc-label">{{ 'LANDING.HERO.CARD_CAPITAL_LABEL' | translate }}</p>
             <p class="dc-value">€2.4B</p>
             <svg class="dc-spark" viewBox="0 0 120 34" fill="none">
               <path
@@ -126,11 +150,11 @@
                 </linearGradient>
               </defs>
             </svg>
-            <p class="dc-foot">Illustrative &middot; 2021&ndash;2026</p>
+            <p class="dc-foot">{{ 'LANDING.HERO.CARD_CAPITAL_FOOT' | translate }}</p>
           </article>
 
           <article class="avera-data-card avera-card-b">
-            <p class="dc-label">Project scale</p>
+            <p class="dc-label">{{ 'LANDING.HERO.CARD_SCALE_LABEL' | translate }}</p>
             <p class="dc-value">1,280 <span>MW</span></p>
             <div class="dc-bars">
               <span style="height: 34%"></span>
@@ -139,21 +163,22 @@
               <span style="height: 72%"></span>
               <span style="height: 88%"></span>
             </div>
-            <p class="dc-foot">Illustrative renewable capacity</p>
+            <p class="dc-foot">{{ 'LANDING.HERO.CARD_SCALE_FOOT' | translate }}</p>
           </article>
 
           <article class="avera-data-card avera-card-c">
-            <p class="dc-label">GCF alignment</p>
+            <p class="dc-label">{{ 'LANDING.HERO.CARD_ALIGNMENT_LABEL' | translate }}</p>
             <p class="dc-value">94<span>%</span></p>
             <p class="dc-ring-label">
-              <span class="avera-mini-dot"></span> Readiness benchmark
+              <span class="avera-mini-dot"></span>
+              {{ 'LANDING.HERO.CARD_ALIGNMENT_BENCHMARK' | translate }}
             </p>
-            <p class="dc-foot">Illustrative assessment</p>
+            <p class="dc-foot">{{ 'LANDING.HERO.CARD_ALIGNMENT_FOOT' | translate }}</p>
           </article>
         </div>
 
         <div class="avera-scroll-cue">
-          <span>Scroll to follow the capital</span>
+          <span>{{ 'LANDING.HERO.SCROLL' | translate }}</span>
           <span class="avera-scroll-line" aria-hidden="true"></span>
         </div>
       </div>
@@ -163,12 +188,10 @@
     <section class="avera-section avera-method" id="methodology">
       <div class="avera-container">
         <div class="avera-section-head">
-          <p class="avera-kicker" data-reveal>02 &mdash; Methodology</p>
-          <h2 data-reveal>Our results-driven methodology.</h2>
+          <p class="avera-kicker" data-reveal>{{ 'LANDING.METHOD.KICKER' | translate }}</p>
+          <h2 data-reveal>{{ 'LANDING.METHOD.TITLE' | translate }}</h2>
           <p class="avera-lede" data-reveal>
-            Four disciplined workstreams that move institutions from structural
-            gaps to GCF-approved funding &mdash; with a clear deliverable at
-            every stage.
+            {{ 'LANDING.METHOD.LEDE' | translate }}
           </p>
         </div>
 
@@ -183,14 +206,13 @@
                 </svg>
               </span>
             </div>
-            <h3>Initial Assessment</h3>
+            <h3>{{ 'LANDING.METHOD.CARD1_TITLE' | translate }}</h3>
             <p>
-              A forensic gap analysis across fiduciary standards, environmental
-              and social safeguards, gender policy and monitoring capacity.
+              {{ 'LANDING.METHOD.CARD1_BODY' | translate }}
             </p>
             <div class="mc-deliverable">
-              <span>Deliverable</span>
-              <strong>Readiness Scorecard</strong>
+              <span>{{ 'LANDING.METHOD.DELIVERABLE' | translate }}</span>
+              <strong>{{ 'LANDING.METHOD.CARD1_DELIVERABLE' | translate }}</strong>
             </div>
           </article>
 
@@ -204,14 +226,13 @@
                 </svg>
               </span>
             </div>
-            <h3>Strategy &amp; Advisory</h3>
+            <h3>{{ 'LANDING.METHOD.CARD2_TITLE' | translate }}</h3>
             <p>
-              Precise GCF alignment: entity positioning, accreditation pathway
-              design and a board-ready sequencing plan.
+              {{ 'LANDING.METHOD.CARD2_BODY' | translate }}
             </p>
             <div class="mc-deliverable">
-              <span>Deliverable</span>
-              <strong>Accreditation Roadmap</strong>
+              <span>{{ 'LANDING.METHOD.DELIVERABLE' | translate }}</span>
+              <strong>{{ 'LANDING.METHOD.CARD2_DELIVERABLE' | translate }}</strong>
             </div>
           </article>
 
@@ -225,14 +246,13 @@
                 </svg>
               </span>
             </div>
-            <h3>Full-Cycle Consulting</h3>
+            <h3>{{ 'LANDING.METHOD.CARD3_TITLE' | translate }}</h3>
             <p>
-              Proposal engineering, project design, co-financing structure and
-              submission management through technical review.
+              {{ 'LANDING.METHOD.CARD3_BODY' | translate }}
             </p>
             <div class="mc-deliverable">
-              <span>Deliverable</span>
-              <strong>Fund-Ready Dossier</strong>
+              <span>{{ 'LANDING.METHOD.DELIVERABLE' | translate }}</span>
+              <strong>{{ 'LANDING.METHOD.CARD3_DELIVERABLE' | translate }}</strong>
             </div>
           </article>
 
@@ -246,14 +266,13 @@
                 </svg>
               </span>
             </div>
-            <h3>Institutional Retainer</h3>
+            <h3>{{ 'LANDING.METHOD.CARD4_TITLE' | translate }}</h3>
             <p>
-              A dedicated long-term advisory desk for portfolio monitoring,
-              compliance and successive funding cycles.
+              {{ 'LANDING.METHOD.CARD4_BODY' | translate }}
             </p>
             <div class="mc-deliverable">
-              <span>Deliverable</span>
-              <strong>Advisory Desk</strong>
+              <span>{{ 'LANDING.METHOD.DELIVERABLE' | translate }}</span>
+              <strong>{{ 'LANDING.METHOD.CARD4_DELIVERABLE' | translate }}</strong>
             </div>
           </article>
         </div>
@@ -265,65 +284,61 @@
       <div class="avera-container">
         <div class="avera-section-head avera-head-split">
           <div>
-            <p class="avera-kicker" data-reveal>03 &mdash; The Avera Edge</p>
-            <h2 data-reveal>Structural precision, end to end.</h2>
+            <p class="avera-kicker" data-reveal>{{ 'LANDING.EDGE.KICKER' | translate }}</p>
+            <h2 data-reveal>{{ 'LANDING.EDGE.TITLE' | translate }}</h2>
           </div>
           <p class="avera-lede" data-reveal>
-            We do not simply advise. We engineer the institutional and financial
-            architecture that makes climate projects fundable.
+            {{ 'LANDING.EDGE.LEDE' | translate }}
           </p>
         </div>
 
         <div class="avera-steps">
           <article class="avera-step" data-reveal>
             <span class="step-num">01</span>
-            <h3>Structural Readiness</h3>
+            <h3>{{ 'LANDING.EDGE.STEP1_TITLE' | translate }}</h3>
             <p>
-              We benchmark your institution against GCF fiduciary and
-              environmental standards, closing gaps before formal review.
+              {{ 'LANDING.EDGE.STEP1_BODY' | translate }}
             </p>
-            <span class="step-tag">Gap closure &middot; Governance</span>
+            <span class="step-tag">{{ 'LANDING.EDGE.STEP1_TAG' | translate }}</span>
           </article>
 
           <article class="avera-step" data-reveal>
             <span class="step-num">02</span>
-            <h3>GCF Accreditation</h3>
+            <h3>{{ 'LANDING.EDGE.STEP2_TITLE' | translate }}</h3>
             <p>
-              We engineer the accreditation package and shepherd it through the
-              Fund's technical and independent review.
+              {{ 'LANDING.EDGE.STEP2_BODY' | translate }}
             </p>
-            <span class="step-tag">Documentation &middot; Review</span>
+            <span class="step-tag">{{ 'LANDING.EDGE.STEP2_TAG' | translate }}</span>
           </article>
 
           <article class="avera-step" data-reveal>
             <span class="step-num">03</span>
-            <h3>Fund Approval</h3>
+            <h3>{{ 'LANDING.EDGE.STEP3_TITLE' | translate }}</h3>
             <p>
-              We structure bankable projects, align co-financing and prepare the
-              dossier for Board approval.
+              {{ 'LANDING.EDGE.STEP3_BODY' | translate }}
             </p>
-            <span class="step-tag">Structuring &middot; Board</span>
+            <span class="step-tag">{{ 'LANDING.EDGE.STEP3_TAG' | translate }}</span>
           </article>
         </div>
 
         <div class="avera-stat-strip" data-reveal>
           <div>
             <strong data-count="2.4" data-decimals="1" data-prefix="€" data-suffix="B">€2.4B</strong>
-            <span>Capital bridged</span>
+            <span>{{ 'LANDING.EDGE.STAT_CAPITAL' | translate }}</span>
           </div>
           <div>
             <strong data-count="38" data-decimals="0" data-suffix="+">38+</strong>
-            <span>Institutions advised</span>
+            <span>{{ 'LANDING.EDGE.STAT_INSTITUTIONS' | translate }}</span>
           </div>
           <div>
             <strong data-count="9" data-decimals="0">9</strong>
-            <span>Months average pathway</span>
+            <span>{{ 'LANDING.EDGE.STAT_MONTHS' | translate }}</span>
           </div>
           <div>
             <strong data-count="4" data-decimals="0">4</strong>
-            <span>Continents</span>
+            <span>{{ 'LANDING.EDGE.STAT_CONTINENTS' | translate }}</span>
           </div>
-          <p class="avera-stat-note">Illustrative portfolio figures.</p>
+          <p class="avera-stat-note">{{ 'LANDING.EDGE.NOTE' | translate }}</p>
         </div>
       </div>
     </section>
@@ -332,23 +347,23 @@
     <section class="avera-section avera-reach" id="reach">
       <div class="avera-container avera-reach-grid">
         <div class="avera-reach-copy">
-          <p class="avera-kicker" data-reveal>04 &mdash; Global Reach</p>
-          <h2 data-reveal>Trusted by leaders,<br />driven by impact.</h2>
+          <p class="avera-kicker" data-reveal>{{ 'LANDING.REACH.KICKER' | translate }}</p>
+          <h2 data-reveal>
+            {{ 'LANDING.REACH.TITLE_1' | translate }}<br />{{ 'LANDING.REACH.TITLE_2' | translate }}
+          </h2>
           <p class="avera-lede" data-reveal>
-            From ministries of finance to regional development banks, Avera
-            works where policy, capital and climate outcomes intersect.
+            {{ 'LANDING.REACH.LEDE' | translate }}
           </p>
 
           <ul class="avera-regions" data-reveal>
-            <li><span></span>Europe &amp; Switzerland &middot; Advisory hub</li>
-            <li><span></span>Africa &middot; Clean energy &amp; resilience</li>
-            <li><span></span>Asia-Pacific &middot; Adaptation finance</li>
-            <li><span></span>Latin America &middot; Nature-based capital</li>
+            <li><span></span>{{ 'LANDING.REACH.REGION1' | translate }}</li>
+            <li><span></span>{{ 'LANDING.REACH.REGION2' | translate }}</li>
+            <li><span></span>{{ 'LANDING.REACH.REGION3' | translate }}</li>
+            <li><span></span>{{ 'LANDING.REACH.REGION4' | translate }}</li>
           </ul>
 
           <p class="avera-reach-note" data-reveal>
-            Representative engagements. Client names withheld under advisory
-            confidentiality.
+            {{ 'LANDING.REACH.NOTE' | translate }}
           </p>
         </div>
 
@@ -361,22 +376,22 @@
             <div class="reach-globe-texture"></div>
             <div class="reach-globe-shade"></div>
             <div class="reach-marker" style="left: 27%; top: 39%">
-              <span>New York</span>
+              <span>{{ 'LANDING.REACH.CITY_NEW_YORK' | translate }}</span>
             </div>
             <div class="reach-marker" style="left: 47%; top: 29%">
-              <span>London</span>
+              <span>{{ 'LANDING.REACH.CITY_LONDON' | translate }}</span>
             </div>
             <div class="reach-marker reach-marker-hub" style="left: 52%; top: 38%">
-              <span>Geneva</span>
+              <span>{{ 'LANDING.REACH.CITY_GENEVA' | translate }}</span>
             </div>
             <div class="reach-marker" style="left: 61%; top: 47%">
-              <span>Abu Dhabi</span>
+              <span>{{ 'LANDING.REACH.CITY_ABU_DHABI' | translate }}</span>
             </div>
             <div class="reach-marker" style="left: 73%; top: 58%">
-              <span>Singapore</span>
+              <span>{{ 'LANDING.REACH.CITY_SINGAPORE' | translate }}</span>
             </div>
             <div class="reach-marker reach-marker-project" style="left: 56%; top: 64%">
-              <span>Nairobi</span>
+              <span>{{ 'LANDING.REACH.CITY_NAIROBI' | translate }}</span>
             </div>
           </div>
 
@@ -393,40 +408,35 @@
       <div class="avera-container">
         <div class="avera-quotes">
           <figure class="avera-quote" data-reveal>
-            <div class="quote-logo">WAF &middot; MINISTRY OF FINANCE</div>
+            <div class="quote-logo">{{ 'LANDING.REACH.QUOTE1_LOGO' | translate }}</div>
             <blockquote>
-              Avera turned a two-year accreditation maze into a structured
-              nine-month pathway. Their gap analysis was the turning point for
-              our institution.
+              {{ 'LANDING.REACH.QUOTE1_TEXT' | translate }}
             </blockquote>
             <figcaption>
-              <strong>Minister of Climate Finance</strong>
-              <span>West African Republic &middot; Representative engagement</span>
+              <strong>{{ 'LANDING.REACH.QUOTE1_ROLE' | translate }}</strong>
+              <span>{{ 'LANDING.REACH.QUOTE1_ORG' | translate }}</span>
             </figcaption>
           </figure>
 
           <figure class="avera-quote" data-reveal>
-            <div class="quote-logo">RDB &middot; REGIONAL DEVELOPMENT BANK</div>
+            <div class="quote-logo">{{ 'LANDING.REACH.QUOTE2_LOGO' | translate }}</div>
             <blockquote>
-              Their structural review gave our board the confidence to pursue
-              GCF accreditation at scale &mdash; with a clear view of every
-              compliance requirement.
+              {{ 'LANDING.REACH.QUOTE2_TEXT' | translate }}
             </blockquote>
             <figcaption>
-              <strong>Chief Executive Officer</strong>
-              <span>Regional Development Bank &middot; Representative engagement</span>
+              <strong>{{ 'LANDING.REACH.QUOTE2_ROLE' | translate }}</strong>
+              <span>{{ 'LANDING.REACH.QUOTE2_ORG' | translate }}</span>
             </figcaption>
           </figure>
 
           <figure class="avera-quote" data-reveal>
-            <div class="quote-logo">SCF &middot; SOVEREIGN CLIMATE FUND</div>
+            <div class="quote-logo">{{ 'LANDING.REACH.QUOTE3_LOGO' | translate }}</div>
             <blockquote>
-              The most precise climate finance advisory team we have worked
-              with. Rigorous, discreet and genuinely focused on impact.
+              {{ 'LANDING.REACH.QUOTE3_TEXT' | translate }}
             </blockquote>
             <figcaption>
-              <strong>Director of Investments</strong>
-              <span>Sovereign Climate Fund &middot; Representative engagement</span>
+              <strong>{{ 'LANDING.REACH.QUOTE3_ROLE' | translate }}</strong>
+              <span>{{ 'LANDING.REACH.QUOTE3_ORG' | translate }}</span>
             </figcaption>
           </figure>
         </div>
@@ -437,22 +447,21 @@
     <section class="avera-section avera-portal" id="portal">
       <div class="avera-container avera-portal-grid">
         <div class="avera-portal-copy">
-          <p class="avera-kicker" data-reveal>05 &mdash; Client Portal</p>
-          <h2 data-reveal>Access your PATH to funding.</h2>
+          <p class="avera-kicker" data-reveal>{{ 'LANDING.PORTAL.KICKER' | translate }}</p>
+          <h2 data-reveal>{{ 'LANDING.PORTAL.TITLE' | translate }}</h2>
           <p class="avera-lede" data-reveal>
-            One secure workspace for documents, accreditation milestones and
-            direct advisory. Every requirement, every deadline, in view.
+            {{ 'LANDING.PORTAL.LEDE' | translate }}
           </p>
 
           <ul class="avera-check-list" data-reveal>
-            <li>Secure document vault with audit trail</li>
-            <li>Live accreditation status and milestone tracking</li>
-            <li>Direct channel to your dedicated advisory desk</li>
-            <li>Board-ready reporting and portfolio analytics</li>
+            <li>{{ 'LANDING.PORTAL.ITEM1' | translate }}</li>
+            <li>{{ 'LANDING.PORTAL.ITEM2' | translate }}</li>
+            <li>{{ 'LANDING.PORTAL.ITEM3' | translate }}</li>
+            <li>{{ 'LANDING.PORTAL.ITEM4' | translate }}</li>
           </ul>
 
           <a routerLink="/login" class="avera-btn avera-btn-primary" data-reveal>
-            Consult our experts <span aria-hidden="true">→</span>
+            {{ 'LANDING.PORTAL.CTA' | translate }} <span aria-hidden="true">→</span>
           </a>
         </div>
 
@@ -468,48 +477,59 @@
                 <span class="pm-mark-shape"></span>
                 <span>AVERA</span>
               </div>
-              <h3>Client sign in</h3>
-              <p>Secure access to your accreditation workspace.</p>
+              <h3>{{ 'LANDING.PORTAL.MOCK_LOGIN_TITLE' | translate }}</h3>
+              <p>{{ 'LANDING.PORTAL.MOCK_LOGIN_SUB' | translate }}</p>
 
-              <label>Email address</label>
+              <label>{{ 'LANDING.PORTAL.MOCK_EMAIL_LABEL' | translate }}</label>
               <div class="pm-field">name&#64;institution.org</div>
-              <label>Password</label>
+              <label>{{ 'LANDING.PORTAL.MOCK_PASSWORD_LABEL' | translate }}</label>
               <div class="pm-field pm-field-dots">••••••••••</div>
 
-              <div class="pm-submit">Sign in securely <span>→</span></div>
+              <div class="pm-submit">
+                {{ 'LANDING.PORTAL.MOCK_SUBMIT' | translate }} <span>→</span>
+              </div>
               <p class="pm-secure">
-                <span class="pm-lock"></span> 256-bit encrypted session
+                <span class="pm-lock"></span> {{ 'LANDING.PORTAL.MOCK_SECURE' | translate }}
               </p>
             </div>
 
             <div class="pm-dashboard">
               <div class="pm-dash-head">
                 <div>
-                  <p>Project status</p>
-                  <strong>East Africa Clean Energy Corridor</strong>
+                  <p>{{ 'LANDING.PORTAL.MOCK_STATUS' | translate }}</p>
+                  <strong>{{ 'LANDING.PORTAL.MOCK_PROJECT' | translate }}</strong>
                 </div>
-                <span class="pm-badge">In review</span>
+                <span class="pm-badge">{{ 'LANDING.PORTAL.MOCK_BADGE' | translate }}</span>
               </div>
 
               <div class="pm-progress">
                 <span style="width: 68%"></span>
               </div>
               <div class="pm-progress-meta">
-                <span>GCF accreditation &middot; technical review</span>
+                <span>{{ 'LANDING.PORTAL.MOCK_PROGRESS' | translate }}</span>
                 <strong>68%</strong>
               </div>
 
               <ul class="pm-steps">
-                <li class="is-done">Eligibility screening</li>
-                <li class="is-done">Gap analysis</li>
-                <li class="is-active">Accreditation package</li>
-                <li>Board review</li>
+                <li class="is-done">{{ 'LANDING.PORTAL.MOCK_STEP1' | translate }}</li>
+                <li class="is-done">{{ 'LANDING.PORTAL.MOCK_STEP2' | translate }}</li>
+                <li class="is-active">{{ 'LANDING.PORTAL.MOCK_STEP3' | translate }}</li>
+                <li>{{ 'LANDING.PORTAL.MOCK_STEP4' | translate }}</li>
               </ul>
 
               <div class="pm-metrics">
-                <div><span>Capital aligned</span><strong>€186M</strong></div>
-                <div><span>Capacity</span><strong>1,280 MW</strong></div>
-                <div><span>Milestones</span><strong>7 / 10</strong></div>
+                <div>
+                  <span>{{ 'LANDING.PORTAL.MOCK_METRIC_CAPITAL_LABEL' | translate }}</span>
+                  <strong>€186M</strong>
+                </div>
+                <div>
+                  <span>{{ 'LANDING.PORTAL.MOCK_METRIC_CAPACITY_LABEL' | translate }}</span>
+                  <strong>1,280 MW</strong>
+                </div>
+                <div>
+                  <span>{{ 'LANDING.PORTAL.MOCK_METRIC_MILESTONES_LABEL' | translate }}</span>
+                  <strong>7 / 10</strong>
+                </div>
               </div>
 
               <div class="pm-chart">
@@ -522,7 +542,7 @@
                 <span style="height: 76%"></span>
                 <span style="height: 96%"></span>
               </div>
-              <p class="pm-chart-label">Illustrative readiness progression</p>
+              <p class="pm-chart-label">{{ 'LANDING.PORTAL.MOCK_CHART_LABEL' | translate }}</p>
             </div>
           </div>
         </div>
@@ -533,32 +553,30 @@
     <section class="avera-section avera-readiness" id="readiness">
       <div class="avera-container avera-readiness-inner">
         <div class="avera-readiness-head">
-          <p class="avera-kicker" data-reveal>06 &mdash; GCF Readiness Intake</p>
-          <h2 data-reveal>Structure a Readiness proposal GCF can actually review.</h2>
+          <p class="avera-kicker" data-reveal>{{ 'LANDING.READINESS.KICKER' | translate }}</p>
+          <h2 data-reveal>{{ 'LANDING.READINESS.TITLE' | translate }}</h2>
           <p class="avera-lede" data-reveal>
-            A guided seven-step intake for unaccredited organizations pursuing GCF Readiness
-            2024&ndash;2027. Build the logframe, trace every cost to an activity, run the FMCA
-            fiduciary check and export a clean JSON package.
+            {{ 'LANDING.READINESS.LEDE' | translate }}
           </p>
         </div>
 
         <div class="avera-readiness-grid">
           <div class="avera-readiness-copy" data-reveal>
             <ul class="avera-check-list avera-readiness-list">
-              <li>Eligibility, NDA focal point and Readiness objective alignment</li>
-              <li>Accreditation gap matrix across fiduciary, ESS and gender pillars</li>
-              <li>Outcome &rarr; output &rarr; activity logframe with a Q1&ndash;Q8 Gantt</li>
-              <li>Activity-linked budget with live PMC, audit and variance guardrails</li>
-              <li>Conditional FMCA due diligence with a live fiduciary risk rating</li>
-              <li>Statutory PDF vault, final checklist and GCF-ready JSON export</li>
+              <li>{{ 'LANDING.READINESS.ITEM1' | translate }}</li>
+              <li>{{ 'LANDING.READINESS.ITEM2' | translate }}</li>
+              <li>{{ 'LANDING.READINESS.ITEM3' | translate }}</li>
+              <li>{{ 'LANDING.READINESS.ITEM4' | translate }}</li>
+              <li>{{ 'LANDING.READINESS.ITEM5' | translate }}</li>
+              <li>{{ 'LANDING.READINESS.ITEM6' | translate }}</li>
             </ul>
 
             <div class="avera-readiness-actions">
               <a routerLink="/readiness" class="avera-btn avera-btn-primary">
-                Start the Readiness wizard <span aria-hidden="true">&rarr;</span>
+                {{ 'LANDING.READINESS.CTA' | translate }} <span aria-hidden="true">→</span>
               </a>
               <span class="avera-readiness-note">
-                7 steps &middot; autosaves in your browser &middot; no account required
+                {{ 'LANDING.READINESS.NOTE' | translate }}
               </span>
             </div>
           </div>
@@ -566,25 +584,46 @@
           <div class="avera-readiness-card" data-reveal aria-hidden="true">
             <div class="rd-card-head">
               <span class="rd-mark">AVERA</span>
-              <span class="rd-badge">Draft &middot; autosaved</span>
+              <span class="rd-badge">{{ 'LANDING.READINESS.DRAFT' | translate }}</span>
             </div>
 
             <div class="rd-progress"><span></span></div>
 
             <ol class="rd-steps">
-              <li><em>01</em><span>Eligibility &amp; Readiness setup</span><i class="is-done">Done</i></li>
-              <li><em>02</em><span>Institutional gap matrix</span><i class="is-done">Done</i></li>
-              <li><em>03</em><span>Strategic narrative</span><i class="is-done">Done</i></li>
-              <li class="is-active"><em>04</em><span>Logframe &amp; workplan</span><i>Active</i></li>
-              <li><em>05</em><span>Activity-based budget</span><i>Next</i></li>
-              <li><em>06</em><span>FMCA due diligence</span><i class="is-conditional">Conditional</i></li>
-              <li><em>07</em><span>PDF vault &amp; JSON export</span><i>Next</i></li>
+              <li>
+                <em>01</em><span>{{ 'LANDING.READINESS.STEP1' | translate }}</span>
+                <i class="is-done">{{ 'LANDING.READINESS.DONE' | translate }}</i>
+              </li>
+              <li>
+                <em>02</em><span>{{ 'LANDING.READINESS.STEP2' | translate }}</span>
+                <i class="is-done">{{ 'LANDING.READINESS.DONE' | translate }}</i>
+              </li>
+              <li>
+                <em>03</em><span>{{ 'LANDING.READINESS.STEP3' | translate }}</span>
+                <i class="is-done">{{ 'LANDING.READINESS.DONE' | translate }}</i>
+              </li>
+              <li class="is-active">
+                <em>04</em><span>{{ 'LANDING.READINESS.STEP4' | translate }}</span>
+                <i>{{ 'LANDING.READINESS.ACTIVE' | translate }}</i>
+              </li>
+              <li>
+                <em>05</em><span>{{ 'LANDING.READINESS.STEP5' | translate }}</span>
+                <i>{{ 'LANDING.READINESS.NEXT' | translate }}</i>
+              </li>
+              <li>
+                <em>06</em><span>{{ 'LANDING.READINESS.STEP6' | translate }}</span>
+                <i class="is-conditional">{{ 'LANDING.READINESS.CONDITIONAL' | translate }}</i>
+              </li>
+              <li>
+                <em>07</em><span>{{ 'LANDING.READINESS.STEP7' | translate }}</span>
+                <i>{{ 'LANDING.READINESS.NEXT' | translate }}</i>
+              </li>
             </ol>
 
             <div class="rd-foot">
-              <span>PMC cap 7.5%</span>
-              <span>Risk engine live</span>
-              <span>JSON 1.0</span>
+              <span>{{ 'LANDING.READINESS.FOOT1' | translate }}</span>
+              <span>{{ 'LANDING.READINESS.FOOT2' | translate }}</span>
+              <span>{{ 'LANDING.READINESS.FOOT3' | translate }}</span>
             </div>
           </div>
         </div>
@@ -595,30 +634,24 @@
     <section class="avera-section avera-contact" id="contact">
       <div class="avera-container avera-contact-inner">
         <div class="avera-contact-copy">
-          <p class="avera-kicker" data-reveal>07 &mdash; Pathway guidance</p>
-          <h2 data-reveal>Readiness or accreditation? Ask before you commit.</h2>
+          <p class="avera-kicker" data-reveal>{{ 'LANDING.CONTACT.KICKER' | translate }}</p>
+          <h2 data-reveal>{{ 'LANDING.CONTACT.TITLE' | translate }}</h2>
           <p class="avera-lede" data-reveal>
-            Most institutions are not sure which route fits their current capacity. Readiness
-            builds the policies and systems you are missing; accreditation is the long-term
-            status that follows. Tell us where you stand and we will tell you which one to
-            pursue first.
+            {{ 'LANDING.CONTACT.LEDE' | translate }}
           </p>
 
           <ul class="avera-check-list avera-contact-list" data-reveal>
-            <li>A confidential read on your eligibility for either pathway</li>
-            <li>A clear comparison of cost, timeline and institutional effort</li>
-            <li>An honest answer on whether you are ready for accreditation yet</li>
+            <li>{{ 'LANDING.CONTACT.ITEM1' | translate }}</li>
+            <li>{{ 'LANDING.CONTACT.ITEM2' | translate }}</li>
+            <li>{{ 'LANDING.CONTACT.ITEM3' | translate }}</li>
           </ul>
 
           <div class="avera-contact-actions" data-reveal>
-            <a
-              class="avera-btn avera-btn-primary"
-              href="mailto:contact@averacapitalaccess.com?subject=Readiness%20or%20accreditation%20guidance"
-            >
-              Email our advisory team <span aria-hidden="true">&rarr;</span>
+            <a class="avera-btn avera-btn-primary" [href]="contactMailto">
+              {{ 'LANDING.CONTACT.CTA' | translate }} <span aria-hidden="true">&rarr;</span>
             </a>
             <span class="avera-contact-note">
-              contact&#64;averacapitalaccess.com &middot; reply within 2 business days
+              {{ 'LANDING.CONTACT.NOTE' | translate }}
             </span>
           </div>
         </div>
@@ -626,41 +659,38 @@
         <div class="avera-contact-panel" data-reveal>
           <div class="pc-option">
             <div class="pc-head">
-              <span class="pc-tag">Pathway A</span>
-              <span class="pc-duration">12&ndash;36 months</span>
+              <span class="pc-tag">{{ 'LANDING.CONTACT.PATHWAY_A' | translate }}</span>
+              <span class="pc-duration">{{ 'LANDING.CONTACT.PATHWAY_A_DURATION' | translate }}</span>
             </div>
-            <h3>GCF Readiness</h3>
+            <h3>{{ 'LANDING.CONTACT.PATHWAY_A_TITLE' | translate }}</h3>
             <p>
-              A targeted grant to close fiduciary, ESS and gender gaps, then prepare a fundable
-              project pipeline.
+              {{ 'LANDING.CONTACT.PATHWAY_A_BODY' | translate }}
             </p>
             <ul>
-              <li>For unaccredited national, private or civil society entities</li>
-              <li>Typical grant size $300k&ndash;$1M+</li>
-              <li>Fastest route to a first GCF-funded engagement</li>
+              <li>{{ 'LANDING.CONTACT.PATHWAY_A_ITEM1' | translate }}</li>
+              <li>{{ 'LANDING.CONTACT.PATHWAY_A_ITEM2' | translate }}</li>
+              <li>{{ 'LANDING.CONTACT.PATHWAY_A_ITEM3' | translate }}</li>
             </ul>
           </div>
 
           <div class="pc-option pc-option-accent">
             <div class="pc-head">
-              <span class="pc-tag">Pathway B</span>
-              <span class="pc-duration">24&ndash;48 months</span>
+              <span class="pc-tag">{{ 'LANDING.CONTACT.PATHWAY_B' | translate }}</span>
+              <span class="pc-duration">{{ 'LANDING.CONTACT.PATHWAY_B_DURATION' | translate }}</span>
             </div>
-            <h3>Full accreditation</h3>
+            <h3>{{ 'LANDING.CONTACT.PATHWAY_B_TITLE' | translate }}</h3>
             <p>
-              Direct Access Entity status: your institution manages GCF funds and larger
-              investment projects itself.
+              {{ 'LANDING.CONTACT.PATHWAY_B_BODY' | translate }}
             </p>
             <ul>
-              <li>Requires board-approved policies and clean external audits</li>
-              <li>Undergoes the FMCA and full accreditation review</li>
-              <li>Usually sequenced after a Readiness grant</li>
+              <li>{{ 'LANDING.CONTACT.PATHWAY_B_ITEM1' | translate }}</li>
+              <li>{{ 'LANDING.CONTACT.PATHWAY_B_ITEM2' | translate }}</li>
+              <li>{{ 'LANDING.CONTACT.PATHWAY_B_ITEM3' | translate }}</li>
             </ul>
           </div>
 
           <p class="pc-note">
-            Not sure which applies? Send one paragraph about your organization and we will map
-            both routes for you.
+            {{ 'LANDING.CONTACT.NOTE_PANEL' | translate }}
           </p>
         </div>
       </div>
@@ -670,19 +700,17 @@
     <section class="avera-final">
       <div class="avera-final-glow" aria-hidden="true"></div>
       <div class="avera-container avera-final-inner">
-        <p class="avera-kicker" data-reveal>Next step</p>
-        <h2 data-reveal>Ready to structure your climate finance pathway?</h2>
+        <p class="avera-kicker" data-reveal>{{ 'LANDING.FINAL.KICKER' | translate }}</p>
+        <h2 data-reveal>{{ 'LANDING.FINAL.TITLE' | translate }}</h2>
         <p data-reveal>
-          Begin with a confidential initial assessment. We will map your
-          institutional readiness and outline the fastest credible route to GCF
-          funding.
+          {{ 'LANDING.FINAL.BODY' | translate }}
         </p>
         <div class="avera-final-actions" data-reveal>
           <a routerLink="/stage1" class="avera-btn avera-btn-primary">
-            Get an Initial Assessment <span aria-hidden="true">→</span>
+            {{ 'LANDING.FINAL.CTA_PRIMARY' | translate }} <span aria-hidden="true">→</span>
           </a>
           <a routerLink="/pricing" class="avera-btn avera-btn-ghost">
-            View engagement plans
+            {{ 'LANDING.FINAL.CTA_SECONDARY' | translate }}
           </a>
         </div>
       </div>
@@ -715,46 +743,44 @@
           </span>
         </a>
         <p>
-          Climate finance advisory for public and private institutions seeking
-          Green Climate Fund accreditation and funding.
+          {{ 'LANDING.FOOTER.ABOUT' | translate }}
         </p>
       </div>
 
       <div class="avera-footer-col">
-        <h4>Advisory</h4>
-        <a href="#methodology">Methodology</a>
-        <a href="#edge">The Avera Edge</a>
-        <a href="#reach">Global Reach</a>
-        <a href="#contact">Pathway guidance</a>
-        <a routerLink="/pricing">Engagement plans</a>
+        <h4>{{ 'LANDING.FOOTER.ADVISORY' | translate }}</h4>
+        <a href="#methodology">{{ 'LANDING.FOOTER.LINK_METHODOLOGY' | translate }}</a>
+        <a href="#edge">{{ 'LANDING.FOOTER.LINK_EDGE' | translate }}</a>
+        <a href="#reach">{{ 'LANDING.FOOTER.LINK_REACH' | translate }}</a>
+        <a href="#contact">{{ 'LANDING.FOOTER.LINK_GUIDANCE' | translate }}</a>
+        <a routerLink="/pricing">{{ 'LANDING.FOOTER.LINK_PLANS' | translate }}</a>
       </div>
 
       <div class="avera-footer-col">
-        <h4>Access</h4>
-        <a routerLink="/login">Client portal</a>
-        <a routerLink="/stage1">Initial assessment</a>
-        <a routerLink="/readiness">GCF Readiness wizard</a>
-        <a routerLink="/dashboard">Advisor dashboard</a>
+        <h4>{{ 'LANDING.FOOTER.ACCESS' | translate }}</h4>
+        <a routerLink="/login">{{ 'LANDING.FOOTER.LINK_PORTAL' | translate }}</a>
+        <a routerLink="/stage1">{{ 'LANDING.FOOTER.LINK_ASSESSMENT' | translate }}</a>
+        <a routerLink="/readiness">{{ 'LANDING.FOOTER.LINK_WIZARD' | translate }}</a>
+        <a routerLink="/dashboard">{{ 'LANDING.FOOTER.LINK_DASHBOARD' | translate }}</a>
       </div>
 
       <div class="avera-footer-col">
-        <h4>Contact</h4>
+        <h4>{{ 'LANDING.FOOTER.CONTACT' | translate }}</h4>
         <a href="mailto:contact@averacapitalaccess.com">contact&#64;averacapitalaccess.com</a>
         <span>Geneva &middot; London &middot; Singapore</span>
-        <span>Mon&ndash;Fri &middot; 09:00&ndash;18:00 CET</span>
+        <span>{{ 'LANDING.FOOTER.HOURS' | translate }}</span>
       </div>
     </div>
 
     <div class="avera-container avera-footer-bottom">
-      <p>&copy; 2026 Avera Capital Access. All rights reserved.</p>
+      <p>{{ 'LANDING.FOOTER.RIGHTS' | translate }}</p>
       <p>
-        Independent advisory firm, not affiliated with the Green Climate Fund.
-        Figures and client references are illustrative.
+        {{ 'LANDING.FOOTER.DISCLAIMER' | translate }}
       </p>
       <div class="avera-footer-legal">
-        <a href="#hero">Privacy</a>
-        <a href="#hero">Terms</a>
-        <a href="#hero">Disclosures</a>
+        <a href="#hero">{{ 'LANDING.FOOTER.PRIVACY' | translate }}</a>
+        <a href="#hero">{{ 'LANDING.FOOTER.TERMS' | translate }}</a>
+        <a href="#hero">{{ 'LANDING.FOOTER.DISCLOSURES' | translate }}</a>
       </div>
     </div>
   </footer>

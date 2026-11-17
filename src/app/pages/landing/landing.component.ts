@@ -6,12 +6,17 @@ import {
 } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { Title } from '@angular/platform-browser';
+import { DestroyRef, inject } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { ImpactGlobeComponent } from './impact-globe/impact-globe.component';
+import { LanguageService } from '../../services/language.service';
+import { CONTACT_EMAIL } from '../../config/email.config';
 
 @Component({
   selector: 'app-landing',
   standalone: true,
-  imports: [RouterLink, ImpactGlobeComponent],
+  imports: [RouterLink, TranslatePipe, ImpactGlobeComponent],
   templateUrl: './landing.component.html',
   styleUrl: './landing.component.css',
 })
@@ -19,12 +24,23 @@ export class LandingComponent implements AfterViewInit, OnDestroy {
   menuOpen = false;
   scrolled = false;
 
+  /** Contact inbox used by the pathway-guidance CTA. */
+  readonly contactMailto = `mailto:${CONTACT_EMAIL}?subject=GCF%20pathway%20guidance`;
+
   private revealObserver?: IntersectionObserver;
   private counterObserver?: IntersectionObserver;
   private readonly previousTitle = 'Avera — GCF Accreditation Portal';
+  private readonly destroyRef = inject(DestroyRef);
 
-  constructor(private readonly title: Title) {
-    this.title.setTitle('Avera Capital Access — Climate Finance Advisory');
+  constructor(
+    private readonly title: Title,
+    public readonly languageService: LanguageService,
+    private readonly translate: TranslateService,
+  ) {
+    this.syncDocumentTitle();
+    this.translate.onLangChange
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => this.syncDocumentTitle());
   }
 
   @HostListener('window:scroll')
@@ -86,6 +102,23 @@ export class LandingComponent implements AfterViewInit, OnDestroy {
 
   closeMenu(): void {
     this.menuOpen = false;
+  }
+
+  changeLanguage(event: Event): void {
+    const select = event.target as HTMLSelectElement | null;
+    if (!select) {
+      return;
+    }
+    this.languageService.setLanguage(select.value);
+  }
+
+  private syncDocumentTitle(): void {
+    const translated = this.translate.instant('LANDING.META_TITLE');
+    this.title.setTitle(
+      translated && translated !== 'LANDING.META_TITLE'
+        ? translated
+        : 'Avera Capital Access — Climate Finance Advisory',
+    );
   }
 
   private setupReveals(): void {

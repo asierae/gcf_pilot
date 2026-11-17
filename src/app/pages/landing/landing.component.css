@@ -168,6 +168,76 @@ a {
   margin-left: auto;
 }
 
+/* Language switcher */
+.avera-lang {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: 34px;
+  padding: 0 10px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: rgba(147, 168, 184, 0.06);
+  transition:
+    border-color 0.2s ease,
+    background 0.2s ease;
+}
+
+.avera-lang:hover,
+.avera-lang:focus-within {
+  border-color: var(--line-strong);
+  background: rgba(232, 192, 106, 0.09);
+}
+
+.avera-lang-icon {
+  display: inline-flex;
+  width: 15px;
+  height: 15px;
+  color: var(--teal);
+}
+
+.avera-lang-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.avera-lang-select {
+  appearance: none;
+  -webkit-appearance: none;
+  max-width: 108px;
+  padding: 0 14px 0 0;
+  border: 0;
+  outline: none;
+  background-color: transparent;
+  background-image: linear-gradient(45deg, transparent 50%, rgba(232, 192, 106, 0.9) 50%),
+    linear-gradient(135deg, rgba(232, 192, 106, 0.9) 50%, transparent 50%);
+  background-position:
+    calc(100% - 6px) 50%,
+    calc(100% - 2px) 50%;
+  background-size: 4px 4px, 4px 4px;
+  background-repeat: no-repeat;
+  color: rgba(212, 228, 236, 0.88);
+  font-family: var(--font-body);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-overflow: ellipsis;
+  cursor: pointer;
+}
+
+.avera-lang-select:focus-visible {
+  outline: 1px solid var(--line-strong);
+  outline-offset: 4px;
+  border-radius: 4px;
+}
+
+.avera-lang-select option {
+  background: #f4fbff;
+  color: #0a1824;
+  font-size: 13px;
+}
+
 .avera-nav-login {
   font-size: 12px;
   font-weight: 500;
@@ -2329,6 +2399,20 @@ a {
     display: none;
   }
 
+  .avera-lang {
+    height: 30px;
+    padding: 0 8px;
+  }
+
+  .avera-lang-icon {
+    display: none;
+  }
+
+  .avera-lang-select {
+    max-width: 78px;
+    font-size: 10px;
+  }
+
   .avera-hero-stage {
     height: 175vh;
   }
@@ -2522,4 +2606,76 @@ a {
     opacity: 1;
     animation: none !important;
   }
+}
+
+/* ═══════════════ RTL (Arabic) ═══════════════ */
+:host-context([dir="rtl"]) {
+  font-family: "Noto Sans Arabic", "Segoe UI", var(--font-body);
+}
+
+:host-context([dir="rtl"]) .avera-nav-links {
+  margin-left: 0;
+  margin-right: 12px;
+}
+
+:host-context([dir="rtl"]) .avera-nav-links a::after {
+  transform-origin: right;
+}
+
+:host-context([dir="rtl"]) .avera-nav-actions {
+  margin-left: 0;
+  margin-right: auto;
+}
+
+:host-context([dir="rtl"]) .avera-burger {
+  margin-left: 0;
+  margin-right: auto;
+}
+
+:host-context([dir="rtl"]) .avera-check-list li {
+  padding-left: 0;
+  padding-right: 30px;
+}
+
+:host-context([dir="rtl"]) .avera-check-list li::before,
+:host-context([dir="rtl"]) .avera-check-list li::after {
+  left: auto;
+  right: 0;
+}
+
+:host-context([dir="rtl"]) .avera-check-list li::after {
+  right: 5px;
+  transform: rotate(45deg);
+}
+
+:host-context([dir="rtl"]) .avera-readiness-list li,
+:host-context([dir="rtl"]) .avera-regions li,
+:host-context([dir="rtl"]) .avera-contact-panel ul li {
+  padding-left: 0;
+  padding-right: 22px;
+}
+
+:host-context([dir="rtl"]) .avera-regions li span,
+:host-context([dir="rtl"]) .avera-contact-panel ul li::before {
+  left: auto;
+  right: 0;
+}
+
+:host-context([dir="rtl"]) .avera-lang-select {
+  padding: 0 0 0 14px;
+  background-position:
+    calc(0% + 6px) 50%,
+    calc(0% + 2px) 50%;
+}
+
+:host-context([dir="rtl"]) .avera-hero-actions,
+:host-context([dir="rtl"]) .avera-final-actions,
+:host-context([dir="rtl"]) .avera-contact-actions,
+:host-context([dir="rtl"]) .avera-readiness-actions {
+  direction: rtl;
+}
+
+:host-context([dir="rtl"]) .avera-btn span[aria-hidden="true"] {
+  display: inline-block;
+  transform: scaleX(-1);
 }
