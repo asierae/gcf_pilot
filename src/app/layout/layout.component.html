@@ -250,6 +250,23 @@
             </li>
             <li>
               <a
+                routerLink="/dashboard/readiness"
+                routerLinkActive="active"
+                class="nav-link"
+                [title]="sidebarCollapsed ? 'Readiness' : ''"
+              >
+                <span class="nav-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M4 5h16M4 12h10M4 19h7" />
+                    <circle cx="18" cy="12" r="2.2" />
+                    <circle cx="15" cy="19" r="2.2" />
+                  </svg>
+                </span>
+                <span class="nav-label">Readiness</span>
+              </a>
+            </li>
+            <li>
+              <a
                 routerLink="/dashboard/leads"
                 routerLinkActive="active"
                 class="nav-link"

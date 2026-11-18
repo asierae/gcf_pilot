@@ -80,4 +80,12 @@ export class OrganizationService {
   ): Promise<{ submittedAt: string }> {
     return this.api.submitReadiness(organizationId, data);
   }
+
+  /** Admin edit: updates the submission without re-sending emails. */
+  async updateReadiness(
+    organizationId: string,
+    data: Record<string, unknown>,
+  ): Promise<{ submittedAt: string; updatedAt: string }> {
+    return this.api.updateReadinessAdmin(organizationId, data);
+  }
 }

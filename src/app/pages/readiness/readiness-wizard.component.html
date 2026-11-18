@@ -13,21 +13,28 @@
         </span>
         <span class="brand-text">
           <span class="brand-name">Readiness Intake</span>
-          <span class="brand-sub">GCF 2024–2027 application</span>
+          <span class="brand-sub">
+            {{ adminEdit ? 'Admin edit · ' + organizationId : 'GCF 2024–2027 application' }}
+          </span>
         </span>
       </a>
 
       <div class="topbar-actions">
+        @if (adminEdit) {
+          <a routerLink="/dashboard/readiness" class="btn btn-ghost">← Submissions</a>
+        }
         <span class="save-state" [class.is-error]="saveState === 'error'">
           <span class="save-dot" aria-hidden="true"></span>
           {{ saveText }}
         </span>
-        <button type="button" class="btn btn-ghost" (click)="fillDemoData()">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <path d="M13 2 4.5 13.5H11l-1 8.5 8.5-11.5H12l1-8.5Z" />
-          </svg>
-          Fill Demo Data
-        </button>
+        @if (!adminEdit) {
+          <button type="button" class="btn btn-ghost" (click)="fillDemoData()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M13 2 4.5 13.5H11l-1 8.5 8.5-11.5H12l1-8.5Z" />
+            </svg>
+            Fill Demo Data
+          </button>
+        }
       </div>
     </div>
   </header>
@@ -108,11 +115,21 @@
           <path d="m8.5 12 2.5 2.5 4.5-5" />
         </svg>
         <div>
-          <p class="alert-title">Application submitted</p>
-          <p>
-            Saved to your organization workspace on {{ submittedAt | date: 'medium' }}. You can track
-            it from the organization dashboard.
+          <p class="alert-title">
+            {{ adminEdit ? 'Editing a submitted application' : 'Application submitted' }}
           </p>
+          @if (adminEdit) {
+            <p>
+              Originally submitted on {{ submittedAt | date: 'medium' }}. Save your edits with the
+              <strong>Save changes</strong> button on the last step — the applicant is not emailed
+              again.
+            </p>
+          } @else {
+            <p>
+              Saved to your organization workspace on {{ submittedAt | date: 'medium' }}. You can track
+              it from the organization dashboard.
+            </p>
+          }
         </div>
       </div>
     }
@@ -1256,7 +1273,7 @@
             (click)="submitReadiness()"
             [disabled]="submitting"
           >
-            {{ submitting ? 'Submitting…' : 'Submit application' }}
+            {{ submitting ? (adminEdit ? 'Saving…' : 'Submitting…') : (adminEdit ? 'Save changes' : 'Submit application') }}
           </button>
           <button type="button" class="btn btn-ghost" (click)="downloadJson()">
             Download Application JSON
@@ -1267,9 +1284,14 @@
           <p class="field-error" role="alert">{{ submitError }}</p>
         }
         <p class="export-note">
-          Submitting stores the application in your organization workspace, where the GCF team and
-          your organization dashboard can review it. Official GCF proposals are still submitted
-          through the GCF Partner Portal.
+          @if (adminEdit) {
+            Saving updates the organization's readiness submission in place. No notification emails
+            are sent to the applicant.
+          } @else {
+            Submitting stores the application in your organization workspace, where the GCF team and
+            your organization dashboard can review it. Official GCF proposals are still submitted
+            through the GCF Partner Portal.
+          }
         </p>
       </section>
     }
@@ -1322,7 +1344,7 @@
           (click)="submitReadiness()"
           [disabled]="submitting"
         >
-          {{ submitting ? 'Submitting…' : 'Submit application' }}
+          {{ submitting ? (adminEdit ? 'Saving…' : 'Submitting…') : (adminEdit ? 'Save changes' : 'Submit application') }}
         </button>
       }
     </div>

@@ -22,6 +22,20 @@ export interface LatestSubmission {
   data: Record<string, unknown>;
 }
 
+export interface ReadinessSubmissionSummary {
+  organizationId: string;
+  submittedAt: string;
+  updatedAt: string;
+  organization: {
+    name: string;
+    acronym: string;
+    country: string;
+  };
+  proposalTitle: string;
+  requestedAmountUSD: number | null;
+  ndaEmail: string;
+}
+
 /**
  * HTTP client for the Cloudflare Worker API (D1 + R2).
  *
@@ -275,6 +289,30 @@ export class ApiService {
   }
 
   // ── Readiness ───────────────────────────────────────────────────────────
+
+  async getReadinessSubmissions(): Promise<ReadinessSubmissionSummary[]> {
+    const payload = await this.request<{
+      submissions?: ReadinessSubmissionSummary[];
+    }>("/api/readiness", { method: "GET" }, true);
+    return payload.submissions ?? [];
+  }
+
+  async updateReadinessAdmin(
+    organizationId: string,
+    data: Record<string, unknown>,
+  ): Promise<{ submittedAt: string; updatedAt: string }> {
+    const payload = await this.request<{
+      submission: { submittedAt: string; updatedAt: string };
+    }>(
+      `/api/readiness/${encodeURIComponent(organizationId)}`,
+      { method: "PATCH", body: JSON.stringify({ data }) },
+      true,
+    );
+    return {
+      submittedAt: payload.submission.submittedAt,
+      updatedAt: payload.submission.updatedAt,
+    };
+  }
 
   async submitReadiness(
     organizationId: string,

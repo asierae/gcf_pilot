@@ -6,6 +6,7 @@ import { Stage2Component } from "./pages/stage2/stage2.component";
 import { LoginComponent } from "./pages/login/login.component";
 import { DashboardComponent } from "./pages/dashboard/dashboard.component";
 import { SubmissionDetailComponent } from "./pages/dashboard/submission-detail/submission-detail.component";
+import { ReadinessDashboardComponent } from "./pages/dashboard/readiness-dashboard/readiness-dashboard.component";
 import { LeadsImportComponent } from "./pages/dashboard/leads-import/leads-import.component";
 import { UserManagementComponent } from "./pages/settings/user-management/user-management.component";
 import { PricingComponent } from "./pages/pricing/pricing.component";
@@ -37,6 +38,17 @@ export const routes: Routes = [
         path: "dashboard/submission/:id",
         component: SubmissionDetailComponent,
         canActivate: [adminGuard],
+      },
+      {
+        path: "dashboard/readiness",
+        component: ReadinessDashboardComponent,
+        canActivate: [adminGuard],
+      },
+      {
+        path: "dashboard/readiness/:organizationId",
+        component: ReadinessWizardComponent,
+        canActivate: [adminGuard],
+        data: { adminEdit: true },
       },
       {
         path: "settings/users",

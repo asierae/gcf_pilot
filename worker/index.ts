@@ -829,6 +829,107 @@ async function putReadiness(
   );
 }
 
+interface ReadinessListRow {
+  organization_id: string;
+  submitted_at: string;
+  updated_at: string;
+  data: string;
+  org_name: string | null;
+  org_acronym: string | null;
+  org_country: string | null;
+}
+
+/** Compact row for the admin readiness dashboard. */
+function readinessSummary(row: ReadinessListRow): JsonObject {
+  const data = parseJson<JsonObject>(row.data, {});
+  const metadata =
+    data.metadata && typeof data.metadata === 'object'
+      ? (data.metadata as JsonObject)
+      : {};
+  const read = (key: string): string => {
+    const value = metadata[key];
+    return typeof value === 'string' ? value : '';
+  };
+  const amount = metadata.requestedAmountUSD;
+
+  return {
+    organizationId: row.organization_id,
+    submittedAt: row.submitted_at,
+    updatedAt: row.updated_at,
+    organization: {
+      name: row.org_name || read('organizationLegalName'),
+      acronym: row.org_acronym || read('organizationAcronym'),
+      country: row.org_country || read('country'),
+    },
+    proposalTitle: read('proposalTitle'),
+    requestedAmountUSD: typeof amount === 'number' ? amount : null,
+    ndaEmail: read('ndaEmail'),
+  };
+}
+
+async function listReadiness(env: Env): Promise<Response> {
+  const { results } = await env.DB.prepare(
+    `SELECT r.organization_id, r.submitted_at, r.updated_at, r.data,
+            o.name AS org_name, o.acronym AS org_acronym, o.country AS org_country
+       FROM readiness_applications r
+       LEFT JOIN organizations o ON o.id = r.organization_id
+      ORDER BY r.submitted_at DESC`,
+  ).all<ReadinessListRow>();
+
+  return json({ submissions: (results ?? []).map(readinessSummary) });
+}
+
+/**
+ * Admin edit: rewrites the readiness answers without bumping `submitted_at`
+ * and without sending another pair of submission emails.
+ */
+async function updateReadinessAdmin(
+  request: Request,
+  env: Env,
+  orgId: string,
+): Promise<Response> {
+  assertEntityId(orgId);
+  const body = await readJson<{ data?: unknown }>(request);
+  const data = asObject(body.data, 'data');
+  const now = new Date().toISOString();
+
+  const existing = await env.DB.prepare(
+    'SELECT submitted_at FROM readiness_applications WHERE organization_id = ?',
+  )
+    .bind(orgId)
+    .first<{ submitted_at: string }>();
+
+  if (!existing) {
+    return json({ error: 'Readiness submission not found.' }, 404);
+  }
+
+  const organization = await saveOrganization(
+    env,
+    orgId,
+    organizationFromReadiness(data),
+  );
+
+  await env.DB.prepare(
+    `UPDATE readiness_applications
+        SET updated_at = ?, data = ?
+      WHERE organization_id = ?`,
+  )
+    .bind(now, JSON.stringify(data), orgId)
+    .run();
+
+  await deleteDraftRow(env, 'readiness', orgId);
+
+  return json({
+    submission: {
+      organizationId: orgId,
+      submittedAt: existing.submitted_at,
+      updatedAt: now,
+      data,
+    },
+    organization,
+  });
+}
+
 async function getReadiness(env: Env, orgId: string): Promise<Response> {
   assertEntityId(orgId);
   const row = await env.DB.prepare(
@@ -1870,12 +1971,20 @@ async function handleApi(request: Request, env: Env, path: string): Promise<Resp
     return methodNotAllowed('GET, PUT, DELETE');
   }
 
+  if (path === '/api/readiness') {
+    if (method !== 'GET') return methodNotAllowed('GET');
+    return withAdmin(env, request, () => listReadiness(env));
+  }
+
   const readinessMatch = /^\/api\/readiness\/([^/]+)$/.exec(path);
   if (readinessMatch) {
     const orgId = decodeURIComponent(readinessMatch[1]);
     if (method === 'GET') return getReadiness(env, orgId);
     if (method === 'PUT' || method === 'POST') return putReadiness(request, env, orgId);
-    return methodNotAllowed('GET, PUT');
+    if (method === 'PATCH') {
+      return withAdmin(env, request, () => updateReadinessAdmin(request, env, orgId));
+    }
+    return methodNotAllowed('GET, PUT, PATCH');
   }
 
   const applicantMatch = /^\/api\/applicants\/([^/]+)(?:\/(status|stage1|review-notes|review-sent))?$/.exec(

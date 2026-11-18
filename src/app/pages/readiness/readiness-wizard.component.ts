@@ -192,6 +192,8 @@ export class ReadinessWizardComponent implements OnInit, OnDestroy {
   previewOpen = false;
   previewJson = '';
   copyLabel = 'Copy JSON';
+  /** Admin editor: edits an existing readiness submission in place. */
+  adminEdit = false;
 
   private readonly attachmentService = inject(AttachmentService);
   private readonly authService = inject(AuthService);
@@ -205,10 +207,19 @@ export class ReadinessWizardComponent implements OnInit, OnDestroy {
   private localSavedAt: string | null = null;
 
   async ngOnInit(): Promise<void> {
-    this.organizationId = this.resolveOrganizationId();
-    syncOrganizationId(this.location, this.organizationId);
+    this.adminEdit = this.route.snapshot.data['adminEdit'] === true;
 
-    this.restoreLocalDraft();
+    if (this.adminEdit) {
+      const fromRoute = this.route.snapshot.paramMap.get('organizationId');
+      if (isOrganizationId(fromRoute)) {
+        this.organizationId = fromRoute as string;
+      }
+    } else {
+      this.organizationId = this.resolveOrganizationId();
+      syncOrganizationId(this.location, this.organizationId);
+      this.restoreLocalDraft();
+    }
+
     this.refreshActivitySequence();
 
     await this.loadServerState();
@@ -287,7 +298,7 @@ export class ReadinessWizardComponent implements OnInit, OnDestroy {
     const organization = forms.organization;
     if (organization) {
       this.organization = organization;
-      this.identityLocked = true;
+      this.identityLocked = !this.adminEdit;
       this.applyOrganizationProfile(organization);
     }
 
@@ -295,11 +306,17 @@ export class ReadinessWizardComponent implements OnInit, OnDestroy {
       this.submittedAt = forms.readiness.submittedAt;
     }
 
-    if (draft?.data) {
+    const source =
+      draft?.data ??
+      (forms.readiness?.data as Record<string, unknown> | undefined);
+    if (source) {
       const serverIsNewer =
-        !this.localSavedAt || new Date(draft.updatedAt) >= new Date(this.localSavedAt);
+        this.adminEdit ||
+        !draft ||
+        !this.localSavedAt ||
+        new Date(draft.updatedAt) >= new Date(this.localSavedAt);
       if (serverIsNewer) {
-        this.applySavedApplication(draft.data as Partial<ReadinessApplication>);
+        this.applySavedApplication(source as Partial<ReadinessApplication>);
       }
     }
   }
@@ -328,8 +345,31 @@ export class ReadinessWizardComponent implements OnInit, OnDestroy {
       documents: base.documents,
     };
 
-    this.docAttachments = saved.__docAttachments ?? {};
-    this.docMeta = saved.__docMeta ?? {};
+    this.docAttachments = { ...(saved.__docAttachments ?? {}) };
+    this.docMeta = { ...(saved.__docMeta ?? {}) };
+
+    // Submitted readiness payloads keep their attachments under `documents`.
+    const savedDocuments = (
+      saved as unknown as {
+        documents?: Record<
+          string,
+          { fileName?: string; url?: string; publicId?: string } | null
+        >;
+      }
+    ).documents;
+
+    for (const [key, value] of Object.entries(savedDocuments ?? {})) {
+      if (!value?.url) continue;
+      if (!this.docAttachments[key as DocumentKey]) {
+        this.docAttachments[key as DocumentKey] = {
+          url: value.url,
+          publicId: value.publicId ?? '',
+          resourceType: 'raw',
+          name: value.fileName ?? 'Document',
+        };
+      }
+    }
+
     for (const [key, attachment] of Object.entries(this.docAttachments)) {
       if (attachment && !this.docMeta[key as DocumentKey]) {
         this.docMeta[key as DocumentKey] = attachment.name;
@@ -391,6 +431,16 @@ export class ReadinessWizardComponent implements OnInit, OnDestroy {
   }
 
   persist(): void {
+    if (this.adminEdit) {
+      // The admin editor writes drafts straight to D1 and never touches the
+      // browser draft of the organization.
+      this.saveState = 'saved';
+      if (this.draftReady) {
+        void this.saveServerDraft();
+      }
+      return;
+    }
+
     try {
       const payload = {
         ...this.draftPayload(),
@@ -1208,6 +1258,17 @@ export class ReadinessWizardComponent implements OnInit, OnDestroy {
         contactName: this.application.metadata.ndaFocalPointName,
       });
       this.identityLocked = true;
+
+      if (this.adminEdit) {
+        const { submittedAt } = await this.organizationService.updateReadiness(
+          this.organizationId,
+          data,
+        );
+        await this.organizationService.clearDraft('readiness', this.organizationId);
+        this.submittedAt = submittedAt;
+        this.saveState = 'saved';
+        return;
+      }
 
       const { submittedAt } = await this.organizationService.submitReadiness(
         this.organizationId,

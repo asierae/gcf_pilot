@@ -1,0 +1,105 @@
+﻿<div class="readiness-dashboard">
+  <header class="dashboard-header">
+    <div>
+      <p class="page-eyebrow">Admin overview</p>
+      <h2>Readiness submissions</h2>
+      <p>GCF Readiness intake applications stored on the server. Open one to edit it.</p>
+    </div>
+    <div class="header-actions">
+      <span class="count-badge">
+        @if (search.trim()) {
+          {{ filteredSubmissions.length }} of {{ submissions.length }}
+        } @else {
+          {{ submissions.length }} submission(s)
+        }
+      </span>
+    </div>
+  </header>
+
+  @if (loading) {
+    <div class="empty-state">
+      <span class="empty-icon">⏳</span>
+      <p>Loading readiness submissions…</p>
+    </div>
+  } @else if (loadError) {
+    <div class="empty-state">
+      <span class="empty-icon">⚠️</span>
+      <p>{{ loadError }}</p>
+      <button type="button" class="btn-retry" (click)="load()">Try again</button>
+    </div>
+  } @else if (!submissions.length) {
+    <div class="empty-state">
+      <span class="empty-icon">🗂️</span>
+      <p>No readiness submissions yet.</p>
+      <p class="empty-hint">Submitted Readiness intakes will appear here.</p>
+    </div>
+  } @else {
+    <div class="table-toolbar">
+      <label class="search-box">
+        <span class="search-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7">
+            <circle cx="11" cy="11" r="7" />
+            <path d="m16 16 4.5 4.5" stroke-linecap="round" />
+          </svg>
+        </span>
+        <input
+          class="search-input"
+          type="search"
+          placeholder="Search organization, acronym, country or proposal"
+          [(ngModel)]="search"
+          aria-label="Search readiness submissions"
+        />
+      </label>
+    </div>
+
+    @if (!filteredSubmissions.length) {
+      <div class="empty-state">
+        <span class="empty-icon">🔍</span>
+        <p>No submissions match “{{ search }}”.</p>
+        <button type="button" class="btn-retry" (click)="search = ''">Clear search</button>
+      </div>
+    } @else {
+      <div class="table-wrapper">
+        <table class="submissions-table">
+          <thead>
+            <tr>
+              <th>Organization</th>
+              <th>Proposal</th>
+              <th>Country</th>
+              <th>Requested</th>
+              <th>Submitted</th>
+              <th>Updated</th>
+              <th class="col-action">Edit</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (submission of filteredSubmissions; track submission.organizationId) {
+              <tr>
+                <td class="col-name">
+                  {{ submission.organization.name || 'Untitled organization' }}
+                  @if (submission.organization.acronym) {
+                    <span class="acronym">{{ submission.organization.acronym }}</span>
+                  }
+                  <span class="org-id">{{ submission.organizationId }}</span>
+                </td>
+                <td class="col-proposal">{{ submission.proposalTitle || '—' }}</td>
+                <td>{{ submission.organization.country || '—' }}</td>
+                <td class="col-amount">{{ formatAmount(submission.requestedAmountUSD) }}</td>
+                <td class="col-date">{{ formatDate(submission.submittedAt) }}</td>
+                <td class="col-date">{{ formatDate(submission.updatedAt) }}</td>
+                <td class="col-action">
+                  <a
+                    class="btn-edit"
+                    [routerLink]="['/dashboard/readiness', submission.organizationId]"
+                  >
+                    Open &amp; edit <span aria-hidden="true">→</span>
+                  </a>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  }
+</div>
