@@ -1,0 +1,143 @@
+<div class="ga-page">
+  <header class="ga-nav">
+    <a class="ga-brand" routerLink="/home">
+      <span class="ga-brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 40 40" fill="none">
+          <path
+            d="M20 3.5 34.5 12v16L20 36.5 5.5 28V12L20 3.5Z"
+            stroke="currentColor"
+            stroke-width="1.4"
+          />
+          <path
+            d="M20 11v18M12 24l8-13 8 13"
+            stroke="currentColor"
+            stroke-width="1.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+        </svg>
+      </span>
+      <span class="ga-brand-text">
+        <strong>AVERA</strong>
+        <span>CAPITAL ACCESS</span>
+      </span>
+    </a>
+
+    <div class="ga-nav-actions">
+      <app-language-switcher [ariaLabel]="'LANDING.NAV.LANGUAGE' | translate" />
+      <a routerLink="/login" class="ga-signin">{{ 'LANDING.NAV.SIGN_IN' | translate }}</a>
+    </div>
+  </header>
+
+  <main class="ga-main">
+    <div class="ga-glow" aria-hidden="true"></div>
+
+    <div class="ga-container">
+      <a routerLink="/home" class="ga-back">
+        <span aria-hidden="true">←</span>
+        {{ 'GET_ASSESSED.BACK' | translate }}
+      </a>
+
+      <header class="ga-intro">
+        <p class="ga-kicker">{{ 'GET_ASSESSED.EYEBROW' | translate }}</p>
+        <h1 class="ga-title" [innerHTML]="'GET_ASSESSED.TITLE' | translate"></h1>
+        <p class="ga-lede">{{ 'GET_ASSESSED.LEDE' | translate }}</p>
+      </header>
+
+      <div class="ga-grid">
+        <!-- Readiness -->
+        <a routerLink="/readiness" class="ga-card ga-card--featured">
+          <div class="ga-card-top">
+            <span class="ga-card-step">{{ 'GET_ASSESSED.STEP' | translate }} 01</span>
+            <span class="ga-card-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M4 19a8 8 0 1 1 16 0" />
+                <path d="m12 15 4-4" />
+                <path d="M12 19h.01" />
+                <path d="M4 19h4M16 19h4" />
+              </svg>
+            </span>
+          </div>
+          <h2>{{ 'GET_ASSESSED.READINESS_TITLE' | translate }}</h2>
+          <p>{{ 'GET_ASSESSED.READINESS_BODY' | translate }}</p>
+          <p class="ga-meta">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="12" cy="12" r="8.5" />
+              <path d="M12 7.5V12l3 2" />
+            </svg>
+            {{ 'GET_ASSESSED.READINESS_META' | translate }}
+          </p>
+          <span class="ga-card-cta">
+            {{ 'GET_ASSESSED.READINESS_CTA' | translate }}
+            <span aria-hidden="true">→</span>
+          </span>
+        </a>
+
+        <!-- Pre-accreditation -->
+        <a routerLink="/stage1" class="ga-card">
+          <div class="ga-card-top">
+            <span class="ga-card-step">{{ 'GET_ASSESSED.STEP' | translate }} 02</span>
+            <span class="ga-card-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 3 5 6v5.5c0 4.4 2.9 8.2 7 9.5 4.1-1.3 7-5.1 7-9.5V6l-7-3Z" />
+                <path d="m9 12 2 2 4-4" />
+              </svg>
+            </span>
+          </div>
+          <h2>{{ 'GET_ASSESSED.STAGE1_TITLE' | translate }}</h2>
+          <p>{{ 'GET_ASSESSED.STAGE1_BODY' | translate }}</p>
+          <p class="ga-meta">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="12" cy="12" r="8.5" />
+              <path d="M12 7.5V12l3 2" />
+            </svg>
+            {{ 'GET_ASSESSED.STAGE1_META' | translate }}
+          </p>
+          <span class="ga-card-cta">
+            {{ 'GET_ASSESSED.STAGE1_CTA' | translate }}
+            <span aria-hidden="true">→</span>
+          </span>
+        </a>
+
+        <!-- Contact -->
+        <a [href]="contactMailto" class="ga-card">
+          <div class="ga-card-top">
+            <span class="ga-card-step">{{ 'GET_ASSESSED.STEP' | translate }} 03</span>
+            <span class="ga-card-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20 12.5a7.5 7.5 0 0 1-10.9 6.7L4 20l.9-4.9A7.5 7.5 0 1 1 20 12.5Z" />
+                <path d="M8.5 11h7M8.5 14h4.5" />
+              </svg>
+            </span>
+          </div>
+          <h2>{{ 'GET_ASSESSED.CONTACT_TITLE' | translate }}</h2>
+          <p>{{ 'GET_ASSESSED.CONTACT_BODY' | translate }}</p>
+          <p class="ga-meta">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="12" cy="12" r="8.5" />
+              <path d="M12 7.5V12l3 2" />
+            </svg>
+            {{ 'GET_ASSESSED.CONTACT_META' | translate }}
+          </p>
+          <span class="ga-card-cta">
+            {{ 'GET_ASSESSED.CONTACT_CTA' | translate }}
+            <span aria-hidden="true">→</span>
+          </span>
+        </a>
+      </div>
+
+      <div class="ga-note">
+        <p>{{ 'GET_ASSESSED.NOTE' | translate }}</p>
+        <a routerLink="/login">
+          {{ 'GET_ASSESSED.NOTE_LINK' | translate }}
+          <span aria-hidden="true">→</span>
+        </a>
+      </div>
+    </div>
+  </main>
+
+  <footer class="ga-footer">
+    <span>{{ 'GET_ASSESSED.FOOTER' | translate }}</span>
+    <a [href]="'mailto:' + contactEmail">{{ contactEmail }}</a>
+  </footer>
+</div>

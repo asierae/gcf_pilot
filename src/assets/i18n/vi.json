@@ -5,6 +5,29 @@
     "DASHBOARD": "Bảng điều khiển",
     "USER_PROFILE": "Hồ sơ người dùng"
   },
+  "GET_ASSESSED": {
+    "META_TITLE": "Chọn lộ trình của bạn — Avera Capital Access",
+    "BACK": "Về trang chủ",
+    "EYEBROW": "Bắt đầu tại đây",
+    "TITLE": "Chọn lộ trình phù hợp với <em>hiện trạng của bạn</em>.",
+    "LEDE": "Ba cách để bắt đầu. Hãy chọn cách phù hợp nhất với tổ chức của bạn hôm nay — bạn luôn có thể chuyển đổi sau.",
+    "STEP": "Lộ trình",
+    "READINESS_TITLE": "Đánh giá mức độ sẵn sàng",
+    "READINESS_BODY": "So sánh tổ chức của bạn với các tiêu chí sẵn sàng của GCF và nhận danh sách khoảng trống được ưu tiên.",
+    "READINESS_META": "Khoảng 8 phút · Không cần tài khoản",
+    "READINESS_CTA": "Bắt đầu đánh giá",
+    "STAGE1_TITLE": "Tiền công nhận",
+    "STAGE1_BODY": "Dành cho các tổ chức theo đuổi công nhận GCF: sàng lọc sơ bộ có cấu trúc về nhiệm vụ, tiêu chuẩn tín thác, biện pháp bảo vệ và thành tích.",
+    "STAGE1_META": "Khoảng 12 phút · Tự động lưu bản nháp",
+    "STAGE1_CTA": "Bắt đầu sàng lọc",
+    "CONTACT_TITLE": "Trao đổi với cố vấn",
+    "CONTACT_BODY": "Chưa chắc lộ trình nào phù hợp hoặc cần phạm vi riêng? Hãy gửi lời nhắn, cố vấn Avera sẽ phản hồi trong vòng hai ngày làm việc.",
+    "CONTACT_META": "Phản hồi trong 2 ngày làm việc",
+    "CONTACT_CTA": "Liên hệ đội ngũ",
+    "NOTE": "Đã làm việc với Avera?",
+    "NOTE_LINK": "Đăng nhập cổng thông tin",
+    "FOOTER": "Avera Capital Access · Tư vấn tài chính khí hậu"
+  },
   "LANDING": {
     "META_TITLE": "Avera Capital Access — Tư vấn tài chính khí hậu",
     "NAV": {

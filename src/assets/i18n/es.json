@@ -5,6 +5,29 @@
     "DASHBOARD": "Panel",
     "USER_PROFILE": "Perfil de usuario"
   },
+  "GET_ASSESSED": {
+    "META_TITLE": "Elige tu vía — Avera Capital Access",
+    "BACK": "Volver al inicio",
+    "EYEBROW": "Empieza aquí",
+    "TITLE": "Elige la vía que encaja con <em>tu punto de partida</em>.",
+    "LEDE": "Tres formas de empezar. Elige la que mejor describa a tu organización hoy: siempre podrás cambiar de vía más adelante.",
+    "STEP": "Vía",
+    "READINESS_TITLE": "Diagnóstico de preparación",
+    "READINESS_BODY": "Compara tu institución con los criterios de preparación del FVC y obtén una visión priorizada de las brechas por cerrar.",
+    "READINESS_META": "Unos 8 minutos · Sin cuenta",
+    "READINESS_CTA": "Iniciar diagnóstico",
+    "STAGE1_TITLE": "Preacreditación",
+    "STAGE1_BODY": "Para entidades que buscan la acreditación del FVC: una preevaluación estructurada de mandato, estándares fiduciarios, salvaguardas y trayectoria.",
+    "STAGE1_META": "Unos 12 minutos · Borrador guardado automáticamente",
+    "STAGE1_CTA": "Iniciar preevaluación",
+    "CONTACT_TITLE": "Hablar con un asesor",
+    "CONTACT_BODY": "¿No sabes qué vía elegir o necesitas un alcance a medida? Escríbenos y un asesor de Avera responderá en un plazo de dos días hábiles.",
+    "CONTACT_META": "Respuesta en 2 días hábiles",
+    "CONTACT_CTA": "Contactar al equipo",
+    "NOTE": "¿Ya trabajas con Avera?",
+    "NOTE_LINK": "Accede a tu portal",
+    "FOOTER": "Avera Capital Access · Asesoría en finanzas climáticas"
+  },
   "LANDING": {
     "META_TITLE": "Avera Capital Access — Asesoría en financiación climática",
     "NAV": {

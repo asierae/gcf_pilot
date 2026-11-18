@@ -5,6 +5,29 @@
     "DASHBOARD": "Tableau de bord",
     "USER_PROFILE": "Profil utilisateur"
   },
+  "GET_ASSESSED": {
+    "META_TITLE": "Choisissez votre parcours — Avera Capital Access",
+    "BACK": "Retour à l'accueil",
+    "EYEBROW": "Commencez ici",
+    "TITLE": "Choisissez la voie qui correspond à <em>votre situation</em>.",
+    "LEDE": "Trois façons de commencer. Choisissez celle qui décrit le mieux votre organisation aujourd'hui — vous pourrez toujours en changer.",
+    "STEP": "Parcours",
+    "READINESS_TITLE": "Diagnostic de préparation",
+    "READINESS_BODY": "Comparez votre institution aux critères de préparation du FVC et obtenez une vue priorisée des écarts à combler.",
+    "READINESS_META": "Environ 8 minutes · Sans compte",
+    "READINESS_CTA": "Lancer le diagnostic",
+    "STAGE1_TITLE": "Pré-accréditation",
+    "STAGE1_BODY": "Pour les entités visant l'accréditation du FVC : un pré-examen structuré du mandat, des normes fiduciaires, des sauvegardes et des antécédents.",
+    "STAGE1_META": "Environ 12 minutes · Brouillon enregistré automatiquement",
+    "STAGE1_CTA": "Lancer le pré-examen",
+    "CONTACT_TITLE": "Parler à un conseiller",
+    "CONTACT_BODY": "Vous hésitez sur le parcours à suivre ou avez besoin d'un périmètre sur mesure ? Écrivez-nous : un conseiller Avera répond sous deux jours ouvrés.",
+    "CONTACT_META": "Réponse sous 2 jours ouvrés",
+    "CONTACT_CTA": "Contacter l'équipe",
+    "NOTE": "Vous travaillez déjà avec Avera ?",
+    "NOTE_LINK": "Accéder à votre portail",
+    "FOOTER": "Avera Capital Access · Conseil en finance climatique"
+  },
   "LANDING": {
     "META_TITLE": "Avera Capital Access — Conseil en finance climatique",
     "NAV": {

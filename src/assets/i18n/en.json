@@ -5,6 +5,29 @@
     "DASHBOARD": "Dashboard",
     "USER_PROFILE": "User Profile"
   },
+  "GET_ASSESSED": {
+    "META_TITLE": "Choose your pathway — Avera Capital Access",
+    "BACK": "Back to home",
+    "EYEBROW": "Start here",
+    "TITLE": "Choose the pathway that fits <em>where you are</em>.",
+    "LEDE": "Three ways to begin. Pick the one that matches your organization today — you can always move between them later.",
+    "STEP": "Pathway",
+    "READINESS_TITLE": "Readiness check",
+    "READINESS_BODY": "Benchmark your institution against GCF readiness criteria and get a prioritised view of the gaps to close.",
+    "READINESS_META": "About 8 minutes · No account needed",
+    "READINESS_CTA": "Start readiness check",
+    "STAGE1_TITLE": "Pre-accreditation",
+    "STAGE1_BODY": "For entities pursuing GCF accreditation: a structured pre-screening of mandate, fiduciary standards, safeguards and track record.",
+    "STAGE1_META": "About 12 minutes · Draft saved automatically",
+    "STAGE1_CTA": "Start pre-screening",
+    "CONTACT_TITLE": "Talk to an adviser",
+    "CONTACT_BODY": "Not sure which pathway fits, or need a tailored scope? Send a short note and an Avera adviser will reply within two business days.",
+    "CONTACT_META": "Reply within 2 business days",
+    "CONTACT_CTA": "Contact the team",
+    "NOTE": "Already working with Avera?",
+    "NOTE_LINK": "Sign in to your portal",
+    "FOOTER": "Avera Capital Access · Climate finance advisory"
+  },
   "LANDING": {
     "META_TITLE": "Avera Capital Access — Climate Finance Advisory",
     "NAV": {

@@ -12,6 +12,7 @@ import { LeadsImportComponent } from "./pages/dashboard/leads-import/leads-impor
 import { UserManagementComponent } from "./pages/settings/user-management/user-management.component";
 import { PricingComponent } from "./pages/pricing/pricing.component";
 import { ReadinessWizardComponent } from "./pages/readiness/readiness-wizard.component";
+import { GetAssessedComponent } from "./pages/get-assessed/get-assessed.component";
 import { MyFormsComponent } from "./pages/my-forms/my-forms.component";
 import { adminGuard, authGuard } from "./guards/auth.guard";
 
@@ -20,6 +21,7 @@ export const routes: Routes = [
   { path: "reset-password", component: PasswordTokenComponent },
   { path: "accept-invite", component: PasswordTokenComponent },
   { path: "home", component: LandingComponent },
+  { path: "get-assessed", component: GetAssessedComponent },
   { path: "", redirectTo: "home", pathMatch: "full" },
   {
     path: "",
