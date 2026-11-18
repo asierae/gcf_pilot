@@ -97,6 +97,7 @@
             <td>
               <app-country-select
                 [compact]="true"
+                [overlay]="true"
                 [ngModel]="lead.country"
                 (ngModelChange)="updatePendingField(i, 'country', $event)"
               ></app-country-select>
@@ -366,6 +367,7 @@
             <td>
               <app-country-select
                 [compact]="true"
+                [overlay]="true"
                 [ngModel]="lead.country"
                 (ngModelChange)="updateSavedField(lead, 'country', $event)"
               ></app-country-select>

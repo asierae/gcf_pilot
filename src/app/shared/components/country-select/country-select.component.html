@@ -52,7 +52,14 @@
   </div>
 
   @if (open) {
-    <div #panel class="cs-panel" [style]="panelStyle" role="listbox">
+    <div
+      #panel
+      class="cs-panel"
+      [class.cs-panel-overlay]="overlay"
+      [class.cs-panel-inline]="!overlay"
+      [style]="overlay ? panelStyle : null"
+      role="listbox"
+    >
       <div class="cs-search-row">
         <input
           #searchInput

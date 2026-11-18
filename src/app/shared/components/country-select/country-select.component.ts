@@ -27,6 +27,8 @@ export class CountrySelectComponent implements ControlValueAccessor {
   @Input() placeholder = "Select country...";
   @Input() multiple = false;
   @Input() compact = false;
+  /** Table cells need a floating panel; forms use an inline one. */
+  @Input() overlay = false;
   @Input() inputId = "";
   @Input() name = "";
 
@@ -97,20 +99,25 @@ export class CountrySelectComponent implements ControlValueAccessor {
     this.open = true;
     this.query = "";
     this.activeIndex = 0;
-    const rect = this.control?.nativeElement.getBoundingClientRect();
-    if (rect) {
-      const maxHeight = 250;
-      const flip = window.innerHeight - rect.bottom < maxHeight + 16;
+
+    const control = this.control?.nativeElement;
+    const maxHeight = 250;
+    if (control && window.innerHeight - control.getBoundingClientRect().bottom < maxHeight + 16) {
+      // Bring the field into view so the panel opens downwards and stays visible.
+      control.scrollIntoView({ block: "center", behavior: "auto" });
+    }
+
+    if (this.overlay && control) {
+      const rect = control.getBoundingClientRect();
       this.panelStyle = {
         left: `${rect.left}px`,
         width: `${Math.max(rect.width, 200)}px`,
-        top: flip
-          ? `${Math.max(8, rect.top - maxHeight - 4)}px`
-          : `${rect.bottom + 4}px`,
+        top: `${rect.bottom + 4}px`,
         maxHeight: `${maxHeight}px`,
       };
     }
-    setTimeout(() => this.searchInput?.nativeElement.focus());
+
+    setTimeout(() => this.searchInput?.nativeElement.focus({ preventScroll: true }));
   }
 
   close(): void {
@@ -193,9 +200,13 @@ export class CountrySelectComponent implements ControlValueAccessor {
     if (!insideControl && !insidePanel) this.close();
   }
 
-  @HostListener("window:scroll")
   @HostListener("window:resize")
   onViewportChange(): void {
-    if (this.open) this.close();
+    if (this.open && this.overlay) this.close();
+  }
+
+  @HostListener("window:scroll")
+  onWindowScroll(): void {
+    if (this.open && this.overlay) this.close();
   }
 }
