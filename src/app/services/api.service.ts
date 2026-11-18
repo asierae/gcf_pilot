@@ -11,6 +11,7 @@ import {
   OrganizationForms,
   OrganizationRecord,
 } from "../models/organization.model";
+import { AdminStats } from "../models/admin-stats.model";
 
 interface ApiErrorPayload {
   error?: string;
@@ -526,6 +527,11 @@ export class ApiService {
       },
       false,
     );
+  }
+
+  /** Aggregated system metrics for the admin overview page. */
+  async getAdminStats(): Promise<AdminStats> {
+    return this.request<AdminStats>("/api/admin/stats", { method: "GET" }, true);
   }
 
   // ── Transport ───────────────────────────────────────────────────────────

@@ -188,6 +188,10 @@ Admin (`Authorization: Bearer <API_TOKEN>`):
 - `GET /api/readiness` — every readiness submission joined with its organization
 - `PATCH /api/readiness/:organizationId` — `{ data }`; admin edit that preserves
   `submitted_at` and sends no emails
+- `GET /api/admin/stats` — aggregated dashboard metrics: organization, country,
+  submission, lead and user counts, funding requested/budgeted, status and
+  source breakdowns, entity types, six-month activity, map points and the
+  latest submissions
 - `GET /api/applicants`
 - `GET /api/applicants/:id`
 - `PATCH /api/applicants/:id/status` — `{ status }` (`Pending` / `Passed` /

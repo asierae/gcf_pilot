@@ -88,10 +88,9 @@
       @if (authService.isLoggedIn) {
         @if (authService.currentUserValue?.role === "admin") {
           <a
-            routerLink="/dashboard"
+            routerLink="/dashboard/overview"
             routerLinkActive="active"
-            [routerLinkActiveOptions]="{ exact: true }"
-            class="btn-header"
+            class="btn-header btn-header-dashboard"
             >{{ 'HEADER.DASHBOARD' | translate }}</a
           >
         }
@@ -147,6 +146,23 @@
       >
         <div class="nav-caption" aria-hidden="true">Workspace</div>
         <ul class="nav-menu">
+          @if (authService.currentUserValue?.role === "admin") {
+            <li>
+              <a
+                routerLink="/dashboard/overview"
+                routerLinkActive="active"
+                class="nav-link"
+                [title]="sidebarCollapsed ? 'Dashboard' : ''"
+              >
+                <span class="nav-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M4 20V10M10 20V4M16 20v-7M22 20H2" />
+                  </svg>
+                </span>
+                <span class="nav-label">Dashboard</span>
+              </a>
+            </li>
+          }
           <li>
             <a
               routerLink="/pricing"
@@ -270,7 +286,7 @@
                 routerLinkActive="active"
                 [routerLinkActiveOptions]="{ exact: true }"
                 class="nav-link"
-                [title]="sidebarCollapsed ? 'Dashboard' : ''"
+                [title]="sidebarCollapsed ? 'Accreditation Subm.' : ''"
               >
                 <span class="nav-icon" aria-hidden="true">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
@@ -280,7 +296,7 @@
                     <rect x="14" y="14" width="7" height="7" rx="1.5" />
                   </svg>
                 </span>
-                <span class="nav-label">Dashboard</span>
+                <span class="nav-label">Accreditation Subm.</span>
               </a>
             </li>
             <li>
@@ -288,7 +304,7 @@
                 routerLink="/dashboard/readiness"
                 routerLinkActive="active"
                 class="nav-link"
-                [title]="sidebarCollapsed ? 'Readiness' : ''"
+                [title]="sidebarCollapsed ? 'Readiness Subm.' : ''"
               >
                 <span class="nav-icon" aria-hidden="true">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
@@ -297,7 +313,7 @@
                     <circle cx="15" cy="19" r="2.2" />
                   </svg>
                 </span>
-                <span class="nav-label">Readiness</span>
+                <span class="nav-label">Readiness Subm.</span>
               </a>
             </li>
             <li>

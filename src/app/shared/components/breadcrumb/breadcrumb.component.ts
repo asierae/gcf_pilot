@@ -11,11 +11,13 @@ export interface Crumb {
 
 const ROUTE_MAP: Record<string, Crumb[]> = {
   "/pricing": [{ label: "Plans & Pricing" }],
-  "/stage1": [{ label: "Stage 1" }],
-  "/stage2": [{ label: "Stage 2" }],
-  "/dashboard": [{ label: "Dashboard" }],
+  "/stage1": [{ label: "Pre-screening" }],
+  "/stage2": [{ label: "Accreditation" }],
+  "/dashboard/overview": [{ label: "Dashboard" }],
+  "/dashboard": [{ label: "Accreditation Subm." }],
+  "/dashboard/readiness": [{ label: "Readiness Subm." }],
   "/dashboard/leads": [
-    { label: "Dashboard", link: "/dashboard" },
+    { label: "Dashboard", link: "/dashboard/overview" },
     { label: "Leads" },
   ],
   "/settings/users": [{ label: "Settings" }, { label: "User Management" }],
@@ -48,7 +50,7 @@ export class BreadcrumbComponent {
     if (url.startsWith("/dashboard/submission/")) {
       const ctx = this.breadcrumbService.context();
       this.crumbs = [
-        { label: "Dashboard", link: "/dashboard" },
+        { label: "Accreditation Subm.", link: "/dashboard" },
         { label: ctx ?? "Submission" },
       ];
       return;

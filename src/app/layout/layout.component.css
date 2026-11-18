@@ -464,6 +464,19 @@
     font-size: 0.8rem;
   }
 
+  /* The sidebar already starts with Dashboard on small screens. */
+  .btn-header-dashboard {
+    display: none;
+  }
+
+  .user-badge-btn {
+    padding: 0.3rem 0.5rem 0.3rem 0.3rem;
+  }
+
+  .user-name {
+    font-size: 0.78rem;
+  }
+
   .user-badge {
     display: none;
   }

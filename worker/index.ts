@@ -2786,6 +2786,217 @@ async function ensureProfileUser(
   return { username, created: true };
 }
 
+/** Aggregated, read-only metrics for the admin system overview. */
+async function adminStats(env: Env): Promise<Response> {
+  const [orgResult, applicantResult, readinessResult, leadResult, userResult] =
+    await Promise.all([
+      env.DB.prepare(
+        'SELECT id, name, country, entity_type FROM organizations',
+      ).all<{
+        id: string;
+        name: string;
+        country: string | null;
+        entity_type: string | null;
+      }>(),
+      env.DB.prepare(
+        'SELECT id, created_at, stage1, stage2, admin FROM applicants',
+      ).all<ApplicantRow>(),
+      env.DB.prepare(
+        'SELECT organization_id, submitted_at, data FROM readiness_applications',
+      ).all<{ organization_id: string; submitted_at: string; data: string }>(),
+      env.DB.prepare(
+        'SELECT id, country, status, source, readiness_score, created_at, organization FROM leads',
+      ).all<{
+        id: string;
+        country: string | null;
+        status: string;
+        source: string | null;
+        readiness_score: number | null;
+        created_at: string;
+        organization: string;
+      }>(),
+      env.DB.prepare('SELECT role, status FROM users').all<{
+        role: string;
+        status: string;
+      }>(),
+    ]);
+
+  const orgs = orgResult.results ?? [];
+  const applicants = applicantResult.results ?? [];
+  const readiness = readinessResult.results ?? [];
+  const leads = leadResult.results ?? [];
+  const users = userResult.results ?? [];
+
+  const increment = (target: Record<string, number>, key: string): void => {
+    const value = key.trim() || 'Unspecified';
+    target[value] = (target[value] ?? 0) + 1;
+  };
+  const number = (raw: unknown): number =>
+    typeof raw === 'number' && Number.isFinite(raw) ? raw : 0;
+
+  // Countries: organization profile first, then the pre-screening answers and
+  // readiness submissions for rows that have no profile country yet.
+  const countryCounts: Record<string, number> = {};
+  const entityCounts: Record<string, number> = {};
+  for (const org of orgs) {
+    increment(countryCounts, org.country ?? '');
+    increment(entityCounts, org.entity_type ?? '');
+  }
+  for (const applicant of applicants) {
+    const stage = parseJson<{ data?: JsonObject }>(applicant.stage1, {});
+    const data = stage.data ?? {};
+    if (typeof data.headquartersCountry === 'string' && data.headquartersCountry) {
+      increment(countryCounts, data.headquartersCountry);
+    }
+    if (typeof data.typeOfEntity === 'string' && data.typeOfEntity) {
+      // Only count types that are not already represented in the profile
+      // table; organization profiles are the canonical source.
+      if (!orgs.length) increment(entityCounts, data.typeOfEntity);
+    }
+  }
+  for (const row of readiness) {
+    const data = parseJson<{ metadata?: JsonObject }>(row.data, {});
+    const country = data.metadata?.country;
+    if (typeof country === 'string' && country) increment(countryCounts, country);
+  }
+  for (const lead of leads) {
+    if (lead.country) increment(countryCounts, lead.country);
+  }
+
+  const statusCounts: Record<string, number> = {};
+  let stage2Count = 0;
+  for (const applicant of applicants) {
+    const admin = parseJson<{ status?: string }>(applicant.admin, {});
+    increment(statusCounts, admin.status ?? 'Pending');
+    if (applicant.stage2) stage2Count += 1;
+  }
+
+  const leadStatusCounts: Record<string, number> = {};
+  const leadSourceCounts: Record<string, number> = {};
+  let scoreTotal = 0;
+  let scoreCount = 0;
+  for (const lead of leads) {
+    increment(leadStatusCounts, lead.status);
+    increment(leadSourceCounts, lead.source ?? 'manual');
+    if ((lead.source ?? 'manual') === 'profile' && lead.readiness_score) {
+      scoreTotal += lead.readiness_score;
+      scoreCount += 1;
+    }
+  }
+
+  const userCounts: Record<string, number> = {};
+  const roleCounts: Record<string, number> = {};
+  for (const user of users) {
+    increment(userCounts, user.status);
+    increment(roleCounts, user.role);
+  }
+
+  let fundingRequestedUSD = 0;
+  let budgetPlannedUSD = 0;
+  for (const row of readiness) {
+    const data = parseJson<{ metadata?: JsonObject; budget?: JsonObject }>(
+      row.data,
+      {},
+    );
+    fundingRequestedUSD += number(data.metadata?.requestedAmountUSD);
+    const lineItems = Array.isArray(data.budget?.lineItems)
+      ? (data.budget?.lineItems as JsonObject[])
+      : [];
+    for (const item of lineItems) {
+      budgetPlannedUSD += number(item.unitCostUSD) * number(item.quantity);
+    }
+  }
+
+  // Monthly activity for the last six calendar months.
+  const monthKeys: string[] = [];
+  const now = new Date();
+  for (let offset = 5; offset >= 0; offset -= 1) {
+    const date = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - offset, 1));
+    monthKeys.push(date.toISOString().slice(0, 7));
+  }
+  const monthly = monthKeys.map((key) => ({
+    label: new Date(`${key}-01T00:00:00Z`).toLocaleString('en-US', {
+      month: 'short',
+      timeZone: 'UTC',
+    }),
+    value: 0,
+  }));
+  const countMonth = (date: string): void => {
+    const key = typeof date === 'string' ? date.slice(0, 7) : '';
+    const index = monthKeys.indexOf(key);
+    if (index >= 0) monthly[index].value += 1;
+  };
+  for (const applicant of applicants) countMonth(applicant.created_at);
+  for (const row of readiness) countMonth(row.submitted_at);
+  for (const lead of leads) countMonth(lead.created_at);
+
+  const recent: { id: string; label: string; sub: string; date: string; route: string }[] = [];
+  for (const applicant of applicants) {
+    if (!applicant.stage1) continue;
+    const stage = parseJson<{ data?: JsonObject }>(applicant.stage1, {});
+    const name = stage.data?.applicantName;
+    recent.push({
+      id: applicant.id,
+      label: typeof name === 'string' && name ? name : 'Accreditation submission',
+      sub: 'Pre-screening',
+      date: applicant.created_at,
+      route: '/dashboard/submission/' + encodeURIComponent(applicant.id),
+    });
+  }
+  for (const row of readiness) {
+    recent.push({
+      id: row.organization_id,
+      label: orgs.find((item) => item.id === row.organization_id)?.name ||
+        row.organization_id,
+      sub: 'Readiness submission',
+      date: row.submitted_at,
+      route: '/dashboard/readiness/' + encodeURIComponent(row.organization_id),
+    });
+  }
+  for (const lead of leads) {
+    recent.push({
+      id: lead.id,
+      label: lead.organization || 'Enquiry',
+      sub: (lead.source ?? 'manual') === 'profile' ? 'Profile assessment' : 'Lead',
+      date: lead.created_at,
+      route: '/dashboard/leads',
+    });
+  }
+  recent.sort((a, b) => b.date.localeCompare(a.date));
+
+  const toRanked = (counts: Record<string, number>) =>
+    Object.entries(counts)
+      .map(([label, value]) => ({ label, value }))
+      .sort((a, b) => b.value - a.value)
+      .slice(0, 8);
+
+  return json({
+    organizations: orgs.length,
+    countries: Object.keys(countryCounts).length,
+    accreditationSubmissions: applicants.filter((row) => !!row.stage1).length,
+    readinessSubmissions: readiness.length,
+    stage2Submissions: stage2Count,
+    leads: leads.length,
+    users: users.length,
+    fundingRequestedUSD,
+    budgetPlannedUSD,
+    avgReadinessScore: scoreCount ? Math.round(scoreTotal / scoreCount) : 0,
+    statusCounts,
+    leadStatusCounts,
+    leadSourceCounts,
+    userCounts,
+    roleCounts,
+    entityTypes: toRanked(entityCounts),
+    topCountries: toRanked(countryCounts),
+    mapPoints: Object.entries(countryCounts).map(([country, count]) => ({
+      country,
+      count,
+    })),
+    monthly,
+    recent: recent.slice(0, 6),
+  });
+}
+
 async function createProfileAssessment(
   request: Request,
   env: Env,
@@ -3101,6 +3312,11 @@ async function handleApi(request: Request, env: Env, path: string): Promise<Resp
     if (method === 'POST') return uploadFile(request, env);
     if (method === 'DELETE') return deleteFile(request, env);
     return methodNotAllowed('POST, DELETE');
+  }
+
+  if (path === '/api/admin/stats') {
+    if (method !== 'GET') return methodNotAllowed('GET');
+    return withAdmin(env, request, () => adminStats(env));
   }
 
   if (path === '/api/applicants') {

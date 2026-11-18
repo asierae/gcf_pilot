@@ -6,6 +6,7 @@ import { Stage2Component } from "./pages/stage2/stage2.component";
 import { LoginComponent } from "./pages/login/login.component";
 import { PasswordTokenComponent } from "./pages/auth/password-token/password-token.component";
 import { DashboardComponent } from "./pages/dashboard/dashboard.component";
+import { OverviewDashboardComponent } from "./pages/dashboard/overview/overview-dashboard.component";
 import { SubmissionDetailComponent } from "./pages/dashboard/submission-detail/submission-detail.component";
 import { ReadinessDashboardComponent } from "./pages/dashboard/readiness-dashboard/readiness-dashboard.component";
 import { LeadsImportComponent } from "./pages/dashboard/leads-import/leads-import.component";
@@ -34,6 +35,11 @@ export const routes: Routes = [
         path: "stage2",
         component: Stage2Component,
         canActivate: [authGuard, preScreeningGuard],
+      },
+      {
+        path: "dashboard/overview",
+        component: OverviewDashboardComponent,
+        canActivate: [adminGuard],
       },
       {
         path: "dashboard",
