@@ -112,16 +112,10 @@
               
               <div class="profile-menu-body">
                 <div class="language-selector-wrap">
-                  <label for="lang-select" class="lang-label">
+                  <span class="lang-label">
                     <span class="lang-icon">🌐</span> {{ 'HEADER.LANGUAGE' | translate }}
-                  </label>
-                  <select id="lang-select" class="lang-select" [value]="languageService.currentLanguage" (change)="changeLanguage($event)">
-                    @for (language of languageService.languages; track language.code) {
-                      <option [value]="language.code" [selected]="language.code === languageService.currentLanguage">
-                        {{ language.label }}
-                      </option>
-                    }
-                  </select>
+                  </span>
+                  <app-language-switcher [block]="true" [ariaLabel]="'HEADER.LANGUAGE' | translate" />
                 </div>
               </div>
 

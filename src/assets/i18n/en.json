@@ -16,12 +16,13 @@
       "CONTACT": "Contact",
       "SIGN_IN": "Sign in",
       "CTA": "Get an Initial Assessment",
+      "CTA_SHORT": "Get assessed",
       "MENU": "Toggle navigation",
       "LANGUAGE": "Language"
     },
     "HERO": {
       "EYEBROW": "Green Climate Fund Advisory · Global",
-      "TITLE": "Bridging global capital to <em>high-impact</em> climate projects.",
+      "TITLE": "Bridging global capital to <em>high-impact</em> sustainable projects.",
       "SUB": "Expert guidance for public and private organizations to secure Green Climate Fund (GCF) accreditation and funding.",
       "CTA_PRIMARY": "Get an Initial Assessment",
       "CTA_SECONDARY": "Explore our methodology",

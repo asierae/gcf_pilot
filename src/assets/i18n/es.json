@@ -16,12 +16,13 @@
       "CONTACT": "Contacto",
       "SIGN_IN": "Iniciar sesión",
       "CTA": "Solicitar una evaluación inicial",
+      "CTA_SHORT": "Evaluación inicial",
       "MENU": "Alternar navegación",
       "LANGUAGE": "Idioma"
     },
     "HERO": {
       "EYEBROW": "Asesoría del Fondo Verde para el Clima · Global",
-      "TITLE": "Conectamos el capital global con proyectos climáticos <em>de alto impacto</em>.",
+      "TITLE": "Conectamos el capital global con proyectos sostenibles <em>de alto impacto</em>.",
       "SUB": "Asesoramiento experto para que organizaciones públicas y privadas obtengan la acreditación y la financiación del Fondo Verde para el Clima (GCF).",
       "CTA_PRIMARY": "Solicitar una evaluación inicial",
       "CTA_SECONDARY": "Descubrir nuestra metodología",

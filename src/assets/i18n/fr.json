@@ -16,12 +16,13 @@
       "CONTACT": "Contact",
       "SIGN_IN": "Se connecter",
       "CTA": "Demander une évaluation initiale",
+      "CTA_SHORT": "Évaluation initiale",
       "MENU": "Basculer la navigation",
       "LANGUAGE": "Langue"
     },
     "HERO": {
       "EYEBROW": "Conseil Fonds vert pour le climat · Mondial",
-      "TITLE": "Relier le capital mondial à des projets climatiques <em>à fort impact</em>.",
+      "TITLE": "Relier le capital mondial à des projets durables <em>à fort impact</em>.",
       "SUB": "Un accompagnement expert pour que les organisations publiques et privées obtiennent l'accréditation et les financements du Fonds vert pour le climat (GCF).",
       "CTA_PRIMARY": "Demander une évaluation initiale",
       "CTA_SECONDARY": "Découvrir notre méthodologie",

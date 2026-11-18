@@ -11,12 +11,13 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { ImpactGlobeComponent } from './impact-globe/impact-globe.component';
 import { LanguageService } from '../../services/language.service';
+import { LanguageSwitcherComponent } from '../../shared/components/language-switcher/language-switcher.component';
 import { CONTACT_EMAIL } from '../../config/email.config';
 
 @Component({
   selector: 'app-landing',
   standalone: true,
-  imports: [RouterLink, TranslatePipe, ImpactGlobeComponent],
+  imports: [RouterLink, TranslatePipe, ImpactGlobeComponent, LanguageSwitcherComponent],
   templateUrl: './landing.component.html',
   styleUrl: './landing.component.css',
 })
@@ -102,14 +103,6 @@ export class LandingComponent implements AfterViewInit, OnDestroy {
 
   closeMenu(): void {
     this.menuOpen = false;
-  }
-
-  changeLanguage(event: Event): void {
-    const select = event.target as HTMLSelectElement | null;
-    if (!select) {
-      return;
-    }
-    this.languageService.setLanguage(select.value);
   }
 
   private syncDocumentTitle(): void {

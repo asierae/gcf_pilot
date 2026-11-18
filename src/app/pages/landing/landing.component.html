@@ -37,34 +37,11 @@
     </nav>
 
     <div class="avera-nav-actions">
-      <div class="avera-lang">
-        <span class="avera-lang-icon" aria-hidden="true">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-            <circle cx="12" cy="12" r="8.5" />
-            <path
-              d="M3.5 12h17M12 3.5c2.3 2.3 3.5 5.2 3.5 8.5S14.3 18.2 12 20.5c-2.3-2.3-3.5-5.2-3.5-8.5S9.7 5.8 12 3.5Z"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            />
-          </svg>
-        </span>
-        <select
-          class="avera-lang-select"
-          [attr.aria-label]="'LANDING.NAV.LANGUAGE' | translate"
-          [value]="languageService.currentLanguage"
-          (change)="changeLanguage($event)"
-        >
-          @for (language of languageService.languages; track language.code) {
-            <option [value]="language.code" [selected]="language.code === languageService.currentLanguage">
-              {{ language.label }}
-            </option>
-          }
-        </select>
-      </div>
+      <app-language-switcher [ariaLabel]="'LANDING.NAV.LANGUAGE' | translate" />
 
       <a routerLink="/login" class="avera-nav-login">{{ 'LANDING.NAV.SIGN_IN' | translate }}</a>
       <a routerLink="/stage1" class="avera-btn avera-btn-nav">
-        {{ 'LANDING.NAV.CTA' | translate }} <span aria-hidden="true">→</span>
+        {{ 'LANDING.NAV.CTA_SHORT' | translate }} <span aria-hidden="true">→</span>
       </a>
     </div>
 
@@ -119,7 +96,7 @@
                 <span>{{ 'LANDING.HERO.STAT_CONTINENTS' | translate }}</span>
               </li>
               <li>
-                <strong data-count="38" data-decimals="0">38</strong>
+                <strong data-count="216" data-decimals="0">216</strong>
                 <span>{{ 'LANDING.HERO.STAT_INSTITUTIONS' | translate }}</span>
               </li>
               <li>
@@ -327,7 +304,7 @@
             <span>{{ 'LANDING.EDGE.STAT_CAPITAL' | translate }}</span>
           </div>
           <div>
-            <strong data-count="38" data-decimals="0" data-suffix="+">38+</strong>
+            <strong data-count="216" data-decimals="0" data-suffix="+">216+</strong>
             <span>{{ 'LANDING.EDGE.STAT_INSTITUTIONS' | translate }}</span>
           </div>
           <div>

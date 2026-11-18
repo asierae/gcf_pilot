@@ -11,6 +11,7 @@ import { LanguageService } from "../services/language.service";
 import { TranslatePipe } from '@ngx-translate/core';
 import { BreadcrumbComponent } from "../shared/components/breadcrumb/breadcrumb.component";
 import { ChatComponent } from "../shared/components/chat/chat.component";
+import { LanguageSwitcherComponent } from "../shared/components/language-switcher/language-switcher.component";
 
 @Component({
   selector: "app-layout",
@@ -23,6 +24,7 @@ import { ChatComponent } from "../shared/components/chat/chat.component";
     BreadcrumbComponent,
     ChatComponent,
     TranslatePipe,
+    LanguageSwitcherComponent,
   ],
   templateUrl: "./layout.component.html",
   styleUrl: "./layout.component.css",
@@ -69,10 +71,5 @@ export class LayoutComponent {
 
   closeProfileMenu(): void {
     this.profileMenuOpen = false;
-  }
-
-  changeLanguage(event: Event): void {
-    const selectElement = event.target as HTMLSelectElement;
-    this.languageService.setLanguage(selectElement.value);
   }
 }
