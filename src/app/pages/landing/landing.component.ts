@@ -13,6 +13,7 @@ import { ImpactGlobeComponent } from './impact-globe/impact-globe.component';
 import { LanguageService } from '../../services/language.service';
 import { LanguageSwitcherComponent } from '../../shared/components/language-switcher/language-switcher.component';
 import { CONTACT_EMAIL } from '../../config/email.config';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-landing',
@@ -32,6 +33,8 @@ export class LandingComponent implements AfterViewInit, OnDestroy {
   private counterObserver?: IntersectionObserver;
   private readonly previousTitle = 'Avera — GCF Accreditation Portal';
   private readonly destroyRef = inject(DestroyRef);
+  /** Plans & Pricing is admin-only for now. */
+  readonly authService = inject(AuthService);
 
   constructor(
     private readonly title: Title,

@@ -45,13 +45,6 @@
         >
           Pre-Screening
         </a>
-        <a
-          routerLink="/pricing"
-          routerLinkActive="pub-active"
-          class="pub-nav-link"
-        >
-          Plans &amp; Pricing
-        </a>
         <button
           type="button"
           class="pub-nav-link pub-nav-soon"
@@ -163,22 +156,24 @@
               </a>
             </li>
           }
-          <li>
-            <a
-              routerLink="/pricing"
-              routerLinkActive="active"
-              class="nav-link"
-              [title]="sidebarCollapsed ? 'Plans & Pricing' : ''"
-            >
-              <span class="nav-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M12 3 3 9l9 12 9-12-9-6Z" />
-                  <path d="M3 9h18" />
-                </svg>
-              </span>
-              <span class="nav-label">Plans &amp; Pricing</span>
-            </a>
-          </li>
+          @if (authService.currentUserValue?.role === "admin") {
+            <li>
+              <a
+                routerLink="/pricing"
+                routerLinkActive="active"
+                class="nav-link"
+                [title]="sidebarCollapsed ? 'Plans & Pricing' : ''"
+              >
+                <span class="nav-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 3 3 9l9 12 9-12-9-6Z" />
+                    <path d="M3 9h18" />
+                  </svg>
+                </span>
+                <span class="nav-label">Plans &amp; Pricing</span>
+              </a>
+            </li>
+          }
           <li>
             <a
               routerLink="/stage1"

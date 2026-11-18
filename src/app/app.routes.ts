@@ -72,7 +72,11 @@ export const routes: Routes = [
         component: UserManagementComponent,
         canActivate: [adminGuard],
       },
-      { path: "pricing", component: PricingComponent },
+      {
+        path: "pricing",
+        component: PricingComponent,
+        canActivate: [adminGuard],
+      },
       { path: "readiness", component: ReadinessWizardComponent },
       { path: "my-forms", component: MyFormsComponent, canActivate: [authGuard] },
     ],

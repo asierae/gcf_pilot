@@ -695,9 +695,11 @@
           <a routerLink="/get-assessed" class="avera-btn avera-btn-primary">
             {{ 'LANDING.FINAL.CTA_PRIMARY' | translate }} <span aria-hidden="true">→</span>
           </a>
-          <a routerLink="/pricing" class="avera-btn avera-btn-ghost">
-            {{ 'LANDING.FINAL.CTA_SECONDARY' | translate }}
-          </a>
+          @if (authService.currentUserValue?.role === 'admin') {
+            <a routerLink="/pricing" class="avera-btn avera-btn-ghost">
+              {{ 'LANDING.FINAL.CTA_SECONDARY' | translate }}
+            </a>
+          }
         </div>
       </div>
     </section>
@@ -739,7 +741,9 @@
         <a href="#edge">{{ 'LANDING.FOOTER.LINK_EDGE' | translate }}</a>
         <a href="#reach">{{ 'LANDING.FOOTER.LINK_REACH' | translate }}</a>
         <a href="#contact">{{ 'LANDING.FOOTER.LINK_GUIDANCE' | translate }}</a>
-        <a routerLink="/pricing">{{ 'LANDING.FOOTER.LINK_PLANS' | translate }}</a>
+        @if (authService.currentUserValue?.role === 'admin') {
+          <a routerLink="/pricing">{{ 'LANDING.FOOTER.LINK_PLANS' | translate }}</a>
+        }
       </div>
 
       <div class="avera-footer-col">
