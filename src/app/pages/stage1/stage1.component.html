@@ -1,34 +1,88 @@
-<div class="app-container">
-  <!-- Progress Bar -->
-  <div class="progress-container">
-    <div class="progress-bar">
-      <div class="progress-fill" [style.width.%]="getStepProgress()"></div>
-    </div>
-    <div class="steps-nav">
-      <button
-        *ngFor="let step of steps; let i = index"
-        class="step-btn"
-        [class.active]="currentStep === i"
-        [class.completed]="currentStep > i"
-        (click)="goToStep(i)"
-      >
-        <span class="step-icon"><app-step-icon [name]="step.id" /></span>
-        <span class="step-label">{{ step.title }}</span>
-      </button>
-    </div>
-    <p class="draft-status">
-      @if (draftSaving) {
-        Saving draft…
-      } @else if (draftSavedAt) {
-        Draft saved {{ draftSavedAt | date: 'short' }} · share this page's link to resume later
-      } @else {
-        Your progress is saved automatically as a draft
-      }
-    </p>
-  </div>
+<div class="wizard-shell">
+  <header class="wizard-topbar">
+    <div class="topbar-inner">
+      <a routerLink="/home" class="wizard-brand" aria-label="Avera Capital Access home">
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2.5 21 7.5v9L12 21.5 3 16.5v-9l9-5Z" />
+            <path d="M12 7.5v9" />
+            <path d="M7.5 10v4.5" />
+            <path d="M16.5 10v4.5" />
+          </svg>
+        </span>
+        <span class="brand-text">
+          <span class="brand-name">Pre-accreditation</span>
+          <span class="brand-sub">GCF pre-screening · Stage 1</span>
+        </span>
+      </a>
 
-  <!-- Form -->
-  <main class="main-content">
+      <div class="topbar-actions">
+        <span class="save-state" [class.is-saving]="draftSaving">
+          <span class="save-dot" aria-hidden="true"></span>
+          @if (draftSaving) {
+            Saving draft…
+          } @else if (draftSavedAt) {
+            Draft saved {{ draftSavedAt | date: 'short' }}
+          } @else {
+            Draft saved automatically
+          }
+        </span>
+        <a routerLink="/get-assessed" class="btn btn-ghost">All pathways</a>
+      </div>
+    </div>
+  </header>
+
+  <div class="wizard-body">
+    <nav class="stepper" aria-label="Pre-screening progress">
+      <div class="stepper-meta">
+        <p class="stepper-kicker">GCF pre-accreditation · 2024–2027</p>
+        <p class="stepper-count">Step {{ currentStep + 1 }} of {{ steps.length }}</p>
+      </div>
+
+      <div
+        class="progress-track"
+        role="progressbar"
+        [attr.aria-valuenow]="getStepProgress()"
+        aria-valuemin="0"
+        aria-valuemax="100"
+        aria-label="Pre-screening progress"
+      >
+        <span class="progress-fill" [style.width.%]="getStepProgress()"></span>
+      </div>
+
+      <ol class="step-list">
+        @for (step of steps; track step.id; let i = $index) {
+          <li
+            class="step-pill"
+            [class.is-active]="currentStep === i"
+            [class.is-complete]="currentStep > i"
+          >
+            <button type="button" class="step-button" (click)="goToStep(i)">
+              <span class="step-index">
+                @if (currentStep > i) {
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="m5 13 4 4L19 7" />
+                  </svg>
+                } @else {
+                  {{ i + 1 }}
+                }
+              </span>
+              <span class="step-label">{{ step.title }}</span>
+            </button>
+          </li>
+        }
+      </ol>
+    </nav>
+
+    <main class="main-content">
+      @if (!submitSuccess) {
+        <header class="step-heading">
+          <p class="step-eyebrow">Stage 1 · Pre-screening</p>
+          <h1>{{ steps[currentStep].title }}</h1>
+          <p class="step-subtitle">{{ stepDescriptions[currentStep] }}</p>
+        </header>
+      }
+
     @if (submitSuccess) {
       <div class="success-banner">
         <span class="success-icon" aria-hidden="true">
@@ -980,5 +1034,6 @@
       </div>
     </form>
     }
-  </main>
+    </main>
+  </div>
 </div>

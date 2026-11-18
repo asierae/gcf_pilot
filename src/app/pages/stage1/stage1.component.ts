@@ -1,6 +1,6 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule, Location } from '@angular/common';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import {
   ReactiveFormsModule,
   FormBuilder,
@@ -13,7 +13,6 @@ import { AuthService } from '../../services/auth.service';
 import { OrganizationService } from '../../services/organization.service';
 import { OrganizationRecord } from '../../models/organization.model';
 import { FileUploadComponent } from '../../shared/components/file-upload/file-upload.component';
-import { StepIconComponent } from '../../shared/components/step-icon/step-icon.component';
 import {
   acronymAvailabilityValidator,
   isOrganizationId,
@@ -30,7 +29,7 @@ import {
 @Component({
   selector: 'app-stage1',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, FileUploadComponent, StepIconComponent],
+  imports: [CommonModule, ReactiveFormsModule, FileUploadComponent, RouterLink],
   templateUrl: './stage1.component.html',
   styleUrl: './stage1.component.css'
 })
@@ -61,6 +60,15 @@ export class Stage1Component implements OnInit, OnDestroy {
     { id: 'legal', title: 'Legal Status & Eligibility', icon: '⚖️' },
     { id: 'additional', title: 'Additional Information', icon: '📊' },
     { id: 'fasttrack', title: 'Fast-Track & Engagement', icon: '🚀' },
+  ];
+
+  /** One-line guidance rendered under the active step title. */
+  stepDescriptions = [
+    'Choose how your organization accesses GCF resources and share any nomination or NDA consultation details.',
+    'Provide your legal contact details, entity type and the scope of your operations.',
+    'Confirm your legal status, eligibility and the documents that evidence it.',
+    'Tell us about governance, track record and the institutional capacity you can demonstrate.',
+    'Describe fast-track options, partnerships and your engagement with the GCF so far.',
   ];
 
   countries = [

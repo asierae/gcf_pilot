@@ -1,267 +1,269 @@
-<div class="app-container">
-  @if (submitSuccess) {
-    <div class="success-banner">
-      <span class="success-icon" aria-hidden="true">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="12" r="9" />
-          <path d="m8.5 12 2.5 2.5 4.5-5" />
-        </svg>
-      </span>
-      <h2>Application Submitted Successfully</h2>
-      <p>Your full accreditation application (Stage 1 + Stage 2) has been saved.</p>
-    </div>
-  } @else {
-    <div class="form-intro">
-      <h2>Full Form (Stage 1 & Stage 2)</h2>
-      <p>Complete pre-screening sections and accreditation requirements. You can navigate freely to review or edit any section.</p>
-    </div>
+<div class="wizard-shell">
+  <header class="wizard-topbar">
+    <div class="topbar-inner">
+      <a routerLink="/home" class="wizard-brand" aria-label="Avera Capital Access home">
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2.5 21 7.5v9L12 21.5 3 16.5v-9l9-5Z" />
+            <path d="M12 7.5v9" />
+            <path d="M7.5 10v4.5" />
+            <path d="M16.5 10v4.5" />
+          </svg>
+        </span>
+        <span class="brand-text">
+          <span class="brand-name">Accreditation Application</span>
+          <span class="brand-sub">GCF full form · Stage 1 &amp; 2</span>
+        </span>
+      </a>
 
-    <div class="wizard-layout-with-timeline" [class.applicant-layout]="!isAdmin">
-      @if (isAdmin) {
-      <aside class="wizard-sidebar">
-        <div class="wizard-progress-header">
-          <div class="progress-meta">
-            <span>Step {{ currentStep + 1 }} of {{ totalSteps }}</span>
-            <span class="progress-pct">{{ stepProgress | number:'1.0-0' }}%</span>
-          </div>
-          <div class="progress-bar">
-            <div class="progress-fill" [style.width.%]="stepProgress"></div>
-          </div>
+      <div class="topbar-actions">
+        <span class="save-state">
+          <span class="save-dot" aria-hidden="true"></span>
+          Step {{ currentStep + 1 }} of {{ totalSteps }}
+        </span>
+        @if (!isAdmin && viewMode === 'form') {
+          <button type="button" class="btn btn-ghost" (click)="backToGrid()">
+            All sections
+          </button>
+        }
+        <a routerLink="/get-assessed" class="btn btn-ghost">All pathways</a>
+      </div>
+    </div>
+  </header>
+
+  <div class="wizard-body">
+    @if (submitSuccess) {
+      <div class="success-banner">
+        <span class="success-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="9" />
+            <path d="m8.5 12 2.5 2.5 4.5-5" />
+          </svg>
+        </span>
+        <h2>Application Submitted Successfully</h2>
+        <p>Your full accreditation application (Stage 1 + Stage 2) has been saved.</p>
+      </div>
+    } @else {
+      <nav class="stepper" aria-label="Application progress">
+        <div class="stepper-meta">
+          <p class="stepper-kicker">GCF accreditation · Pre-screening + full application</p>
+          <p class="stepper-count">{{ stepProgress | number: '1.0-0' }}% complete</p>
+        </div>
+
+        <div
+          class="progress-track"
+          role="progressbar"
+          [attr.aria-valuenow]="stepProgress"
+          aria-valuemin="0"
+          aria-valuemax="100"
+          [attr.aria-label]="'Application ' + (stepProgress | number: '1.0-0') + ' percent complete'"
+        >
+          <span class="progress-fill" [style.width.%]="stepProgress"></span>
         </div>
 
         @for (group of navGroups; track group.id) {
-          <div class="nav-group">
-            <h3 class="nav-group-label">{{ group.label }}</h3>
-            <ul class="nav-steps">
+          <div class="step-group">
+            <p class="step-group-label">{{ group.label }}</p>
+            <ol class="step-list step-list--many">
               @for (item of group.steps; track item.id) {
-                <li>
-                  <button
-                    type="button"
-                    class="nav-step-btn"
-                    [class.active]="currentStep === item.index"
-                    [class.completed]="currentStep > item.index"
-                    [class.entry-point]="item.index === stage2EntryStep"
-                    (click)="goToStep(item.index)"
-                  >
-                    <span class="nav-step-icon"><app-step-icon [name]="item.id" /></span>
-                    <span class="nav-step-text">
-                      <span class="nav-step-title">{{ item.title }}</span>
-                      @if (item.subtitle) {
-                        <span class="nav-step-subtitle">{{ item.subtitle }}</span>
+                <li
+                  class="step-pill"
+                  [class.is-active]="currentStep === item.index"
+                  [class.is-complete]="currentStep > item.index"
+                >
+                  <button type="button" class="step-button" (click)="goToStep(item.index)">
+                    <span class="step-index">
+                      @if (currentStep > item.index) {
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                          <path d="m5 13 4 4L19 7" />
+                        </svg>
+                      } @else {
+                        {{ item.index + 1 }}
                       }
                     </span>
-                    @if (currentStep > item.index) {
-                      <span class="nav-step-check">✓</span>
-                    }
+                    <span class="step-label">{{ item.title }}</span>
                   </button>
                 </li>
               }
-            </ul>
+            </ol>
           </div>
         }
-      </aside>
-      }
+      </nav>
 
-      <div class="wizard-content">
-        @if (viewMode === 'grid') {
-          <div class="card-grid-container">
-            @for (group of navGroups; track group.id) {
-              <div class="card-grid-group">
-                <h3>{{ group.label }}</h3>
-                <div class="card-grid">
-                  @for (item of group.steps; track item.id) {
-                    <div class="section-card" [class.completed]="currentStep > item.index" (click)="goToStep(item.index)">
-                      <div class="card-icon"><app-step-icon [name]="item.id" /></div>
-                      <div class="card-details">
-                        <h4>{{ item.title }}</h4>
-                        @if (item.subtitle) {
-                          <span class="card-subtitle">{{ item.subtitle }}</span>
-                        }
-                      </div>
-                      <div class="card-status">
-                        @if (currentStep > item.index) {
-                          <span class="status-badge complete">✓ Completed</span>
-                        } @else {
-                          <span class="status-badge pending">Pending</span>
-                        }
-                      </div>
+      @if (viewMode === 'grid') {
+        <div class="card-grid-container">
+          @for (group of navGroups; track group.id) {
+            <div class="card-grid-group">
+              <h3>{{ group.label }}</h3>
+              <div class="card-grid">
+                @for (item of group.steps; track item.id) {
+                  <div class="section-card" [class.completed]="currentStep > item.index" (click)="goToStep(item.index)">
+                    <div class="card-icon"><app-step-icon [name]="item.id" /></div>
+                    <div class="card-details">
+                      <h4>{{ item.title }}</h4>
+                      @if (item.subtitle) {
+                        <span class="card-subtitle">{{ item.subtitle }}</span>
+                      }
                     </div>
-                  }
-                </div>
-              </div>
-            }
-          </div>
-        } @else {
-          @if (!isAdmin) {
-            <button type="button" class="btn-back" (click)="backToGrid()">← Back to Sections</button>
-          }
-          <div class="content-header">
-          <span class="content-step-badge">Step {{ currentStep + 1 }}/{{ totalSteps }}</span>
-          <h2>{{ currentStepLabel }}</h2>
-        </div>
-
-        <form [formGroup]="form" (ngSubmit)="onSubmit()">
-          @if (isStage1Step) {
-            <app-stage1-steps
-              [form]="form"
-              [stepIndex]="currentStep"
-              [entityId]="applicantId"
-              [identityLocked]="identityLocked"
-            ></app-stage1-steps>
-          } @else if (currentScreeningStep) {
-            <div class="form-step">
-              <div class="section-header">
-                <p>{{ currentScreeningStep.description }}</p>
-              </div>
-
-              @if (currentScreeningStep.screeningRequirement) {
-                <div class="alert-box info">
-                  <strong>Screening requirement:</strong> {{ currentScreeningStep.screeningRequirement }}
-                </div>
-              }
-
-              @if (currentStep === stage2EntryStep) {
-                <div class="form-card">
-                  <h3>Application Settings</h3>
-                  <div class="form-group">
-                    <label>Maximum E&S Risk Category of Intended Projects <span class="required">*</span></label>
-                    <select formControlName="maxRiskCategory">
-                      <option value="">Select category...</option>
-                      <option value="high">High risk (Category A / Intermediation-1)</option>
-                      <option value="medium">Medium risk (Category B / Intermediation-2)</option>
-                      <option value="minimal">Minimal to no risk (Category C / Intermediation-3)</option>
-                    </select>
-                  </div>
-                </div>
-              }
-
-              @for (question of currentScreeningStep.questions; track question.key) {
-                <div class="form-card screening-question">
-                  <div class="form-group">
-                    <label>{{ question.label }} <span class="required">*</span></label>
-                    @if (question.help) {
-                      <p class="field-help">{{ question.help }}</p>
-                    }
-                    <div class="yes-no-group">
-                      <label class="radio-option compact">
-                        <input type="radio" [formControlName]="question.key + '_answer'" value="yes">
-                        <span class="radio-custom"></span>
-                        <span>Yes</span>
-                      </label>
-                      <label class="radio-option compact">
-                        <input type="radio" [formControlName]="question.key + '_answer'" value="no">
-                        <span class="radio-custom"></span>
-                        <span>No</span>
-                      </label>
-                    </div>
-                  </div>
-                  <div class="form-group">
-                    <label>Narrative explanation (reference supporting documentation) <span class="required">*</span></label>
-                    <textarea
-                      [formControlName]="question.key + '_narrative'"
-                      rows="4"
-                      placeholder="Provide a narrative explanation with reference to supporting documentation (100–500 words)..."
-                    ></textarea>
-                  </div>
-                  <app-file-upload
-                    [formControlName]="question.key + '_files'"
-                    [entityId]="applicantId"
-                    [section]="currentScreeningStep.id"
-                    label="Upload mandatory / supplementary evidence"
-                    hint="Drag & drop or click to browse"
-                  />
-                </div>
-              }
-
-              @if (currentScreeningStep.sectionStatusKey && currentScreeningStep.sectionCommentsKey) {
-                <div class="form-card section-feedback">
-                  <div class="form-group">
-                    <label>Section status <span class="required">*</span></label>
-                    <div class="status-group">
-                      <label class="radio-option compact">
-                        <input type="radio" [formControlName]="currentScreeningStep.sectionStatusKey" value="complete">
-                        <span class="radio-custom"></span>
-                        <span class="status-badge complete">Complete</span>
-                      </label>
-                      <label class="radio-option compact">
-                        <input type="radio" [formControlName]="currentScreeningStep.sectionStatusKey" value="pending">
-                        <span class="radio-custom"></span>
+                    <div class="card-status">
+                      @if (currentStep > item.index) {
+                        <span class="status-badge complete">✓ Completed</span>
+                      } @else {
                         <span class="status-badge pending">Pending</span>
-                      </label>
+                      }
                     </div>
                   </div>
-                  <div class="form-group">
-                    <label>Comments</label>
-                    <textarea
-                      [formControlName]="currentScreeningStep.sectionCommentsKey"
-                      rows="4"
-                      placeholder="No comments yet. Please share your feedback."
-                    ></textarea>
-                  </div>
-                </div>
-              }
-
-              @if (currentStep === totalSteps - 1) {
-                <div class="submit-section">
-                  <button type="submit" class="btn-submit">
-                    <span>Submit Application</span>
-                    <span class="btn-icon" aria-hidden="true">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M21 3 10.5 13.5M21 3l-6.5 18-4-8-8-4L21 3Z" />
-                      </svg>
-                    </span>
-                  </button>
-                </div>
-              }
+                }
+              </div>
             </div>
           }
-
-          <div class="form-navigation">
-            @if (currentStep > 0) {
-              <button type="button" class="btn-nav btn-prev" (click)="prevStep()">← Previous</button>
-            }
-            <div class="nav-spacer"></div>
-            @if (currentStep < totalSteps - 1) {
-              <button type="button" class="btn-nav btn-next" (click)="nextStep()">Next →</button>
-            }
-          </div>
-        </form>
-        }
-      </div>
-
-      <aside class="timeline-sidebar">
-        <h3>Application Status</h3>
-        <div class="timeline">
-          <div class="timeline-item active">
-            <div class="timeline-marker"></div>
-            <div class="timeline-content">
-              <h4>Pre-Screening (Stage 1)</h4>
-              <p>In Progress</p>
-            </div>
-          </div>
-          <div class="timeline-item">
-            <div class="timeline-marker"></div>
-            <div class="timeline-content">
-              <h4>Full Form (Stage 2)</h4>
-              <p>Pending</p>
-            </div>
-          </div>
-          <div class="timeline-item">
-            <div class="timeline-marker"></div>
-            <div class="timeline-content">
-              <h4>Accreditation</h4>
-              <p>Pending</p>
-            </div>
-          </div>
-          <div class="timeline-item">
-            <div class="timeline-marker"></div>
-            <div class="timeline-content">
-              <h4>Project Planning</h4>
-              <p>Pending</p>
-            </div>
-          </div>
         </div>
-      </aside>
-    </div>
-  }
+      } @else {
+        <div class="wizard-content">
+          @if (!isAdmin) {
+            <button type="button" class="btn btn-ghost btn-back" (click)="backToGrid()">
+              ← Back to sections
+            </button>
+          }
+
+          <header class="step-heading">
+            <p class="step-eyebrow">
+              {{ isStage1Step ? 'Stage 1 · Pre-screening' : 'Stage 2 · Accreditation requirements' }}
+            </p>
+            <h1>{{ currentStepLabel }}</h1>
+            <p class="step-subtitle">
+              @if (currentScreeningStep) {
+                {{ currentScreeningStep.description }}
+              } @else {
+                Complete the pre-screening sections and accreditation requirements. Use the section map above to jump to any part.
+              }
+            </p>
+          </header>
+
+          <form [formGroup]="form" (ngSubmit)="onSubmit()">
+            @if (isStage1Step) {
+              <app-stage1-steps
+                [form]="form"
+                [stepIndex]="currentStep"
+                [entityId]="applicantId"
+                [identityLocked]="identityLocked"
+              ></app-stage1-steps>
+            } @else if (currentScreeningStep) {
+              <div class="form-step">
+                @if (currentScreeningStep.screeningRequirement) {
+                  <div class="alert-box info">
+                    <strong>Screening requirement:</strong> {{ currentScreeningStep.screeningRequirement }}
+                  </div>
+                }
+
+                @if (currentStep === stage2EntryStep) {
+                  <div class="form-card">
+                    <h3>Application Settings</h3>
+                    <div class="form-group">
+                      <label>Maximum E&amp;S Risk Category of Intended Projects <span class="required">*</span></label>
+                      <select formControlName="maxRiskCategory">
+                        <option value="">Select category...</option>
+                        <option value="high">High risk (Category A / Intermediation-1)</option>
+                        <option value="medium">Medium risk (Category B / Intermediation-2)</option>
+                        <option value="minimal">Minimal to no risk (Category C / Intermediation-3)</option>
+                      </select>
+                    </div>
+                  </div>
+                }
+
+                @for (question of currentScreeningStep.questions; track question.key) {
+                  <div class="form-card screening-question">
+                    <div class="form-group">
+                      <label>{{ question.label }} <span class="required">*</span></label>
+                      @if (question.help) {
+                        <p class="field-help">{{ question.help }}</p>
+                      }
+                      <div class="yes-no-group">
+                        <label class="radio-option compact">
+                          <input type="radio" [formControlName]="question.key + '_answer'" value="yes">
+                          <span class="radio-custom"></span>
+                          <span>Yes</span>
+                        </label>
+                        <label class="radio-option compact">
+                          <input type="radio" [formControlName]="question.key + '_answer'" value="no">
+                          <span class="radio-custom"></span>
+                          <span>No</span>
+                        </label>
+                      </div>
+                    </div>
+                    <div class="form-group">
+                      <label>Narrative explanation (reference supporting documentation) <span class="required">*</span></label>
+                      <textarea
+                        [formControlName]="question.key + '_narrative'"
+                        rows="4"
+                        placeholder="Provide a narrative explanation with reference to supporting documentation (100–500 words)..."
+                      ></textarea>
+                    </div>
+                    <app-file-upload
+                      [formControlName]="question.key + '_files'"
+                      [entityId]="applicantId"
+                      [section]="currentScreeningStep.id"
+                      label="Upload mandatory / supplementary evidence"
+                      hint="Drag & drop or click to browse"
+                    />
+                  </div>
+                }
+
+                @if (currentScreeningStep.sectionStatusKey && currentScreeningStep.sectionCommentsKey) {
+                  <div class="form-card section-feedback">
+                    <div class="form-group">
+                      <label>Section status <span class="required">*</span></label>
+                      <div class="status-group">
+                        <label class="radio-option compact">
+                          <input type="radio" [formControlName]="currentScreeningStep.sectionStatusKey" value="complete">
+                          <span class="radio-custom"></span>
+                          <span class="status-badge complete">Complete</span>
+                        </label>
+                        <label class="radio-option compact">
+                          <input type="radio" [formControlName]="currentScreeningStep.sectionStatusKey" value="pending">
+                          <span class="radio-custom"></span>
+                          <span class="status-badge pending">Pending</span>
+                        </label>
+                      </div>
+                    </div>
+                    <div class="form-group">
+                      <label>Comments</label>
+                      <textarea
+                        [formControlName]="currentScreeningStep.sectionCommentsKey"
+                        rows="4"
+                        placeholder="No comments yet. Please share your feedback."
+                      ></textarea>
+                    </div>
+                  </div>
+                }
+
+                @if (currentStep === totalSteps - 1) {
+                  <div class="submit-section">
+                    <button type="submit" class="btn-submit">
+                      <span>Submit Application</span>
+                      <span class="btn-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+                          <path d="M21 3 10.5 13.5M21 3l-6.5 18-4-8-8-4L21 3Z" />
+                        </svg>
+                      </span>
+                    </button>
+                  </div>
+                }
+              </div>
+            }
+
+            <div class="form-navigation">
+              @if (currentStep > 0) {
+                <button type="button" class="btn-nav btn-prev" (click)="prevStep()">← Previous</button>
+              }
+              <div class="nav-spacer"></div>
+              @if (currentStep < totalSteps - 1) {
+                <button type="button" class="btn-nav btn-next" (click)="nextStep()">Next →</button>
+              }
+            </div>
+          </form>
+        </div>
+      }
+    }
+  </div>
 </div>
