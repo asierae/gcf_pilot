@@ -169,6 +169,11 @@ export class UserManagementComponent implements OnInit, OnDestroy {
     }
   }
 
+  /** Invitations only make sense for accounts that have not set a password yet. */
+  canInvite(user: ApiUser): boolean {
+    return !user.hasPassword && user.status === 'pending';
+  }
+
   async sendInvitation(user: ApiUser): Promise<void> {
     if (this.invitingId) return;
     this.invitingId = user.id;

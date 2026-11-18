@@ -161,19 +161,21 @@
               </td>
               <td class="col-date">{{ formatDate(user.createdAt) }}</td>
               <td class="col-actions">
-                <button
-                  type="button"
-                  class="btn-invite"
-                  (click)="sendInvitation(user)"
-                  [disabled]="invitingId === user.id"
-                  [title]="'Send invitation to ' + user.email"
-                >
-                  @if (invitingId === user.id) {
-                    Sending…
-                  } @else {
-                    Send invitation
-                  }
-                </button>
+                @if (canInvite(user)) {
+                  <button
+                    type="button"
+                    class="btn-invite"
+                    (click)="sendInvitation(user)"
+                    [disabled]="invitingId === user.id"
+                    [title]="'Send invitation to ' + user.email"
+                  >
+                    @if (invitingId === user.id) {
+                      Sending…
+                    } @else {
+                      Send invitation
+                    }
+                  </button>
+                }
                 <button
                   type="button"
                   class="btn-action btn-edit-user"
