@@ -99,10 +99,36 @@
           </span>
         </a>
 
+        <!-- Profile assessment -->
+        <a routerLink="/profile-assessment" class="ga-card">
+          <div class="ga-card-top">
+            <span class="ga-card-step">{{ 'GET_ASSESSED.STEP' | translate }} 03</span>
+            <span class="ga-card-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 3 5 6v5.5c0 4.4 2.9 8.2 7 9.5 4.1-1.3 7-5.1 7-9.5V6l-7-3Z" />
+                <path d="M9 12h6M9 15h4" />
+              </svg>
+            </span>
+          </div>
+          <h2>{{ 'GET_ASSESSED.PROFILE_TITLE' | translate }}</h2>
+          <p>{{ 'GET_ASSESSED.PROFILE_BODY' | translate }}</p>
+          <p class="ga-meta">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="12" cy="12" r="8.5" />
+              <path d="M12 7.5V12l3 2" />
+            </svg>
+            {{ 'GET_ASSESSED.PROFILE_META' | translate }}
+          </p>
+          <span class="ga-card-cta">
+            {{ 'GET_ASSESSED.PROFILE_CTA' | translate }}
+            <span aria-hidden="true">→</span>
+          </span>
+        </a>
+
         <!-- Contact -->
         <a [href]="contactMailto" class="ga-card">
           <div class="ga-card-top">
-            <span class="ga-card-step">{{ 'GET_ASSESSED.STEP' | translate }} 03</span>
+            <span class="ga-card-step">{{ 'GET_ASSESSED.STEP' | translate }} 04</span>
             <span class="ga-card-icon" aria-hidden="true">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M20 12.5a7.5 7.5 0 0 1-10.9 6.7L4 20l.9-4.9A7.5 7.5 0 1 1 20 12.5Z" />
