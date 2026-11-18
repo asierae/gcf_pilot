@@ -55,6 +55,25 @@ export interface LeadRecord {
   climateSpecialty: string;
   comments: string;
   status: LeadStatus;
+  /** "Check my profile" enquiry fields. */
+  contactName?: string;
+  contactRole?: string;
+  objective?: string;
+  financing?: string;
+  timeline?: string;
+  operatingHistory?: string;
+  availableDocuments?: string[];
+  projectStage?: string;
+  projectCountry?: string;
+  projectSector?: string;
+  accessType?: string;
+  complianceIssues?: string;
+  challenge?: string;
+  engagement?: string;
+  consent?: boolean;
+  readinessScore?: number;
+  suggestedRoute?: string;
+  source?: string;
   createdAt?: string;
   updatedAt?: string;
 }

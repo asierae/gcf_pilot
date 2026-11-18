@@ -31,6 +31,27 @@ CREATE TABLE IF NOT EXISTS leads (
   climate_specialty TEXT NOT NULL DEFAULT '',
   comments          TEXT NOT NULL DEFAULT '',
   status            TEXT NOT NULL DEFAULT 'Pending',
+  -- "Check my profile" enquiry (see the profile-assessment page).
+  contact_name      TEXT NOT NULL DEFAULT '',
+  contact_role      TEXT NOT NULL DEFAULT '',
+  objective         TEXT NOT NULL DEFAULT '',
+  financing         TEXT NOT NULL DEFAULT '',
+  timeline          TEXT NOT NULL DEFAULT '',
+  operating_history TEXT NOT NULL DEFAULT '',
+  -- JSON array of the documents/capabilities the institution already has.
+  available_documents TEXT NOT NULL DEFAULT '[]',
+  project_stage     TEXT NOT NULL DEFAULT '',
+  project_country   TEXT NOT NULL DEFAULT '',
+  project_sector    TEXT NOT NULL DEFAULT '',
+  access_type       TEXT NOT NULL DEFAULT '',
+  compliance_issues TEXT NOT NULL DEFAULT '',
+  challenge         TEXT NOT NULL DEFAULT '',
+  engagement        TEXT NOT NULL DEFAULT '',
+  consent           INTEGER NOT NULL DEFAULT 0,
+  readiness_score   INTEGER NOT NULL DEFAULT 0,
+  suggested_route   TEXT NOT NULL DEFAULT '',
+  -- manual | import | profile
+  source            TEXT NOT NULL DEFAULT 'manual',
   created_at        TEXT NOT NULL,
   updated_at        TEXT NOT NULL
 );

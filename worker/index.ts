@@ -148,6 +148,24 @@ interface LeadRecord {
   climateSpecialty: string;
   comments: string;
   status: string;
+  contactName: string;
+  contactRole: string;
+  objective: string;
+  financing: string;
+  timeline: string;
+  operatingHistory: string;
+  availableDocuments: string[];
+  projectStage: string;
+  projectCountry: string;
+  projectSector: string;
+  accessType: string;
+  complianceIssues: string;
+  challenge: string;
+  engagement: string;
+  consent: boolean;
+  readinessScore: number;
+  suggestedRoute: string;
+  source: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -164,6 +182,24 @@ interface LeadRow {
   climate_specialty: string | null;
   comments: string | null;
   status: string | null;
+  contact_name: string | null;
+  contact_role: string | null;
+  objective: string | null;
+  financing: string | null;
+  timeline: string | null;
+  operating_history: string | null;
+  available_documents: string | null;
+  project_stage: string | null;
+  project_country: string | null;
+  project_sector: string | null;
+  access_type: string | null;
+  compliance_issues: string | null;
+  challenge: string | null;
+  engagement: string | null;
+  consent: number | null;
+  readiness_score: number | null;
+  suggested_route: string | null;
+  source: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -453,6 +489,24 @@ function rowToLead(row: LeadRow): LeadRecord {
     climateSpecialty: row.climate_specialty ?? '',
     comments: row.comments ?? '',
     status: row.status ?? 'Pending',
+    contactName: row.contact_name ?? '',
+    contactRole: row.contact_role ?? '',
+    objective: row.objective ?? '',
+    financing: row.financing ?? '',
+    timeline: row.timeline ?? '',
+    operatingHistory: row.operating_history ?? '',
+    availableDocuments: parseJson<string[]>(row.available_documents, []),
+    projectStage: row.project_stage ?? '',
+    projectCountry: row.project_country ?? '',
+    projectSector: row.project_sector ?? '',
+    accessType: row.access_type ?? '',
+    complianceIssues: row.compliance_issues ?? '',
+    challenge: row.challenge ?? '',
+    engagement: row.engagement ?? '',
+    consent: row.consent === 1,
+    readinessScore: row.readiness_score ?? 0,
+    suggestedRoute: row.suggested_route ?? '',
+    source: row.source ?? 'manual',
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
@@ -2254,6 +2308,11 @@ function normalizeLeadInput(raw: unknown): Omit<LeadRecord, 'id' | 'createdAt' |
     typeof lead[key] === 'string' ? (lead[key] as string) : '';
 
   const status = read('status');
+  const documents = Array.isArray(lead.availableDocuments)
+    ? lead.availableDocuments.filter((item): item is string => typeof item === 'string')
+    : typeof lead.availableDocuments === 'string'
+      ? parseJson<string[]>(lead.availableDocuments, [])
+      : [];
 
   return {
     region: read('region'),
@@ -2266,7 +2325,33 @@ function normalizeLeadInput(raw: unknown): Omit<LeadRecord, 'id' | 'createdAt' |
     climateSpecialty: read('climateSpecialty'),
     comments: read('comments'),
     status: LEAD_STATUSES.includes(status) ? status : 'Pending',
+    contactName: read('contactName'),
+    contactRole: read('contactRole'),
+    objective: read('objective'),
+    financing: read('financing'),
+    timeline: read('timeline'),
+    operatingHistory: read('operatingHistory'),
+    availableDocuments: documents,
+    projectStage: read('projectStage'),
+    projectCountry: read('projectCountry'),
+    projectSector: read('projectSector'),
+    accessType: read('accessType'),
+    complianceIssues: read('complianceIssues'),
+    challenge: read('challenge'),
+    engagement: read('engagement'),
+    consent: lead.consent === true,
+    readinessScore: readInt(lead.readinessScore, 0, 100),
+    suggestedRoute: read('suggestedRoute'),
+    source: ['manual', 'import', 'profile'].includes(read('source'))
+      ? read('source')
+      : 'manual',
   };
+}
+
+function readInt(raw: unknown, min: number, max: number): number {
+  const value = typeof raw === 'number' ? raw : Number(raw);
+  if (!Number.isFinite(value)) return min;
+  return Math.min(max, Math.max(min, Math.round(value)));
 }
 
 async function listLeads(env: Env): Promise<Response> {
@@ -2300,8 +2385,12 @@ async function createLeads(request: Request, env: Env): Promise<Response> {
       env.DB.prepare(
         `INSERT INTO leads
            (id, region, country, organization, acronym, entity_type, website,
-            contact_email, climate_specialty, comments, status, created_at, updated_at)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            contact_email, climate_specialty, comments, status,
+            contact_name, contact_role, objective, financing, timeline,
+            operating_history, available_documents, project_stage, project_country,
+            project_sector, access_type, compliance_issues, challenge, engagement,
+            consent, readiness_score, suggested_route, source, created_at, updated_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       ).bind(
         lead.id,
         lead.region,
@@ -2314,6 +2403,24 @@ async function createLeads(request: Request, env: Env): Promise<Response> {
         lead.climateSpecialty,
         lead.comments,
         lead.status,
+        lead.contactName,
+        lead.contactRole,
+        lead.objective,
+        lead.financing,
+        lead.timeline,
+        lead.operatingHistory,
+        JSON.stringify(lead.availableDocuments),
+        lead.projectStage,
+        lead.projectCountry,
+        lead.projectSector,
+        lead.accessType,
+        lead.complianceIssues,
+        lead.challenge,
+        lead.engagement,
+        lead.consent ? 1 : 0,
+        lead.readinessScore,
+        lead.suggestedRoute,
+        lead.source,
         lead.createdAt,
         lead.updatedAt,
       ),
@@ -2336,7 +2443,12 @@ async function updateLead(
     `UPDATE leads
         SET region = ?, country = ?, organization = ?, acronym = ?, entity_type = ?,
             website = ?, contact_email = ?, climate_specialty = ?, comments = ?,
-            status = ?, updated_at = ?
+            status = ?, contact_name = ?, contact_role = ?, objective = ?,
+            financing = ?, timeline = ?, operating_history = ?,
+            available_documents = ?, project_stage = ?, project_country = ?,
+            project_sector = ?, access_type = ?, compliance_issues = ?,
+            challenge = ?, engagement = ?, consent = ?, readiness_score = ?,
+            suggested_route = ?, source = ?, updated_at = ?
       WHERE id = ?`,
   )
     .bind(
@@ -2350,12 +2462,195 @@ async function updateLead(
       lead.climateSpecialty,
       lead.comments,
       lead.status,
+      lead.contactName,
+      lead.contactRole,
+      lead.objective,
+      lead.financing,
+      lead.timeline,
+      lead.operatingHistory,
+      JSON.stringify(lead.availableDocuments),
+      lead.projectStage,
+      lead.projectCountry,
+      lead.projectSector,
+      lead.accessType,
+      lead.complianceIssues,
+      lead.challenge,
+      lead.engagement,
+      lead.consent ? 1 : 0,
+      lead.readinessScore,
+      lead.suggestedRoute,
+      lead.source,
       now,
       id,
     )
     .run();
 
   return empty();
+}
+
+/* ------------------------------------------------------------------ *
+ * Profile assessment (public enquiry form)
+ * ------------------------------------------------------------------ */
+
+/**
+ * Documents / capabilities the public profile form can tick. The score
+ * weighting mirrors the indicative screening used by the form itself.
+ */
+const PROFILE_DOCUMENT_WEIGHTS: Record<string, number> = {
+  'Audited financial statements': 15,
+  'Governance and internal control policies': 15,
+  'Environmental and social risk management framework': 15,
+  'Anti-money laundering / anti-corruption policies': 15,
+  'Climate project or financing track record': 10,
+};
+
+const PROFILE_PROJECT_OBJECTIVES = [
+  'Project financing / investment',
+  'Project development / proposal support',
+];
+
+const PROFILE_ACCREDITATION_OBJECTIVE = 'GCF accreditation and institutional readiness';
+
+function isProfileProject(lead: Omit<LeadRecord, 'id' | 'createdAt' | 'updatedAt'>): boolean {
+  return PROFILE_PROJECT_OBJECTIVES.includes(lead.objective);
+}
+
+function isProfileAccreditation(
+  lead: Omit<LeadRecord, 'id' | 'createdAt' | 'updatedAt'>,
+): boolean {
+  return lead.objective === PROFILE_ACCREDITATION_OBJECTIVE;
+}
+
+/** Indicative 0–100 readiness score, computed server-side. */
+function computeProfileScore(
+  lead: Omit<LeadRecord, 'id' | 'createdAt' | 'updatedAt'>,
+): number {
+  let score = 0;
+
+  if (lead.operatingHistory === '3+ years') score += 20;
+  else if (lead.operatingHistory === '1–2 years') score += 10;
+
+  for (const document of lead.availableDocuments) {
+    score += PROFILE_DOCUMENT_WEIGHTS[document] ?? 0;
+  }
+
+  if (isProfileProject(lead)) {
+    if (lead.projectStage === 'Feasibility study available') score += 5;
+    else if (
+      lead.projectStage === 'Investment proposal prepared' ||
+      lead.projectStage === 'Seeking financing / financial close'
+    ) {
+      score += 10;
+    }
+  } else if (isProfileAccreditation(lead)) {
+    if (lead.accessType && lead.accessType !== 'Not yet determined') score += 10;
+  } else {
+    score += 10;
+  }
+
+  return Math.min(100, score);
+}
+
+/** Advisory pathway suggested from the enquiry answers. */
+function suggestProfileRoute(
+  lead: Omit<LeadRecord, 'id' | 'createdAt' | 'updatedAt'>,
+): string {
+  if (lead.complianceIssues !== 'No known material issues') {
+    return 'Confidential compliance clarification';
+  }
+  if (isProfileAccreditation(lead)) {
+    return 'Institutional Accreditation Readiness Diagnostic';
+  }
+  if (isProfileProject(lead)) {
+    return 'Project Investment Readiness Review';
+  }
+  if (lead.objective === 'Institutional due diligence / risk intelligence') {
+    return 'Institutional Integrity & Risk Intelligence Review';
+  }
+  if (lead.objective === 'Strategic partnerships / capital mobilisation') {
+    return 'Capital Mobilisation & Partnership Strategy';
+  }
+  return 'Strategic Advisory Scoping';
+}
+
+async function createProfileAssessment(
+  request: Request,
+  env: Env,
+): Promise<Response> {
+  const body = await readJson<{ lead?: unknown }>(request);
+  const lead = normalizeLeadInput(body.lead);
+
+  if (!lead.organization.trim()) {
+    throw new HttpError(400, 'Please enter your organisation name.');
+  }
+  if (!EMAIL_PATTERN.test(lead.contactEmail)) {
+    throw new HttpError(400, 'Please enter a valid professional contact email.');
+  }
+  if (!lead.consent) {
+    throw new HttpError(400, 'Consent is required to submit this enquiry.');
+  }
+
+  const now = new Date().toISOString();
+  const assessed = {
+    ...lead,
+    status: 'Pending',
+    source: 'profile',
+    readinessScore: computeProfileScore(lead),
+    suggestedRoute: suggestProfileRoute(lead),
+  };
+  const created: LeadRecord = {
+    ...assessed,
+    id: generateId(),
+    createdAt: now,
+    updatedAt: now,
+  };
+
+  await env.DB.prepare(
+    `INSERT INTO leads
+       (id, region, country, organization, acronym, entity_type, website,
+        contact_email, climate_specialty, comments, status,
+        contact_name, contact_role, objective, financing, timeline,
+        operating_history, available_documents, project_stage, project_country,
+        project_sector, access_type, compliance_issues, challenge, engagement,
+        consent, readiness_score, suggested_route, source, created_at, updated_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+  )
+    .bind(
+      created.id,
+      created.region,
+      created.country,
+      created.organization,
+      created.acronym,
+      created.entityType,
+      created.website,
+      created.contactEmail,
+      created.climateSpecialty,
+      created.comments,
+      created.status,
+      created.contactName,
+      created.contactRole,
+      created.objective,
+      created.financing,
+      created.timeline,
+      created.operatingHistory,
+      JSON.stringify(created.availableDocuments),
+      created.projectStage,
+      created.projectCountry,
+      created.projectSector,
+      created.accessType,
+      created.complianceIssues,
+      created.challenge,
+      created.engagement,
+      created.consent ? 1 : 0,
+      created.readinessScore,
+      created.suggestedRoute,
+      created.source,
+      created.createdAt,
+      created.updatedAt,
+    )
+    .run();
+
+  return json({ lead: created }, 201);
 }
 
 async function deleteLeads(request: Request, env: Env): Promise<Response> {
@@ -2684,6 +2979,11 @@ async function handleApi(request: Request, env: Env, path: string): Promise<Resp
     if (method === 'POST') return withAdmin(env, request, () => createLeads(request, env));
     if (method === 'DELETE') return withAdmin(env, request, () => deleteLeads(request, env));
     return methodNotAllowed('GET, POST, DELETE');
+  }
+
+  if (path === '/api/profile-assessment') {
+    if (method !== 'POST') return methodNotAllowed('POST');
+    return createProfileAssessment(request, env);
   }
 
   const leadMatch = /^\/api\/leads\/([^/]+)$/.exec(path);

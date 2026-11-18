@@ -37,6 +37,14 @@ so it is safe to re-run after every update. It also seeds the legacy demo
 accounts (`hatyja`, `sarah.admin`, `hatyja2`, …) with their old passwords;
 those accounts can immediately sign in and should be re-invited or reset.
 
+Databases created before the "Check my profile" feature need one extra step —
+`CREATE TABLE IF NOT EXISTS` cannot add columns to an existing table:
+
+```powershell
+npx wrangler d1 execute averacapital-db --local --file=worker/migrations/2026-11-18_leads_profile_fields.sql
+npx wrangler d1 execute averacapital-db --remote --file=worker/migrations/2026-11-18_leads_profile_fields.sql
+```
+
 ## 3. Configure secrets
 
 ```powershell
@@ -148,6 +156,10 @@ Public (no token):
 - `POST /api/send-review-email` — `{ to, subject, body }`; sends from
   `NOREPLY_EMAIL` with `reply_to: CONTACT_EMAIL`. Returns 501 when
   `RESEND_API_KEY` is missing so the UI falls back to Gmail compose.
+- `POST /api/profile-assessment` — `{ lead }` (public "Check my profile"
+  enquiry). Requires organisation, a valid email and `consent: true`. Stores a
+  `leads` row with `source: 'profile'` and computes the indicative readiness
+  score and suggested advisory route server-side. Returns `{ lead }`.
 - `POST /api/login` — `{ username, password }` → `{ user, token? }`. Portal
   accounts are verified against the D1 `users` table; `token` (the admin API
   token) is only returned for admins. The env-based `ADMIN_ACCOUNTS` /

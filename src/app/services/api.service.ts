@@ -507,6 +507,21 @@ export class ApiService {
     );
   }
 
+  /** Public "Check my profile" enquiry — creates a lead without a token. */
+  async submitProfileAssessment(
+    lead: Omit<LeadRecord, "id" | "createdAt" | "updatedAt">,
+  ): Promise<LeadRecord> {
+    const payload = await this.request<{ lead?: LeadRecord }>(
+      "/api/profile-assessment",
+      {
+        method: "POST",
+        body: JSON.stringify({ lead }),
+      },
+      false,
+    );
+    return payload.lead as LeadRecord;
+  }
+
   // ── Transport ───────────────────────────────────────────────────────────
 
   private async request<T>(
