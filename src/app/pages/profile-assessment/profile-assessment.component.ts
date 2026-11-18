@@ -307,6 +307,8 @@ export class ProfileAssessmentComponent implements OnDestroy {
   errorMessage = '';
   /** Set by the API so the summary matches what was stored. */
   result: LeadRecord | null = null;
+  accountCreated = false;
+  accountUsername = '';
 
   private previousTitle = 'Avera Capital Access';
 
@@ -395,6 +397,8 @@ export class ProfileAssessmentComponent implements OnDestroy {
     this.currentStep = 0;
     this.submitted = false;
     this.result = null;
+    this.accountCreated = false;
+    this.accountUsername = '';
     this.errorMessage = '';
     this.scrollToTop();
   }
@@ -495,8 +499,10 @@ export class ProfileAssessmentComponent implements OnDestroy {
     };
 
     try {
-      const lead = await this.api.submitProfileAssessment(payload);
-      this.result = lead;
+      const response = await this.api.submitProfileAssessment(payload);
+      this.result = response.lead;
+      this.accountCreated = response.userCreated;
+      this.accountUsername = response.username ?? '';
       this.submitted = true;
       this.notification.success('Your profile assessment has been received.');
       this.scrollToTop();

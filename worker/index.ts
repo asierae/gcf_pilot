@@ -2573,6 +2573,71 @@ function suggestProfileRoute(
   return 'Strategic Advisory Scoping';
 }
 
+/** Build a valid portal username from the contact email's local part. */
+function profileUsername(email: string): string {
+  const local = (email.split('@')[0] ?? '')
+    .toLowerCase()
+    .replace(/[^a-z0-9._-]/g, '')
+    .slice(0, 30);
+  return local.length >= 3 ? local : `user${local}`;
+}
+
+/**
+ * Ensure the enquiry has a portal account. Unknown emails get an inactive
+ * (pending, passwordless) applicant account for the admin to approve manually.
+ */
+async function ensureProfileUser(
+  env: Env,
+  lead: LeadRecord,
+): Promise<{ username: string; created: boolean }> {
+  const existing = await findUser(env, 'email', lead.contactEmail);
+  if (existing) {
+    return { username: existing.username, created: false };
+  }
+
+  const base = profileUsername(lead.contactEmail);
+  let username = base;
+  for (let suffix = 2; (await findUser(env, 'username', username)) && suffix < 100; suffix += 1) {
+    username = `${base}-${suffix}`.slice(0, 40);
+  }
+
+  let organizationId: string | null = null;
+  if (lead.acronym.trim()) {
+    try {
+      const organization = await env.DB.prepare(
+        'SELECT id FROM organizations WHERE acronym_norm = ? LIMIT 1',
+      )
+        .bind(lead.acronym.trim().toLowerCase())
+        .first<{ id: string }>();
+      organizationId = organization?.id ?? null;
+    } catch {
+      // An older database may not have the organizations table/column yet.
+    }
+  }
+
+  const now = new Date().toISOString();
+  await env.DB.prepare(
+    `INSERT INTO users (
+       id, username, email, password_hash, role, status,
+       organization_id, organization_name, organization_acronym,
+       created_at, updated_at
+     ) VALUES (?, ?, ?, NULL, 'applicant', 'pending', ?, ?, ?, ?, ?)`,
+  )
+    .bind(
+      `usr-${crypto.randomUUID()}`,
+      username,
+      lead.contactEmail.trim().toLowerCase(),
+      organizationId,
+      lead.organization,
+      lead.acronym.trim() || null,
+      now,
+      now,
+    )
+    .run();
+
+  return { username, created: true };
+}
+
 async function createProfileAssessment(
   request: Request,
   env: Env,
@@ -2650,7 +2715,24 @@ async function createProfileAssessment(
     )
     .run();
 
-  return json({ lead: created }, 201);
+  // An unknown contact becomes an inactive applicant account so an admin can
+  // review and send an invitation manually. Never fail the saved lead if the
+  // account cannot be provisioned (e.g. users table not applied yet).
+  let account: { username: string; created: boolean } = { username: '', created: false };
+  try {
+    account = await ensureProfileUser(env, created);
+  } catch (error) {
+    console.error('Could not provision a portal account for the profile enquiry', error);
+  }
+
+  return json(
+    {
+      lead: created,
+      userCreated: account.created,
+      username: account.username || undefined,
+    },
+    201,
+  );
 }
 
 async function deleteLeads(request: Request, env: Env): Promise<Response> {

@@ -501,6 +501,16 @@ textarea {
   line-height: 1.55;
 }
 
+.alert-box.account-notice {
+  border-color: var(--app-accent-line);
+  background: var(--app-accent-soft);
+  color: var(--app-text);
+}
+
+.alert-box.account-notice strong {
+  color: var(--app-accent);
+}
+
 /* ── Navigation ── */
 .form-navigation {
   display: flex;

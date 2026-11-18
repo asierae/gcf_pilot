@@ -61,6 +61,13 @@ export interface UserTokenInfo {
   organizationName?: string;
 }
 
+/** Result of a public profile enquiry: the lead plus account provisioning info. */
+export interface ProfileAssessmentResponse {
+  lead: LeadRecord;
+  userCreated: boolean;
+  username?: string;
+}
+
 /**
  * HTTP client for the Cloudflare Worker API (D1 + R2).
  *
@@ -510,8 +517,8 @@ export class ApiService {
   /** Public "Check my profile" enquiry — creates a lead without a token. */
   async submitProfileAssessment(
     lead: Omit<LeadRecord, "id" | "createdAt" | "updatedAt">,
-  ): Promise<LeadRecord> {
-    const payload = await this.request<{ lead?: LeadRecord }>(
+  ): Promise<ProfileAssessmentResponse> {
+    return this.request<ProfileAssessmentResponse>(
       "/api/profile-assessment",
       {
         method: "POST",
@@ -519,7 +526,6 @@ export class ApiService {
       },
       false,
     );
-    return payload.lead as LeadRecord;
   }
 
   // ── Transport ───────────────────────────────────────────────────────────

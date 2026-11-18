@@ -159,7 +159,10 @@ Public (no token):
 - `POST /api/profile-assessment` — `{ lead }` (public "Check my profile"
   enquiry). Requires organisation, a valid email and `consent: true`. Stores a
   `leads` row with `source: 'profile'` and computes the indicative readiness
-  score and suggested advisory route server-side. Returns `{ lead }`.
+  score and suggested advisory route server-side. Returns `{ lead,
+  userCreated, username }`. When the contact email does not belong to a portal
+  account yet, a passwordless `applicant` user with status `pending` is created
+  for manual approval through Settings → Users.
 - `POST /api/login` — `{ username, password }` → `{ user, token? }`. Portal
   accounts are verified against the D1 `users` table; `token` (the admin API
   token) is only returned for admins. The env-based `ADMIN_ACCOUNTS` /

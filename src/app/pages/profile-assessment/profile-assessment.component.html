@@ -424,6 +424,14 @@
           </p>
         </div>
 
+        @if (accountCreated) {
+          <div class="alert-box account-notice">
+            A portal access request has been created for <strong>{{ state.contactEmail }}</strong>@if (accountUsername) {
+              (username <strong>{{ accountUsername }}</strong>)
+            }. The account is inactive until an Avera administrator approves it and sends an invitation.
+          </div>
+        }
+
         <div class="result-grid">
           <div class="form-card result-card">
             <p class="result-kicker">Suggested next step</p>
