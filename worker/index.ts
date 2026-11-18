@@ -1291,29 +1291,34 @@ async function login(request: Request, env: Env): Promise<Response> {
     if (account.status === 'suspended') {
       return json({ error: 'This account is suspended. Contact the team.' }, 403);
     }
-    if (!(await verifyPassword(password, account.password_hash))) {
-      return json({ error: 'Invalid username or password.' }, 401);
-    }
-    if (account.status === 'pending') {
-      return json(
-        {
-          error:
-            'This account has not been activated yet. Use the invitation link in your email to set a password.',
-        },
-        403,
-      );
+    if (await verifyPassword(password, account.password_hash)) {
+      if (account.status === 'pending') {
+        return json(
+          {
+            error:
+              'This account has not been activated yet. Use the invitation link in your email to set a password.',
+          },
+          403,
+        );
+      }
+
+      return json({
+        user: publicUser(account),
+        token: account.role === 'admin' ? env.API_TOKEN : undefined,
+      });
     }
 
-    return json({
-      user: publicUser(account),
-      token: account.role === 'admin' ? env.API_TOKEN : undefined,
-    });
+    // The D1 row exists (e.g. seeded from the old demo store) but the password
+    // does not match. Legacy env credentials still win, so applying the new
+    // schema can never lock an existing administrator out.
+    if (!checkCredentials(env, username, password)) {
+      return json({ error: 'Invalid username or password.' }, 401);
+    }
+  } else if (!checkCredentials(env, username, password)) {
+    return json({ error: 'Invalid username or password.' }, 401);
   }
 
   // Legacy administrators configured through env vars.
-  if (!checkCredentials(env, username, password)) {
-    return json({ error: 'Invalid username or password.' }, 401);
-  }
   if (!env.API_TOKEN) {
     return json(
       { error: 'API_TOKEN is not configured on the Worker. Run: wrangler secret put API_TOKEN' },
