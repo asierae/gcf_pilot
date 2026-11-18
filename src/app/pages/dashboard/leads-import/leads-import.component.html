@@ -333,6 +333,7 @@
             <th>Climate Specialty</th>
             <th>Comments</th>
             <th>Status</th>
+            <th>Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -471,6 +472,21 @@
                   {{ status }}
                 </option>
               </select>
+            </td>
+            <td>
+              <button
+                type="button"
+                class="btn-open-lead"
+                (click)="openLeadDetail(lead)"
+                [attr.aria-label]="'Open ' + lead.organization"
+                title="Open lead details"
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M2 12s3.6-6.5 10-6.5S22 12 22 12s-3.6 6.5-10 6.5S2 12 2 12Z" />
+                  <circle cx="12" cy="12" r="2.5" />
+                </svg>
+                <span>Open</span>
+              </button>
             </td>
           </tr>
         </tbody>
@@ -721,6 +737,128 @@
             [disabled]="addFormSaving"
           >
             {{ addFormSaving ? "Saving…" : "Add lead" }}
+          </button>
+        </footer>
+      }
+    </aside>
+  </div>
+
+  <!-- ── Lead detail editor ── -->
+  <div class="detail-layer" [class.is-open]="detailOpen">
+    <div class="drawer-backdrop" (click)="closeLeadDetail()" aria-hidden="true"></div>
+    <aside
+      class="detail-drawer"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="lead-detail-title"
+    >
+      <header class="drawer-head">
+        <div>
+          <p class="page-eyebrow">Lead detail</p>
+          <h3 id="lead-detail-title">{{ detailLead?.organization || 'Lead' }}</h3>
+          <p *ngIf="detailLead">
+            Created {{ detailLead.createdAt | date: 'medium' }} ·
+            {{ detailLead.source || 'manual' }} enquiry
+          </p>
+        </div>
+        <button
+          type="button"
+          class="drawer-close"
+          (click)="closeLeadDetail()"
+          aria-label="Close lead details"
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true">
+            <path d="M6 6l12 12M18 6 6 18" />
+          </svg>
+        </button>
+      </header>
+
+      @if (detailLead) {
+        <div class="detail-body">
+          <p class="detail-note">
+            Every field below is editable. Changes are saved to the leads table.
+          </p>
+
+          @for (section of detailSections; track section.title) {
+            <section class="detail-section">
+              <h4>{{ section.title }}</h4>
+              <div class="add-lead-grid">
+                @for (field of section.fields; track field.key) {
+                  <label
+                    class="add-field"
+                    [class.add-field-wide]="field.wide"
+                  >
+                    <span>{{ field.label }}</span>
+                    @if (field.key === 'challenge' || field.key === 'comments') {
+                      <textarea
+                        class="add-input add-textarea"
+                        rows="3"
+                        [(ngModel)]="detailLead[field.key]"
+                      ></textarea>
+                    } @else {
+                      <input
+                        class="add-input"
+                        [type]="field.type || 'text'"
+                        [(ngModel)]="detailLead[field.key]"
+                      />
+                    }
+                  </label>
+                }
+
+                <label class="add-field add-field-wide">
+                  <span>Available documents / capabilities (comma separated)</span>
+                  <input class="add-input" [(ngModel)]="detailDocumentsText" />
+                </label>
+              </div>
+            </section>
+          }
+
+          <section class="detail-section">
+            <h4>Assessment &amp; pipeline</h4>
+            <div class="add-lead-grid">
+              <label class="add-field">
+                <span>Status</span>
+                <select class="add-input add-select" [(ngModel)]="detailLead.status">
+                  <option *ngFor="let s of statusOptions" [value]="s">{{ s }}</option>
+                </select>
+              </label>
+              <label class="add-field">
+                <span>Readiness score</span>
+                <input class="add-input" type="number" min="0" max="100" [(ngModel)]="detailLead.readinessScore" />
+              </label>
+              <label class="add-field add-field-wide">
+                <span>Suggested route</span>
+                <input class="add-input" [(ngModel)]="detailLead.suggestedRoute" />
+              </label>
+              <label class="add-field">
+                <span>Source</span>
+                <input class="add-input" [(ngModel)]="detailLead.source" />
+              </label>
+              <label class="add-field">
+                <span>Consent given</span>
+                <span class="detail-consent">
+                  {{ detailLead.consent ? 'Yes' : 'No' }}
+                </span>
+              </label>
+            </div>
+          </section>
+
+          @if (detailError) {
+            <p class="add-form-error">{{ detailError }}</p>
+          }
+        </div>
+
+        <footer class="drawer-foot">
+          <button type="button" class="btn-ghost" (click)="closeLeadDetail()">
+            Cancel
+          </button>
+          <button
+            type="button"
+            class="btn-primary"
+            (click)="saveLeadDetail()"
+            [disabled]="detailSaving"
+          >
+            {{ detailSaving ? "Saving…" : "Save changes" }}
           </button>
         </footer>
       }

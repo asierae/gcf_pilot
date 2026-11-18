@@ -54,6 +54,106 @@ export class LeadsImportComponent implements OnInit, OnDestroy {
   addFormSaving = false;
   addFormError = "";
 
+  // Lead detail editor
+  detailOpen = false;
+  detailLead: LeadRecord | null = null;
+  detailDocumentsText = "";
+  detailSaving = false;
+  detailError = "";
+  private previousDetailOverflow = "";
+
+  readonly detailSections: {
+    title: string;
+    fields: { key: keyof LeadRecord; label: string; wide?: boolean; type?: string }[];
+  }[] = [
+    {
+      title: "Institution",
+      fields: [
+        { key: "organization", label: "Organization", wide: true },
+        { key: "acronym", label: "Acronym" },
+        { key: "entityType", label: "Entity type" },
+        { key: "region", label: "Region" },
+        { key: "country", label: "Country" },
+        { key: "website", label: "Website", type: "url" },
+      ],
+    },
+    {
+      title: "Enquiry",
+      fields: [
+        { key: "contactName", label: "Contact name" },
+        { key: "contactRole", label: "Contact role" },
+        { key: "contactEmail", label: "Contact email", type: "email" },
+        { key: "climateSpecialty", label: "Climate specialty", wide: true },
+        { key: "objective", label: "Primary objective", wide: true },
+        { key: "financing", label: "Indicative financing need" },
+        { key: "timeline", label: "Intended timeline" },
+        { key: "operatingHistory", label: "Operating history" },
+        { key: "projectStage", label: "Project stage" },
+        { key: "projectCountry", label: "Project country" },
+        { key: "projectSector", label: "Project sector" },
+        { key: "accessType", label: "Access type" },
+        { key: "complianceIssues", label: "Compliance declaration", wide: true },
+        { key: "engagement", label: "Preferred next step", wide: true },
+      ],
+    },
+    {
+      title: "Notes",
+      fields: [
+        { key: "challenge", label: "Challenge / support requested", wide: true },
+        { key: "comments", label: "Internal comments", wide: true },
+      ],
+    },
+  ];
+
+  openLeadDetail(lead: LeadRecord): void {
+    this.detailLead = { ...lead };
+    this.detailDocumentsText = (lead.availableDocuments ?? []).join(", ");
+    this.detailError = "";
+    this.detailOpen = true;
+    this.previousDetailOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+  }
+
+  closeLeadDetail(): void {
+    this.detailOpen = false;
+    this.detailLead = null;
+    document.body.style.overflow = this.previousDetailOverflow;
+  }
+
+  async saveLeadDetail(): Promise<void> {
+    const lead = this.detailLead;
+    if (!lead?.id) return;
+
+    this.detailSaving = true;
+    this.detailError = "";
+
+    const updated: LeadRecord = {
+      ...lead,
+      availableDocuments: this.detailDocumentsText
+        .split(",")
+        .map((item) => item.trim())
+        .filter(Boolean),
+    };
+
+    const index = this.savedLeads.findIndex((item) => item.id === lead.id);
+    try {
+      const { id, createdAt, updatedAt, ...payload } = updated;
+      await this.storageService.updateLead(lead.id, payload);
+      if (index !== -1) {
+        this.savedLeads[index] = {
+          ...updated,
+          updatedAt: new Date().toISOString(),
+        };
+      }
+      this.successMessage = `Lead "${updated.organization}" updated.`;
+      this.closeLeadDetail();
+    } catch {
+      this.detailError = "Could not save this lead. Please try again.";
+    } finally {
+      this.detailSaving = false;
+    }
+  }
+
   openDrawer(tab: "import" | "single"): void {
     this.activeTab = tab;
     this.drawerOpen = true;
@@ -69,13 +169,18 @@ export class LeadsImportComponent implements OnInit, OnDestroy {
 
   @HostListener("document:keydown.escape")
   onEscape(): void {
-    if (this.drawerOpen) {
+    if (this.detailOpen) {
+      this.closeLeadDetail();
+    } else if (this.drawerOpen) {
       this.closeDrawer();
     }
   }
 
   ngOnDestroy(): void {
     document.body.style.overflow = this.previousBodyOverflow;
+    if (this.detailOpen) {
+      document.body.style.overflow = this.previousDetailOverflow;
+    }
   }
 
   dismissMessages(): void {
