@@ -182,6 +182,16 @@ a {
   color: var(--teal);
 }
 
+.avera-nav-mobile-actions {
+  display: none;
+}
+
+.avera-nav-mobile-login {
+  font-size: 15px;
+  font-weight: 500;
+  color: rgba(212, 228, 236, 0.82);
+}
+
 .avera-burger {
   display: none;
   flex-direction: column;
@@ -2355,6 +2365,29 @@ a {
   }
 
   .avera-nav-actions .avera-btn {
+    display: none;
+  }
+
+  .avera-nav-login {
+    display: none;
+  }
+
+  .avera-nav-mobile-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    width: 100%;
+    margin-top: 6px;
+    padding-top: 20px;
+    border-top: 1px solid var(--line);
+  }
+
+  .avera-nav-mobile-actions .avera-btn {
+    width: 100%;
+    height: 46px;
+  }
+
+  .avera-nav-mobile-actions .avera-btn::after {
     display: none;
   }
 

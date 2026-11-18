@@ -34,6 +34,15 @@
       <a href="#portal" (click)="closeMenu()">{{ 'LANDING.NAV.PORTAL' | translate }}</a>
       <a href="#readiness" (click)="closeMenu()">{{ 'LANDING.NAV.READINESS' | translate }}</a>
       <a href="#contact" (click)="closeMenu()">{{ 'LANDING.NAV.CONTACT' | translate }}</a>
+
+      <div class="avera-nav-mobile-actions">
+        <a routerLink="/login" class="avera-nav-mobile-login" (click)="closeMenu()">
+          {{ 'LANDING.NAV.SIGN_IN' | translate }}
+        </a>
+        <a routerLink="/stage1" class="avera-btn avera-btn-nav" (click)="closeMenu()">
+          {{ 'LANDING.NAV.CTA_SHORT' | translate }} <span aria-hidden="true">→</span>
+        </a>
+      </div>
     </nav>
 
     <div class="avera-nav-actions">
