@@ -15,7 +15,7 @@ import { ReadinessWizardComponent } from "./pages/readiness/readiness-wizard.com
 import { GetAssessedComponent } from "./pages/get-assessed/get-assessed.component";
 import { ProfileAssessmentComponent } from "./pages/profile-assessment/profile-assessment.component";
 import { MyFormsComponent } from "./pages/my-forms/my-forms.component";
-import { adminGuard, authGuard } from "./guards/auth.guard";
+import { adminGuard, authGuard, preScreeningGuard } from "./guards/auth.guard";
 
 export const routes: Routes = [
   { path: "login", component: LoginComponent },
@@ -30,7 +30,11 @@ export const routes: Routes = [
     component: LayoutComponent,
     children: [
       { path: "stage1", component: Stage1Component },
-      { path: "stage2", component: Stage2Component, canActivate: [authGuard] },
+      {
+        path: "stage2",
+        component: Stage2Component,
+        canActivate: [authGuard, preScreeningGuard],
+      },
       {
         path: "dashboard",
         component: DashboardComponent,

@@ -1,3 +1,5 @@
+import type { SubmissionStatus } from './applicant.model';
+
 /**
  * An organization is the entity that fills the forms. Its id is also the R2
  * folder (`organizations/<id>/...`) and the id of the pre-screening applicant
@@ -29,6 +31,8 @@ export interface OrganizationForms {
   stage1: FormSubmissionSummary | null;
   stage2: FormSubmissionSummary | null;
   readiness: FormSubmissionSummary | null;
+  /** Admin decision on the pre-screening form; gates access to Accreditation. */
+  preScreeningStatus: SubmissionStatus;
   /** Last draft save per form, null when there is no draft. */
   drafts: Record<'stage1' | 'readiness', string | null>;
 }

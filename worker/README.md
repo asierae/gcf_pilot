@@ -145,7 +145,9 @@ Public (no token):
 - `PUT /api/organizations/:id` — create on first write, then update every field
   except `name` / `acronym` (they identify the organization)
 - `GET /api/organizations/:id/forms` — everything the organization has filled
-  in: profile, stage 1, stage 2, readiness and the last draft timestamp per form
+  in: profile, stage 1 (Pre-screening), stage 2 (Accreditation), readiness, the
+  last draft timestamp per form and `preScreeningStatus` (`Pending` / `Passed` /
+  `Failed`). Only `Passed` unlocks Accreditation in the sidebar and route guard.
 - `GET /api/organizations/acronym-available?acronym=&exclude=` — uniqueness check
 - `GET | PUT | DELETE /api/drafts/(stage1|readiness)/:organizationId` — draft
   autosave, keyed by the organization id
@@ -188,7 +190,11 @@ Admin (`Authorization: Bearer <API_TOKEN>`):
   `submitted_at` and sends no emails
 - `GET /api/applicants`
 - `GET /api/applicants/:id`
-- `PATCH /api/applicants/:id/status` — `{ status }`
+- `PATCH /api/applicants/:id/status` — `{ status }` (`Pending` / `Passed` /
+  `Failed`); on a real change it emails the organization contact (stage 1
+  contact email, organization profile email, or linked user email) from
+  `NOREPLY_EMAIL` with `reply_to: CONTACT_EMAIL`. Skipped without
+  `RESEND_API_KEY`; a mail failure never fails the status update.
 - `PATCH /api/applicants/:id/stage1` — `{ data, updatedAt? }`
 - `PATCH /api/applicants/:id/review-notes` — `{ sectionId, note }`
 - `PATCH /api/applicants/:id/review-sent` — `{ recipient }`

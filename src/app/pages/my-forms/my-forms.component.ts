@@ -82,7 +82,7 @@ export class MyFormsComponent implements OnInit {
     return [
       this.card(
         "stage1",
-        "Pre-accreditation",
+        "Pre-screening",
         "Stage 1 general information, legal status and fast-track eligibility.",
         "/stage1",
         forms.stage1?.submittedAt ?? null,
@@ -157,6 +157,13 @@ export class MyFormsComponent implements OnInit {
       return current.toLocaleString("en-US", { style: "currency", currency: "USD" });
     }
     return String(current);
+  }
+
+  /** True once the organization has a submission or a saved draft. */
+  get hasActivity(): boolean {
+    return this.cards.some(
+      (card) => card.submittedAt !== null || card.draftAt !== null,
+    );
   }
 
   statusOf(card: FormCard): "submitted" | "draft" | "empty" {

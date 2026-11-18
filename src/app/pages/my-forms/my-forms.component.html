@@ -22,6 +22,18 @@
   @if (loading) {
     <p class="muted">Loading your forms…</p>
   } @else if (!error) {
+    @if (!hasActivity) {
+      <section class="empty-forms">
+        <span class="empty-icon" aria-hidden="true">✦</span>
+        <h2>Start by getting to know your profile</h2>
+        <p>
+          Choose a pathway — a short profile assessment, a readiness check or
+          accreditation — and we will map the next steps for
+          {{ organizationName || "your organization" }}.
+        </p>
+        <a routerLink="/get-assessed" class="btn btn-primary">Explore pathways →</a>
+      </section>
+    } @else {
     <div class="form-grid">
       @for (card of cards; track card.key) {
         <article class="form-card" [class.is-submitted]="statusOf(card) === 'submitted'">
@@ -77,10 +89,13 @@
         </article>
       }
     </div>
+    }
 
-    <p class="foot-note">
-      Need to change a submitted form? Open it and submit again — the latest version replaces the
-      previous one for your organization.
-    </p>
+    @if (hasActivity) {
+      <p class="foot-note">
+        Need to change a submitted form? Open it and submit again — the latest version replaces the
+        previous one for your organization.
+      </p>
+    }
   }
 </div>

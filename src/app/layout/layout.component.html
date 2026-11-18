@@ -95,6 +95,9 @@
             >{{ 'HEADER.DASHBOARD' | translate }}</a
           >
         }
+        @if (organizationName) {
+          <span class="header-org-name" [title]="organizationName">{{ organizationName }}</span>
+        }
         <div class="profile-menu-wrap">
           <button type="button" class="user-badge-btn" (click)="toggleProfileMenu()">
             <span class="user-avatar">{{ authService.currentUserValue?.username?.charAt(0)?.toUpperCase() }}</span>
@@ -165,7 +168,11 @@
               routerLink="/stage1"
               routerLinkActive="active"
               class="nav-link"
-              [title]="sidebarCollapsed ? 'Stage 1' : ''"
+              [title]="
+                sidebarCollapsed
+                  ? 'Pre-screening · ' + preScreeningStatusLabel
+                  : 'Pre-screening'
+              "
             >
               <span class="nav-icon" aria-hidden="true">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
@@ -174,24 +181,52 @@
                   <path d="m9 13 2.2 2.2L15.5 11" />
                 </svg>
               </span>
-              <span class="nav-label">Stage 1</span>
+              <span class="nav-label">Pre-screening</span>
+              @if (authService.currentUserValue?.role === "applicant") {
+                <span
+                  class="nav-status"
+                  [class]="'nav-status status-' + preScreeningStatus.toLowerCase()"
+                  [title]="'Pre-screening: ' + preScreeningStatusLabel"
+                >{{ preScreeningStatusLabel }}</span>
+              }
             </a>
           </li>
           <li>
-            <a
-              routerLink="/stage2"
-              routerLinkActive="active"
-              class="nav-link"
-              [title]="sidebarCollapsed ? 'Stage 2' : ''"
-            >
-              <span class="nav-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8l-5-5Z" />
-                  <path d="M14 3v5h5M9 13h6M9 17h6" />
-                </svg>
+            @if (accreditationUnlocked) {
+              <a
+                routerLink="/stage2"
+                routerLinkActive="active"
+                class="nav-link"
+                [title]="sidebarCollapsed ? 'Accreditation' : ''"
+              >
+                <span class="nav-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8l-5-5Z" />
+                    <path d="M14 3v5h5M9 13h6M9 17h6" />
+                  </svg>
+                </span>
+                <span class="nav-label">Accreditation</span>
+              </a>
+            } @else {
+              <span
+                class="nav-link nav-link-locked"
+                aria-disabled="true"
+                [title]="
+                  'Pass pre-screening to unlock Accreditation (currently ' +
+                  preScreeningStatusLabel.toLowerCase() +
+                  ')'
+                "
+              >
+                <span class="nav-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="5" y="10" width="14" height="11" rx="2" />
+                    <path d="M8 10V7a4 4 0 0 1 8 0v3" />
+                  </svg>
+                </span>
+                <span class="nav-label">Accreditation</span>
+                <span class="nav-lock" aria-hidden="true">🔒</span>
               </span>
-              <span class="nav-label">Stage 2</span>
-            </a>
+            }
           </li>
           <li>
             <a

@@ -1046,7 +1046,14 @@ async function organizationForms(env: Env, orgId: string): Promise<Response> {
   }
 
   if (!orgRow && !applicant && !readinessRow) {
-    return json({ organization: null, stage1: null, stage2: null, readiness: null, drafts });
+    return json({
+      organization: null,
+      stage1: null,
+      stage2: null,
+      readiness: null,
+      drafts,
+      preScreeningStatus: 'Pending',
+    });
   }
 
   const stage1 = applicant ? normalizeStage(parseJson<unknown>(applicant.stage1, null)) : null;
@@ -1063,6 +1070,14 @@ async function organizationForms(env: Env, orgId: string): Promise<Response> {
         }
       : null,
     drafts,
+    preScreeningStatus: applicant
+      ? (() => {
+          const admin = parseJson<Partial<ApplicantAdmin>>(applicant.admin, {});
+          return SUBMISSION_STATUSES.includes(admin.status as SubmissionStatus)
+            ? (admin.status as SubmissionStatus)
+            : 'Pending';
+        })()
+      : 'Pending',
   });
 }
 
@@ -2185,6 +2200,119 @@ async function deleteApplicants(request: Request, env: Env): Promise<Response> {
   return empty();
 }
 
+/** Best-effort contact details for the organization behind an applicant. */
+async function applicantContact(
+  env: Env,
+  applicant: ApplicantRecord,
+): Promise<{ email: string; name: string }> {
+  const data = (applicant.stage1?.data ?? {}) as Record<string, unknown>;
+  const pick = (...keys: string[]): string => {
+    for (const key of keys) {
+      const value = data[key];
+      if (typeof value === 'string' && value.trim()) return value.trim();
+    }
+    return '';
+  };
+
+  let email = pick('primaryContactEmail', 'contactEmail', 'email');
+  let name = pick('primaryContactName', 'contactName', 'applicantName');
+
+  try {
+    const org = await env.DB.prepare(
+      'SELECT name, contact_name, contact_email FROM organizations WHERE id = ? LIMIT 1',
+    )
+      .bind(applicant.id)
+      .first<{ name: string | null; contact_name: string | null; contact_email: string | null }>();
+    if (org) {
+      email = email || org.contact_email || '';
+      name = name || org.contact_name || org.name || '';
+    }
+  } catch {
+    // Older databases may not have the organizations table yet.
+  }
+
+  if (!email) {
+    try {
+      const user = await env.DB.prepare(
+        'SELECT email, username FROM users WHERE organization_id = ? LIMIT 1',
+      )
+        .bind(applicant.id)
+        .first<{ email: string | null; username: string }>();
+      email = user?.email ?? '';
+      name = name || user?.username || '';
+    } catch {
+      // The users table is optional too.
+    }
+  }
+
+  return { email, name };
+}
+
+/** Automatic status notice to the organization. Never fails the PATCH. */
+async function notifyPreScreeningStatus(
+  env: Env,
+  applicant: ApplicantRecord,
+  status: SubmissionStatus,
+): Promise<void> {
+  if (!env.RESEND_API_KEY) return;
+
+  const { email, name } = await applicantContact(env, applicant);
+  if (!EMAIL_PATTERN.test(email)) return;
+
+  const data = (applicant.stage1?.data ?? {}) as Record<string, unknown>;
+  const organization =
+    typeof data.applicantName === 'string' && data.applicantName.trim()
+      ? data.applicantName.trim()
+      : name || 'your organization';
+
+  const intro =
+    status === 'Passed'
+      ? `Good news — the pre-screening for ${organization} has been approved.`
+      : status === 'Failed'
+        ? `The pre-screening for ${organization} was not approved at this time.`
+        : `The pre-screening for ${organization} is back under review.`;
+
+  const paragraphs =
+    status === 'Passed'
+      ? [
+          'You can now open Accreditation from the portal sidebar and continue with the full application.',
+          'If anything looks out of date, reply to this email and our advisory team will help you update it.',
+        ]
+      : status === 'Failed'
+        ? [
+            'Reply to this email and an Avera adviser will explain the outcome and the options available to you.',
+            'You can keep working on your responses at any time — drafts are saved in the portal.',
+          ]
+        : [
+            'Our team will review the latest information and get back to you if anything else is needed.',
+          ];
+
+  const content: EmailContent = {
+    kicker: 'Pre-screening update',
+    title: `Your pre-screening status: ${status}`,
+    intro,
+    paragraphs,
+    rows: [
+      { label: 'Organization', value: organization },
+      { label: 'Status', value: status },
+      { label: 'Reference', value: applicant.id },
+    ],
+    cta: {
+      label: status === 'Passed' ? 'Continue to Accreditation' : 'View your forms',
+      href: `${siteUrl(env)}${status === 'Passed' ? '/stage2' : '/my-forms'}`,
+    },
+    footnote: 'Replies go directly to the Avera advisory team.',
+    audience: 'applicant',
+  };
+
+  await sendEmail(env, {
+    to: email,
+    subject: `Pre-screening status for ${organization}: ${status}`,
+    html: renderEmailHtml(content, { site: siteUrl(env), inbox: contactEmail(env) }),
+    text: renderEmailText(content, { site: siteUrl(env), inbox: contactEmail(env) }),
+  });
+}
+
 async function updateApplicantStatus(
   request: Request,
   env: Env,
@@ -2197,11 +2325,31 @@ async function updateApplicantStatus(
     throw new HttpError(400, `"status" must be one of ${SUBMISSION_STATUSES.join(', ')}.`);
   }
 
-  return patchApplicant(env, id, (applicant, now) => ({
-    ...applicant,
-    updatedAt: now,
-    admin: { ...applicant.admin, status },
-  }));
+  const change: { previous?: SubmissionStatus; applicant?: ApplicantRecord } = {};
+  const response = await patchApplicant(env, id, (applicant, now) => {
+    change.previous = applicant.admin.status;
+    change.applicant = {
+      ...applicant,
+      updatedAt: now,
+      admin: { ...applicant.admin, status },
+    };
+    return change.applicant;
+  });
+
+  if (
+    response.status < 400 &&
+    change.applicant &&
+    change.previous &&
+    change.previous !== status
+  ) {
+    try {
+      await notifyPreScreeningStatus(env, change.applicant, status);
+    } catch (error) {
+      console.error('Could not send the pre-screening status email', error);
+    }
+  }
+
+  return response;
 }
 
 async function updateApplicantStage1(

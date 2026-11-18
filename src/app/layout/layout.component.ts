@@ -1,4 +1,4 @@
-import { Component } from "@angular/core";
+import { Component, OnInit } from "@angular/core";
 import { CommonModule } from "@angular/common";
 import {
   Router,
@@ -7,6 +7,8 @@ import {
   RouterOutlet,
 } from "@angular/router";
 import { AuthService } from "../services/auth.service";
+import { OrganizationService } from "../services/organization.service";
+import { SubmissionStatus } from "../models/applicant.model";
 import { LanguageService } from "../services/language.service";
 import { TranslatePipe } from '@ngx-translate/core';
 import { BreadcrumbComponent } from "../shared/components/breadcrumb/breadcrumb.component";
@@ -29,16 +31,51 @@ import { LanguageSwitcherComponent } from "../shared/components/language-switche
   templateUrl: "./layout.component.html",
   styleUrl: "./layout.component.css",
 })
-export class LayoutComponent {
+export class LayoutComponent implements OnInit {
   sidebarCollapsed = false;
   gearMenuOpen = false;
   profileMenuOpen = false;
+  preScreeningStatus: SubmissionStatus = "Pending";
+  organizationName = "";
 
   constructor(
     public authService: AuthService,
     public languageService: LanguageService,
+    private organizationService: OrganizationService,
     private router: Router,
   ) {}
+
+  ngOnInit(): void {
+    this.organizationName = this.authService.currentUserValue?.organizationName ?? "";
+    void this.loadPreScreeningStatus();
+  }
+
+  private async loadPreScreeningStatus(): Promise<void> {
+    const user = this.authService.currentUserValue;
+    if (!user || user.role !== "applicant" || !user.organizationId) return;
+
+    try {
+      const forms = await this.organizationService.forms(user.organizationId);
+      this.preScreeningStatus = forms.preScreeningStatus ?? "Pending";
+      this.organizationName = forms.organization?.name || this.organizationName;
+    } catch {
+      // Keep the conservative default: Accreditation stays locked on failure.
+    }
+  }
+
+  /** Admins always have access; applicants need a passed pre-screening. */
+  get accreditationUnlocked(): boolean {
+    return (
+      this.authService.currentUserValue?.role === "admin" ||
+      this.preScreeningStatus === "Passed"
+    );
+  }
+
+  get preScreeningStatusLabel(): string {
+    if (this.preScreeningStatus === "Passed") return "Passed";
+    if (this.preScreeningStatus === "Failed") return "Failed";
+    return "Pending";
+  }
 
   logout(): void {
     this.authService.logout();

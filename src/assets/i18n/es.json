@@ -63,7 +63,8 @@
       "CARD_ALIGNMENT_LABEL": "Alineación con el GCF",
       "CARD_ALIGNMENT_BENCHMARK": "Referencia de preparación",
       "CARD_ALIGNMENT_FOOT": "Evaluación ilustrativa",
-      "SCROLL": "Desplázate para seguir el capital"
+      "SCROLL": "Desplázate para seguir el capital",
+      "BRAND": "Plataforma independiente de acceso a capital global"
     },
     "METHOD": {
       "KICKER": "02 — Metodología",
