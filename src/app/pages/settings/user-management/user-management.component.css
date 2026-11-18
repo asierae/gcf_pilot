@@ -142,6 +142,42 @@
 
 .col-org { max-width: 180px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #94a3b8; }
 .col-subs { text-align: center; }
+.col-access { white-space: nowrap; }
+.access-state { font-size: 0.74rem; font-weight: 600; }
+.access-state.is-ready { color: #6ee7b7; }
+.access-state.is-pending { color: #fdba74; }
+.btn-invite {
+  padding: 0.34rem 0.65rem;
+  border-radius: 7px;
+  border: 1px solid rgba(232, 192, 106, 0.28);
+  background: rgba(232, 192, 106, 0.1);
+  color: #f5dfa8;
+  font-size: 0.72rem;
+  font-weight: 600;
+  font-family: inherit;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+.btn-invite:hover:not(:disabled) {
+  background: rgba(232, 192, 106, 0.2);
+  border-color: rgba(232, 192, 106, 0.5);
+}
+.btn-invite:disabled { opacity: 0.55; cursor: default; }
+.field-note { font-weight: 400; color: #64748b; line-height: 1.5; }
+.btn-retry {
+  margin-top: 0.75rem;
+  padding: 0.45rem 1rem;
+  border-radius: 8px;
+  border: 1px solid rgba(232, 192, 106, 0.35);
+  background: rgba(232, 192, 106, 0.12);
+  color: #f5dfa8;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.btn-retry:hover { background: rgba(232, 192, 106, 0.2); }
+.btn-save-form:disabled { opacity: 0.55; cursor: default; }
 .subs-count {
   display: inline-flex; align-items: center; justify-content: center;
   width: 1.5rem; height: 1.5rem; background: rgba(212,169,78,0.12);

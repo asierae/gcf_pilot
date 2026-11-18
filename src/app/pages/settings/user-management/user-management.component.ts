@@ -1,20 +1,23 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import { AppUser, UserRole, UserService, UserStatus } from '../../../services/user.service';
+import { ApiService, ApiUser } from '../../../services/api.service';
 import { NotificationService } from '../../../services/notification.service';
 import { BreadcrumbService } from '../../../services/breadcrumb.service';
+
+type UserRole = ApiUser['role'];
+type UserStatus = ApiUser['status'];
 
 interface UserFormData {
   username: string;
   email: string;
-  password: string;
   role: UserRole;
   status: UserStatus;
+  organizationId: string;
   organizationName: string;
-  linkedSubmissionIds: string;
-  sendActivation: boolean;
+  organizationAcronym: string;
+  invite: boolean;
 }
 
 @Component({
@@ -24,40 +27,54 @@ interface UserFormData {
   templateUrl: './user-management.component.html',
   styleUrl: './user-management.component.css',
 })
-export class UserManagementComponent implements OnInit {
-  users: AppUser[] = [];
+export class UserManagementComponent implements OnInit, OnDestroy {
+  users: ApiUser[] = [];
   userSearch = '';
   showForm = false;
-  editingUser: AppUser | null = null;
+  editingUser: ApiUser | null = null;
   form: UserFormData = this.emptyForm();
 
+  loading = true;
+  loadError = '';
+  saving = false;
+  invitingId: string | null = null;
+  deletingId: string | null = null;
+
   constructor(
-    private userService: UserService,
-    private notificationService: NotificationService,
-    private breadcrumbService: BreadcrumbService,
+    private readonly api: ApiService,
+    private readonly notificationService: NotificationService,
+    private readonly breadcrumbService: BreadcrumbService,
   ) {}
 
   ngOnInit(): void {
     this.breadcrumbService.setContext('User Management');
-    this.loadUsers();
+    void this.loadUsers();
   }
 
   ngOnDestroy(): void {
     this.breadcrumbService.clearContext();
   }
 
-  loadUsers(): void {
-    this.users = this.userService.getUsers();
+  async loadUsers(): Promise<void> {
+    this.loading = true;
+    this.loadError = '';
+    try {
+      this.users = await this.api.getUsers();
+    } catch (error) {
+      this.loadError =
+        error instanceof Error ? error.message : 'Could not load users.';
+    } finally {
+      this.loading = false;
+    }
   }
 
-  get filteredUsers(): AppUser[] {
+  get filteredUsers(): ApiUser[] {
     const q = this.userSearch.trim().toLowerCase();
     if (!q) return this.users;
-    return this.users.filter(
-      (u) =>
-        u.username.toLowerCase().includes(q) ||
-        u.email.toLowerCase().includes(q) ||
-        (u.organizationName ?? '').toLowerCase().includes(q),
+    return this.users.filter((u) =>
+      [u.username, u.email, u.organizationName, u.organizationId, u.organizationAcronym]
+        .filter(Boolean)
+        .some((value) => String(value).toLowerCase().includes(q)),
     );
   }
 
@@ -67,17 +84,17 @@ export class UserManagementComponent implements OnInit {
     this.showForm = true;
   }
 
-  openEditForm(user: AppUser): void {
+  openEditForm(user: ApiUser): void {
     this.editingUser = user;
     this.form = {
       username: user.username,
       email: user.email,
-      password: '',
       role: user.role,
       status: user.status,
+      organizationId: user.organizationId ?? '',
       organizationName: user.organizationName ?? '',
-      linkedSubmissionIds: user.linkedSubmissionIds.join(', '),
-      sendActivation: false,
+      organizationAcronym: user.organizationAcronym ?? '',
+      invite: false,
     };
     this.showForm = true;
   }
@@ -87,7 +104,9 @@ export class UserManagementComponent implements OnInit {
     this.editingUser = null;
   }
 
-  saveForm(): void {
+  async saveForm(): Promise<void> {
+    if (this.saving) return;
+
     if (!this.form.username.trim()) {
       this.notificationService.warning('Username is required.');
       return;
@@ -97,55 +116,99 @@ export class UserManagementComponent implements OnInit {
       return;
     }
 
-    const linkedIds = this.form.linkedSubmissionIds
-      .split(',')
-      .map((s) => s.trim())
-      .filter(Boolean);
+    this.saving = true;
 
-    if (this.editingUser) {
-      const updates: Partial<Omit<AppUser, 'id' | 'createdAt'>> = {
-        username: this.form.username.trim(),
-        email: this.form.email.trim(),
-        role: this.form.role,
-        status: this.form.status,
-        organizationName: this.form.organizationName.trim() || undefined,
-        linkedSubmissionIds: linkedIds,
-      };
-      if (this.form.password.trim()) {
-        updates.password = this.form.password.trim();
-      }
-      this.userService.updateUser(this.editingUser.id, updates);
-      this.notificationService.success(`User "${this.form.username}" updated.`);
-    } else {
-      const newUser = this.userService.createUser({
-        username: this.form.username.trim(),
-        email: this.form.email.trim(),
-        password: this.form.password.trim(),
-        role: this.form.role,
-        status: this.form.role === 'applicant' ? 'pending' : this.form.status,
-        organizationName: this.form.organizationName.trim() || undefined,
-        linkedSubmissionIds: linkedIds,
-      });
-      if (this.form.sendActivation || this.form.role === 'applicant') {
-        this.userService.sendActivationEmail(newUser);
+    try {
+      if (this.editingUser) {
+        await this.api.updateUser(this.editingUser.id, {
+          username: this.form.username.trim(),
+          email: this.form.email.trim(),
+          role: this.form.role,
+          status: this.form.status,
+          organizationId: this.form.organizationId.trim() || undefined,
+          organizationName: this.form.organizationName.trim() || undefined,
+          organizationAcronym: this.form.organizationAcronym.trim() || undefined,
+        });
+        this.notificationService.success(`User "${this.form.username}" updated.`);
       } else {
-        this.notificationService.success(`User "${newUser.username}" created.`);
+        const created = await this.api.createUser({
+          username: this.form.username.trim(),
+          email: this.form.email.trim(),
+          role: this.form.role,
+          status: this.form.status,
+          organizationId: this.form.organizationId.trim() || undefined,
+          organizationName: this.form.organizationName.trim() || undefined,
+          organizationAcronym: this.form.organizationAcronym.trim() || undefined,
+          invite: this.form.invite,
+        });
+
+        if (created.invited) {
+          this.notificationService.success(
+            `User "${this.form.username}" created and invited by email.`,
+          );
+        } else if (created.inviteError) {
+          this.notificationService.warning(
+            `User created, but the invitation was not sent: ${created.inviteError}`,
+          );
+        } else {
+          this.notificationService.success(
+            `User "${this.form.username}" created. Send an invitation to activate it.`,
+          );
+        }
       }
+
+      await this.loadUsers();
+      this.showForm = false;
+      this.editingUser = null;
+    } catch (error) {
+      this.notificationService.error(
+        error instanceof Error ? error.message : 'Could not save the user.',
+      );
+    } finally {
+      this.saving = false;
     }
-
-    this.loadUsers();
-    this.showForm = false;
-    this.editingUser = null;
   }
 
-  deleteUser(user: AppUser): void {
+  async sendInvitation(user: ApiUser): Promise<void> {
+    if (this.invitingId) return;
+    this.invitingId = user.id;
+
+    try {
+      await this.api.inviteUser(user.id);
+      this.notificationService.success(
+        `Invitation emailed to ${user.email}. The link expires in 7 days.`,
+      );
+      await this.loadUsers();
+    } catch (error) {
+      this.notificationService.error(
+        error instanceof Error
+          ? error.message
+          : 'Could not send the invitation.',
+      );
+    } finally {
+      this.invitingId = null;
+    }
+  }
+
+  async deleteUser(user: ApiUser): Promise<void> {
+    if (this.deletingId) return;
     if (!confirm(`Delete user "${user.username}"? This cannot be undone.`)) return;
-    this.userService.deleteUser(user.id);
-    this.loadUsers();
-    this.notificationService.success(`User "${user.username}" deleted.`);
+
+    this.deletingId = user.id;
+    try {
+      await this.api.deleteUser(user.id);
+      this.notificationService.success(`User "${user.username}" deleted.`);
+      await this.loadUsers();
+    } catch (error) {
+      this.notificationService.error(
+        error instanceof Error ? error.message : 'Could not delete the user.',
+      );
+    } finally {
+      this.deletingId = null;
+    }
   }
 
-  getInitials(user: AppUser): string {
+  getInitials(user: ApiUser): string {
     const name = user.organizationName ?? user.username;
     return name.slice(0, 2).toUpperCase();
   }
@@ -158,20 +221,25 @@ export class UserManagementComponent implements OnInit {
     return `badge-status-${status}`;
   }
 
-  formatDate(iso: string): string {
-    return new Date(iso).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
+  formatDate(iso?: string): string {
+    if (!iso) return '—';
+    return new Date(iso).toLocaleDateString(undefined, {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+    });
   }
 
   private emptyForm(): UserFormData {
     return {
       username: '',
       email: '',
-      password: '',
       role: 'applicant',
-      status: 'active',
+      status: 'pending',
+      organizationId: '',
       organizationName: '',
-      linkedSubmissionIds: '',
-      sendActivation: true,
+      organizationAcronym: '',
+      invite: true,
     };
   }
 }
