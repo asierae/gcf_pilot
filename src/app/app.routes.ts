@@ -13,6 +13,7 @@ import { UserManagementComponent } from "./pages/settings/user-management/user-m
 import { PricingComponent } from "./pages/pricing/pricing.component";
 import { ReadinessWizardComponent } from "./pages/readiness/readiness-wizard.component";
 import { GetAssessedComponent } from "./pages/get-assessed/get-assessed.component";
+import { ProfileAssessmentComponent } from "./pages/profile-assessment/profile-assessment.component";
 import { MyFormsComponent } from "./pages/my-forms/my-forms.component";
 import { adminGuard, authGuard } from "./guards/auth.guard";
 
@@ -22,6 +23,7 @@ export const routes: Routes = [
   { path: "accept-invite", component: PasswordTokenComponent },
   { path: "home", component: LandingComponent },
   { path: "get-assessed", component: GetAssessedComponent },
+  { path: "profile-assessment", component: ProfileAssessmentComponent },
   { path: "", redirectTo: "home", pathMatch: "full" },
   {
     path: "",
