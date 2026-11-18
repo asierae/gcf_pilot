@@ -873,11 +873,29 @@ async function putReadiness(
     ],
   });
 
+  // A readiness submission is also an access request: create an inactive
+  // applicant account when this contact email is not registered yet.
+  let account: { username: string; created: boolean } = { username: '', created: false };
+  try {
+    account = await ensurePortalUser(env, {
+      email: readText(metadata, 'ndaEmail'),
+      organizationName:
+        readText(metadata, 'organizationLegalName') || organization.name || orgId,
+      organizationAcronym:
+        organization.acronym || readText(metadata, 'organizationAcronym'),
+      organizationId: orgId,
+    });
+  } catch (error) {
+    console.error('Could not provision a portal account for the readiness submission', error);
+  }
+
   return json(
     {
       submission: { organizationId: orgId, submittedAt: now, data },
       organization,
       created: existing === null,
+      userCreated: account.created,
+      username: account.username || undefined,
     },
     existing === null ? 201 : 200,
   );
@@ -2730,32 +2748,43 @@ function profileUsername(email: string): string {
   return local.length >= 3 ? local : `user${local}`;
 }
 
+interface PortalAccountInput {
+  email: string;
+  organizationName: string;
+  organizationAcronym?: string;
+  organizationId?: string | null;
+}
+
 /**
- * Ensure the enquiry has a portal account. Unknown emails get an inactive
+ * Ensure an email has a portal account. Unknown emails get an inactive
  * (pending, passwordless) applicant account for the admin to approve manually.
+ * Existing accounts are never modified — the email is only used to detect them.
  */
-async function ensureProfileUser(
+async function ensurePortalUser(
   env: Env,
-  lead: LeadRecord,
+  input: PortalAccountInput,
 ): Promise<{ username: string; created: boolean }> {
-  const existing = await findUser(env, 'email', lead.contactEmail);
+  const email = input.email.trim().toLowerCase();
+  if (!EMAIL_PATTERN.test(email)) return { username: '', created: false };
+
+  const existing = await findUser(env, 'email', email);
   if (existing) {
     return { username: existing.username, created: false };
   }
 
-  const base = profileUsername(lead.contactEmail);
+  const base = profileUsername(email);
   let username = base;
   for (let suffix = 2; (await findUser(env, 'username', username)) && suffix < 100; suffix += 1) {
     username = `${base}-${suffix}`.slice(0, 40);
   }
 
-  let organizationId: string | null = null;
-  if (lead.acronym.trim()) {
+  let organizationId = input.organizationId ?? null;
+  if (!organizationId && input.organizationAcronym?.trim()) {
     try {
       const organization = await env.DB.prepare(
         'SELECT id FROM organizations WHERE acronym_norm = ? LIMIT 1',
       )
-        .bind(lead.acronym.trim().toLowerCase())
+        .bind(input.organizationAcronym.trim().toLowerCase())
         .first<{ id: string }>();
       organizationId = organization?.id ?? null;
     } catch {
@@ -2774,16 +2803,28 @@ async function ensureProfileUser(
     .bind(
       `usr-${crypto.randomUUID()}`,
       username,
-      lead.contactEmail.trim().toLowerCase(),
+      email,
       organizationId,
-      lead.organization,
-      lead.acronym.trim() || null,
+      input.organizationName,
+      input.organizationAcronym?.trim() || null,
       now,
       now,
     )
     .run();
 
   return { username, created: true };
+}
+
+/** Profile enquiries resolve the organization by acronym. */
+async function ensureProfileUser(
+  env: Env,
+  lead: LeadRecord,
+): Promise<{ username: string; created: boolean }> {
+  return ensurePortalUser(env, {
+    email: lead.contactEmail,
+    organizationName: lead.organization,
+    organizationAcronym: lead.acronym,
+  });
 }
 
 /** Aggregated, read-only metrics for the admin system overview. */
@@ -2930,6 +2971,18 @@ async function adminStats(env: Env): Promise<Response> {
   for (const row of readiness) countMonth(row.submitted_at);
   for (const lead of leads) countMonth(lead.created_at);
 
+  const monthlyFunding = monthKeys.map(() => 0);
+  for (const row of readiness) {
+    const index = monthKeys.indexOf(row.submitted_at.slice(0, 7));
+    if (index < 0) continue;
+    const data = parseJson<{ metadata?: JsonObject }>(row.data, {});
+    monthlyFunding[index] += number(data.metadata?.requestedAmountUSD);
+  }
+  const fundingByMonth = monthKeys.map((key, index) => ({
+    label: monthly[index].label,
+    value: monthlyFunding[index],
+  }));
+
   const recent: { id: string; label: string; sub: string; date: string; route: string }[] = [];
   for (const applicant of applicants) {
     if (!applicant.stage1) continue;
@@ -2993,6 +3046,10 @@ async function adminStats(env: Env): Promise<Response> {
       count,
     })),
     monthly,
+    fundingByMonth,
+    conversionRate: applicants.length
+      ? Math.round(((statusCounts['Passed'] ?? 0) / applicants.length) * 100)
+      : 0,
     recent: recent.slice(0, 6),
   });
 }

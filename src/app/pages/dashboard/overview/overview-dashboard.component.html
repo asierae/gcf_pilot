@@ -6,10 +6,16 @@
       <p class="lede">
         Live metrics across organizations, submissions and enquiries.
       </p>
+      @if (lastUpdated) {
+        <p class="updated-at">Last refreshed at {{ lastUpdated }}</p>
+      }
     </div>
-    <button type="button" class="btn-refresh" (click)="load()" [disabled]="loading">
-      {{ loading ? "Refreshing…" : "Refresh" }}
-    </button>
+    <div class="header-actions">
+      <span class="status-pill"><span></span> All systems operational</span>
+      <button type="button" class="btn-refresh" (click)="load()" [disabled]="loading">
+        {{ loading ? "Refreshing…" : "Refresh" }}
+      </button>
+    </div>
   </header>
 
   @if (error) {
@@ -31,7 +37,9 @@
         <span class="kpi-icon">▤</span>
         <span class="kpi-label">Accreditation submissions</span>
         <strong class="kpi-value">{{ formatNumber(data.accreditationSubmissions) }}</strong>
-        <span class="kpi-sub">{{ data.statusCounts["Passed"] || 0 }} passed pre-screening</span>
+        <span class="kpi-sub">
+          {{ data.statusCounts["Passed"] || 0 }} passed · {{ data.conversionRate }}% approval rate
+        </span>
       </article>
       <article class="kpi">
         <span class="kpi-icon">◎</span>
@@ -96,14 +104,17 @@
             <p>Share of registered entities</p>
           </div>
         </div>
-        @if (data.entityTypes.length) {
+        @if (donutSlices.length) {
           <div class="donut-row">
-            <div class="donut" [style.background]="donutBackground(data.entityTypes)">
-              <div class="donut-hole">
-                <strong>{{ data.organizations }}</strong>
-                <span>total</span>
-              </div>
-            </div>
+            <svg class="donut-svg" viewBox="-90 -90 180 180" role="img" aria-label="Organization types">
+              @for (slice of donutSlices; track slice.label) {
+                <path [attr.d]="slice.path" [attr.fill]="slice.color">
+                  <title>{{ slice.label }}: {{ slice.value }}</title>
+                </path>
+              }
+              <text class="donut-total" x="0" y="2" text-anchor="middle">{{ data.organizations }}</text>
+              <text class="donut-caption" x="0" y="18" text-anchor="middle">total</text>
+            </svg>
             <ul class="legend">
               @for (type of data.entityTypes; track type.label; let i = $index) {
                 <li>
@@ -118,6 +129,72 @@
           <p class="panel-empty">No organization types recorded yet.</p>
         }
       </article>
+    </section>
+
+    <section class="panel-grid chart-grid" aria-label="Trends">
+      @if (activityChart; as chart) {
+        <article class="panel">
+          <div class="panel-head">
+            <div>
+              <h2>Activity trend</h2>
+              <p>Submissions and enquiries · last six months</p>
+            </div>
+            <span class="panel-pill">peak {{ chart.max }}</span>
+          </div>
+          <svg class="chart-svg" viewBox="0 0 600 180" role="img" aria-label="Monthly activity">
+            <defs>
+              <linearGradient id="activityFill" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="rgba(56,189,248,0.4)" />
+                <stop offset="100%" stop-color="rgba(56,189,248,0)" />
+              </linearGradient>
+            </defs>
+            @for (tick of chart.yTicks; track tick.label) {
+              <line class="grid-line" x1="24" [attr.x2]="chartRight" [attr.y1]="tick.y" [attr.y2]="tick.y" />
+              <text class="axis-label" x="2" [attr.y]="tick.y + 3">{{ tick.label }}</text>
+            }
+            <path class="chart-area" [attr.d]="chart.area" fill="url(#activityFill)" />
+            <path class="chart-line activity" [attr.d]="chart.line" />
+            @for (point of chart.points; track point.label) {
+              <circle class="chart-point activity" [attr.cx]="point.x" [attr.cy]="point.y" r="3">
+                <title>{{ point.label }}: {{ point.value }}</title>
+              </circle>
+              <text class="x-label" [attr.x]="point.x" y="172" text-anchor="middle">{{ point.label }}</text>
+            }
+          </svg>
+        </article>
+      }
+
+      @if (fundingChart; as chart) {
+        <article class="panel">
+          <div class="panel-head">
+            <div>
+              <h2>Funding trend</h2>
+              <p>Capital requested in readiness proposals</p>
+            </div>
+            <span class="panel-pill">{{ formatMoney(data.fundingRequestedUSD) }} total</span>
+          </div>
+          <svg class="chart-svg" viewBox="0 0 600 180" role="img" aria-label="Monthly funding requested">
+            <defs>
+              <linearGradient id="fundingFill" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="rgba(232,192,106,0.42)" />
+                <stop offset="100%" stop-color="rgba(232,192,106,0)" />
+              </linearGradient>
+            </defs>
+            @for (tick of chart.yTicks; track tick.label) {
+              <line class="grid-line" x1="42" [attr.x2]="chartRight" [attr.y1]="tick.y" [attr.y2]="tick.y" />
+              <text class="axis-label" x="2" [attr.y]="tick.y + 3">{{ tick.label }}</text>
+            }
+            <path class="chart-area" [attr.d]="chart.area" fill="url(#fundingFill)" />
+            <path class="chart-line funding" [attr.d]="chart.line" />
+            @for (point of chart.points; track point.label) {
+              <circle class="chart-point funding" [attr.cx]="point.x" [attr.cy]="point.y" r="3">
+                <title>{{ point.label }}: {{ formatMoney(point.value) }}</title>
+              </circle>
+              <text class="x-label" [attr.x]="point.x" y="172" text-anchor="middle">{{ point.label }}</text>
+            }
+          </svg>
+        </article>
+      }
     </section>
 
     <section class="panel-grid panel-grid-3">
@@ -141,29 +218,6 @@
                   [style.width.%]="percent(row.value, data.accreditationSubmissions)"
                 ></div>
               </div>
-            </div>
-          }
-        </div>
-      </article>
-
-      <article class="panel">
-        <div class="panel-head">
-          <div>
-            <h2>Activity</h2>
-            <p>Last six months</p>
-          </div>
-        </div>
-        <div class="columns">
-          @for (row of data.monthly; track row.label) {
-            <div class="column">
-              <span class="column-value">{{ row.value || "" }}</span>
-              <div class="column-track">
-                <div
-                  class="column-fill"
-                  [style.height.%]="percent(row.value, maxMonthly)"
-                ></div>
-              </div>
-              <span class="column-label">{{ row.label }}</span>
             </div>
           }
         </div>
@@ -198,6 +252,39 @@
             <span class="source-tag">{{ row.label }} · {{ row.value }}</span>
           }
         </div>
+      </article>
+
+      <article class="panel">
+        <div class="panel-head">
+          <div>
+            <h2>Portal accounts</h2>
+            <p>Users by state</p>
+          </div>
+        </div>
+        <div class="bar-list">
+          @for (row of userRows(data.userCounts); track row.label) {
+            <div class="bar-row">
+              <div class="bar-head">
+                <span>{{ row.label }}</span>
+                <strong>{{ row.value }}</strong>
+              </div>
+              <div class="bar-track">
+                <div
+                  class="bar-fill tone-{{ row.tone }}"
+                  [style.width.%]="percent(row.value, data.users)"
+                ></div>
+              </div>
+            </div>
+          }
+        </div>
+        <div class="source-tags">
+          @for (row of roleRows(data.roleCounts); track row.label) {
+            <span class="source-tag">{{ row.label }} · {{ row.value }}</span>
+          }
+        </div>
+        <p class="score-note">
+          Average profile score: <strong>{{ data.avgReadinessScore }}/100</strong>
+        </p>
       </article>
     </section>
 
@@ -261,34 +348,33 @@
       <article class="panel">
         <div class="panel-head">
           <div>
-            <h2>Portal accounts</h2>
-            <p>Users by state</p>
+            <h2>Conversion snapshot</h2>
+            <p>From enquiry to accredited pipeline</p>
           </div>
         </div>
-        <div class="bar-list">
-          @for (row of userRows(data.userCounts); track row.label) {
-            <div class="bar-row">
-              <div class="bar-head">
-                <span>{{ row.label }}</span>
-                <strong>{{ row.value }}</strong>
-              </div>
-              <div class="bar-track">
-                <div
-                  class="bar-fill tone-{{ row.tone }}"
-                  [style.width.%]="percent(row.value, data.users)"
-                ></div>
-              </div>
-            </div>
-          }
-        </div>
-        <div class="source-tags">
-          @for (row of roleRows(data.roleCounts); track row.label) {
-            <span class="source-tag">{{ row.label }} · {{ row.value }}</span>
-          }
-        </div>
-        <p class="score-note">
-          Average profile score: <strong>{{ data.avgReadinessScore }}/100</strong>
-        </p>
+        <ul class="metric-list">
+          <li>
+            <span>Approval rate</span>
+            <strong>{{ data.conversionRate }}%</strong>
+          </li>
+          <li>
+            <span>Stage 2 coverage</span>
+            <strong>{{ percent(data.stage2Submissions, data.accreditationSubmissions) }}%</strong>
+          </li>
+          <li>
+            <span>Countries reached</span>
+            <strong>{{ data.countries }}</strong>
+          </li>
+          <li>
+            <span>Pending invitations</span>
+            <strong>{{ data.userCounts["pending"] || 0 }}</strong>
+          </li>
+          <li>
+            <span>Avg. profile score</span>
+            <strong>{{ data.avgReadinessScore }}/100</strong>
+          </li>
+        </ul>
+        <a class="panel-link" routerLink="/dashboard/leads">Review enquiries →</a>
       </article>
     </section>
   } @else if (loading) {

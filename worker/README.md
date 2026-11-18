@@ -151,7 +151,11 @@ Public (no token):
 - `GET /api/organizations/acronym-available?acronym=&exclude=` — uniqueness check
 - `GET | PUT | DELETE /api/drafts/(stage1|readiness)/:organizationId` — draft
   autosave, keyed by the organization id
-- `GET | PUT /api/readiness/:organizationId` — submitted readiness application
+- `GET | PUT /api/readiness/:organizationId` — submitted readiness application.
+  On PUT, the `metadata.ndaEmail` contact is checked against D1 `users`; an
+  unknown email gets a passwordless `applicant` account with status `pending`,
+  linked to the organization id. Returns `{ submission, organization, created,
+  userCreated, username }`. Existing accounts are never modified.
 - `POST /api/upload` — multipart `file`, `scope`, `entityId`, `section` (max 15 MB)
 - `DELETE /api/upload` — `{ publicId }`
 - `GET /api/files/<key>` — streams an R2 object

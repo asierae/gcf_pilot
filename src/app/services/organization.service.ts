@@ -77,7 +77,7 @@ export class OrganizationService {
   async submitReadiness(
     organizationId: string,
     data: Record<string, unknown>,
-  ): Promise<{ submittedAt: string }> {
+  ): Promise<{ submittedAt: string; userCreated: boolean; username?: string }> {
     return this.api.submitReadiness(organizationId, data);
   }
 

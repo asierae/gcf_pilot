@@ -448,15 +448,21 @@ export class ApiService {
   async submitReadiness(
     organizationId: string,
     data: Record<string, unknown>,
-  ): Promise<{ submittedAt: string }> {
+  ): Promise<{ submittedAt: string; userCreated: boolean; username?: string }> {
     const payload = await this.request<{
       submission: { submittedAt: string };
+      userCreated?: boolean;
+      username?: string;
     }>(
       `/api/readiness/${encodeURIComponent(organizationId)}`,
       { method: "PUT", body: JSON.stringify({ data }) },
       false,
     );
-    return { submittedAt: payload.submission.submittedAt };
+    return {
+      submittedAt: payload.submission.submittedAt,
+      userCreated: payload.userCreated === true,
+      username: payload.username,
+    };
   }
 
   // ── Leads ───────────────────────────────────────────────────────────────

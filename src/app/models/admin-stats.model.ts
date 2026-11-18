@@ -37,5 +37,7 @@ export interface AdminStats {
   topCountries: StatRank[];
   mapPoints: MapPoint[];
   monthly: StatRank[];
+  fundingByMonth: StatRank[];
+  conversionRate: number;
   recent: RecentActivity[];
 }

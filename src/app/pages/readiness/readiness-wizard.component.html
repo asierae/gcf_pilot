@@ -129,6 +129,15 @@
               Saved to your organization workspace on {{ submittedAt | date: 'medium' }}. You can track
               it from the organization dashboard.
             </p>
+            @if (accountCreated) {
+              <p>
+                A portal access request has been created for
+                <strong>{{ application.metadata.ndaEmail }}</strong>@if (accountUsername) {
+                  (username <strong>{{ accountUsername }}</strong>)
+                }. The account is inactive until an Avera administrator approves it and sends an
+                invitation.
+              </p>
+            }
           }
         </div>
       </div>

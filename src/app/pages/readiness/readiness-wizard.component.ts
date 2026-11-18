@@ -183,6 +183,8 @@ export class ReadinessWizardComponent implements OnInit, OnDestroy {
   acronymChecking = false;
   submitting = false;
   submittedAt: string | null = null;
+  accountCreated = false;
+  accountUsername = "";
   submitError = '';
   docMeta: Partial<Record<DocumentKey, string>> = {};
   docAttachments: Partial<Record<DocumentKey, StoredAttachment>> = {};
@@ -1245,6 +1247,8 @@ export class ReadinessWizardComponent implements OnInit, OnDestroy {
 
     this.submitting = true;
     this.submitError = '';
+    this.accountCreated = false;
+    this.accountUsername = '';
 
     try {
       const data = this.buildExportObject();
@@ -1271,7 +1275,7 @@ export class ReadinessWizardComponent implements OnInit, OnDestroy {
         return;
       }
 
-      const { submittedAt } = await this.organizationService.submitReadiness(
+      const result = await this.organizationService.submitReadiness(
         this.organizationId,
         data,
       );
@@ -1279,7 +1283,9 @@ export class ReadinessWizardComponent implements OnInit, OnDestroy {
       await this.organizationService.clearDraft('readiness', this.organizationId);
       localStorage.removeItem(STORAGE_KEY);
 
-      this.submittedAt = submittedAt;
+      this.submittedAt = result.submittedAt;
+      this.accountCreated = result.userCreated;
+      this.accountUsername = result.username ?? '';
       this.saveState = 'saved';
     } catch (error) {
       const message =

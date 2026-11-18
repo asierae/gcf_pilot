@@ -1,6 +1,7 @@
 import { Component, OnInit } from "@angular/core";
 import { CommonModule } from "@angular/common";
 import { RouterLink } from "@angular/router";
+import { arc, area, curveMonotoneX, line, pie, scaleLinear } from "d3";
 import { ApiService } from "../../../services/api.service";
 import { BreadcrumbService } from "../../../services/breadcrumb.service";
 import { AdminStats, StatRank } from "../../../models/admin-stats.model";
@@ -19,6 +20,30 @@ interface StatusRow {
   tone: string;
 }
 
+interface ChartPoint extends StatRank {
+  x: number;
+  y: number;
+}
+
+interface ChartGeometry {
+  line: string;
+  area: string;
+  points: ChartPoint[];
+  yTicks: { label: string; y: number }[];
+  max: number;
+}
+
+interface DonutSlice {
+  path: string;
+  color: string;
+  label: string;
+  value: number;
+}
+
+const CHART_WIDTH = 600;
+const CHART_HEIGHT = 180;
+const CHART_PAD = 24;
+
 @Component({
   selector: "app-overview-dashboard",
   standalone: true,
@@ -31,6 +56,11 @@ export class OverviewDashboardComponent implements OnInit {
   loading = true;
   error = "";
   mapMarkers: Marker[] = [];
+  lastUpdated = "";
+
+  activityChart: ChartGeometry | null = null;
+  fundingChart: ChartGeometry | null = null;
+  donutSlices: DonutSlice[] = [];
 
   readonly palette = [
     "#e8c06a",
@@ -42,6 +72,9 @@ export class OverviewDashboardComponent implements OnInit {
     "#22d3ee",
     "#94a3b8",
   ];
+  readonly chartWidth = CHART_WIDTH;
+  readonly chartRight = CHART_WIDTH - CHART_PAD;
+  readonly chartBaseline = CHART_HEIGHT - CHART_PAD;
 
   constructor(
     private api: ApiService,
@@ -58,6 +91,10 @@ export class OverviewDashboardComponent implements OnInit {
     this.error = "";
     try {
       this.stats = await this.api.getAdminStats();
+      this.lastUpdated = new Date().toLocaleTimeString("en-US", {
+        hour: "2-digit",
+        minute: "2-digit",
+      });
       this.mapMarkers = (this.stats.mapPoints ?? [])
         .map((point) => {
           const coords = countryMarker(point.country);
@@ -65,11 +102,78 @@ export class OverviewDashboardComponent implements OnInit {
         })
         .filter((point): point is Marker => point !== null)
         .sort((a, b) => b.count - a.count);
+      this.donutSlices = this.buildDonut(this.stats.entityTypes ?? []);
+      this.activityChart = this.buildChart(
+        this.stats.monthly ?? [],
+        (value) => String(value),
+      );
+      this.fundingChart = this.buildChart(
+        this.stats.fundingByMonth ?? [],
+        (value) => this.formatMoney(value),
+      );
     } catch {
       this.error = "Could not load the system statistics. Please try again.";
     } finally {
       this.loading = false;
     }
+  }
+
+  private buildChart(
+    rows: StatRank[],
+    tickFormat: (value: number) => string,
+  ): ChartGeometry {
+    const maxValue = Math.max(1, ...rows.map((row) => row.value));
+    const x = scaleLinear()
+      .domain([0, Math.max(1, rows.length - 1)])
+      .range([CHART_PAD, CHART_WIDTH - CHART_PAD]);
+    const y = scaleLinear()
+      .domain([0, maxValue])
+      .range([CHART_HEIGHT - CHART_PAD, CHART_PAD]);
+
+    const linePath =
+      line<StatRank>()
+        .x((_, index) => x(index))
+        .y((row) => y(row.value))
+        .curve(curveMonotoneX)(rows) ?? "";
+    const areaPath =
+      area<StatRank>()
+        .x((_, index) => x(index))
+        .y0(CHART_HEIGHT - CHART_PAD)
+        .y1((row) => y(row.value))
+        .curve(curveMonotoneX)(rows) ?? "";
+
+    return {
+      line: linePath,
+      area: areaPath,
+      points: rows.map((row, index) => ({
+        ...row,
+        x: x(index),
+        y: y(row.value),
+      })),
+      yTicks: y.ticks(4).map((value) => ({
+        label: tickFormat(value),
+        y: y(value),
+      })),
+      max: maxValue,
+    };
+  }
+
+  private buildDonut(rows: StatRank[]): DonutSlice[] {
+    if (!rows.length) return [];
+    const pieGenerator = pie<StatRank>()
+      .value((row) => row.value)
+      .sort(null);
+    const arcGenerator = arc<any>()
+      .innerRadius(46)
+      .outerRadius(70)
+      .cornerRadius(3);
+
+    return pieGenerator(rows).map((segment, index) => ({
+      path: arcGenerator(segment) ?? "",
+      color: this.colorAt(index),
+      label: segment.data.label,
+      value: segment.data.value,
+    }));
   }
 
   formatMoney(value: number): string {
@@ -102,19 +206,6 @@ export class OverviewDashboardComponent implements OnInit {
 
   colorAt(index: number): string {
     return this.palette[index % this.palette.length];
-  }
-
-  donutBackground(rows: StatRank[]): string {
-    const total = rows.reduce((sum, row) => sum + row.value, 0);
-    if (!total) return "rgba(255,255,255,0.06)";
-    let start = 0;
-    const stops = rows.map((row, index) => {
-      const end = start + (row.value / total) * 100;
-      const segment = `${this.colorAt(index)} ${start}% ${end}%`;
-      start = end;
-      return segment;
-    });
-    return `conic-gradient(${stops.join(", ")})`;
   }
 
   get screeningRows(): StatusRow[] {
@@ -154,10 +245,6 @@ export class OverviewDashboardComponent implements OnInit {
     return Object.entries(counts)
       .map(([label, value]) => ({ label, value }))
       .sort((a, b) => b.value - a.value);
-  }
-
-  get maxMonthly(): number {
-    return Math.max(1, ...(this.stats?.monthly ?? []).map((row) => row.value));
   }
 
   get activeUsers(): number {
