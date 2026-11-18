@@ -13,6 +13,7 @@ import { AuthService } from '../../services/auth.service';
 import { OrganizationService } from '../../services/organization.service';
 import { OrganizationRecord } from '../../models/organization.model';
 import { FileUploadComponent } from '../../shared/components/file-upload/file-upload.component';
+import { CountrySelectComponent } from '../../shared/components/country-select/country-select.component';
 import {
   acronymAvailabilityValidator,
   isOrganizationId,
@@ -29,7 +30,13 @@ import {
 @Component({
   selector: 'app-stage1',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, FileUploadComponent, RouterLink],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    FileUploadComponent,
+    RouterLink,
+    CountrySelectComponent,
+  ],
   templateUrl: './stage1.component.html',
   styleUrl: './stage1.component.css'
 })

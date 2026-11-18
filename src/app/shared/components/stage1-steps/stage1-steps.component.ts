@@ -3,11 +3,12 @@ import { CommonModule } from '@angular/common';
 import { FormGroup, FormArray, FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { COUNTRIES } from '../../data/form-steps.config';
 import { FileUploadComponent } from '../file-upload/file-upload.component';
+import { CountrySelectComponent } from '../country-select/country-select.component';
 
 @Component({
   selector: 'app-stage1-steps',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, FileUploadComponent],
+  imports: [CommonModule, ReactiveFormsModule, FileUploadComponent, CountrySelectComponent],
   templateUrl: './stage1-steps.component.html',
   styleUrl: '../../../pages/stage1/stage1.component.css'
 })

@@ -95,13 +95,11 @@
               />
             </td>
             <td>
-              <input
-                class="cell-input"
-                [value]="lead.country"
-                (change)="
-                  updatePendingField(i, 'country', $any($event.target).value)
-                "
-              />
+              <app-country-select
+                [compact]="true"
+                [ngModel]="lead.country"
+                (ngModelChange)="updatePendingField(i, 'country', $event)"
+              ></app-country-select>
             </td>
             <td>
               <input
@@ -366,14 +364,11 @@
               />
             </td>
             <td>
-              <input
-                class="cell-input"
-                [value]="lead.country"
-                aria-label="Country"
-                (change)="
-                  updateSavedField(lead, 'country', $any($event.target).value)
-                "
-              />
+              <app-country-select
+                [compact]="true"
+                [ngModel]="lead.country"
+                (ngModelChange)="updateSavedField(lead, 'country', $event)"
+              ></app-country-select>
             </td>
             <td>
               <input
@@ -648,12 +643,11 @@
 
             <label class="add-field">
               <span>Country</span>
-              <input
-                type="text"
-                class="add-input"
+              <app-country-select
+                name="addCountry"
                 [(ngModel)]="addFormData.country"
-                placeholder="e.g. Kenya"
-              />
+                placeholder="Select country…"
+              ></app-country-select>
             </label>
 
             <label class="add-field">

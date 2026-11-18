@@ -1,5 +1,6 @@
 import { Component, OnInit } from "@angular/core";
 import { CommonModule } from "@angular/common";
+import { FormsModule } from "@angular/forms";
 import { ActivatedRoute, RouterLink } from "@angular/router";
 import {
   FormSubmission,
@@ -31,6 +32,7 @@ import { ApplicantRecord } from "../../../models/applicant.model";
 import { StoredAttachment } from "../../../models/attachment.model";
 import { resolveAttachmentUrl } from "../../../shared/utils/attachment-url.util";
 import { StepIconComponent } from "../../../shared/components/step-icon/step-icon.component";
+import { CountrySelectComponent } from "../../../shared/components/country-select/country-select.component";
 
 type FieldEditType = "text" | "textarea" | "select" | "attachment" | "readonly";
 
@@ -40,7 +42,7 @@ const READ_ONLY_FIELDS = new Set(["applicantName", "areaOfOperation"]);
 @Component({
   selector: "app-submission-detail",
   standalone: true,
-  imports: [CommonModule, RouterLink, StepIconComponent],
+  imports: [CommonModule, FormsModule, RouterLink, StepIconComponent, CountrySelectComponent],
   templateUrl: "./submission-detail.component.html",
   styleUrl: "./submission-detail.component.css",
 })

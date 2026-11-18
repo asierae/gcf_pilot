@@ -174,15 +174,11 @@
       <div class="summary-card" [class.summary-card-editing]="editMode">
         <span class="summary-label">Headquarters</span>
         @if (editMode) {
-          <input
-            type="text"
-            class="edit-input summary-edit-input"
-            [value]="getEditValue('headquartersCountry')"
-            (input)="
-              setEditValue('headquartersCountry', $any($event.target).value)
-            "
-            placeholder="Country"
-          />
+          <app-country-select
+            [ngModel]="getEditValue('headquartersCountry')"
+            (ngModelChange)="setEditValue('headquartersCountry', $event)"
+            placeholder="Select country…"
+          ></app-country-select>
         } @else {
           <span class="summary-value">{{
             getValue("headquartersCountry") || "—"

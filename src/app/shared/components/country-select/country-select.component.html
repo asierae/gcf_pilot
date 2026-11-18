@@ -1,0 +1,91 @@
+<div
+  class="cs-root"
+  [class.cs-open]="open"
+  [class.cs-disabled]="disabled"
+  [class.cs-compact]="compact"
+>
+  <div
+    #control
+    class="cs-control"
+    role="combobox"
+    tabindex="0"
+    [attr.id]="inputId || null"
+    [attr.aria-expanded]="open"
+    [attr.aria-disabled]="disabled"
+    aria-haspopup="listbox"
+    (click)="toggle($event)"
+    (keydown)="onControlKeydown($event)"
+  >
+    @if (multiple && selected.length) {
+      <span class="cs-chips">
+        @for (country of selected; track country) {
+          <span class="cs-chip">
+            {{ country }}
+            <button
+              type="button"
+              class="cs-chip-remove"
+              [attr.aria-label]="'Remove ' + country"
+              (click)="remove(country, $event)"
+            >
+              ×
+            </button>
+          </span>
+        }
+      </span>
+    } @else {
+      <span class="cs-value" [class.cs-placeholder]="!displayValue">
+        {{ displayValue || placeholder }}
+      </span>
+    }
+
+    @if (displayValue && !disabled) {
+      <button
+        type="button"
+        class="cs-clear"
+        aria-label="Clear country"
+        (click)="clear($event)"
+      >
+        ×
+      </button>
+    }
+    <span class="cs-caret" aria-hidden="true">▾</span>
+  </div>
+
+  @if (open) {
+    <div #panel class="cs-panel" [style]="panelStyle" role="listbox">
+      <div class="cs-search-row">
+        <input
+          #searchInput
+          type="text"
+          class="cs-search"
+          [value]="query"
+          (input)="onSearch($event)"
+          (keydown)="onSearchKeydown($event)"
+          placeholder="Search countries…"
+          aria-label="Search countries"
+          autocomplete="off"
+        />
+      </div>
+      <ul class="cs-options">
+        @for (country of filteredCountries; track country; let i = $index) {
+          <li>
+            <button
+              type="button"
+              class="cs-option"
+              [class.cs-active]="i === activeIndex"
+              [attr.aria-selected]="isSelected(country)"
+              (click)="select(country)"
+            >
+              @if (multiple) {
+                <span class="cs-check">{{ isSelected(country) ? "✓" : "" }}</span>
+              }
+              <span>{{ country }}</span>
+            </button>
+          </li>
+        } @empty {
+          <li class="cs-no-results">No countries found</li>
+        }
+      </ul>
+    </div>
+  }
+</div>

@@ -1,6 +1,7 @@
 import { Component, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { CountrySelectComponent } from '../../shared/components/country-select/country-select.component';
 import { RouterLink } from '@angular/router';
 import { Title } from '@angular/platform-browser';
 import { ApiService } from '../../services/api.service';
@@ -275,7 +276,7 @@ const EMAIL_PATTERN = /^\S+@\S+\.\S+$/;
 @Component({
   selector: 'app-profile-assessment',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule, RouterLink, CountrySelectComponent],
   templateUrl: './profile-assessment.component.html',
   styleUrl: './profile-assessment.component.css',
 })

@@ -172,12 +172,12 @@
 
           <label class="field">
             <span class="field-label">Country <em>*</em></span>
-            <input
-              type="text"
+            <app-country-select
+              name="country"
               [(ngModel)]="application.metadata.country"
               (ngModelChange)="onUserInput()"
               placeholder="Country of implementation"
-            />
+            ></app-country-select>
           </label>
 
           <label class="field">

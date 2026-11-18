@@ -2,6 +2,7 @@ import { CommonModule, Location } from '@angular/common';
 import { Component, OnDestroy, OnInit, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterModule } from '@angular/router';
+import { CountrySelectComponent } from '../../shared/components/country-select/country-select.component';
 import {
   ACCOUNTING_STANDARD_OPTIONS,
   AUDIT_OPINION_OPTIONS,
@@ -67,7 +68,7 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 @Component({
   selector: 'app-readiness-wizard',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule],
+  imports: [CommonModule, FormsModule, RouterModule, CountrySelectComponent],
   templateUrl: './readiness-wizard.component.html',
   styleUrl: './readiness-wizard.component.css',
 })

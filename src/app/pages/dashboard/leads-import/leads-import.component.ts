@@ -8,6 +8,7 @@ import { CommonModule } from "@angular/common";
 import { FormsModule } from "@angular/forms";
 import { RouterLink } from "@angular/router";
 import * as XLSX from "xlsx";
+import { CountrySelectComponent } from "../../../shared/components/country-select/country-select.component";
 import {
   LeadRecord,
   LEAD_STATUS_OPTIONS,
@@ -21,7 +22,13 @@ type LeadField = keyof Omit<LeadRecord, "id" | "createdAt" | "updatedAt">;
 @Component({
   selector: "app-leads-import",
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, ConfirmDialogComponent],
+  imports: [
+    CommonModule,
+    FormsModule,
+    RouterLink,
+    ConfirmDialogComponent,
+    CountrySelectComponent,
+  ],
   templateUrl: "./leads-import.component.html",
   styleUrls: ["./leads-import.component.css"],
 })
