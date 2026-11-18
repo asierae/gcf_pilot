@@ -435,11 +435,12 @@ textarea {
   padding: 0.62rem 0.75rem;
   border: 1px solid var(--app-line);
   border-radius: 10px;
-  background: rgba(255, 255, 255, 0.03);
+  background: rgba(9, 16, 28, 0.72);
   color: var(--app-text-strong);
-  font-family: inherit;
-  font-size: 0.86rem;
-  transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+  font: inherit;
+  font-size: 0.84rem;
+  line-height: 1.45;
+  transition: border-color 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
 }
 
 input::placeholder,
@@ -452,7 +453,7 @@ select:focus,
 textarea:focus {
   outline: none;
   border-color: var(--app-accent-line);
-  background: rgba(255, 255, 255, 0.05);
+  background-color: rgba(12, 21, 36, 0.92);
   box-shadow: 0 0 0 3px rgba(232, 192, 106, 0.12);
 }
 
@@ -466,8 +467,21 @@ textarea {
   min-height: 96px;
 }
 
+/* Same dark, custom-chevron select used by the readiness wizard. */
 select {
-  appearance: auto;
+  appearance: none;
+  padding-right: 1.9rem;
+  color-scheme: dark;
+  background-image: linear-gradient(45deg, transparent 50%, #94a3b8 50%),
+    linear-gradient(135deg, #94a3b8 50%, transparent 50%);
+  background-position: calc(100% - 15px) 50%, calc(100% - 10px) 50%;
+  background-size: 5px 5px, 5px 5px;
+  background-repeat: no-repeat;
+}
+
+select option {
+  color: #f8fafc;
+  background-color: #0c1729;
 }
 
 /* ── Radio / checkbox ── */
