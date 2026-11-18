@@ -9,42 +9,83 @@
         height="48"
       />
       <p class="login-brand">AVERA &middot; CAPITAL ACCESS</p>
-      <h2>Login</h2>
-      <p>Access your GCF Accreditation Portal account</p>
+      @if (mode === 'login') {
+        <h2>Login</h2>
+        <p>Access your GCF Accreditation Portal account</p>
+      } @else {
+        <h2>Reset password</h2>
+        <p>We will email a secure link to the address on your account</p>
+      }
     </div>
 
-    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
-      <div class="form-group">
-        <label for="username">Username</label>
-        <input
-          id="username"
-          type="text"
-          formControlName="username"
-          placeholder="Enter username"
-          autocomplete="username"
-        />
-      </div>
+    @if (mode === 'login') {
+      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+        <div class="form-group">
+          <label for="username">Username</label>
+          <input
+            id="username"
+            type="text"
+            formControlName="username"
+            placeholder="Enter username"
+            autocomplete="username"
+          />
+        </div>
 
-      <div class="form-group">
-        <label for="password">Password</label>
-        <input
-          id="password"
-          type="password"
-          formControlName="password"
-          placeholder="Enter password"
-          autocomplete="current-password"
-        />
-      </div>
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input
+            id="password"
+            type="password"
+            formControlName="password"
+            placeholder="Enter password"
+            autocomplete="current-password"
+          />
+        </div>
 
-      <button type="submit" class="btn-submit" [disabled]="submitting">
-        {{ submitting ? 'Signing in…' : 'Sign In' }}
+        <button type="submit" class="btn-submit" [disabled]="submitting">
+          {{ submitting ? 'Signing in…' : 'Sign In' }}
+        </button>
+      </form>
+
+      <button type="button" class="link-button" (click)="showForgotPassword()">
+        Forgot my password?
       </button>
-    </form>
+    } @else {
+      @if (recoverySent) {
+        <div class="notice notice-success" role="status">
+          <strong>Check your inbox.</strong>
+          <p>
+            If an account matches that username, a password reset link is on its way
+            from contact&#64;averacapitalaccess.com. The link expires in 60 minutes.
+          </p>
+        </div>
+      } @else {
+        <form [formGroup]="recoveryForm" (ngSubmit)="onRequestReset()">
+          <div class="form-group">
+            <label for="recovery-username">Username or email</label>
+            <input
+              id="recovery-username"
+              type="text"
+              formControlName="username"
+              placeholder="Enter your username or email"
+              autocomplete="username"
+            />
+          </div>
 
-    <div class="login-hint">
-      <p><strong>Admin:</strong> hatyja / asier → Dashboard</p>
-      <p><strong>Applicant:</strong> hatyja2 / asier → Stage 2</p>
-    </div>
+          @if (recoveryError) {
+            <p class="form-error" role="alert">{{ recoveryError }}</p>
+          }
+
+          <button type="submit" class="btn-submit" [disabled]="recoverySubmitting">
+            {{ recoverySubmitting ? 'Sending…' : 'Email reset link' }}
+          </button>
+        </form>
+      }
+
+      <button type="button" class="link-button" (click)="showLogin()">
+        ← Back to sign in
+      </button>
+    }
 
     <a routerLink="/stage1" class="back-link">← Back to portal</a>
   </div>

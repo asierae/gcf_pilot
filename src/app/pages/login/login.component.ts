@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
+import { ApiService } from '../../services/api.service';
 import { NotificationService } from '../../services/notification.service';
 
 @Component({
@@ -14,10 +15,18 @@ import { NotificationService } from '../../services/notification.service';
 })
 export class LoginComponent {
   loginForm: FormGroup;
+  recoveryForm: FormGroup;
+
+  mode: 'login' | 'forgot' = 'login';
+  submitting = false;
+  recoverySubmitting = false;
+  recoverySent = false;
+  recoveryError = '';
 
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
+    private apiService: ApiService,
     private router: Router,
     private notificationService: NotificationService
   ) {
@@ -26,12 +35,14 @@ export class LoginComponent {
       password: ['', Validators.required]
     });
 
+    this.recoveryForm = this.fb.group({
+      username: ['', Validators.required]
+    });
+
     if (this.authService.isLoggedIn) {
       this.redirectUser();
     }
   }
-
-  submitting = false;
 
   async onSubmit(): Promise<void> {
     if (!this.loginForm.valid) {
@@ -59,6 +70,42 @@ export class LoginComponent {
       }
     } finally {
       this.submitting = false;
+    }
+  }
+
+  showForgotPassword(): void {
+    const username = this.loginForm.get('username')?.value;
+    this.recoveryForm.patchValue({ username: username ?? '' });
+    this.recoverySent = false;
+    this.recoveryError = '';
+    this.mode = 'forgot';
+  }
+
+  showLogin(): void {
+    this.recoverySent = false;
+    this.recoveryError = '';
+    this.mode = 'login';
+  }
+
+  async onRequestReset(): Promise<void> {
+    if (!this.recoveryForm.valid || this.recoverySubmitting) {
+      return;
+    }
+
+    this.recoverySubmitting = true;
+    this.recoverySent = false;
+    this.recoveryError = '';
+
+    try {
+      await this.apiService.forgotPassword(this.recoveryForm.value.username);
+      this.recoverySent = true;
+    } catch (error) {
+      this.recoveryError =
+        error instanceof Error
+          ? error.message
+          : 'Could not send the reset email. Please try again.';
+    } finally {
+      this.recoverySubmitting = false;
     }
   }
 

@@ -3,10 +3,10 @@
 The Angular SPA is served by the same Worker through the `ASSETS` binding.
 Everything under `/api/*` runs in `worker/index.ts` and talks to:
 
-| Binding     | Resource                    | Purpose                          |
-| ----------- | --------------------------- | -------------------------------- |
-| `DB`        | D1 `averacapital-db`        | applicants + leads               |
-| `DOCUMENTS` | R2 `averacapital-documents` | uploaded PDFs / supporting files |
+| Binding     | Resource                    | Purpose                                    |
+| ----------- | --------------------------- | ------------------------------------------ |
+| `DB`        | D1 `averacapital-db`        | portal accounts, applicants, leads, orgs   |
+| `DOCUMENTS` | R2 `averacapital-documents` | uploaded PDFs / supporting files           |
 
 `wrangler.jsonc` already points at both bindings; only the D1 `database_id`
 needs to be pasted in after creation.
@@ -32,6 +32,11 @@ npx wrangler d1 execute averacapital-db --remote --file=worker/schema.sql
 npx wrangler d1 execute averacapital-db --local --file=worker/schema.sql
 ```
 
+`schema.sql` is idempotent (`CREATE TABLE IF NOT EXISTS` / `INSERT OR IGNORE`),
+so it is safe to re-run after every update. It also seeds the legacy demo
+accounts (`hatyja`, `sarah.admin`, `hatyja2`, …) with their old passwords;
+those accounts can immediately sign in and should be re-invited or reset.
+
 ## 3. Configure secrets
 
 ```powershell
@@ -49,8 +54,9 @@ Optional single-account alternative: set `ADMIN_USERNAME` (already in
 Transactional email uses [Resend](https://resend.com):
 
 ```powershell
-# Without this secret the API answers 501 on /api/send-review-email and the
-# UI falls back to Gmail compose. Submission receipts are simply skipped.
+# Without this secret the API answers 501 on /api/send-review-email,
+# /api/auth/forgot-password and the user invitation endpoint, and the UI
+# falls back to Gmail compose for reviews. Submission receipts are skipped.
 npx wrangler secret put RESEND_API_KEY
 ```
 
@@ -142,9 +148,29 @@ Public (no token):
 - `POST /api/send-review-email` — `{ to, subject, body }`; sends from
   `NOREPLY_EMAIL` with `reply_to: CONTACT_EMAIL`. Returns 501 when
   `RESEND_API_KEY` is missing so the UI falls back to Gmail compose.
+- `POST /api/login` — `{ username, password }` → `{ user, token? }`. Portal
+  accounts are verified against the D1 `users` table; `token` (the admin API
+  token) is only returned for admins. The env-based `ADMIN_ACCOUNTS` /
+  `ADMIN_USERNAME` fallback still works.
+- `POST /api/auth/forgot-password` — `{ username }` (username or email). Emails
+  a one-time reset link from `CONTACT_EMAIL`. 501 without `RESEND_API_KEY`.
+- `POST /api/auth/reset-password` — `{ token, password }`, activates the account
+  and marks the token used.
+- `POST /api/auth/accept-invite` — `{ token, password }`, same as reset but for
+  invitation links (7-day expiry).
+- `GET /api/auth/token/:token` — `{ token: { kind, username, email } }` used by
+  the reset / invite pages to greet the account holder.
 
 Admin (`Authorization: Bearer <API_TOKEN>`):
 
+- `GET /api/users` — portal accounts (never includes password hashes)
+- `POST /api/users` — `{ username, email, role, status?, organization*?, invite? }`
+- `PATCH | DELETE /api/users/:id`
+- `POST /api/users/:id/invite` — emails a set-password link, 502 if Resend
+  rejects it
+- `GET /api/readiness` — every readiness submission joined with its organization
+- `PATCH /api/readiness/:organizationId` — `{ data }`; admin edit that preserves
+  `submitted_at` and sends no emails
 - `GET /api/applicants`
 - `GET /api/applicants/:id`
 - `PATCH /api/applicants/:id/status` — `{ status }`
@@ -155,9 +181,26 @@ Admin (`Authorization: Bearer <API_TOKEN>`):
 - `GET | POST | DELETE /api/leads`
 - `PATCH /api/leads/:id` — `{ lead }`
 
-Auth:
+## Portal accounts
 
-- `POST /api/login` — `{ username, password }` → `{ token }`
+Accounts live in D1 (`users`) and are managed from **Settings → Users**
+(admin only):
+
+- **Create** an account with a username, email and role. Applicants can be tied
+  to an organization id/name/acronym, which the wizards use to prefill forms.
+- **Send invitation** emails a `/accept-invite?token=…` link from
+  `contact@averacapitalaccess.com`. Choose a password there and the account
+  flips from `pending` to `active`; only then can it sign in.
+- **Forgot my password?** on the login page sends a
+  `/reset-password?token=…` link (60 minutes, single use) to the address on the
+  account.
+
+Passwords are stored as PBKDF2-SHA256 hashes (`pbkdf2$100000$salt$hash`). One
+time links live in `user_tokens` with `used_at` / `expires_at`, and every new
+link invalidates the previous unused one of the same kind. Suspended accounts
+cannot sign in or request a reset. Both messages are branded through
+`worker/email.ts` and sent from `CONTACT_EMAIL` with `reply_to` set to the same
+inbox.
 
 ## R2 layout
 

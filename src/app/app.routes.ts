@@ -4,6 +4,7 @@ import { LandingComponent } from "./pages/landing/landing.component";
 import { Stage1Component } from "./pages/stage1/stage1.component";
 import { Stage2Component } from "./pages/stage2/stage2.component";
 import { LoginComponent } from "./pages/login/login.component";
+import { PasswordTokenComponent } from "./pages/auth/password-token/password-token.component";
 import { DashboardComponent } from "./pages/dashboard/dashboard.component";
 import { SubmissionDetailComponent } from "./pages/dashboard/submission-detail/submission-detail.component";
 import { ReadinessDashboardComponent } from "./pages/dashboard/readiness-dashboard/readiness-dashboard.component";
@@ -16,6 +17,8 @@ import { adminGuard, authGuard } from "./guards/auth.guard";
 
 export const routes: Routes = [
   { path: "login", component: LoginComponent },
+  { path: "reset-password", component: PasswordTokenComponent },
+  { path: "accept-invite", component: PasswordTokenComponent },
   { path: "home", component: LandingComponent },
   { path: "", redirectTo: "home", pathMatch: "full" },
   {

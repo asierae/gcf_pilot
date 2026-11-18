@@ -36,6 +36,31 @@ export interface ReadinessSubmissionSummary {
   ndaEmail: string;
 }
 
+export interface ApiUser {
+  id: string;
+  username: string;
+  email: string;
+  role: "admin" | "applicant";
+  status: "active" | "pending" | "suspended";
+  organizationId?: string;
+  organizationName?: string;
+  organizationAcronym?: string;
+  hasPassword?: boolean;
+  createdAt?: string;
+}
+
+export interface LoginResponse {
+  token?: string;
+  user: ApiUser;
+}
+
+export interface UserTokenInfo {
+  kind: "reset" | "invite";
+  username: string;
+  email: string;
+  organizationName?: string;
+}
+
 /**
  * HTTP client for the Cloudflare Worker API (D1 + R2).
  *
@@ -58,9 +83,9 @@ export class ApiService {
     sessionStorage.removeItem(API_TOKEN_STORAGE_KEY);
   }
 
-  /** Exchange admin credentials for the API token. */
-  async login(username: string, password: string): Promise<string> {
-    const payload = await this.request<{ token?: string }>(
+  /** Exchange portal credentials for the session user (and admin API token). */
+  async login(username: string, password: string): Promise<LoginResponse> {
+    const payload = await this.request<LoginResponse>(
       "/api/login",
       {
         method: "POST",
@@ -69,11 +94,109 @@ export class ApiService {
       false,
     );
 
-    if (!payload.token) {
-      throw new Error("The server did not return an API token.");
-    }
+    return payload;
+  }
 
+  // ── Account recovery & invitations ─────────────────────────────────────
+
+  async forgotPassword(username: string): Promise<void> {
+    await this.request<{ sent?: boolean }>(
+      "/api/auth/forgot-password",
+      { method: "POST", body: JSON.stringify({ username }) },
+      false,
+    );
+  }
+
+  async getTokenInfo(token: string): Promise<UserTokenInfo> {
+    const payload = await this.request<{ token: UserTokenInfo }>(
+      `/api/auth/token/${encodeURIComponent(token)}`,
+      { method: "GET" },
+      false,
+    );
     return payload.token;
+  }
+
+  async resetPassword(token: string, password: string): Promise<void> {
+    await this.request<{ ok?: boolean }>(
+      "/api/auth/reset-password",
+      { method: "POST", body: JSON.stringify({ token, password }) },
+      false,
+    );
+  }
+
+  async acceptInvite(token: string, password: string): Promise<void> {
+    await this.request<{ ok?: boolean }>(
+      "/api/auth/accept-invite",
+      { method: "POST", body: JSON.stringify({ token, password }) },
+      false,
+    );
+  }
+
+  // ── Users ───────────────────────────────────────────────────────────────
+
+  async getUsers(): Promise<ApiUser[]> {
+    const payload = await this.request<{ users?: ApiUser[] }>(
+      "/api/users",
+      { method: "GET" },
+      true,
+    );
+    return payload.users ?? [];
+  }
+
+  async createUser(input: {
+    username: string;
+    email: string;
+    role: ApiUser["role"];
+    status?: ApiUser["status"];
+    organizationId?: string;
+    organizationName?: string;
+    organizationAcronym?: string;
+    invite?: boolean;
+  }): Promise<{ user: ApiUser | null; invited: boolean; inviteError?: string }> {
+    return this.request(
+      "/api/users",
+      { method: "POST", body: JSON.stringify(input) },
+      true,
+    );
+  }
+
+  async updateUser(
+    id: string,
+    input: Partial<
+      Pick<
+        ApiUser,
+        | "username"
+        | "email"
+        | "role"
+        | "status"
+        | "organizationId"
+        | "organizationName"
+        | "organizationAcronym"
+      >
+    >,
+  ): Promise<ApiUser | null> {
+    const payload = await this.request<{ user: ApiUser | null }>(
+      `/api/users/${encodeURIComponent(id)}`,
+      { method: "PATCH", body: JSON.stringify(input) },
+      true,
+    );
+    return payload.user;
+  }
+
+  async deleteUser(id: string): Promise<void> {
+    await this.request<void>(
+      `/api/users/${encodeURIComponent(id)}`,
+      { method: "DELETE" },
+      true,
+    );
+  }
+
+  async inviteUser(id: string): Promise<void> {
+    await this.request<{ sent: boolean }>(
+      `/api/users/${encodeURIComponent(id)}/invite`,
+      { method: "POST" },
+      true,
+    );
   }
 
   // ── Applicants ──────────────────────────────────────────────────────────

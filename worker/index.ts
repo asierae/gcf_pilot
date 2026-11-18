@@ -1047,6 +1047,8 @@ interface OutgoingEmail {
   text?: string;
   replyTo?: string;
   fromName?: string;
+  /** Overrides the default no-reply sender, e.g. contact@ for account mail. */
+  from?: string;
 }
 
 async function sendEmail(env: Env, message: OutgoingEmail): Promise<boolean> {
@@ -1065,7 +1067,7 @@ async function sendEmail(env: Env, message: OutgoingEmail): Promise<boolean> {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        from: `${message.fromName ?? 'Avera Capital Access'} <${noreplyEmail(env)}>`,
+        from: `${message.fromName ?? 'Avera Capital Access'} <${message.from ?? noreplyEmail(env)}>`,
         to: recipients,
         subject: message.subject,
         html: message.html,
@@ -1274,7 +1276,44 @@ function checkAdmin(env: Env, request: Request): Response | null {
   return null;
 }
 
+/**
+ * Exchanges credentials for a session user. Portal accounts live in D1; the
+ * legacy env-based admin accounts keep working as a fallback so an existing
+ * deployment cannot lock itself out.
+ */
 async function login(request: Request, env: Env): Promise<Response> {
+  const body = await readJson<{ username?: unknown; password?: unknown }>(request);
+  const username = asString(body.username, 'username').trim();
+  const password = asString(body.password, 'password');
+
+  const account = await findUser(env, 'username', username);
+  if (account) {
+    if (account.status === 'suspended') {
+      return json({ error: 'This account is suspended. Contact the team.' }, 403);
+    }
+    if (!(await verifyPassword(password, account.password_hash))) {
+      return json({ error: 'Invalid username or password.' }, 401);
+    }
+    if (account.status === 'pending') {
+      return json(
+        {
+          error:
+            'This account has not been activated yet. Use the invitation link in your email to set a password.',
+        },
+        403,
+      );
+    }
+
+    return json({
+      user: publicUser(account),
+      token: account.role === 'admin' ? env.API_TOKEN : undefined,
+    });
+  }
+
+  // Legacy administrators configured through env vars.
+  if (!checkCredentials(env, username, password)) {
+    return json({ error: 'Invalid username or password.' }, 401);
+  }
   if (!env.API_TOKEN) {
     return json(
       { error: 'API_TOKEN is not configured on the Worker. Run: wrangler secret put API_TOKEN' },
@@ -1282,15 +1321,589 @@ async function login(request: Request, env: Env): Promise<Response> {
     );
   }
 
-  const body = await readJson<{ username?: unknown; password?: unknown }>(request);
-  const username = asString(body.username, 'username');
-  const password = asString(body.password, 'password');
+  return json({
+    token: env.API_TOKEN,
+    username,
+    user: {
+      id: `legacy-${username}`,
+      username,
+      email: '',
+      role: 'admin',
+      status: 'active',
+      hasPassword: true,
+    },
+  });
+}
 
-  if (!checkCredentials(env, username, password)) {
-    return json({ error: 'Invalid username or password.' }, 401);
+/* ------------------------------------------------------------------ *
+ * Portal accounts (D1 users, password resets, invitations)
+ * ------------------------------------------------------------------ */
+
+interface UserRow {
+  id: string;
+  username: string;
+  email: string;
+  password_hash: string | null;
+  role: string;
+  status: string;
+  organization_id: string | null;
+  organization_name: string | null;
+  organization_acronym: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+interface PublicUser {
+  id: string;
+  username: string;
+  email: string;
+  role: string;
+  status: string;
+  organizationId?: string;
+  organizationName?: string;
+  organizationAcronym?: string;
+  hasPassword: boolean;
+  createdAt: string;
+}
+
+const PASSWORD_ITERATIONS = 100000;
+
+function toHex(bytes: Uint8Array): string {
+  return Array.from(bytes)
+    .map((byte) => byte.toString(16).padStart(2, '0'))
+    .join('');
+}
+
+function fromHex(value: string): Uint8Array {
+  const bytes = new Uint8Array(value.length / 2);
+  for (let i = 0; i < bytes.length; i += 1) {
+    bytes[i] = Number.parseInt(value.slice(i * 2, i * 2 + 2), 16);
+  }
+  return bytes;
+}
+
+async function derivePassword(
+  password: string,
+  salt: Uint8Array,
+): Promise<Uint8Array> {
+  const key = await crypto.subtle.importKey(
+    'raw',
+    new TextEncoder().encode(password),
+    'PBKDF2',
+    false,
+    ['deriveBits'],
+  );
+  const bits = await crypto.subtle.deriveBits(
+    {
+      name: 'PBKDF2',
+      salt,
+      iterations: PASSWORD_ITERATIONS,
+      hash: 'SHA-256',
+    },
+    key,
+    256,
+  );
+  return new Uint8Array(bits);
+}
+
+async function hashPassword(password: string): Promise<string> {
+  const salt = crypto.getRandomValues(new Uint8Array(16));
+  const hash = await derivePassword(password, salt);
+  return `pbkdf2$${PASSWORD_ITERATIONS}$${toHex(salt)}$${toHex(hash)}`;
+}
+
+async function verifyPassword(
+  password: string,
+  stored: string | null,
+): Promise<boolean> {
+  if (!stored) return false;
+  const [scheme, iterations, saltHex, hashHex] = stored.split('$');
+  if (scheme !== 'pbkdf2' || !iterations || !saltHex || !hashHex) return false;
+
+  const key = await crypto.subtle.importKey(
+    'raw',
+    new TextEncoder().encode(password),
+    'PBKDF2',
+    false,
+    ['deriveBits'],
+  );
+  const bits = new Uint8Array(
+    await crypto.subtle.deriveBits(
+      {
+        name: 'PBKDF2',
+        salt: fromHex(saltHex),
+        iterations: Number(iterations) || PASSWORD_ITERATIONS,
+        hash: 'SHA-256',
+      },
+      key,
+      256,
+    ),
+  );
+  if (bits.length !== hashHex.length / 2) return false;
+  const expected = fromHex(hashHex);
+  let diff = 0;
+  for (let i = 0; i < bits.length; i += 1) {
+    diff |= bits[i] ^ expected[i];
+  }
+  return diff === 0;
+}
+
+function randomToken(): string {
+  return toHex(crypto.getRandomValues(new Uint8Array(32)));
+}
+
+function publicUser(row: UserRow): PublicUser {
+  return {
+    id: row.id,
+    username: row.username,
+    email: row.email,
+    role: row.role,
+    status: row.status,
+    organizationId: row.organization_id ?? undefined,
+    organizationName: row.organization_name ?? undefined,
+    organizationAcronym: row.organization_acronym ?? undefined,
+    hasPassword: !!row.password_hash,
+    createdAt: row.created_at,
+  };
+}
+
+/** Users table may not exist until schema.sql has been applied. */
+async function findUser(
+  env: Env,
+  field: 'username' | 'email' | 'id',
+  value: string,
+): Promise<UserRow | null> {
+  try {
+    return await env.DB.prepare(
+      field === 'email'
+        ? 'SELECT * FROM users WHERE lower(email) = lower(?) LIMIT 1'
+        : `SELECT * FROM users WHERE ${field} = ? LIMIT 1`,
+    )
+      .bind(value)
+      .first<UserRow>();
+  } catch (error) {
+    console.error('Could not read users table', error);
+    return null;
+  }
+}
+
+async function listUsers(env: Env): Promise<Response> {
+  let results: UserRow[] = [];
+  try {
+    const response = await env.DB.prepare(
+      'SELECT * FROM users ORDER BY created_at ASC',
+    ).all<UserRow>();
+    results = response.results ?? [];
+  } catch (error) {
+    console.error('Could not list users', error);
+  }
+  return json({ users: results.map(publicUser) });
+}
+
+function readUserInput(body: JsonObject): {
+  username: string;
+  email: string;
+  role: 'admin' | 'applicant';
+  status: 'active' | 'pending' | 'suspended';
+  organizationId?: string;
+  organizationName?: string;
+  organizationAcronym?: string;
+} {
+  const username = asString(body.username, 'username').trim();
+  if (!/^[a-zA-Z0-9._-]{3,40}$/.test(username)) {
+    throw new HttpError(
+      400,
+      'Username must be 3–40 characters (letters, numbers, dot, dash or underscore).',
+    );
   }
 
-  return json({ token: env.API_TOKEN, username });
+  const email = asString(body.email, 'email').trim();
+  if (!EMAIL_PATTERN.test(email)) {
+    throw new HttpError(400, 'Enter a valid email address.');
+  }
+
+  const role = body.role === 'admin' ? 'admin' : 'applicant';
+  const status =
+    body.status === 'active' || body.status === 'suspended'
+      ? body.status
+      : 'pending';
+
+  return {
+    username,
+    email,
+    role,
+    status,
+    organizationId: optionalString(body.organizationId),
+    organizationName: optionalString(body.organizationName),
+    organizationAcronym: optionalString(body.organizationAcronym),
+  };
+}
+
+function optionalString(value: unknown): string | undefined {
+  return typeof value === 'string' && value.trim() ? value.trim() : undefined;
+}
+
+async function createUser(request: Request, env: Env): Promise<Response> {
+  const body = await readJson<JsonObject>(request);
+  const input = readUserInput(body);
+
+  const existing = await findUser(env, 'username', input.username);
+  if (existing) {
+    return json({ error: 'That username is already taken.' }, 409);
+  }
+
+  const now = new Date().toISOString();
+  const id = `usr-${crypto.randomUUID()}`;
+  const status = input.status;
+
+  await env.DB.prepare(
+    `INSERT INTO users (
+       id, username, email, password_hash, role, status,
+       organization_id, organization_name, organization_acronym,
+       created_at, updated_at
+     ) VALUES (?, ?, ?, NULL, ?, ?, ?, ?, ?, ?, ?)`,
+  )
+    .bind(
+      id,
+      input.username,
+      input.email,
+      input.role,
+      status,
+      input.organizationId ?? null,
+      input.organizationName ?? null,
+      input.organizationAcronym ?? null,
+      now,
+      now,
+    )
+    .run();
+
+  const row = await findUser(env, 'id', id);
+  const invite = body.invite === true;
+  let invited = false;
+  let inviteError: string | undefined;
+
+  if (invite && row) {
+    const result = await sendInvite(env, row);
+    invited = result.sent;
+    inviteError = result.error;
+  }
+
+  return json(
+    { user: row ? publicUser(row) : null, invited, inviteError },
+    201,
+  );
+}
+
+async function updateUser(
+  request: Request,
+  env: Env,
+  id: string,
+): Promise<Response> {
+  const row = await findUser(env, 'id', id);
+  if (!row) return json({ error: 'User not found.' }, 404);
+
+  const body = await readJson<JsonObject>(request);
+  const username = optionalString(body.username) ?? row.username;
+  const email = optionalString(body.email) ?? row.email;
+  if (!EMAIL_PATTERN.test(email)) {
+    return json({ error: 'Enter a valid email address.' }, 400);
+  }
+  const role = body.role === 'admin' ? 'admin' : body.role === 'applicant' ? 'applicant' : row.role;
+  const status =
+    body.status === 'active' || body.status === 'pending' || body.status === 'suspended'
+      ? body.status
+      : row.status;
+
+  if (username.toLowerCase() !== row.username.toLowerCase()) {
+    const taken = await findUser(env, 'username', username);
+    if (taken) return json({ error: 'That username is already taken.' }, 409);
+  }
+
+  await env.DB.prepare(
+    `UPDATE users SET
+       username = ?, email = ?, role = ?, status = ?,
+       organization_id = ?, organization_name = ?, organization_acronym = ?,
+       updated_at = ?
+     WHERE id = ?`,
+  )
+    .bind(
+      username,
+      email,
+      role,
+      status,
+      optionalString(body.organizationId) ?? row.organization_id,
+      optionalString(body.organizationName) ?? row.organization_name,
+      optionalString(body.organizationAcronym) ?? row.organization_acronym,
+      new Date().toISOString(),
+      id,
+    )
+    .run();
+
+  const updated = await findUser(env, 'id', id);
+  return json({ user: updated ? publicUser(updated) : null });
+}
+
+async function deleteUser(env: Env, id: string): Promise<Response> {
+  await env.DB.prepare('DELETE FROM user_tokens WHERE user_id = ?').bind(id).run();
+  await env.DB.prepare('DELETE FROM users WHERE id = ?').bind(id).run();
+  return empty();
+}
+
+async function issueUserToken(
+  env: Env,
+  userId: string,
+  kind: 'reset' | 'invite',
+  ttlMinutes: number,
+): Promise<string> {
+  const token = randomToken();
+  const now = new Date();
+  const expires = new Date(now.getTime() + ttlMinutes * 60 * 1000).toISOString();
+
+  await env.DB.prepare(
+    `UPDATE user_tokens SET used_at = ? WHERE user_id = ? AND kind = ? AND used_at IS NULL`,
+  )
+    .bind(now.toISOString(), userId, kind)
+    .run();
+
+  await env.DB.prepare(
+    `INSERT INTO user_tokens (token, user_id, kind, expires_at, used_at, created_at)
+     VALUES (?, ?, ?, ?, NULL, ?)`,
+  )
+    .bind(token, userId, kind, expires, now.toISOString())
+    .run();
+
+  return token;
+}
+
+async function sendAccountEmail(
+  env: Env,
+  user: UserRow,
+  kind: 'reset' | 'invite',
+  token: string,
+): Promise<boolean> {
+  const site = siteUrl(env);
+  const inbox = contactEmail(env);
+  const path = kind === 'reset' ? 'reset-password' : 'accept-invite';
+  const link = `${site}/${path}?token=${encodeURIComponent(token)}`;
+  const expiry = kind === 'reset' ? '60 minutes' : '7 days';
+
+  const content: EmailContent = {
+    kicker: kind === 'reset' ? 'Password reset' : 'Account invitation',
+    title:
+      kind === 'reset'
+        ? 'Reset your Avera password'
+        : 'You have been invited to the Avera portal',
+    intro:
+      kind === 'reset'
+        ? `We received a request to reset the password for the account “${user.username}”. Choose a new password with the button below.`
+        : `An Avera administrator created a portal account for “${user.username}”. Set your password to activate it and sign in.`,
+    paragraphs:
+      kind === 'reset'
+        ? ['If you did not request this, you can ignore this email — your password will not change.']
+        : [
+            user.organization_name
+              ? `Account organization: ${user.organization_name}.`
+              : 'Your account will be linked to your organization once you sign in.',
+          ],
+    cta: {
+      label: kind === 'reset' ? 'Choose a new password' : 'Activate my account',
+      href: link,
+    },
+    footnote: `This link expires in ${expiry} and can only be used once.`,
+    audience: 'applicant',
+  };
+
+  const delivered = await sendEmail(env, {
+    to: user.email,
+    subject:
+      kind === 'reset'
+        ? 'Reset your Avera Capital Access password'
+        : 'Activate your Avera Capital Access account',
+    html: renderEmailHtml(content, { site, inbox }),
+    text: renderEmailText(content, { site, inbox }),
+    from: inbox,
+    replyTo: inbox,
+  });
+
+  return delivered;
+}
+
+async function sendInvite(
+  env: Env,
+  user: UserRow,
+): Promise<{ sent: boolean; error?: string }> {
+  if (!env.RESEND_API_KEY) {
+    return {
+      sent: false,
+      error:
+        'Email delivery is not configured. Add the RESEND_API_KEY secret to send invitations.',
+    };
+  }
+  if (!EMAIL_PATTERN.test(user.email)) {
+    return { sent: false, error: 'This account has no valid email address.' };
+  }
+
+  const token = await issueUserToken(env, user.id, 'invite', 7 * 24 * 60);
+  const sent = await sendAccountEmail(env, user, 'invite', token);
+  return sent
+    ? { sent: true }
+    : { sent: false, error: 'Resend could not deliver the invitation email.' };
+}
+
+async function inviteUser(
+  request: Request,
+  env: Env,
+  id: string,
+): Promise<Response> {
+  const user = await findUser(env, 'id', id);
+  if (!user) return json({ error: 'User not found.' }, 404);
+
+  const result = await sendInvite(env, user);
+  if (!result.sent) {
+    return json({ error: result.error ?? 'Could not send the invitation.' }, 502);
+  }
+
+  if (user.status === 'pending') {
+    // Keep pending until the invitee sets a password.
+  } else if (!user.password_hash) {
+    await env.DB.prepare(
+      `UPDATE users SET status = 'pending', updated_at = ? WHERE id = ?`,
+    )
+      .bind(new Date().toISOString(), id)
+      .run();
+  }
+
+  return json({ sent: true });
+}
+
+async function forgotPassword(request: Request, env: Env): Promise<Response> {
+  if (!env.RESEND_API_KEY) {
+    return json(
+      {
+        error:
+          'Password email is not configured. Add the RESEND_API_KEY secret to the Worker.',
+      },
+      501,
+    );
+  }
+
+  const body = await readJson<{ username?: unknown }>(request);
+  const identifier = asString(body.username, 'username').trim();
+  const user =
+    (await findUser(env, 'username', identifier)) ??
+    (await findUser(env, 'email', identifier));
+
+  if (!user) {
+    return json({ error: 'No account matches that username or email.' }, 404);
+  }
+  if (user.status === 'suspended') {
+    return json({ error: 'This account is suspended. Contact the team.' }, 403);
+  }
+  if (!EMAIL_PATTERN.test(user.email)) {
+    return json({ error: 'This account has no valid email address.' }, 400);
+  }
+
+  const token = await issueUserToken(env, user.id, 'reset', 60);
+  const sent = await sendAccountEmail(env, user, 'reset', token);
+  if (!sent) {
+    return json({ error: 'The email provider rejected the message.' }, 502);
+  }
+
+  return json({ sent: true });
+}
+
+interface TokenRow {
+  token: string;
+  user_id: string;
+  kind: string;
+  expires_at: string;
+  used_at: string | null;
+}
+
+async function consumeUserToken(
+  env: Env,
+  token: string,
+  password: string,
+): Promise<Response> {
+  const row = await env.DB.prepare(
+    'SELECT * FROM user_tokens WHERE token = ?',
+  )
+    .bind(token)
+    .first<TokenRow>();
+
+  if (!row || row.used_at) {
+    return json({ error: 'This link is no longer valid. Request a new one.' }, 400);
+  }
+  if (new Date(row.expires_at).getTime() < Date.now()) {
+    return json({ error: 'This link has expired. Request a new one.' }, 400);
+  }
+  if (password.length < 8) {
+    return json({ error: 'Password must be at least 8 characters.' }, 400);
+  }
+
+  const user = await findUser(env, 'id', row.user_id);
+  if (!user) {
+    return json({ error: 'The account no longer exists.' }, 404);
+  }
+
+  const now = new Date().toISOString();
+  const passwordHash = await hashPassword(password);
+  await env.DB.prepare(
+    `UPDATE users SET password_hash = ?, status = 'active', updated_at = ? WHERE id = ?`,
+  )
+    .bind(passwordHash, now, user.id)
+    .run();
+  await env.DB.prepare(
+    'UPDATE user_tokens SET used_at = ? WHERE token = ?',
+  )
+    .bind(now, token)
+    .run();
+
+  return json({ ok: true, username: user.username });
+}
+
+async function resetPassword(request: Request, env: Env): Promise<Response> {
+  const body = await readJson<JsonObject>(request);
+  const token = asString(body.token, 'token');
+  const password = asString(body.password, 'password');
+  return consumeUserToken(env, token, password);
+}
+
+async function acceptInvite(request: Request, env: Env): Promise<Response> {
+  const body = await readJson<JsonObject>(request);
+  const token = asString(body.token, 'token');
+  const password = asString(body.password, 'password');
+  return consumeUserToken(env, token, password);
+}
+
+/** Public: tells the reset / invite pages whose link this is. */
+async function describeUserToken(env: Env, token: string): Promise<Response> {
+  const row = await env.DB.prepare(
+    'SELECT * FROM user_tokens WHERE token = ?',
+  )
+    .bind(token)
+    .first<TokenRow>();
+
+  if (!row || row.used_at) {
+    return json({ error: 'This link is no longer valid. Request a new one.' }, 400);
+  }
+  if (new Date(row.expires_at).getTime() < Date.now()) {
+    return json({ error: 'This link has expired. Request a new one.' }, 400);
+  }
+
+  const user = await findUser(env, 'id', row.user_id);
+  if (!user) {
+    return json({ error: 'The account no longer exists.' }, 404);
+  }
+
+  return json({
+    token: {
+      kind: row.kind,
+      username: user.username,
+      email: user.email,
+      organizationName: user.organization_name ?? undefined,
+    },
+  });
 }
 
 /* ------------------------------------------------------------------ *
@@ -1896,6 +2509,52 @@ async function handleApi(request: Request, env: Env, path: string): Promise<Resp
   if (path === '/api/login') {
     if (method !== 'POST') return methodNotAllowed('POST');
     return login(request, env);
+  }
+
+  if (path === '/api/auth/forgot-password') {
+    if (method !== 'POST') return methodNotAllowed('POST');
+    return forgotPassword(request, env);
+  }
+
+  if (path === '/api/auth/reset-password') {
+    if (method !== 'POST') return methodNotAllowed('POST');
+    return resetPassword(request, env);
+  }
+
+  if (path === '/api/auth/accept-invite') {
+    if (method !== 'POST') return methodNotAllowed('POST');
+    return acceptInvite(request, env);
+  }
+
+  const authTokenMatch = /^\/api\/auth\/token\/([^/]+)$/.exec(path);
+  if (authTokenMatch) {
+    if (method !== 'GET') return methodNotAllowed('GET');
+    return describeUserToken(env, decodeURIComponent(authTokenMatch[1]));
+  }
+
+  if (path === '/api/users') {
+    if (method === 'GET') return withAdmin(env, request, () => listUsers(env));
+    if (method === 'POST') return withAdmin(env, request, () => createUser(request, env));
+    return methodNotAllowed('GET, POST');
+  }
+
+  const userInviteMatch = /^\/api\/users\/([^/]+)\/invite$/.exec(path);
+  if (userInviteMatch) {
+    if (method !== 'POST') return methodNotAllowed('POST');
+    const id = decodeURIComponent(userInviteMatch[1]);
+    return withAdmin(env, request, () => inviteUser(request, env, id));
+  }
+
+  const userMatch = /^\/api\/users\/([^/]+)$/.exec(path);
+  if (userMatch) {
+    const id = decodeURIComponent(userMatch[1]);
+    if (method === 'PATCH' || method === 'PUT') {
+      return withAdmin(env, request, () => updateUser(request, env, id));
+    }
+    if (method === 'DELETE') {
+      return withAdmin(env, request, () => deleteUser(env, id));
+    }
+    return methodNotAllowed('PATCH, DELETE');
   }
 
   if (path === '/api/send-review-email') {

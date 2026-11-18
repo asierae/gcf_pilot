@@ -87,6 +87,54 @@ CREATE TABLE IF NOT EXISTS readiness_applications (
   data            TEXT NOT NULL
 );
 
+-- ---------------------------------------------------------------------------
+-- Portal accounts
+--
+-- Passwords are PBKDF2-SHA256 (100k iterations) hashes:
+--   pbkdf2$<iterations>$<salt hex>$<hash hex>
+-- NULL means the account still needs an invitation/reset to set a password.
+-- ---------------------------------------------------------------------------
+
+CREATE TABLE IF NOT EXISTS users (
+  id                   TEXT PRIMARY KEY,
+  username             TEXT NOT NULL COLLATE NOCASE UNIQUE,
+  email                TEXT NOT NULL DEFAULT '',
+  password_hash        TEXT,
+  role                 TEXT NOT NULL DEFAULT 'applicant',
+  status               TEXT NOT NULL DEFAULT 'pending',
+  organization_id      TEXT,
+  organization_name    TEXT,
+  organization_acronym TEXT,
+  created_at           TEXT NOT NULL,
+  updated_at           TEXT NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_users_email ON users (lower(email));
+
+-- One-time links for password resets and account invitations.
+CREATE TABLE IF NOT EXISTS user_tokens (
+  token      TEXT PRIMARY KEY,
+  user_id    TEXT NOT NULL,
+  kind       TEXT NOT NULL,
+  expires_at TEXT NOT NULL,
+  used_at    TEXT,
+  created_at TEXT NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_user_tokens_user
+  ON user_tokens (user_id);
+
+-- Seed the accounts that used to live in the Angular demo store so existing
+-- users keep working after the move to D1. Passwords are the old demo ones;
+-- reset or re-invite them from the Users screen.
+INSERT OR IGNORE INTO users (id, username, email, password_hash, role, status, organization_id, organization_name, organization_acronym, created_at, updated_at) VALUES ('usr-001', 'hatyja', 'hatyja@averacapitalaccess.com', 'pbkdf2$100000$b7830e82ed519413b4b2c746d3f58446$7307a17736af57aa4287eef2dc6f4aa5f85bbb41bc0466306c4d143f76d7ce1e', 'admin', 'active', NULL, NULL, NULL, '2024-01-15T09:00:00.000Z', '2024-01-15T09:00:00.000Z');
+INSERT OR IGNORE INTO users (id, username, email, password_hash, role, status, organization_id, organization_name, organization_acronym, created_at, updated_at) VALUES ('usr-002', 'sarah.admin', 'sarah.chen@averacapitalaccess.com', 'pbkdf2$100000$79f01530095141fe717031ab76ea0879$18802e3fa1bcf91fc4c2395ddfd3ef2d32083696d3340d2ec71b0b5d30c24f65', 'admin', 'active', NULL, NULL, NULL, '2024-01-15T09:00:00.000Z', '2024-01-15T09:00:00.000Z');
+INSERT OR IGNORE INTO users (id, username, email, password_hash, role, status, organization_id, organization_name, organization_acronym, created_at, updated_at) VALUES ('usr-003', 'hatyja2', 'marcos@greenenergy.org', 'pbkdf2$100000$305638622aa1fd96870db5416c5fde63$078addb38456041a042db01ded8f474aa97fc899811c7b181100d162bbfcd63c', 'applicant', 'active', 'org-green-energy-corp', 'Green Energy Corp', 'GEC', '2024-01-15T09:00:00.000Z', '2024-01-15T09:00:00.000Z');
+INSERT OR IGNORE INTO users (id, username, email, password_hash, role, status, organization_id, organization_name, organization_acronym, created_at, updated_at) VALUES ('usr-004', 'marcos.oliveira', 'marcos.oliveira@amazonbasin.org', 'pbkdf2$100000$7539fa6d3b98c27415b5ef36eb330b3b$8f3f0cc47d39a29e465abf3b3eab239c3a24e6c83e8707cad7f8736d9127f211', 'applicant', 'active', 'org-amazon-basin', 'Amazon Basin Climate Fund', 'ABCF', '2024-01-15T09:00:00.000Z', '2024-01-15T09:00:00.000Z');
+INSERT OR IGNORE INTO users (id, username, email, password_hash, role, status, organization_id, organization_name, organization_acronym, created_at, updated_at) VALUES ('usr-005', 'priya.sharma', 'priya.sharma@saclimate.in', NULL, 'applicant', 'pending', 'org-south-asia', 'South Asia Resilience Initiative', 'SARI', '2024-01-15T09:00:00.000Z', '2024-01-15T09:00:00.000Z');
+INSERT OR IGNORE INTO users (id, username, email, password_hash, role, status, organization_id, organization_name, organization_acronym, created_at, updated_at) VALUES ('usr-006', 'james.okoye', 'j.okoye@waga.ng', 'pbkdf2$100000$70bd9ba257981f0b0fb2df7cbcbc6a2c$9b55d8aabdafa8dc608b4c399dee70dfe3c8fc66a04973a4619e9fe4e721fc26', 'applicant', 'active', 'org-west-africa', 'West Africa Green Alliance', 'WAGA', '2024-01-15T09:00:00.000Z', '2024-01-15T09:00:00.000Z');
+INSERT OR IGNORE INTO users (id, username, email, password_hash, role, status, organization_id, organization_name, organization_acronym, created_at, updated_at) VALUES ('usr-007', 'fatima.rashid', 'fatima@gulfclimate.ae', NULL, 'applicant', 'pending', 'org-gulf-climate', 'Gulf Region Climate Center', 'GRCC', '2024-01-15T09:00:00.000Z', '2024-01-15T09:00:00.000Z');
+
 -- Backfill organizations for pre-screening submissions created before the
 -- organizations table existed.
 INSERT OR IGNORE INTO organizations (

@@ -43,18 +43,51 @@ export class AuthService {
   }
 
   /**
-   * Admin accounts are validated by the Worker, which returns the API token
-   * used for every admin request. Applicant accounts stay local-only: their
-   * submissions go through the public stage endpoints.
+   * Portal accounts are validated by the Worker against the D1 `users` table.
+   * Admin accounts also receive the API token used for admin requests. The
+   * bundled demo accounts stay as an offline fallback for local development.
    */
   async login(username: string, pass: string): Promise<LoginResult> {
+    let message = "";
+
+    try {
+      const result = await this.apiService.login(username, pass);
+      if (result.token) {
+        this.apiService.setToken(result.token);
+      } else {
+        this.apiService.clearToken();
+      }
+
+      const account = result.user;
+      return this.startSession({
+        id: account.id,
+        username: account.username,
+        email: account.email,
+        role: account.role,
+        organizationId: account.organizationId,
+        organizationName: account.organizationName,
+        organizationAcronym: account.organizationAcronym,
+      });
+    } catch (error) {
+      message =
+        error instanceof Error
+          ? error.message
+          : "Could not sign in to the server.";
+
+      // Only fall back when the Worker cannot be reached; wrong credentials
+      // must fail with the server's message.
+      if (!message.startsWith("Could not reach the server")) {
+        return { ok: false, message };
+      }
+    }
+
     const knownUser = this.userService
       .getUsers()
       .find((user) => user.username === username && user.status === "active");
 
-    if (knownUser && knownUser.role !== "admin") {
-      if (knownUser.password !== pass) {
-        return { ok: false };
+    if (knownUser && knownUser.password === pass) {
+      if (knownUser.role === "admin") {
+        this.apiService.setToken("local-dev-token");
       }
       return this.startSession({
         id: knownUser.id,
@@ -67,24 +100,7 @@ export class AuthService {
       });
     }
 
-    try {
-      // The Worker is the source of truth for admin credentials.
-      const token = await this.apiService.login(username, pass);
-      this.apiService.setToken(token);
-    } catch (error) {
-      const message =
-        error instanceof Error
-          ? error.message
-          : "Could not sign in to the server.";
-      return { ok: false, message };
-    }
-
-    return this.startSession({
-      id: knownUser?.id ?? `api-${username}`,
-      username,
-      email: knownUser?.email ?? "",
-      role: "admin",
-    });
+    return { ok: false, message };
   }
 
   private startSession(user: User): LoginResult {
