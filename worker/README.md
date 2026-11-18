@@ -60,6 +60,12 @@ The sender and inbox are plain vars in `wrangler.jsonc → vars`:
 | --------------- | -------------------------------- | -------------------------------------------- |
 | `NOREPLY_EMAIL` | `noreply@averacapitalaccess.com` | `from` on every automatic email              |
 | `CONTACT_EMAIL` | `contact@averacapitalaccess.com` | internal copy + `reply_to` on automatic mail |
+| `SITE_URL`      | `https://averacapitalaccess.com` | email logo, CTA links and footer             |
+
+The HTML templates live in `worker/email.ts` (`renderEmailHtml` /
+`renderEmailText`) and mirror the landing page: navy shell, gold hairline and
+CTA, wordmark header using `<SITE_URL>/icon-192.png`, content card and a footer
+with the public inbox. Each message also gets a plain-text alternative.
 
 `averacapitalaccess.com` (or whichever domain you verify in Resend) needs the
 DKIM/SPF records Resend prints; sending from it otherwise fails.
@@ -186,6 +192,10 @@ Resend messages, both best-effort — a provider failure never fails the request
 
 Review-notes emails from the admin dashboard use the same transport, but if
 `RESEND_API_KEY` is not configured the UI opens Gmail compose instead.
+
+Both applicant-facing and internal copies are rendered through the branded
+template in `worker/email.ts`; set `SITE_URL` when the site is served from a
+different origin (preview deployments, custom domains).
 
 ## Organizations, drafts and readiness
 
