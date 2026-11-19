@@ -130,6 +130,12 @@ Vercel only serves the static SPA, so it needs the Worker URL to reach the data:
 The SPA resolves relative `/api/files/...` URLs against the Worker when
 `REMOTE_API_BASE_URL` is set, so uploaded documents keep working.
 
+The admin dashboard map uses a simplified 110m country geometry committed at
+`src/assets/world-countries.geo.json`, so there is no runtime TopoJSON
+dependency. Regenerate it with `node scripts/build-world-map.mjs` after a
+temporary `npm install --no-save world-atlas topojson-client i18n-iso-countries`
+(see the script header).
+
 ## Routes
 
 Public (no token):
@@ -194,8 +200,10 @@ Admin (`Authorization: Bearer <API_TOKEN>`):
   `submitted_at` and sends no emails
 - `GET /api/admin/stats` — aggregated dashboard metrics: organization, country,
   submission, lead and user counts, funding requested/budgeted, status and
-  source breakdowns, entity types, six-month activity, map points and the
-  latest submissions
+  source breakdowns, entity types, a 12-month activity series split by stream
+  (accreditation / readiness / enquiries / organizations / users), monthly
+  funding, budget by category, readiness-score buckets, a pipeline-stage
+  funnel, per-country breakdowns with map points and the latest submissions
 - `GET /api/applicants`
 - `GET /api/applicants/:id`
 - `PATCH /api/applicants/:id/status` — `{ status }` (`Pending` / `Passed` /

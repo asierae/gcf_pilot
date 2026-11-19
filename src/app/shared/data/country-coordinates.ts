@@ -190,8 +190,8 @@ const COORDINATES: Record<string, [number, number]> = {
   zimbabwe: [-19.0, 29.9],
 };
 
-/** Returns [left %, top %] for the equirectangular map image. */
-export function countryMarker(name: string): { left: number; top: number } | null {
+/** Returns [longitude, latitude] for a country, or null when unknown. */
+export function countryCentroid(name: string): [number, number] | null {
   if (!name) return null;
   const key = name.trim().toLowerCase().replace(/[^a-z0-9 ]+/g, ' ').replace(/\s+/g, ' ');
   const point =
@@ -202,6 +202,14 @@ export function countryMarker(name: string): { left: number; top: number } | nul
     )?.[1];
   if (!point) return null;
   const [lat, lng] = point;
+  return [lng, lat];
+}
+
+/** Returns [left %, top %] for an equirectangular map image. */
+export function countryMarker(name: string): { left: number; top: number } | null {
+  const point = countryCentroid(name);
+  if (!point) return null;
+  const [lng, lat] = point;
   return {
     left: ((lng + 180) / 360) * 100,
     top: ((90 - lat) / 180) * 100,

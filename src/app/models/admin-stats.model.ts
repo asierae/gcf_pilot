@@ -6,6 +6,30 @@ export interface StatRank {
 export interface MapPoint {
   country: string;
   count: number;
+  organizations: number;
+  accreditation: number;
+  readiness: number;
+  leads: number;
+}
+
+export interface CountryBreakdown {
+  country: string;
+  total: number;
+  organizations: number;
+  accreditation: number;
+  readiness: number;
+  leads: number;
+}
+
+export interface MonthlyActivity {
+  key: string;
+  label: string;
+  accreditation: number;
+  readiness: number;
+  leads: number;
+  organizations: number;
+  users: number;
+  total: number;
 }
 
 export interface RecentActivity {
@@ -28,6 +52,7 @@ export interface AdminStats {
   fundingRequestedUSD: number;
   budgetPlannedUSD: number;
   avgReadinessScore: number;
+  avgFundingPerSubmission: number;
   statusCounts: Record<string, number>;
   leadStatusCounts: Record<string, number>;
   leadSourceCounts: Record<string, number>;
@@ -35,9 +60,14 @@ export interface AdminStats {
   roleCounts: Record<string, number>;
   entityTypes: StatRank[];
   topCountries: StatRank[];
+  countryBreakdown: CountryBreakdown[];
   mapPoints: MapPoint[];
   monthly: StatRank[];
+  monthlySeries: MonthlyActivity[];
   fundingByMonth: StatRank[];
+  budgetByCategory: StatRank[];
+  scoreBuckets: StatRank[];
+  funnel: StatRank[];
   conversionRate: number;
   recent: RecentActivity[];
 }

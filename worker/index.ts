@@ -2832,12 +2832,13 @@ async function adminStats(env: Env): Promise<Response> {
   const [orgResult, applicantResult, readinessResult, leadResult, userResult] =
     await Promise.all([
       env.DB.prepare(
-        'SELECT id, name, country, entity_type FROM organizations',
+        'SELECT id, name, country, entity_type, created_at FROM organizations',
       ).all<{
         id: string;
         name: string;
         country: string | null;
         entity_type: string | null;
+        created_at: string;
       }>(),
       env.DB.prepare(
         'SELECT id, created_at, stage1, stage2, admin FROM applicants',
@@ -2856,9 +2857,10 @@ async function adminStats(env: Env): Promise<Response> {
         created_at: string;
         organization: string;
       }>(),
-      env.DB.prepare('SELECT role, status FROM users').all<{
+      env.DB.prepare('SELECT role, status, created_at FROM users').all<{
         role: string;
         status: string;
+        created_at: string;
       }>(),
     ]);
 
@@ -2875,19 +2877,38 @@ async function adminStats(env: Env): Promise<Response> {
   const number = (raw: unknown): number =>
     typeof raw === 'number' && Number.isFinite(raw) ? raw : 0;
 
-  // Countries: organization profile first, then the pre-screening answers and
-  // readiness submissions for rows that have no profile country yet.
+  // Countries are tracked per source so the map can show where each stream of
+  // the pipeline is coming from, not just an undifferentiated total.
   const countryCounts: Record<string, number> = {};
+  const countrySources: Record<
+    string,
+    { organizations: number; accreditation: number; readiness: number; leads: number }
+  > = {};
   const entityCounts: Record<string, number> = {};
+  const addCountry = (
+    raw: string | null | undefined,
+    source: 'organizations' | 'accreditation' | 'readiness' | 'leads',
+  ): void => {
+    const country = (raw ?? '').trim();
+    if (!country) return;
+    increment(countryCounts, country);
+    const entry = (countrySources[country] ??= {
+      organizations: 0,
+      accreditation: 0,
+      readiness: 0,
+      leads: 0,
+    });
+    entry[source] += 1;
+  };
   for (const org of orgs) {
-    increment(countryCounts, org.country ?? '');
+    addCountry(org.country, 'organizations');
     increment(entityCounts, org.entity_type ?? '');
   }
   for (const applicant of applicants) {
     const stage = parseJson<{ data?: JsonObject }>(applicant.stage1, {});
     const data = stage.data ?? {};
     if (typeof data.headquartersCountry === 'string' && data.headquartersCountry) {
-      increment(countryCounts, data.headquartersCountry);
+      addCountry(data.headquartersCountry, 'accreditation');
     }
     if (typeof data.typeOfEntity === 'string' && data.typeOfEntity) {
       // Only count types that are not already represented in the profile
@@ -2898,10 +2919,10 @@ async function adminStats(env: Env): Promise<Response> {
   for (const row of readiness) {
     const data = parseJson<{ metadata?: JsonObject }>(row.data, {});
     const country = data.metadata?.country;
-    if (typeof country === 'string' && country) increment(countryCounts, country);
+    if (typeof country === 'string' && country) addCountry(country, 'readiness');
   }
   for (const lead of leads) {
-    if (lead.country) increment(countryCounts, lead.country);
+    addCountry(lead.country, 'leads');
   }
 
   const statusCounts: Record<string, number> = {};
@@ -2934,6 +2955,7 @@ async function adminStats(env: Env): Promise<Response> {
 
   let fundingRequestedUSD = 0;
   let budgetPlannedUSD = 0;
+  const budgetCategoryTotals: Record<string, number> = {};
   for (const row of readiness) {
     const data = parseJson<{ metadata?: JsonObject; budget?: JsonObject }>(
       row.data,
@@ -2944,32 +2966,75 @@ async function adminStats(env: Env): Promise<Response> {
       ? (data.budget?.lineItems as JsonObject[])
       : [];
     for (const item of lineItems) {
-      budgetPlannedUSD += number(item.unitCostUSD) * number(item.quantity);
+      const lineTotal = number(item.unitCostUSD) * number(item.quantity);
+      budgetPlannedUSD += lineTotal;
+      const category =
+        typeof item.category === 'string' && item.category
+          ? item.category
+          : 'other';
+      budgetCategoryTotals[category] =
+        (budgetCategoryTotals[category] ?? 0) + lineTotal;
     }
   }
 
-  // Monthly activity for the last six calendar months.
+  const budgetCategoryLabels: Record<string, string> = {
+    international_consultants: 'International consultants',
+    national_consultants: 'National consultants',
+    travel_per_diem: 'Travel & per diem',
+    workshops_training: 'Workshops & training',
+    equipment_software: 'Equipment & software',
+    external_audit: 'External audit',
+    project_management_costs: 'Project management',
+    other: 'Other',
+  };
+  const budgetByCategory = Object.entries(budgetCategoryTotals)
+    .map(([key, value]) => ({
+      label: budgetCategoryLabels[key] ?? key,
+      value: Math.round(value),
+    }))
+    .sort((a, b) => b.value - a.value);
+
+  // Monthly activity for the last twelve calendar months, split by stream.
   const monthKeys: string[] = [];
   const now = new Date();
-  for (let offset = 5; offset >= 0; offset -= 1) {
+  for (let offset = 11; offset >= 0; offset -= 1) {
     const date = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - offset, 1));
     monthKeys.push(date.toISOString().slice(0, 7));
   }
-  const monthly = monthKeys.map((key) => ({
+  const monthlySeries = monthKeys.map((key) => ({
+    key,
     label: new Date(`${key}-01T00:00:00Z`).toLocaleString('en-US', {
       month: 'short',
       timeZone: 'UTC',
     }),
-    value: 0,
+    accreditation: 0,
+    readiness: 0,
+    leads: 0,
+    organizations: 0,
+    users: 0,
+    total: 0,
   }));
-  const countMonth = (date: string): void => {
-    const key = typeof date === 'string' ? date.slice(0, 7) : '';
-    const index = monthKeys.indexOf(key);
-    if (index >= 0) monthly[index].value += 1;
+  const bumpMonth = (
+    date: string,
+    field: 'accreditation' | 'readiness' | 'leads' | 'organizations' | 'users',
+  ): void => {
+    const index = typeof date === 'string' ? monthKeys.indexOf(date.slice(0, 7)) : -1;
+    if (index < 0) return;
+    monthlySeries[index][field] += 1;
+    if (field === 'accreditation' || field === 'readiness' || field === 'leads') {
+      monthlySeries[index].total += 1;
+    }
   };
-  for (const applicant of applicants) countMonth(applicant.created_at);
-  for (const row of readiness) countMonth(row.submitted_at);
-  for (const lead of leads) countMonth(lead.created_at);
+  for (const applicant of applicants) bumpMonth(applicant.created_at, 'accreditation');
+  for (const row of readiness) bumpMonth(row.submitted_at, 'readiness');
+  for (const lead of leads) bumpMonth(lead.created_at, 'leads');
+  for (const org of orgs) bumpMonth(org.created_at, 'organizations');
+  for (const user of users) bumpMonth(user.created_at, 'users');
+
+  const monthly = monthlySeries.map((row) => ({
+    label: row.label,
+    value: row.total,
+  }));
 
   const monthlyFunding = monthKeys.map(() => 0);
   for (const row of readiness) {
@@ -2979,7 +3044,7 @@ async function adminStats(env: Env): Promise<Response> {
     monthlyFunding[index] += number(data.metadata?.requestedAmountUSD);
   }
   const fundingByMonth = monthKeys.map((key, index) => ({
-    label: monthly[index].label,
+    label: monthlySeries[index].label,
     value: monthlyFunding[index],
   }));
 
@@ -3023,10 +3088,54 @@ async function adminStats(env: Env): Promise<Response> {
       .sort((a, b) => b.value - a.value)
       .slice(0, 8);
 
+  // Readiness-score distribution for profile assessments.
+  const scoreBuckets = [
+    { label: '0–19', min: 0, max: 19, value: 0 },
+    { label: '20–39', min: 20, max: 39, value: 0 },
+    { label: '40–59', min: 40, max: 59, value: 0 },
+    { label: '60–79', min: 60, max: 79, value: 0 },
+    { label: '80–100', min: 80, max: 100, value: 0 },
+  ];
+  for (const lead of leads) {
+    if ((lead.source ?? 'manual') !== 'profile') continue;
+    const score = number(lead.readiness_score);
+    if (!score) continue;
+    const bucket = scoreBuckets.find(
+      (item) => score >= item.min && score <= item.max,
+    );
+    if (bucket) bucket.value += 1;
+  }
+
+  const countryBreakdown = Object.entries(countryCounts)
+    .map(([country, total]) => ({
+      country,
+      total,
+      ...(countrySources[country] ?? {
+        organizations: 0,
+        accreditation: 0,
+        readiness: 0,
+        leads: 0,
+      }),
+    }))
+    .sort((a, b) => b.total - a.total)
+    .slice(0, 10);
+
+  const accreditationCount = applicants.filter((row) => !!row.stage1).length;
+  const funnel = [
+    { label: 'Enquiries', value: leads.length },
+    {
+      label: 'Profile assessments',
+      value: leadSourceCounts['profile'] ?? 0,
+    },
+    { label: 'Accreditation', value: accreditationCount },
+    { label: 'Passed pre-screening', value: statusCounts['Passed'] ?? 0 },
+    { label: 'Stage 2 applications', value: stage2Count },
+  ];
+
   return json({
     organizations: orgs.length,
     countries: Object.keys(countryCounts).length,
-    accreditationSubmissions: applicants.filter((row) => !!row.stage1).length,
+    accreditationSubmissions: accreditationCount,
     readinessSubmissions: readiness.length,
     stage2Submissions: stage2Count,
     leads: leads.length,
@@ -3034,6 +3143,9 @@ async function adminStats(env: Env): Promise<Response> {
     fundingRequestedUSD,
     budgetPlannedUSD,
     avgReadinessScore: scoreCount ? Math.round(scoreTotal / scoreCount) : 0,
+    avgFundingPerSubmission: readiness.length
+      ? Math.round(fundingRequestedUSD / readiness.length)
+      : 0,
     statusCounts,
     leadStatusCounts,
     leadSourceCounts,
@@ -3041,16 +3153,27 @@ async function adminStats(env: Env): Promise<Response> {
     roleCounts,
     entityTypes: toRanked(entityCounts),
     topCountries: toRanked(countryCounts),
+    countryBreakdown,
     mapPoints: Object.entries(countryCounts).map(([country, count]) => ({
       country,
       count,
+      ...(countrySources[country] ?? {
+        organizations: 0,
+        accreditation: 0,
+        readiness: 0,
+        leads: 0,
+      }),
     })),
     monthly,
+    monthlySeries,
     fundingByMonth,
+    budgetByCategory,
+    scoreBuckets: scoreBuckets.map(({ label, value }) => ({ label, value })),
+    funnel,
     conversionRate: applicants.length
       ? Math.round(((statusCounts['Passed'] ?? 0) / applicants.length) * 100)
       : 0,
-    recent: recent.slice(0, 6),
+    recent: recent.slice(0, 8),
   });
 }
 
