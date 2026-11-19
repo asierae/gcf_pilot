@@ -21,12 +21,12 @@
     @if (mode === 'login') {
       <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
         <div class="form-group">
-          <label for="username">Username</label>
+          <label for="username">Username or email</label>
           <input
             id="username"
             type="text"
             formControlName="username"
-            placeholder="Enter username"
+            placeholder="Enter username or email"
             autocomplete="username"
           />
         </div>
@@ -55,7 +55,7 @@
         <div class="notice notice-success" role="status">
           <strong>Check your inbox.</strong>
           <p>
-            If an account matches that username, a password reset link is on its way
+            If an account matches that username or email, a password reset link is on its way
             from contact&#64;averacapitalaccess.com. The link expires in 60 minutes.
           </p>
         </div>

@@ -125,7 +125,7 @@ CREATE TABLE IF NOT EXISTS readiness_applications (
 CREATE TABLE IF NOT EXISTS users (
   id                   TEXT PRIMARY KEY,
   username             TEXT NOT NULL COLLATE NOCASE UNIQUE,
-  email                TEXT NOT NULL DEFAULT '',
+  email                TEXT NOT NULL DEFAULT '' COLLATE NOCASE UNIQUE,
   password_hash        TEXT,
   role                 TEXT NOT NULL DEFAULT 'applicant',
   status               TEXT NOT NULL DEFAULT 'pending',

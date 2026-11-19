@@ -2140,10 +2140,15 @@ function checkAdmin(env: Env, request: Request): Response | null {
  */
 async function login(request: Request, env: Env): Promise<Response> {
   const body = await readJson<{ username?: unknown; password?: unknown }>(request);
-  const username = asString(body.username, 'username').trim();
+  const usernameOrEmail = asString(body.username, 'username').trim();
   const password = asString(body.password, 'password');
 
-  const account = await findUser(env, 'username', username);
+  // Try to find user by username first, then by email
+  let account = await findUser(env, 'username', usernameOrEmail);
+  if (!account) {
+    account = await findUser(env, 'email', usernameOrEmail);
+  }
+
   if (account) {
     if (account.status === 'suspended') {
       return json({ error: 'This account is suspended. Contact the team.' }, 403);
@@ -2168,10 +2173,10 @@ async function login(request: Request, env: Env): Promise<Response> {
     // The D1 row exists (e.g. seeded from the old demo store) but the password
     // does not match. Legacy env credentials still win, so applying the new
     // schema can never lock an existing administrator out.
-    if (!checkCredentials(env, username, password)) {
+    if (!checkCredentials(env, usernameOrEmail, password)) {
       return json({ error: 'Invalid username or password.' }, 401);
     }
-  } else if (!checkCredentials(env, username, password)) {
+  } else if (!checkCredentials(env, usernameOrEmail, password)) {
     return json({ error: 'Invalid username or password.' }, 401);
   }
 
@@ -2185,10 +2190,10 @@ async function login(request: Request, env: Env): Promise<Response> {
 
   return json({
     token: env.API_TOKEN,
-    username,
+    username: usernameOrEmail,
     user: {
-      id: `legacy-${username}`,
-      username,
+      id: `legacy-${usernameOrEmail}`,
+      username: usernameOrEmail,
       email: '',
       role: 'admin',
       status: 'active',
@@ -2409,9 +2414,14 @@ async function createUser(request: Request, env: Env): Promise<Response> {
   const body = await readJson<JsonObject>(request);
   const input = readUserInput(body);
 
-  const existing = await findUser(env, 'username', input.username);
-  if (existing) {
+  const existingUsername = await findUser(env, 'username', input.username);
+  if (existingUsername) {
     return json({ error: 'That username is already taken.' }, 409);
+  }
+
+  const existingEmail = await findUser(env, 'email', input.email);
+  if (existingEmail) {
+    return json({ error: 'That email is already registered.' }, 409);
   }
 
   const now = new Date().toISOString();
@@ -2479,6 +2489,11 @@ async function updateUser(
   if (username.toLowerCase() !== row.username.toLowerCase()) {
     const taken = await findUser(env, 'username', username);
     if (taken) return json({ error: 'That username is already taken.' }, 409);
+  }
+
+  if (email.toLowerCase() !== row.email.toLowerCase()) {
+    const taken = await findUser(env, 'email', email);
+    if (taken) return json({ error: 'That email is already registered.' }, 409);
   }
 
   await env.DB.prepare(
