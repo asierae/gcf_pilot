@@ -962,6 +962,19 @@
     "PRIORITY_CRITICAL": "紧急",
     "SAVE_ERROR": "无法保存更改。请重试。",
     "DELETE_CONFIRM_BUTTON": "删除组织",
-    "SELECT_PLACEHOLDER": "选择"
+    "SELECT_PLACEHOLDER": "选择",
+    "TAB_DETAILS": "详情",
+    "TAB_FILES": "文件",
+    "FILES_LOADING": "正在加载文件...",
+    "FILES_EMPTY": "没有为此组织上传文件。",
+    "DOWNLOAD": "下载",
+    "DELETE_CONFIRM_TITLE": "删除组织",
+    "DELETE_CONFIRM_MESSAGE": "确定要删除",
+    "DELETE_WARNING": "此操作无法撤销。所选的所有数据将被永久删除。",
+    "DELETE_FILES": "删除所有文件（上传到 R2 存储的文档）",
+    "DELETE_ACCREDITATION": "删除认证数据（预筛选结果、readyiness 申请）",
+    "DELETE_READINESS": "删除 readiness 草稿和提交",
+    "CANCEL": "取消",
+    "DELETING": "正在删除..."
   }
 }

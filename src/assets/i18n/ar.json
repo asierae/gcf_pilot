@@ -962,6 +962,19 @@
     "PRIORITY_CRITICAL": "حرجة",
     "SAVE_ERROR": "تعذر حفظ التغييرات. يرجى المحاولة مرة أخرى.",
     "DELETE_CONFIRM_BUTTON": "حذف المنظمة",
-    "SELECT_PLACEHOLDER": "اختر"
+    "SELECT_PLACEHOLDER": "اختر",
+    "TAB_DETAILS": "التفاصيل",
+    "TAB_FILES": "الملفات",
+    "FILES_LOADING": "جاري تحميل الملفات...",
+    "FILES_EMPTY": "لا يوجد ملفات تم رفعها لهذه المنظمة.",
+    "DOWNLOAD": "تنزيل",
+    "DELETE_CONFIRM_TITLE": "حذف المنظمة",
+    "DELETE_CONFIRM_MESSAGE": "هل أنت متأكد من أنك تريد حذف",
+    "DELETE_WARNING": "هذا الإجراء لا يمكن التراجع عنه. سيتم حذف جميع البيانات المحددة نهائيًا.",
+    "DELETE_FILES": "حذف جميع الملفات (الوثائق التي تم رفعها إلى سحابة R2)",
+    "DELETE_ACCREDITATION": "حذف بيانات الاعتماد (نتائج الفحص الأولي، طلبات الامتحان readiness)",
+    "DELETE_READINESS": "حذف المسودات والإرسالات readiness",
+    "CANCEL": "إلغاء",
+    "DELETING": "جاري الحذف..."
   }
 }

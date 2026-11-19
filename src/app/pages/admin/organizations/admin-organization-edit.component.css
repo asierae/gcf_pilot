@@ -128,3 +128,320 @@
   .ao-form-grid { grid-template-columns: 1fr; }
   .ao-section { padding: 1rem; }
 }
+
+/* Header actions */
+.header-actions {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.btn-danger {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  border-radius: 8px;
+  background: rgba(239, 68, 68, 0.1);
+  color: #fca5a5;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+.btn-danger:hover {
+  background: rgba(239, 68, 68, 0.2);
+  color: #fecaca;
+}
+.btn-danger svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* Tabs */
+.ao-tabs {
+  display: flex;
+  gap: 0.25rem;
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  padding-bottom: 0;
+}
+.ao-tabs button[role="tab"] {
+  padding: 0.75rem 1.25rem;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: #64748b;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+}
+.ao-tabs button[role="tab"]:hover {
+  color: #cbd5e1;
+}
+.ao-tabs button[role="tab"].active {
+  color: #e8c06a;
+  border-bottom-color: #e8c06a;
+}
+.tab-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.25rem;
+  height: 1.25rem;
+  margin-left: 0.5rem;
+  padding: 0 0.375rem;
+  background: rgba(232, 192, 106, 0.15);
+  border-radius: 9999px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #e8c06a;
+}
+
+/* Files tab */
+.ao-files-tab {
+  max-width: 900px;
+}
+.ao-file-section {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(212,169,78,0.2);
+  border-radius: 12px;
+  padding: 1.25rem;
+  margin-bottom: 1.25rem;
+}
+.ao-file-section-title {
+  margin: 0 0 1rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #f8fafc;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.file-count {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #94a3b8;
+}
+.ao-file-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.ao-file-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.75rem 1rem;
+  background: rgba(15,23,42,0.5);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 8px;
+  transition: border-color 0.15s;
+}
+.ao-file-item:hover {
+  border-color: rgba(212,169,78,0.3);
+}
+.ao-file-info {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-width: 0;
+  flex: 1;
+}
+.file-icon {
+  width: 20px;
+  height: 20px;
+  color: #e8c06a;
+  flex-shrink: 0;
+}
+.file-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  min-width: 0;
+}
+.file-name {
+  font-size: 0.875rem;
+  color: #f1f5f9;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.file-meta {
+  font-size: 0.7rem;
+  color: #64748b;
+}
+.ao-file-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+.btn-file-download {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 8px;
+  background: rgba(15,23,42,0.5);
+  color: #94a3b8;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+.btn-file-download:hover {
+  background: rgba(212,169,78,0.2);
+  border-color: rgba(212,169,78,0.4);
+  color: #e8c06a;
+}
+.btn-file-download svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* Modal */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  z-index: 1000;
+  animation: fadeIn 0.15s ease-out;
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.modal-dialog {
+  background: #1e293b;
+  border: 1px solid rgba(212,169,78,0.3);
+  border-radius: 12px;
+  width: 100%;
+  max-width: 480px;
+  animation: slideUp 0.2s ease-out;
+  overflow: hidden;
+}
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+.modal-header h3 {
+  margin: 0;
+  font-size: 1.125rem;
+  color: #f8fafc;
+}
+.modal-close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: none;
+  color: #64748b;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: background 0.15s, color 0.15s;
+}
+.modal-close:hover {
+  background: rgba(255,255,255,0.08);
+  color: #f8fafc;
+}
+.modal-close svg {
+  width: 20px;
+  height: 20px;
+}
+.modal-body {
+  padding: 1.25rem;
+}
+.modal-body p {
+  margin: 0 0 0.75rem;
+  color: #cbd5e1;
+  line-height: 1.5;
+}
+.delete-warning {
+  font-size: 0.8rem;
+  color: #f87171;
+  margin-top: 0.5rem !important;
+}
+.delete-options {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+.delete-option {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  cursor: pointer;
+}
+.delete-option input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: #d4a94e;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.delete-option span {
+  font-size: 0.875rem;
+  color: #e2e8f0;
+}
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.65rem;
+  padding: 1rem 1.25rem;
+  border-top: 1px solid rgba(255,255,255,0.08);
+}
+.btn-cancel {
+  padding: 0.5rem 0.875rem;
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 8px;
+  background: none;
+  color: #94a3b8;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.btn-cancel:hover {
+  background: rgba(255,255,255,0.05);
+}
+.btn-delete-confirm {
+  padding: 0.5rem 1.125rem;
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  border: none;
+  border-radius: 8px;
+  color: #f8fafc;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+.btn-delete-confirm:hover {
+  opacity: 0.88;
+}
+.btn-delete-confirm:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
+@media (max-width: 768px) {
+  .header-actions { width: 100%; justify-content: flex-start; }
+  .ao-tabs button[role="tab"] { padding: 0.75rem 0.75rem; font-size: 0.8rem; }
+  .modal-dialog { margin: 1rem; max-width: calc(100% - 2rem); }
+}

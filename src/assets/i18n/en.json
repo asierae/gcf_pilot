@@ -963,6 +963,19 @@
     "PRIORITY_CRITICAL": "Critical",
     "SAVE_ERROR": "Could not save changes. Please try again.",
     "DELETE_CONFIRM_BUTTON": "Delete organization",
-    "SELECT_PLACEHOLDER": "Select"
+    "SELECT_PLACEHOLDER": "Select",
+    "TAB_DETAILS": "Details",
+    "TAB_FILES": "Files",
+    "FILES_LOADING": "Loading files...",
+    "FILES_EMPTY": "No files uploaded for this organization.",
+    "DOWNLOAD": "Download",
+    "DELETE_CONFIRM_TITLE": "Delete organization",
+    "DELETE_CONFIRM_MESSAGE": "Are you sure you want to delete",
+    "DELETE_WARNING": "This action cannot be undone. All selected data will be permanently removed.",
+    "DELETE_FILES": "Delete all files (documents uploaded to R2 storage)",
+    "DELETE_ACCREDITATION": "Delete accreditation data (pre-screening results, readiness applications)",
+    "DELETE_READINESS": "Delete readiness drafts and submissions",
+    "CANCEL": "Cancel",
+    "DELETING": "Deleting..."
   }
 }

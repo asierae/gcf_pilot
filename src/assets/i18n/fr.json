@@ -962,6 +962,19 @@
     "PRIORITY_CRITICAL": "Critique",
     "SAVE_ERROR": "Impossible d'enregistrer les modifications. Veuillez réessayer.",
     "DELETE_CONFIRM_BUTTON": "Supprimer l'organisation",
-    "SELECT_PLACEHOLDER": "Sélectionner"
+    "SELECT_PLACEHOLDER": "Sélectionner",
+    "TAB_DETAILS": "Détails",
+    "TAB_FILES": "Fichiers",
+    "FILES_LOADING": "Chargement des fichiers...",
+    "FILES_EMPTY": "Aucun fichier téléchargé pour cette organisation.",
+    "DOWNLOAD": "Télécharger",
+    "DELETE_CONFIRM_TITLE": "Supprimer l'organisation",
+    "DELETE_CONFIRM_MESSAGE": "Êtes-vous sûr de vouloir supprimer",
+    "DELETE_WARNING": "Cette action est irréversible. Toutes les données sélectionnées seront supprimées définitivement.",
+    "DELETE_FILES": "Supprimer tous les fichiers (documents téléchargés dans le stockage R2)",
+    "DELETE_ACCREDITATION": "Supprimer les données d'accréditation (résultats de présélection, applications readiness)",
+    "DELETE_READINESS": "Supprimer les brouillons et soumissions readiness",
+    "CANCEL": "Annuler",
+    "DELETING": "Suppression..."
   }
 }

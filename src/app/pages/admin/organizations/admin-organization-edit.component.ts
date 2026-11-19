@@ -5,9 +5,9 @@ import { FormsModule } from "@angular/forms";
 import { TranslatePipe, TranslateService } from "@ngx-translate/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { ApiService } from "../../../services/api.service";
-import { OrganizationRecord } from "../../../models/organization.model";
 import { NotificationService } from "../../../services/notification.service";
 import { BreadcrumbService } from "../../../services/breadcrumb.service";
+import { OrganizationRecord, OrganizationFilesBySection } from "../../../models/organization.model";
 import { map } from "rxjs/operators";
 
 interface OrgForm {
@@ -73,6 +73,12 @@ export class AdminOrganizationEditComponent implements OnInit {
   saving = false;
   loadError = "";
   saveError = "";
+
+  // Files
+  orgFiles: OrganizationFilesBySection[] = [];
+  filesLoading = false;
+  filesError = "";
+  activeTab = "details"; // 'details' | 'files'
 
   // Available options (populated from data)
   entityTypes = ENTITY_TYPES;
@@ -142,12 +148,27 @@ export class AdminOrganizationEditComponent implements OnInit {
         this.breadcrumb.setContext(
           this.translate.instant("ADMIN_ORGANIZATION_EDIT.TITLE"),
         );
+        // Load files
+        await this.loadFiles(id);
       }
     } catch (error) {
       this.loadError =
         error instanceof Error ? error.message : "Could not load organization.";
     } finally {
       this.loading = false;
+    }
+  }
+
+  async loadFiles(organizationId: string): Promise<void> {
+    this.filesLoading = true;
+    this.filesError = "";
+    try {
+      this.orgFiles = await this.api.getOrganizationFiles(organizationId);
+    } catch (error) {
+      this.filesError =
+        error instanceof Error ? error.message : "Could not load files.";
+    } finally {
+      this.filesLoading = false;
     }
   }
 
@@ -256,5 +277,57 @@ export class AdminOrganizationEditComponent implements OnInit {
       month: "short",
       day: "numeric",
     });
+  }
+
+  // Delete dialog
+  showDeleteDialog = false;
+  deleting = false;
+  deleteOptions = {
+    deleteFiles: true,
+    deleteAccreditation: true,
+    deleteReadiness: true,
+  };
+
+  openDeleteDialog(): void {
+    this.showDeleteDialog = true;
+    this.deleteOptions = {
+      deleteFiles: true,
+      deleteAccreditation: true,
+      deleteReadiness: true,
+    };
+  }
+
+  async confirmDelete(): Promise<void> {
+    if (this.deleting) return;
+    this.deleting = true;
+
+    try {
+      await this.api.deleteOrganizationAdmin(this.orgId, this.deleteOptions);
+      this.notification.success("Organization deleted.");
+      this.router.navigate(["/admin/organizations"]);
+    } catch (error) {
+      this.notification.error(
+        error instanceof Error ? error.message : "Could not delete organization.",
+      );
+    } finally {
+      this.deleting = false;
+      this.showDeleteDialog = false;
+    }
+  }
+
+  cancelDelete(): void {
+    this.showDeleteDialog = false;
+  }
+
+  getTotalFiles(): number {
+    return this.orgFiles.reduce((sum, section) => sum + section.files.length, 0);
+  }
+
+  formatFileSize(bytes: number): string {
+    if (bytes === 0) return '0 B';
+    const k = 1024;
+    const sizes = ['B', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
   }
 }

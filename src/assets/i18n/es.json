@@ -962,6 +962,19 @@
     "PRIORITY_CRITICAL": "Crítico",
     "SAVE_ERROR": "No se pudieron guardar los cambios. Inténtalo de nuevo.",
     "DELETE_CONFIRM_BUTTON": "Eliminar organización",
-    "SELECT_PLACEHOLDER": "Seleccionar"
+    "SELECT_PLACEHOLDER": "Seleccionar",
+    "TAB_DETAILS": "Detalles",
+    "TAB_FILES": "Archivos",
+    "FILES_LOADING": "Cargando archivos...",
+    "FILES_EMPTY": "No hay archivos subidos para esta organización.",
+    "DOWNLOAD": "Descargar",
+    "DELETE_CONFIRM_TITLE": "Eliminar organización",
+    "DELETE_CONFIRM_MESSAGE": "¿Estás seguro de que quieres eliminar",
+    "DELETE_WARNING": "Esta acción no se puede deshacer. Todos los datos seleccionados se eliminarán permanentemente.",
+    "DELETE_FILES": "Eliminar todos los archivos (documentos subidos al almacenamiento R2)",
+    "DELETE_ACCREDITATION": "Eliminar datos de acreditación (resultados de preselección, solicitudes de readiness)",
+    "DELETE_READINESS": "Eliminar borradores y envíos de readiness",
+    "CANCEL": "Cancelar",
+    "DELETING": "Eliminando..."
   }
 }

@@ -8,6 +8,8 @@ import {
 import {
   DraftForm,
   OrganizationDraft,
+  OrganizationFile,
+  OrganizationFilesBySection,
   OrganizationForms,
   OrganizationRecord,
 } from "../models/organization.model";
@@ -420,6 +422,37 @@ export class ApiService {
       true,
     );
     return payload.organization;
+  }
+
+  // Admin: list files for an organization
+  async getOrganizationFiles(
+    organizationId: string,
+  ): Promise<OrganizationFilesBySection[]> {
+    const payload = await this.request<{ sections: OrganizationFilesBySection[] }>(
+      `/api/admin/organizations/${encodeURIComponent(organizationId)}/files`,
+      { method: "GET" },
+      true,
+    );
+    return payload.sections ?? [];
+  }
+
+  // Admin: delete organization and all its files
+  async deleteOrganizationAdmin(
+    organizationId: string,
+    options: {
+      deleteFiles?: boolean;
+      deleteAccreditation?: boolean;
+      deleteReadiness?: boolean;
+    } = {},
+  ): Promise<void> {
+    await this.request(
+      `/api/admin/organizations/${encodeURIComponent(organizationId)}`,
+      {
+        method: "DELETE",
+        body: JSON.stringify(options),
+      },
+      true,
+    );
   }
 
   // ── Drafts ──────────────────────────────────────────────────────────────

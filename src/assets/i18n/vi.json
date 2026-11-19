@@ -962,6 +962,19 @@
     "PRIORITY_CRITICAL": "Nghiêm trọng",
     "SAVE_ERROR": "Không thể lưu thay đổi. Vui lòng thử lại.",
     "DELETE_CONFIRM_BUTTON": "Xóa tổ chức",
-    "SELECT_PLACEHOLDER": "Chọn"
+    "SELECT_PLACEHOLDER": "Chọn",
+    "TAB_DETAILS": "Chi tiết",
+    "TAB_FILES": "Tệp tin",
+    "FILES_LOADING": "Đang tải tệp tin...",
+    "FILES_EMPTY": "Không có tệp tin nào đã được tải lên cho tổ chức này.",
+    "DOWNLOAD": "Tải xuống",
+    "DELETE_CONFIRM_TITLE": "Xóa tổ chức",
+    "DELETE_CONFIRM_MESSAGE": "Bạn có chắc chắn muốn xóa",
+    "DELETE_WARNING": "Hành động này không thể hoàn tác. Tất cả dữ liệu đã chọn sẽ bị xóa vĩnh viễn.",
+    "DELETE_FILES": "Xóa tất cả tệp tin (tài liệu đã tải lên vào bộ lưu trữ R2)",
+    "DELETE_ACCREDITATION": "Xóa dữ liệu công nhận (kết quả sàng lọc sơ bộ, đề xuất readiness)",
+    "DELETE_READINESS": "Xóa thảo luận và bản nháp readiness",
+    "CANCEL": "Hủy",
+    "DELETING": "Đang xóa..."
   }
 }

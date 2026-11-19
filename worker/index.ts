@@ -81,6 +81,19 @@ interface R2ObjectBodyLike {
   httpMetadata?: R2HttpMetadata;
 }
 
+interface R2ObjectLike {
+  key: string;
+  size: number;
+  uploaded?: string | Date;
+  httpMetadata?: R2HttpMetadata;
+}
+
+interface R2ObjectsLike {
+  objects: R2ObjectLike[];
+  truncated: boolean;
+  cursor?: string;
+}
+
 interface R2BucketLike {
   put(
     key: string,
@@ -88,7 +101,12 @@ interface R2BucketLike {
     options?: { httpMetadata?: R2HttpMetadata },
   ): Promise<unknown>;
   get(key: string): Promise<R2ObjectBodyLike | null>;
-  delete(key: string): Promise<void>;
+  delete(key: string | string[]): Promise<void>;
+  list(options?: {
+    prefix?: string;
+    cursor?: string;
+    limit?: number;
+  }): Promise<R2ObjectsLike>;
 }
 
 /* ------------------------------------------------------------------ *
@@ -825,6 +843,58 @@ async function updateOrganizationAdmin(
     .first<OrganizationRow>();
 
   return json({ organization: row ? rowToOrganization(row) : null });
+}
+
+/** Admin: delete organization and all its files from R2. */
+async function deleteOrganizationAdmin(
+  request: Request,
+  env: Env,
+  id: string,
+): Promise<Response> {
+  assertEntityId(id);
+
+  const body = await readJson<{
+    deleteFiles?: boolean;
+    deleteAccreditation?: boolean;
+    deleteReadiness?: boolean;
+  }>(request);
+
+  const deleteFiles = body.deleteFiles ?? true;
+  const deleteAccreditation = body.deleteAccreditation ?? true;
+  const deleteReadiness = body.deleteReadiness ?? true;
+
+  // Delete files from R2 if requested
+  if (deleteFiles) {
+    await deleteOrganizationFiles(env, id);
+  }
+
+  // Delete accreditation data if requested: pre-screening results (the
+  // applicant row shares the organization id) and submitted readiness forms.
+  if (deleteAccreditation) {
+    await env.DB.prepare('DELETE FROM applicants WHERE id = ?')
+      .bind(id)
+      .run();
+    await env.DB.prepare('DELETE FROM readiness_applications WHERE organization_id = ?')
+      .bind(id)
+      .run();
+  }
+
+  // Delete readiness drafts and submissions if requested
+  if (deleteReadiness) {
+    await env.DB.prepare('DELETE FROM readiness_drafts WHERE organization_id = ?')
+      .bind(id)
+      .run();
+    await env.DB.prepare('DELETE FROM readiness_applications WHERE organization_id = ?')
+      .bind(id)
+      .run();
+  }
+
+  // Then delete the organization from the database
+  await env.DB.prepare('DELETE FROM organizations WHERE id = ?')
+    .bind(id)
+    .run();
+
+  return empty();
 }
 
 async function acronymAvailable(
@@ -4295,6 +4365,75 @@ async function serveFile(env: Env, key: string, method: string): Promise<Respons
   return new Response(method === 'HEAD' ? null : object.body, { headers });
 }
 
+/** List all files in an organization's folder in R2. */
+async function listOrganizationFiles(env: Env, orgId: string): Promise<Response> {
+  const prefix = `organizations/${orgId}/`;
+
+  const objects = await env.DOCUMENTS.list({ prefix, limit: 1000 });
+
+  // Group files by section (second path segment)
+  const sectionsMap = new Map<string, { section: string; label: string; files: any[] }>();
+
+  for (const obj of objects.objects) {
+    const key = obj.key;
+    const parts = key.slice(prefix.length).split('/');
+
+    if (parts.length >= 2) {
+      const section = parts[1];
+      const fileName = parts.slice(2).join('/');
+
+      if (!sectionsMap.has(section)) {
+        sectionsMap.set(section, {
+          section,
+          label: sectionLabels[section] ?? section,
+          files: []
+        });
+      }
+
+      sectionsMap.get(section)!.files.push({
+        url: `/api/files/${key}`,
+        publicId: key,
+        name: fileName,
+        resourceType: obj.httpMetadata?.contentType?.startsWith('image/') ? 'image' : 'raw',
+        size: obj.size ?? 0,
+        uploadedAt: obj.uploaded ? new Date(obj.uploaded).toISOString() : '',
+      });
+    }
+  }
+
+  const sections = Array.from(sectionsMap.values()).sort((a, b) =>
+    a.label.localeCompare(b.label)
+  );
+
+  return json({ sections });
+}
+
+/** Section labels for organization files tabs. */
+const sectionLabels: Record<string, string> = {
+  access: 'Access Documents',
+  legal: 'Legal Supporting Documents',
+  fasttrack: 'Fast-track Accreditation',
+  general: 'Other Documents',
+  readiness: 'Readiness Documents',
+};
+
+/** Delete all files belonging to an organization from R2. */
+async function deleteOrganizationFiles(env: Env, orgId: string): Promise<void> {
+  const prefix = `organizations/${orgId}/`;
+  let cursor: string | undefined;
+
+  do {
+    const objects = await env.DOCUMENTS.list({ prefix, limit: 1000, cursor });
+    const keys = objects.objects.map((obj) => obj.key);
+
+    if (keys.length > 0) {
+      await env.DOCUMENTS.delete(keys);
+    }
+
+    cursor = objects.truncated ? objects.cursor : undefined;
+  } while (cursor);
+}
+
 /* ------------------------------------------------------------------ *
  * Router
  * ------------------------------------------------------------------ */
@@ -4447,14 +4586,27 @@ async function handleApi(request: Request, env: Env, path: string): Promise<Resp
     return methodNotAllowed('GET, PUT');
   }
 
-  // Admin: update individual organization editable fields
+  // Admin: update or delete an individual organization
   const adminOrgMatch = /^\/api\/admin\/organizations\/([^/]+)$/.exec(path);
   if (adminOrgMatch) {
     const id = decodeURIComponent(adminOrgMatch[1]);
     if (method === 'PATCH' || method === 'PUT') {
       return withAdmin(env, request, () => updateOrganizationAdmin(request, env, id));
     }
-    return methodNotAllowed('PATCH, PUT');
+    if (method === 'DELETE') {
+      return withAdmin(env, request, () => deleteOrganizationAdmin(request, env, id));
+    }
+    return methodNotAllowed('PATCH, PUT, DELETE');
+  }
+
+  // Admin: list files for an organization
+  const adminOrgFilesMatch = /^\/api\/admin\/organizations\/([^/]+)\/files$/.exec(path);
+  if (adminOrgFilesMatch) {
+    const orgId = decodeURIComponent(adminOrgFilesMatch[1]);
+    if (method === 'GET') {
+      return withAdmin(env, request, () => listOrganizationFiles(env, orgId));
+    }
+    return methodNotAllowed('GET');
   }
 
   const draftMatch = /^\/api\/drafts\/(stage1|readiness)\/([^/]+)$/.exec(path);

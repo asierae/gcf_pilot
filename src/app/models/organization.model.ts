@@ -48,4 +48,19 @@ export interface OrganizationDraft {
   updatedAt: string;
 }
 
+export interface OrganizationFile {
+  url: string;
+  publicId: string;
+  name: string;
+  resourceType: 'image' | 'raw' | 'video';
+  size: number;
+  uploadedAt: string;
+}
+
+export interface OrganizationFilesBySection {
+  section: string;
+  label: string;
+  files: OrganizationFile[];
+}
+
 export type DraftForm = 'stage1' | 'readiness';
