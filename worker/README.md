@@ -150,10 +150,19 @@ Public (no token):
   applicant accounts live in the browser, so there is no token to send)
 - `PUT /api/organizations/:id` — create on first write, then update every field
   except `name` / `acronym` (they identify the organization)
-- `GET /api/organizations/:id/forms` — everything the organization has filled
+- `GET /api/organizations/:id/forms` - everything the organization has filled
   in: profile, stage 1 (Pre-screening), stage 2 (Accreditation), readiness, the
   last draft timestamp per form and `preScreeningStatus` (`Pending` / `Passed` /
   `Failed`). Only `Passed` unlocks Accreditation in the sidebar and route guard.
+- `GET /api/organizations/:id/dashboard` - applicant dashboard payload: both
+  timelines (accreditation / readiness) with per-step status and date, progress
+  percentages, readiness and accreditation snapshots (requested vs budgeted,
+  documents attached, questions answered), the next actions and recent activity.
+  It also returns the Avera risk & reputation index: five weighted factors
+  (governance, financial, delivery, climate, transparency) computed from the
+  submitted profile, Stage 1/2 answers and readiness package, shown against a
+  labelled Dow Jones Sustainability Index reference band (a static benchmark,
+  not a live DJSI feed).
 - `GET /api/organizations/acronym-available?acronym=&exclude=` — uniqueness check
 - `GET | PUT | DELETE /api/drafts/(stage1|readiness)/:organizationId` — draft
   autosave, keyed by the organization id

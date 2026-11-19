@@ -79,9 +79,16 @@
     <!-- Right: auth actions -->
     <div class="header-right">
       @if (authService.isLoggedIn) {
-        @if (authService.currentUserValue?.role === "admin") {
+        @if (
+          authService.currentUserValue?.role === "admin" ||
+          authService.currentUserValue?.role === "applicant"
+        ) {
           <a
-            routerLink="/dashboard/overview"
+            [routerLink]="
+              authService.currentUserValue?.role === 'admin'
+                ? '/dashboard/overview'
+                : '/dashboard/applicant'
+            "
             routerLinkActive="active"
             class="btn-header btn-header-dashboard"
             >{{ 'HEADER.DASHBOARD' | translate }}</a
@@ -139,6 +146,23 @@
       >
         <div class="nav-caption" aria-hidden="true">{{ "NAV.WORKSPACE" | translate }}</div>
         <ul class="nav-menu">
+          @if (authService.currentUserValue?.role === "applicant") {
+            <li>
+              <a
+                routerLink="/dashboard/applicant"
+                routerLinkActive="active"
+                class="nav-link"
+                [title]="sidebarCollapsed ? ('NAV.DASHBOARD' | translate) : ''"
+              >
+                <span class="nav-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M4 20V10M10 20V4M16 20v-7M22 20H2" />
+                  </svg>
+                </span>
+                <span class="nav-label">{{ "NAV.DASHBOARD" | translate }}</span>
+              </a>
+            </li>
+          }
           @if (authService.currentUserValue?.role === "admin") {
             <li>
               <a

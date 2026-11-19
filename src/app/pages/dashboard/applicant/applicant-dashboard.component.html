@@ -1,0 +1,491 @@
+<div class="applicant-dash">
+  <header class="ad-header">
+    <div class="ad-title">
+      <p class="eyebrow">{{ "APPLICANT_DASHBOARD.EYEBROW" | translate }}</p>
+      <h1>
+        @if (dashboard?.organization?.name; as name) {
+          {{ name }}
+        } @else {
+          {{ "APPLICANT_DASHBOARD.TITLE" | translate }}
+        }
+      </h1>
+      <p class="ad-lede">{{ "APPLICANT_DASHBOARD.LEDE" | translate }}</p>
+
+      @if (dashboard?.organization; as org) {
+        <div class="ad-meta">
+          @if (org.acronym) {
+            <span class="chip chip-acronym">{{ org.acronym }}</span>
+          }
+          @if (org.country) {
+            <span class="chip">{{ countryName(org.country) }}</span>
+          }
+          @if (org.entityType) {
+            <span class="chip">{{ entityLabel(org.entityType) }}</span>
+          }
+        </div>
+      }
+
+      @if (lastUpdated) {
+        <p class="updated-at">
+          {{ "APPLICANT_DASHBOARD.UPDATED" | translate: { time: lastUpdated } }}
+        </p>
+      }
+    </div>
+
+    <div class="ad-header-actions">
+      @if (dashboard; as data) {
+        <span class="status-pill" [class]="'status-' + data.preScreeningStatus.toLowerCase()">
+          <span></span>
+          {{ ("APPLICANT_DASHBOARD.STATUS." + data.preScreeningStatus.toUpperCase()) | translate }}
+        </span>
+      }
+      <button type="button" class="btn-refresh" (click)="load()" [disabled]="loading">
+        {{ (loading ? "APPLICANT_DASHBOARD.REFRESHING" : "APPLICANT_DASHBOARD.REFRESH") | translate }}
+      </button>
+    </div>
+  </header>
+
+  @if (noOrganization) {
+    <section class="notice-card">
+      <span class="notice-icon" aria-hidden="true">🏢</span>
+      <div>
+        <h2>{{ "APPLICANT_DASHBOARD.NO_ORG" | translate }}</h2>
+        <p>{{ "APPLICANT_DASHBOARD.NO_ORG_HINT" | translate }}</p>
+      </div>
+    </section>
+  } @else if (error) {
+    <div class="alert" role="alert">
+      {{ error }}
+      <button type="button" (click)="load()">
+        {{ "APPLICANT_DASHBOARD.RETRY" | translate }}
+      </button>
+    </div>
+  } @else if (loading && !dashboard) {
+    <section class="skeleton-grid" [attr.aria-label]="'APPLICANT_DASHBOARD.LOADING' | translate">
+      @for (row of [1, 2, 3, 4, 5]; track row) {
+        <div class="skeleton-card"></div>
+      }
+    </section>
+    <section class="skeleton-panels">
+      @for (row of [1, 2, 3, 4]; track row) {
+        <div class="skeleton-panel"></div>
+      }
+    </section>
+  } @else {
+    @if (dashboard; as data) {
+    <section class="kpi-grid" [attr.aria-label]="'APPLICANT_DASHBOARD.KPI.ARIA' | translate">
+      @for (kpi of kpis; track kpi.key) {
+        <article class="kpi" [class]="'kpi tone-' + kpi.tone">
+          <div class="kpi-top">
+            <span class="kpi-icon" aria-hidden="true">{{ kpi.icon }}</span>
+          </div>
+          <span class="kpi-label">{{ kpi.label }}</span>
+          <strong class="kpi-value">{{ kpi.value }}</strong>
+          <span class="kpi-sub">{{ kpi.sub }}</span>
+        </article>
+      }
+    </section>
+
+    <section class="dash-grid">
+      <!-- Risk & reputation -->
+      <article class="panel span-7 risk-panel">
+        <div class="panel-head">
+          <div class="panel-title">
+            <span class="panel-icon risk-icon" aria-hidden="true">🛡️</span>
+            <div>
+              <h2>{{ "APPLICANT_DASHBOARD.RISK.TITLE" | translate }}</h2>
+              <p>{{ "APPLICANT_DASHBOARD.RISK.SUB" | translate }}</p>
+            </div>
+          </div>
+          <span class="panel-pill">{{ "APPLICANT_DASHBOARD.RISK.BENCHMARK_SHORT" | translate }}</span>
+        </div>
+
+        <div class="risk-body">
+          <div class="risk-gauge">
+            @if (riskGauge; as gauge) {
+              <svg viewBox="0 0 200 120" role="img" [attr.aria-label]="'APPLICANT_DASHBOARD.RISK.SCORE' | translate">
+                <path
+                  class="gauge-track"
+                  d="M 20 100 A 80 80 0 0 1 180 100"
+                  pathLength="100"
+                />
+                <path
+                  class="gauge-value"
+                  d="M 20 100 A 80 80 0 0 1 180 100"
+                  pathLength="100"
+                  [attr.stroke]="gauge.color"
+                  [attr.stroke-dasharray]="gauge.value + ' 100'"
+                />
+              </svg>
+              <div class="gauge-readout">
+                <strong>{{ gauge.value }}</strong>
+                <span>{{ "APPLICANT_DASHBOARD.RISK.OUT_OF" | translate }}</span>
+                <em [style.color]="gauge.color">{{ riskBandLabel(data.risk.riskBand) }}</em>
+              </div>
+            }
+            <div class="risk-compare">
+              <span class="compare-label">{{ "APPLICANT_DASHBOARD.RISK.BENCHMARK" | translate }}</span>
+              <strong>{{ data.risk.benchmark }}</strong>
+              <span class="compare-diff">{{ riskComparison() }}</span>
+            </div>
+            <div class="confidence">
+              <span>{{ "APPLICANT_DASHBOARD.RISK.CONFIDENCE" | translate }}</span>
+              <strong>{{ confidenceLabel() }}</strong>
+            </div>
+          </div>
+
+          <div class="risk-radar">
+            @if (riskRadar; as radar) {
+              <svg
+                [attr.viewBox]="'0 0 ' + radar.width + ' ' + radar.height"
+                role="img"
+                [attr.aria-label]="'APPLICANT_DASHBOARD.RISK.FACTORS' | translate"
+              >
+                @for (ring of radar.rings; track ring) {
+                  <polygon class="radar-ring" [attr.points]="ring" />
+                }
+                @for (axis of radar.axes; track axis.x2) {
+                  <line
+                    class="radar-axis"
+                    [attr.x1]="axis.x1"
+                    [attr.y1]="axis.y1"
+                    [attr.x2]="axis.x2"
+                    [attr.y2]="axis.y2"
+                  />
+                }
+                <polygon class="radar-benchmark" [attr.points]="radar.benchmarkPolygon" />
+                <polygon class="radar-value" [attr.points]="radar.valuePolygon" />
+                @for (point of radar.valuePoints; track point.key) {
+                  <circle class="radar-dot" [attr.cx]="point.x" [attr.cy]="point.y" r="3.2" />
+                }
+              </svg>
+            }
+            <div class="radar-legend">
+              <span><i class="dot dot-value"></i>{{ "APPLICANT_DASHBOARD.RISK.YOUR_SCORE" | translate }}</span>
+              <span><i class="dot dot-benchmark"></i>{{ "APPLICANT_DASHBOARD.RISK.BENCHMARK" | translate }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="factor-list">
+          @for (factorRow of data.risk.factors; track factorRow.key) {
+            <div class="factor-row">
+              <span class="factor-name">{{ factorLabel(factorRow.key) }}</span>
+              <span class="factor-track">
+                <span
+                  class="factor-fill"
+                  [style.width.%]="factorRow.value"
+                  [style.background]="riskGauge?.color"
+                ></span>
+                <span
+                  class="factor-benchmark"
+                  [style.inset-inline-start.%]="data.risk.benchmark"
+                ></span>
+              </span>
+              <span class="factor-value">{{ factorRow.value }}</span>
+              <span class="factor-weight">
+                {{ "APPLICANT_DASHBOARD.RISK.WEIGHT" | translate: { value: (factorRow.weight * 100) } }}
+              </span>
+            </div>
+          }
+        </div>
+
+        <p class="risk-source">{{ "APPLICANT_DASHBOARD.RISK.SOURCE" | translate }}</p>
+      </article>
+
+      <!-- Next actions -->
+      <article class="panel span-5 actions-panel">
+        <div class="panel-head">
+          <div class="panel-title">
+            <span class="panel-icon" aria-hidden="true">🎯</span>
+            <div>
+              <h2>{{ "APPLICANT_DASHBOARD.ACTIONS.TITLE" | translate }}</h2>
+              <p>{{ "APPLICANT_DASHBOARD.ACTIONS.SUB" | translate }}</p>
+            </div>
+          </div>
+        </div>
+
+        @if (actions.length) {
+          <ul class="action-list">
+            @for (action of actions; track action.key) {
+              <li class="action-item" [class]="'tone-' + action.tone">
+                <span class="action-dot"></span>
+                <div class="action-copy">
+                  <strong>{{ actionTitle(action.key) }}</strong>
+                  <p>{{ actionDesc(action.key) }}</p>
+                </div>
+                @if (action.route) {
+                  <a class="action-cta" [routerLink]="action.route">
+                    {{ actionCta(action.key) }}
+                    <span aria-hidden="true">→</span>
+                  </a>
+                }
+              </li>
+            }
+          </ul>
+        } @else {
+          <div class="empty-state">
+            <span aria-hidden="true">✅</span>
+            <h3>{{ "APPLICANT_DASHBOARD.ACTIONS.EMPTY" | translate }}</h3>
+            <p>{{ "APPLICANT_DASHBOARD.ACTIONS.EMPTY_HINT" | translate }}</p>
+          </div>
+        }
+
+        <div class="focus-block">
+          <div class="focus-head">
+            <h3>{{ "APPLICANT_DASHBOARD.ACTIONS.FOCUS_TITLE" | translate }}</h3>
+            <p>{{ "APPLICANT_DASHBOARD.ACTIONS.FOCUS_SUB" | translate }}</p>
+          </div>
+          <ul class="focus-list">
+            @for (factorItem of focusFactors; track factorItem.key) {
+              <li class="focus-item">
+                <span class="focus-name">{{ factorLabel(factorItem.key) }}</span>
+                <span class="focus-track">
+                  <span
+                    class="focus-fill"
+                    [style.width.%]="factorItem.value"
+                    [style.background]="riskGauge?.color"
+                  ></span>
+                </span>
+                <span class="focus-value">{{ factorItem.value }}</span>
+              </li>
+            }
+          </ul>
+        </div>
+      </article>
+
+      <!-- Accreditation timeline -->
+      <article class="panel span-6 timeline-panel">
+        <div class="panel-head">
+          <div class="panel-title">
+            <span class="panel-icon" aria-hidden="true">🧾</span>
+            <div>
+              <h2>{{ "APPLICANT_DASHBOARD.TIMELINE.ACCREDITATION" | translate }}</h2>
+              <p>{{ "APPLICANT_DASHBOARD.TIMELINE.ACCREDITATION_SUB" | translate }}</p>
+            </div>
+          </div>
+          <span class="panel-pill">{{ data.progress.accreditation }}%</span>
+        </div>
+
+        <div class="progress-bar" aria-hidden="true">
+          <span [style.width.%]="data.progress.accreditation"></span>
+        </div>
+
+        <ol class="timeline">
+          @for (step of accreditationSteps; track step.key) {
+            <li class="tl-step" [class]="'tl-' + step.status">
+              <span class="tl-dot" aria-hidden="true"></span>
+              <div class="tl-body">
+                <div class="tl-top">
+                  <strong>{{ timelineTitle("accreditation", step.key) }}</strong>
+                  <span class="tl-meta">
+                    {{ step.date ? formatDate(step.date) : stepStatusLabel(step.status) }}
+                  </span>
+                </div>
+                <p>{{ timelineDesc("accreditation", step.key) }}</p>
+              </div>
+            </li>
+          }
+        </ol>
+      </article>
+
+      <!-- Readiness timeline -->
+      <article class="panel span-6 timeline-panel">
+        <div class="panel-head">
+          <div class="panel-title">
+            <span class="panel-icon" aria-hidden="true">📘</span>
+            <div>
+              <h2>{{ "APPLICANT_DASHBOARD.TIMELINE.READINESS" | translate }}</h2>
+              <p>{{ "APPLICANT_DASHBOARD.TIMELINE.READINESS_SUB" | translate }}</p>
+            </div>
+          </div>
+          <span class="panel-pill">{{ data.progress.readiness }}%</span>
+        </div>
+
+        <div class="progress-bar" aria-hidden="true">
+          <span [style.width.%]="data.progress.readiness"></span>
+        </div>
+
+        <ol class="timeline">
+          @for (step of readinessSteps; track step.key) {
+            <li class="tl-step" [class]="'tl-' + step.status">
+              <span class="tl-dot" aria-hidden="true"></span>
+              <div class="tl-body">
+                <div class="tl-top">
+                  <strong>{{ timelineTitle("readiness", step.key) }}</strong>
+                  <span class="tl-meta">
+                    {{ step.date ? formatDate(step.date) : stepStatusLabel(step.status) }}
+                  </span>
+                </div>
+                <p>{{ timelineDesc("readiness", step.key) }}</p>
+              </div>
+            </li>
+          }
+        </ol>
+      </article>
+
+      <!-- Readiness snapshot -->
+      <article class="panel span-7 snapshot-panel">
+        <div class="panel-head">
+          <div class="panel-title">
+            <span class="panel-icon" aria-hidden="true">📊</span>
+            <div>
+              <h2>{{ "APPLICANT_DASHBOARD.SNAPSHOT.READINESS_TITLE" | translate }}</h2>
+              <p>{{ "APPLICANT_DASHBOARD.SNAPSHOT.READINESS_SUB" | translate }}</p>
+            </div>
+          </div>
+        </div>
+
+        @if (data.readiness; as readiness) {
+          <div class="stat-grid">
+            <div class="stat">
+              <span>{{ "APPLICANT_DASHBOARD.SNAPSHOT.REQUESTED" | translate }}</span>
+              <strong>{{ formatMoney(readiness.requestedUSD) }}</strong>
+            </div>
+            <div class="stat">
+              <span>{{ "APPLICANT_DASHBOARD.SNAPSHOT.BUDGETED" | translate }}</span>
+              <strong>{{ formatMoney(readiness.budgetTotalUSD) }}</strong>
+            </div>
+            <div class="stat" [class.is-warn]="readiness.varianceUSD !== 0">
+              <span>{{ "APPLICANT_DASHBOARD.SNAPSHOT.VARIANCE" | translate }}</span>
+              <strong>{{ varianceLabel(readiness.varianceUSD) }}</strong>
+            </div>
+            <div class="stat">
+              <span>{{ "APPLICANT_DASHBOARD.SNAPSHOT.DURATION" | translate }}</span>
+              <strong>
+                {{ "APPLICANT_DASHBOARD.SNAPSHOT.MONTHS" | translate: { count: readiness.durationMonths } }}
+              </strong>
+            </div>
+            <div class="stat">
+              <span>{{ "APPLICANT_DASHBOARD.SNAPSHOT.OBJECTIVES" | translate }}</span>
+              <strong>
+                {{ "APPLICANT_DASHBOARD.SNAPSHOT.OBJECTIVES_VALUE" | translate: { count: readiness.objectives } }}
+              </strong>
+            </div>
+            <div class="stat">
+              <span>{{ "APPLICANT_DASHBOARD.SNAPSHOT.DOCUMENTS" | translate }}</span>
+              <strong>
+                {{ "APPLICANT_DASHBOARD.SNAPSHOT.DOCUMENTS_VALUE" | translate: { attached: readiness.documentsAttached, required: readiness.documentsRequired } }}
+              </strong>
+            </div>
+          </div>
+
+          <div class="budget-block">
+            <h3>{{ "APPLICANT_DASHBOARD.SNAPSHOT.BUDGET_BREAKDOWN" | translate }}</h3>
+            @if (budgetRows.length) {
+              <div class="budget-list">
+                @for (row of budgetRows; track row.key) {
+                  <div class="budget-row">
+                    <span class="budget-name">{{ budgetLabel(row.key) }}</span>
+                    <span class="budget-track">
+                      <span [style.width.%]="row.pct" [style.background]="row.color"></span>
+                    </span>
+                    <span class="budget-amount">{{ row.amountLabel }}</span>
+                  </div>
+                }
+              </div>
+            } @else {
+              <p class="muted">{{ "APPLICANT_DASHBOARD.SNAPSHOT.NO_BUDGET" | translate }}</p>
+            }
+          </div>
+        } @else {
+          <div class="empty-state compact">
+            <span aria-hidden="true">📄</span>
+            <h3>{{ "APPLICANT_DASHBOARD.SNAPSHOT.NO_READINESS_TITLE" | translate }}</h3>
+            <p>{{ "APPLICANT_DASHBOARD.SNAPSHOT.NO_READINESS_HINT" | translate }}</p>
+            <a class="btn-inline" routerLink="/readiness">
+              {{ "APPLICANT_DASHBOARD.SNAPSHOT.START_READINESS" | translate }} →
+            </a>
+          </div>
+        }
+      </article>
+
+      <!-- Accreditation snapshot -->
+      <article class="panel span-5 snapshot-panel">
+        <div class="panel-head">
+          <div class="panel-title">
+            <span class="panel-icon" aria-hidden="true">🏛️</span>
+            <div>
+              <h2>{{ "APPLICANT_DASHBOARD.SNAPSHOT.ACCREDITATION_TITLE" | translate }}</h2>
+              <p>{{ "APPLICANT_DASHBOARD.SNAPSHOT.ACCREDITATION_SUB" | translate }}</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="stat-grid two">
+          <div class="stat">
+            <span>{{ "APPLICANT_DASHBOARD.SNAPSHOT.PRESCREENING" | translate }}</span>
+            <strong [class]="'text-' + data.preScreeningStatus.toLowerCase()">
+              {{ ("APPLICANT_DASHBOARD.STATUS." + data.preScreeningStatus.toUpperCase()) | translate }}
+            </strong>
+          </div>
+          <div class="stat">
+            <span>{{ "APPLICANT_DASHBOARD.SNAPSHOT.QUESTIONS" | translate }}</span>
+            <strong>
+              @if (data.accreditation.questionsTotal) {
+                {{ "APPLICANT_DASHBOARD.SNAPSHOT.QUESTIONS_VALUE" | translate: { answered: data.accreditation.questionsAnswered, total: data.accreditation.questionsTotal } }}
+              } @else {
+                —
+              }
+            </strong>
+          </div>
+          <div class="stat">
+            <span>{{ "APPLICANT_DASHBOARD.SNAPSHOT.SECTIONS" | translate }}</span>
+            <strong>
+              @if (data.accreditation.sectionsTotal) {
+                {{ "APPLICANT_DASHBOARD.SNAPSHOT.SECTIONS_VALUE" | translate: { complete: data.accreditation.sectionsComplete, total: data.accreditation.sectionsTotal } }}
+              } @else {
+                —
+              }
+            </strong>
+          </div>
+          <div class="stat">
+            <span>{{ "APPLICANT_DASHBOARD.SNAPSHOT.STAGE2_SUBMITTED" | translate }}</span>
+            <strong>{{ stage2SubmittedLabel() }}</strong>
+          </div>
+        </div>
+
+        @if (data.readiness; as readiness) {
+          <div class="mini-stats">
+            <span>
+              <em>{{ "APPLICANT_DASHBOARD.SNAPSHOT.STAFF" | translate }}</em>
+              <strong>{{ formatNumber(readiness.staffCount) }}</strong>
+            </span>
+            <span>
+              <em>{{ "APPLICANT_DASHBOARD.SNAPSHOT.ANNUAL_BUDGET" | translate }}</em>
+              <strong>{{ formatMoney(readiness.annualBudgetUSD) }}</strong>
+            </span>
+          </div>
+        }
+      </article>
+
+      <!-- Recent activity -->
+      <article class="panel span-12 activity-panel">
+        <div class="panel-head">
+          <div class="panel-title">
+            <span class="panel-icon" aria-hidden="true">🕘</span>
+            <div>
+              <h2>{{ "APPLICANT_DASHBOARD.ACTIVITY.TITLE" | translate }}</h2>
+              <p>{{ "APPLICANT_DASHBOARD.ACTIVITY.SUB" | translate }}</p>
+            </div>
+          </div>
+        </div>
+
+        @if (activity.length) {
+          <ul class="activity-list">
+            @for (item of activity; track item.key + item.date) {
+              <li class="activity-item" [class]="'tone-' + item.tone">
+                <span class="activity-dot" aria-hidden="true"></span>
+                <span class="activity-copy">{{ activityLabel(item.key) }}</span>
+                <time>{{ formatDate(item.date) }}</time>
+              </li>
+            }
+          </ul>
+        } @else {
+          <p class="muted">{{ "APPLICANT_DASHBOARD.ACTIVITY.EMPTY" | translate }}</p>
+        }
+      </article>
+    </section>
+    }
+  }
+</div>

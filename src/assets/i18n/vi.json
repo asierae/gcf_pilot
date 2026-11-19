@@ -689,5 +689,203 @@
   },
   "FOOTER": {
     "DISCLAIMER": "Ứng dụng của chúng tôi cung cấp công cụ và hướng dẫn để tối ưu hóa quy trình nộp đơn xin tài trợ. Xin lưu ý rằng chúng tôi không phải là tổ chức tài trợ và không đảm bảo phê duyệt khoản tài trợ cũng như nhận được tiền. Dịch vụ của chúng tôi nhằm nâng cao chất lượng và mức độ sẵn sàng của hồ sơ; tuy nhiên, quyết định tài trợ cuối cùng hoàn toàn thuộc về các tổ chức cấp tài trợ."
+  },
+  "APPLICANT_DASHBOARD": {
+    "EYEBROW": "Không gian tổ chức",
+    "TITLE": "Bảng điều khiển tổ chức",
+    "LEDE": "Theo dõi tiến độ công nhận và mức độ sẵn sàng, xem điểm hồ sơ và thực hiện các bước tiếp theo.",
+    "UPDATED": "Cập nhật {{time}}",
+    "REFRESH": "Làm mới",
+    "REFRESHING": "Đang làm mới…",
+    "RETRY": "Thử lại",
+    "LOAD_ERROR": "Không thể tải bảng điều khiển. Vui lòng thử lại.",
+    "LOADING": "Đang tải bảng điều khiển",
+    "NO_ORG": "Tài khoản của bạn chưa được liên kết với tổ chức.",
+    "NO_ORG_HINT": "Liên hệ đội ngũ Avera để liên kết tổ chức và mở bảng điều khiển.",
+    "KPI": {
+      "READINESS": "Chỉ số sẵn sàng",
+      "READINESS_SUB": "Dựa trên hồ sơ sẵn sàng",
+      "NO_READINESS": "Chưa có hồ sơ sẵn sàng",
+      "RISK": "Rủi ro & uy tín",
+      "PROGRESS": "Tiến độ quy trình",
+      "PROGRESS_SUB": "Công nhận {{accreditation}}% · Sẵn sàng {{readiness}}%",
+      "FUNDING": "Vốn đề nghị",
+      "FUNDING_SUB": "Ngân sách {{amount}}",
+      "DOCUMENTS": "Tài liệu đính kèm",
+      "DOCUMENTS_SUB": "Tài liệu hỗ trợ đã tải lên",
+      "ARIA": "Chỉ số tổ chức"
+    },
+    "RISK": {
+      "TITLE": "Chỉ số rủi ro & uy tín",
+      "SUB": "Đánh giá tổng hợp về quản trị, quản lý tài chính, năng lực thực hiện, mức độ phù hợp khí hậu và tính minh bạch.",
+      "SCORE": "Điểm tổng thể",
+      "OUT_OF": "trên 100",
+      "BENCHMARK": "Tham chiếu Dow Jones",
+      "BENCHMARK_SHORT": "Tham chiếu DJSI",
+      "YOUR_SCORE": "Điểm của bạn",
+      "AT": "Ngang với mức tham chiếu",
+      "ABOVE": "Cao hơn tham chiếu {{value}} điểm",
+      "BELOW": "Thấp hơn tham chiếu {{value}} điểm",
+      "CONFIDENCE": "Độ tin cậy bằng chứng",
+      "CONFIDENCE_LOW": "Thấp",
+      "CONFIDENCE_MEDIUM": "Trung bình",
+      "CONFIDENCE_HIGH": "Cao",
+      "FACTORS": "Yếu tố điểm",
+      "WEIGHT": "Trọng số {{value}}%",
+      "SOURCE": "Tham chiếu: dải ngành của Chỉ số Bền vững Dow Jones. Chỉ số của bạn do nhóm nghiên cứu Avera tính từ dữ liệu hồ sơ, công nhận và sẵn sàng bạn đã gửi; đây không phải nguồn dữ liệu Dow Jones trực tiếp.",
+      "BAND_LOW": "Rủi ro thấp",
+      "BAND_MODERATE": "Rủi ro trung bình",
+      "BAND_ELEVATED": "Rủi ro gia tăng",
+      "BAND_HIGH": "Rủi ro cao"
+    },
+    "FACTORS": {
+      "GOVERNANCE": "Quản trị & tuân thủ",
+      "FINANCIAL": "Quản lý tài chính",
+      "DELIVERY": "Kinh nghiệm thực hiện",
+      "CLIMATE": "Phù hợp sứ mệnh khí hậu",
+      "TRANSPARENCY": "Minh bạch & bằng chứng"
+    },
+    "TIMELINE": {
+      "ACCREDITATION": "Công nhận",
+      "ACCREDITATION_SUB": "Từ hồ sơ tổ chức đến xét duyệt công nhận.",
+      "READINESS": "Sẵn sàng",
+      "READINESS_SUB": "Từ hồ sơ sẵn sàng đến xét duyệt.",
+      "STATUS": {
+        "COMPLETE": "Hoàn tất",
+        "CURRENT": "Đang thực hiện",
+        "PENDING": "Chờ xử lý",
+        "BLOCKED": "Bị chặn"
+      },
+      "ACC": {
+        "PROFILE": {
+          "TITLE": "Hồ sơ tổ chức",
+          "DESC": "Thông tin pháp lý và liên hệ đã đăng ký."
+        },
+        "PRESCREENING": {
+          "TITLE": "Đã gửi sàng lọc sơ bộ",
+          "DESC": "Câu trả lời về điều kiện và năng lực giai đoạn 1."
+        },
+        "REVIEW": {
+          "TITLE": "Xét duyệt sàng lọc sơ bộ",
+          "DESC": "Quyết định của Avera về sàng lọc sơ bộ."
+        },
+        "ACCREDITATION": {
+          "TITLE": "Đã gửi công nhận",
+          "DESC": "Tiêu chuẩn và bằng chứng giai đoạn 2."
+        },
+        "DECISION": {
+          "TITLE": "Xét duyệt công nhận",
+          "DESC": "Xét duyệt hồ sơ công nhận."
+        }
+      },
+      "READY": {
+        "STARTED": {
+          "TITLE": "Đã bắt đầu hồ sơ sẵn sàng",
+          "DESC": "Bản nháp đã lưu."
+        },
+        "SUBMITTED": {
+          "TITLE": "Đã gửi hồ sơ sẵn sàng",
+          "DESC": "Đề xuất, ngân sách, khung logic và tài liệu."
+        },
+        "REVIEW": {
+          "TITLE": "Xét duyệt hồ sơ sẵn sàng",
+          "DESC": "Avera xét duyệt hồ sơ sẵn sàng."
+        }
+      }
+    },
+    "ACTIONS": {
+      "TITLE": "Hành động tiếp theo",
+      "SUB": "Các bước hữu ích nhất cho tổ chức lúc này.",
+      "EMPTY": "Đã hoàn tất",
+      "EMPTY_HINT": "Không có hành động chờ xử lý. Chúng tôi sẽ gửi email khi cần bạn lưu ý.",
+      "COMPLETE_PROFILE": {
+        "TITLE": "Hoàn thiện hồ sơ tổ chức",
+        "DESC": "Bổ sung địa chỉ pháp lý, website và thông tin liên hệ để tăng độ mạnh hồ sơ.",
+        "CTA": "Hoàn thiện hồ sơ"
+      },
+      "COMPLETE_PRESCREENING": {
+        "TITLE": "Bắt đầu sàng lọc sơ bộ",
+        "DESC": "Gửi giai đoạn 1 để bắt đầu lộ trình công nhận.",
+        "CTA": "Mở sàng lọc"
+      },
+      "AWAITING_PRESCREENING": {
+        "TITLE": "Sàng lọc sơ bộ đang xét duyệt",
+        "DESC": "Hồ sơ giai đoạn 1 đang ở đội ngũ Avera.",
+        "CTA": "Xem hồ sơ"
+      },
+      "REVISE_PRESCREENING": {
+        "TITLE": "Chỉnh sửa sàng lọc sơ bộ",
+        "DESC": "Xem phản hồi và gửi lại giai đoạn 1.",
+        "CTA": "Mở sàng lọc"
+      },
+      "START_ACCREDITATION": {
+        "TITLE": "Bắt đầu công nhận giai đoạn 2",
+        "DESC": "Sàng lọc sơ bộ đã qua. Hoàn thiện tiêu chuẩn công nhận.",
+        "CTA": "Mở công nhận"
+      },
+      "UPLOAD_DOCUMENTS": {
+        "TITLE": "Đính kèm tài liệu hỗ trợ",
+        "DESC": "Thêm tài liệu pháp lý và tài chính mà người xét duyệt cần.",
+        "CTA": "Mở hồ sơ sẵn sàng"
+      },
+      "START_READINESS": {
+        "TITLE": "Bắt đầu hồ sơ sẵn sàng",
+        "DESC": "Tạo đề xuất GCF Readiness 2024–2027 với ngân sách và khung logic.",
+        "CTA": "Bắt đầu sẵn sàng"
+      },
+      "RESUME_READINESS": {
+        "TITLE": "Tiếp tục bản nháp sẵn sàng",
+        "DESC": "Tiếp tục từ nơi đã lưu và gửi khi sẵn sàng.",
+        "CTA": "Tiếp tục nháp"
+      },
+      "FOCUS_TITLE": "Trọng tâm cải thiện",
+      "FOCUS_SUB": "Hai yếu tố này đang kéo chỉ số của bạn xuống nhiều nhất."
+    },
+    "ACTIVITY": {
+      "TITLE": "Hoạt động gần đây",
+      "SUB": "Các mốc đã ghi nhận cho tổ chức.",
+      "EMPTY": "Chưa có hoạt động.",
+      "PROFILE": "Đã tạo hồ sơ tổ chức",
+      "STAGE1": "Đã gửi sàng lọc sơ bộ",
+      "PRESCREENING_PASSED": "Đã qua sàng lọc sơ bộ",
+      "PRESCREENING_FAILED": "Sàng lọc sơ bộ cần chỉnh sửa",
+      "STAGE2": "Đã gửi công nhận",
+      "READINESS_DRAFT": "Đã lưu nháp sẵn sàng",
+      "READINESS": "Đã gửi hồ sơ sẵn sàng"
+    },
+    "SNAPSHOT": {
+      "READINESS_TITLE": "Tổng quan sẵn sàng",
+      "READINESS_SUB": "Ngân sách và bằng chứng cho hồ sơ sẵn sàng.",
+      "REQUESTED": "Đề nghị",
+      "BUDGETED": "Ngân sách",
+      "VARIANCE": "Chênh lệch",
+      "DURATION": "Thời hạn",
+      "MONTHS": "{{count}} tháng",
+      "OBJECTIVES": "Mục tiêu",
+      "OBJECTIVES_VALUE": "{{count}} trên 5",
+      "DOCUMENTS": "Tài liệu",
+      "DOCUMENTS_VALUE": "{{attached}} trên {{required}}",
+      "BUDGET_BREAKDOWN": "Ngân sách theo hạng mục",
+      "NO_BUDGET": "Chưa có dòng ngân sách.",
+      "NO_READINESS_TITLE": "Chưa có hồ sơ sẵn sàng",
+      "NO_READINESS_HINT": "Tạo hồ sơ sẵn sàng để xem ngân sách, bằng chứng và khung logic tại đây.",
+      "START_READINESS": "Bắt đầu sẵn sàng",
+      "ACCREDITATION_TITLE": "Tổng quan công nhận",
+      "ACCREDITATION_SUB": "Trạng thái sàng lọc và độ phủ bằng chứng giai đoạn 2.",
+      "QUESTIONS": "Câu hỏi đã trả lời",
+      "QUESTIONS_VALUE": "{{answered}} trên {{total}}",
+      "SECTIONS": "Phần đã hoàn tất",
+      "SECTIONS_VALUE": "{{complete}} trên {{total}}",
+      "PRESCREENING": "Sàng lọc sơ bộ",
+      "STAGE2_SUBMITTED": "Đã gửi giai đoạn 2",
+      "NOT_STARTED": "Chưa bắt đầu",
+      "STAFF": "Nhân sự",
+      "ANNUAL_BUDGET": "Ngân sách năm"
+    },
+    "STATUS": {
+      "PENDING": "Chờ xử lý",
+      "PASSED": "Đã qua",
+      "FAILED": "Chưa qua"
+    }
   }
 }

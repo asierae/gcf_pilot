@@ -12,6 +12,7 @@ import {
   OrganizationRecord,
 } from "../models/organization.model";
 import { AdminStats } from "../models/admin-stats.model";
+import { ApplicantDashboard } from "../models/applicant-dashboard.model";
 
 interface ApiErrorPayload {
   error?: string;
@@ -379,6 +380,15 @@ export class ApiService {
   async getOrganizationForms(id: string): Promise<OrganizationForms> {
     return this.request<OrganizationForms>(
       `/api/organizations/${encodeURIComponent(id)}/forms`,
+      { method: "GET" },
+      false,
+    );
+  }
+
+  /** Timeline, progress and reputation index for one organization. */
+  async getApplicantDashboard(id: string): Promise<ApplicantDashboard> {
+    return this.request<ApplicantDashboard>(
+      `/api/organizations/${encodeURIComponent(id)}/dashboard`,
       { method: "GET" },
       false,
     );

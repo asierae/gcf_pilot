@@ -689,5 +689,203 @@
   },
   "FOOTER": {
     "DISCLAIMER": "Our app provides tools and guidance to optimize your grant application process. Please note that we are not a funding body and do not guarantee the approval of grants or the receipt of funds. Our services are intended to improve the quality and readiness of your application; however, final funding decisions rest solely with the grant-giving organizations."
+  },
+  "APPLICANT_DASHBOARD": {
+    "EYEBROW": "Organization workspace",
+    "TITLE": "Organization dashboard",
+    "LEDE": "Track your accreditation and readiness progress, see how your profile scores, and act on what is next.",
+    "UPDATED": "Updated {{time}}",
+    "REFRESH": "Refresh",
+    "REFRESHING": "Refreshing…",
+    "RETRY": "Retry",
+    "LOAD_ERROR": "Could not load your dashboard. Please try again.",
+    "LOADING": "Loading your dashboard",
+    "NO_ORG": "Your account is not linked to an organization yet.",
+    "NO_ORG_HINT": "Contact the Avera team to link your organization and unlock the dashboard.",
+    "KPI": {
+      "READINESS": "Readiness index",
+      "READINESS_SUB": "Based on your readiness package",
+      "NO_READINESS": "No readiness application yet",
+      "RISK": "Risk & reputation",
+      "PROGRESS": "Process progress",
+      "PROGRESS_SUB": "Accreditation {{accreditation}}% · Readiness {{readiness}}%",
+      "FUNDING": "Funding requested",
+      "FUNDING_SUB": "Budgeted {{amount}}",
+      "DOCUMENTS": "Documents attached",
+      "DOCUMENTS_SUB": "Supporting documents uploaded",
+      "ARIA": "Organization indicators"
+    },
+    "RISK": {
+      "TITLE": "Risk & reputation index",
+      "SUB": "A blended view of governance, financial management, delivery capacity, climate alignment and transparency.",
+      "SCORE": "Overall score",
+      "OUT_OF": "out of 100",
+      "BENCHMARK": "Dow Jones reference",
+      "BENCHMARK_SHORT": "DJSI reference",
+      "YOUR_SCORE": "Your score",
+      "AT": "In line with the reference",
+      "ABOVE": "{{value}} pts above the reference",
+      "BELOW": "{{value}} pts below the reference",
+      "CONFIDENCE": "Evidence confidence",
+      "CONFIDENCE_LOW": "Low",
+      "CONFIDENCE_MEDIUM": "Medium",
+      "CONFIDENCE_HIGH": "High",
+      "FACTORS": "Score drivers",
+      "WEIGHT": "Weight {{value}}%",
+      "SOURCE": "Reference: Dow Jones Sustainability Index sector band. Your index is computed by Avera research from the profile, accreditation and readiness data you submitted — not a live Dow Jones feed.",
+      "BAND_LOW": "Low risk",
+      "BAND_MODERATE": "Moderate risk",
+      "BAND_ELEVATED": "Elevated risk",
+      "BAND_HIGH": "High risk"
+    },
+    "FACTORS": {
+      "GOVERNANCE": "Governance & compliance",
+      "FINANCIAL": "Financial management",
+      "DELIVERY": "Delivery track record",
+      "CLIMATE": "Climate mandate alignment",
+      "TRANSPARENCY": "Transparency & evidence"
+    },
+    "TIMELINE": {
+      "ACCREDITATION": "Accreditation",
+      "ACCREDITATION_SUB": "From organization profile to accreditation review.",
+      "READINESS": "Readiness",
+      "READINESS_SUB": "From readiness intake to review.",
+      "STATUS": {
+        "COMPLETE": "Complete",
+        "CURRENT": "In progress",
+        "PENDING": "Pending",
+        "BLOCKED": "Blocked"
+      },
+      "ACC": {
+        "PROFILE": {
+          "TITLE": "Organization profile",
+          "DESC": "Legal identity and contacts registered."
+        },
+        "PRESCREENING": {
+          "TITLE": "Pre-screening submitted",
+          "DESC": "Stage 1 eligibility and capacity answers."
+        },
+        "REVIEW": {
+          "TITLE": "Pre-screening review",
+          "DESC": "Avera decision on your pre-screening."
+        },
+        "ACCREDITATION": {
+          "TITLE": "Accreditation submitted",
+          "DESC": "Stage 2 standards and narrative evidence."
+        },
+        "DECISION": {
+          "TITLE": "Accreditation review",
+          "DESC": "Review of your accreditation package."
+        }
+      },
+      "READY": {
+        "STARTED": {
+          "TITLE": "Readiness intake started",
+          "DESC": "Draft saved for your readiness application."
+        },
+        "SUBMITTED": {
+          "TITLE": "Readiness submitted",
+          "DESC": "Proposal, budget, logframe and documents."
+        },
+        "REVIEW": {
+          "TITLE": "Readiness review",
+          "DESC": "Avera review of your readiness package."
+        }
+      }
+    },
+    "ACTIONS": {
+      "TITLE": "Next actions",
+      "SUB": "The most useful steps for your organization right now.",
+      "EMPTY": "You're all caught up",
+      "EMPTY_HINT": "No pending actions. We will email you when something needs your attention.",
+      "COMPLETE_PROFILE": {
+        "TITLE": "Complete your organization profile",
+        "DESC": "Add legal address, website and contact details to strengthen your file.",
+        "CTA": "Complete profile"
+      },
+      "COMPLETE_PRESCREENING": {
+        "TITLE": "Start pre-screening",
+        "DESC": "Submit Stage 1 to begin your accreditation pathway.",
+        "CTA": "Open pre-screening"
+      },
+      "AWAITING_PRESCREENING": {
+        "TITLE": "Pre-screening under review",
+        "DESC": "Your Stage 1 submission is with the Avera team.",
+        "CTA": "View submission"
+      },
+      "REVISE_PRESCREENING": {
+        "TITLE": "Revise your pre-screening",
+        "DESC": "Review the feedback and resubmit Stage 1.",
+        "CTA": "Open pre-screening"
+      },
+      "START_ACCREDITATION": {
+        "TITLE": "Start Stage 2 accreditation",
+        "DESC": "Your pre-screening passed. Complete the accreditation standards.",
+        "CTA": "Open accreditation"
+      },
+      "UPLOAD_DOCUMENTS": {
+        "TITLE": "Attach supporting documents",
+        "DESC": "Add the statutory and financial documents reviewers need.",
+        "CTA": "Open readiness"
+      },
+      "START_READINESS": {
+        "TITLE": "Start a readiness application",
+        "DESC": "Build a GCF Readiness 2024–2027 proposal with budget and logframe.",
+        "CTA": "Start readiness"
+      },
+      "RESUME_READINESS": {
+        "TITLE": "Resume your readiness draft",
+        "DESC": "Continue where you left off and submit when ready.",
+        "CTA": "Resume draft"
+      },
+      "FOCUS_TITLE": "Focus areas",
+      "FOCUS_SUB": "These two drivers hold your index back the most."
+    },
+    "ACTIVITY": {
+      "TITLE": "Recent activity",
+      "SUB": "Milestones recorded for your organization.",
+      "EMPTY": "No activity recorded yet.",
+      "PROFILE": "Organization profile created",
+      "STAGE1": "Pre-screening submitted",
+      "PRESCREENING_PASSED": "Pre-screening passed",
+      "PRESCREENING_FAILED": "Pre-screening needs revision",
+      "STAGE2": "Accreditation submitted",
+      "READINESS_DRAFT": "Readiness draft saved",
+      "READINESS": "Readiness submitted"
+    },
+    "SNAPSHOT": {
+      "READINESS_TITLE": "Readiness snapshot",
+      "READINESS_SUB": "Budget and evidence for your readiness application.",
+      "REQUESTED": "Requested",
+      "BUDGETED": "Budgeted",
+      "VARIANCE": "Variance",
+      "DURATION": "Duration",
+      "MONTHS": "{{count}} months",
+      "OBJECTIVES": "Objectives",
+      "OBJECTIVES_VALUE": "{{count}} of 5",
+      "DOCUMENTS": "Documents",
+      "DOCUMENTS_VALUE": "{{attached}} of {{required}}",
+      "BUDGET_BREAKDOWN": "Budget by category",
+      "NO_BUDGET": "No budget lines yet.",
+      "NO_READINESS_TITLE": "No readiness application yet",
+      "NO_READINESS_HINT": "Create a readiness application to see your budget, evidence and logframe here.",
+      "START_READINESS": "Start readiness",
+      "ACCREDITATION_TITLE": "Accreditation snapshot",
+      "ACCREDITATION_SUB": "Pre-screening status and Stage 2 evidence coverage.",
+      "QUESTIONS": "Questions answered",
+      "QUESTIONS_VALUE": "{{answered}} of {{total}}",
+      "SECTIONS": "Sections complete",
+      "SECTIONS_VALUE": "{{complete}} of {{total}}",
+      "PRESCREENING": "Pre-screening",
+      "STAGE2_SUBMITTED": "Stage 2 submitted",
+      "NOT_STARTED": "Not started",
+      "STAFF": "Staff",
+      "ANNUAL_BUDGET": "Annual budget"
+    },
+    "STATUS": {
+      "PENDING": "Pending",
+      "PASSED": "Passed",
+      "FAILED": "Failed"
+    }
   }
 }

@@ -1100,6 +1100,678 @@ async function organizationForms(env: Env, orgId: string): Promise<Response> {
 }
 
 /* ------------------------------------------------------------------ *
+ * Applicant dashboard
+ *
+ * Everything the organization sees on its own dashboard: process timeline,
+ * progress, readiness snapshot and the Avera risk & reputation index.
+ * The index is computed from the data the organization has submitted and is
+ * shown next to a Dow Jones Sustainability Index *reference* band. It is not
+ * a live Dow Jones feed.
+ * ------------------------------------------------------------------ */
+
+const DASHBOARD_DOC_KEYS = [
+  'ndaNoObjectionLetterPdf',
+  'legalRegistrationStatutesPdf',
+  'organogramPdf',
+  'auditedFinancialStatements3YrsPdf',
+  'financeAndProcurementManualsPdf',
+  'bankAccountConfirmationPdf',
+];
+
+/** Dow Jones Sustainability Index sector band used as a reference marker. */
+const DJSI_REFERENCE = 68;
+
+const STAGE1_CAPACITY_KEYS = [
+  'hasLegalPersonality',
+  'hasLegalCapacity',
+  'canReceiveFundsDirectly',
+  'canHandleGCFCurrencies',
+  'canMaintainInterestBearingAccount',
+  'canUndertakeFullCycle',
+  'hasFiduciaryCapacity',
+  'hasESSCapacity',
+  'hasGenderCapacity',
+  'hasMonitoringCapacity',
+  'hasGrievanceMechanism',
+  'canEnsureDownstreamCompliance',
+  'canMonitorCompliance',
+  'preparedForPartnerships',
+];
+
+const STAGE1_FINANCIAL_KEYS = [
+  'hasFiduciaryCapacity',
+  'canReceiveFundsDirectly',
+  'canHandleGCFCurrencies',
+  'canMaintainInterestBearingAccount',
+  'hasSubmittedFMCA',
+];
+
+const STAGE1_TRACK_KEYS = [
+  'hasServedAsExecutingEntity',
+  'hasServedAsDeliveryPartner',
+  'hasTrackRecordInRegion',
+  'hasClimateFinanceExperience',
+  'hasEngagedInPSAA',
+];
+
+const GAP_KEYS = [
+  'financialManagementPolicy',
+  'internalExternalAudit',
+  'procurementPolicy',
+  'amlCftPolicy',
+  'whistleblowerPolicy',
+  'essManagementSystem',
+  'grievanceMechanism',
+  'genderPolicy',
+];
+
+const NARRATIVE_KEYS = [
+  'problemStatementAndBarriers',
+  'nationalAlignmentNdcNap',
+  'complementarityPastGrants',
+  'theoryOfChange',
+  'sustainabilityAndExitStrategy',
+];
+
+function dashboardRecord(value: unknown): JsonObject {
+  return value && typeof value === 'object' && !Array.isArray(value)
+    ? (value as JsonObject)
+    : {};
+}
+
+function dashboardNumber(value: unknown): number {
+  if (typeof value === 'number' && Number.isFinite(value)) return value;
+  if (typeof value === 'string') {
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? parsed : 0;
+  }
+  return 0;
+}
+
+function dashboardText(value: unknown): string {
+  return typeof value === 'string' ? value.trim() : '';
+}
+
+function dashboardYes(value: unknown): boolean {
+  return (
+    value === true ||
+    value === 1 ||
+    ['yes', 'true', '1'].includes(dashboardText(value).toLowerCase())
+  );
+}
+
+function dashboardClamp(value: number, min = 0, max = 100): number {
+  return Math.max(min, Math.min(max, Math.round(value)));
+}
+
+function dashboardLevel(value: unknown): number {
+  switch (dashboardText(value).toLowerCase()) {
+    case 'established':
+      return 100;
+    case 'developing':
+      return 62;
+    case 'foundational':
+      return 30;
+    default:
+      return 0;
+  }
+}
+
+function dashboardYesRatio(source: JsonObject, keys: string[], fallback: number): number {
+  const answered = keys.filter((key) => dashboardText(source[key]) !== '');
+  if (!answered.length) return fallback;
+  const yes = answered.filter((key) => dashboardYes(source[key])).length;
+  return dashboardClamp((yes / answered.length) * 100);
+}
+
+function dashboardGapScore(gap: JsonObject, fallback: number): number {
+  const answered = GAP_KEYS.filter((key) => dashboardText(gap[key]) !== '');
+  if (!answered.length) return fallback;
+  const total = answered.reduce((sum, key) => {
+    switch (dashboardText(gap[key]).toLowerCase()) {
+      case 'board_approved':
+        return sum + 100;
+      case 'draft':
+        return sum + 55;
+      default:
+        return sum + 15;
+    }
+  }, 0);
+  return dashboardClamp(total / answered.length);
+}
+
+function dashboardFmcaScore(fmca: JsonObject, fallback: number): number {
+  if (!Object.keys(fmca).length) return fallback;
+
+  const controls = [
+    'hasIndependentAuditCommittee',
+    'canSegregateGcfFundsInSeparateAccount',
+    'hasDualSignatoryControls',
+    'hasSanctionsScreeningProcess',
+  ].filter((key) => fmca[key] !== undefined);
+  const controlScore = controls.length
+    ? (controls.filter((key) => dashboardYes(fmca[key])).length / controls.length) * 100
+    : 40;
+
+  let auditScore = 45;
+  switch (dashboardText(fmca.past3YearsAuditOpinion).toLowerCase()) {
+    case 'unqualified':
+      auditScore = 100;
+      break;
+    case 'qualified':
+      auditScore = 65;
+      break;
+    case 'no_audits':
+      auditScore = 40;
+      break;
+    case 'disclaimed':
+      auditScore = 20;
+      break;
+    case 'adverse':
+      auditScore = 0;
+      break;
+  }
+
+  let standardScore = 55;
+  switch (dashboardText(fmca.accountingStandard).toLowerCase()) {
+    case 'ifrs':
+    case 'ipsas':
+      standardScore = 100;
+      break;
+    case 'national_gaap':
+      standardScore = 70;
+      break;
+    case 'cash_basis':
+      standardScore = 40;
+      break;
+  }
+
+  return dashboardClamp(controlScore * 0.45 + auditScore * 0.35 + standardScore * 0.2);
+}
+
+function dashboardRiskBand(score: number): 'low' | 'moderate' | 'elevated' | 'high' {
+  if (score >= 75) return 'low';
+  if (score >= 60) return 'moderate';
+  if (score >= 40) return 'elevated';
+  return 'high';
+}
+
+function dashboardProgress(
+  organization: OrganizationRecord | null,
+  stage1: StagePayload | null,
+  stage2: StagePayload | null,
+  preScreeningStatus: SubmissionStatus,
+  readiness: JsonObject | null,
+  draftAt: string | null,
+  docsAttached: number,
+  docsRequired: number,
+): { accreditation: number; readiness: number; overall: number } {
+  let accreditation = 0;
+  if (organization) accreditation += 15;
+  if (stage1) accreditation += 40;
+  if (preScreeningStatus === 'Passed') accreditation += 20;
+  if (stage2) accreditation += 25;
+
+  let readinessProgress = 0;
+  if (readiness) readinessProgress += 55;
+  else if (draftAt) readinessProgress += 15;
+  if (docsRequired > 0) readinessProgress += (docsAttached / docsRequired) * 20;
+  if (readiness) {
+    const narratives = dashboardRecord(readiness.narrative);
+    const filled = NARRATIVE_KEYS.filter(
+      (key) => dashboardText(narratives[key]).length >= 40,
+    ).length;
+    readinessProgress += (filled / NARRATIVE_KEYS.length) * 15;
+  } else if (draftAt) {
+    readinessProgress += 5;
+  }
+
+  const accreditationPct = dashboardClamp(accreditation);
+  const readinessPct = dashboardClamp(readinessProgress);
+
+  return {
+    accreditation: accreditationPct,
+    readiness: readinessPct,
+    overall: dashboardClamp((accreditationPct + readinessPct) / 2),
+  };
+}
+
+async function organizationDashboard(env: Env, orgId: string): Promise<Response> {
+  assertEntityId(orgId);
+
+  const orgRow = await env.DB.prepare('SELECT * FROM organizations WHERE id = ?')
+    .bind(orgId)
+    .first<OrganizationRow>();
+  const applicantRow = await env.DB.prepare('SELECT * FROM applicants WHERE id = ?')
+    .bind(orgId)
+    .first<ApplicantRow>();
+  const readinessRow = await env.DB.prepare(
+    'SELECT submitted_at, updated_at, data FROM readiness_applications WHERE organization_id = ?',
+  )
+    .bind(orgId)
+    .first<{ submitted_at: string; updated_at: string; data: string }>();
+  const stage1Draft = await env.DB.prepare(
+    'SELECT updated_at FROM stage1_drafts WHERE organization_id = ?',
+  )
+    .bind(orgId)
+    .first<{ updated_at: string }>();
+  const readinessDraft = await env.DB.prepare(
+    'SELECT updated_at FROM readiness_drafts WHERE organization_id = ?',
+  )
+    .bind(orgId)
+    .first<{ updated_at: string }>();
+
+  const organization = orgRow ? rowToOrganization(orgRow) : null;
+  const stage1 = applicantRow
+    ? normalizeStage(parseJson<unknown>(applicantRow.stage1, null))
+    : null;
+  const stage2 = applicantRow
+    ? normalizeStage(parseJson<unknown>(applicantRow.stage2, null))
+    : null;
+  const admin = applicantRow
+    ? normalizeAdmin(parseJson<unknown>(applicantRow.admin, {}))
+    : { ...DEFAULT_ADMIN };
+  const preScreeningStatus = admin.status;
+
+  const stage1Data = stage1 ? dashboardRecord(stage1.data) : {};
+  const stage2Data = stage2 ? dashboardRecord(stage2.data) : {};
+  const readiness = readinessRow
+    ? parseJson<JsonObject>(readinessRow.data, {})
+    : null;
+
+  const metadata = dashboardRecord(readiness?.metadata);
+  const institutional = dashboardRecord(readiness?.institutionalProfile);
+  const gapMatrix = dashboardRecord(institutional.gapMatrix);
+  const fmca = dashboardRecord(readiness?.fmca);
+  const budget = dashboardRecord(readiness?.budget);
+  const documents = dashboardRecord(readiness?.documents);
+  const narrative = dashboardRecord(readiness?.narrative);
+  const logframe = dashboardRecord(readiness?.logframe);
+  const lineItems = Array.isArray(budget.lineItems) ? budget.lineItems : [];
+  const outcomes = Array.isArray(logframe.outcomes) ? logframe.outcomes : [];
+  const objectives = Array.isArray(metadata.readinessObjectives)
+    ? metadata.readinessObjectives
+    : [];
+
+  /* ── Readiness figures ─────────────────────────────── */
+
+  const requestedUSD = dashboardNumber(metadata.requestedAmountUSD);
+  const budgetRowsMap = new Map<string, number>();
+  let budgetTotalUSD = 0;
+  for (const rawLine of lineItems) {
+    const line = dashboardRecord(rawLine);
+    const amount =
+      dashboardNumber(line.unitCostUSD) * Math.max(1, dashboardNumber(line.quantity) || 1);
+    budgetTotalUSD += amount;
+    const category = dashboardText(line.category) || 'other';
+    budgetRowsMap.set(category, (budgetRowsMap.get(category) ?? 0) + amount);
+  }
+
+  const docsAttached = DASHBOARD_DOC_KEYS.filter((key) => {
+    const value = documents[key];
+    return Boolean(value && (typeof value === 'object' || typeof value === 'string'));
+  }).length;
+  const docsRequired = DASHBOARD_DOC_KEYS.length;
+
+  const grants = Array.isArray(fmca.pastGrantsTrackRecord)
+    ? fmca.pastGrantsTrackRecord
+    : [];
+
+  const narrativeScore = NARRATIVE_KEYS.length
+    ? NARRATIVE_KEYS.reduce((sum, key) => {
+        const length = dashboardText(narrative[key]).length;
+        return sum + Math.min(100, (length / 220) * 100);
+      }, 0) / NARRATIVE_KEYS.length
+    : 0;
+
+  const objectivesScore = Math.min(100, (objectives.length / 5) * 100);
+  const documentsScore = (docsAttached / docsRequired) * 100;
+  const gapScore = dashboardGapScore(gapMatrix, readiness ? 35 : 30);
+  const fmcaScore = dashboardFmcaScore(fmca, readiness ? 45 : 35);
+
+  const deliveryBase = [
+    dashboardNumber(institutional.staffCount) > 0
+      ? Math.min(100, (dashboardNumber(institutional.staffCount) / 50) * 100)
+      : null,
+    dashboardNumber(institutional.annualOperatingBudgetUSD) > 0
+      ? Math.min(100, (dashboardNumber(institutional.annualOperatingBudgetUSD) / 2_000_000) * 100)
+      : null,
+    dashboardNumber(institutional.largestPreviousGrantUSD) > 0
+      ? Math.min(100, (dashboardNumber(institutional.largestPreviousGrantUSD) / 500_000) * 100)
+      : null,
+    grants.length > 0 ? Math.min(100, (grants.length / 3) * 100) : null,
+  ].filter((value): value is number => value !== null);
+  const readinessDelivery = deliveryBase.length
+    ? deliveryBase.reduce((sum, value) => sum + value, 0) / deliveryBase.length
+    : 35;
+
+  /* ── Stage 2 coverage ──────────────────────────────── */
+
+  const answerKeys = Object.keys(stage2Data).filter((key) => key.endsWith('_answer'));
+  const answered = answerKeys.filter(
+    (key) => dashboardText(stage2Data[key]) !== '',
+  ).length;
+  const yesAnswers = answerKeys.filter((key) => dashboardYes(stage2Data[key])).length;
+  const answerScore = answerKeys.length
+    ? (yesAnswers / answerKeys.length) * 100
+    : stage2
+      ? 40
+      : 30;
+
+  const statusKeys = Object.keys(stage2Data).filter((key) => key.endsWith('_status'));
+  const completeSections = statusKeys.filter(
+    (key) => dashboardText(stage2Data[key]).toLowerCase() === 'complete',
+  ).length;
+  const sectionScore = statusKeys.length
+    ? (completeSections / statusKeys.length) * 100
+    : stage2
+      ? 45
+      : 30;
+
+  /* ── Organization completeness ─────────────────────── */
+
+  const orgFields = organization
+    ? [
+        organization.name,
+        organization.acronym,
+        organization.legalAddress,
+        organization.operationalAddress,
+        organization.website,
+        organization.country,
+        organization.entityType,
+        organization.contactName,
+        organization.contactEmail,
+        organization.contactPhone,
+      ]
+    : [];
+  const orgComplete = orgFields.length
+    ? (orgFields.filter((value) => Boolean(value && value.trim())).length /
+        orgFields.length) *
+      100
+    : 0;
+
+  /* ── Risk & reputation index ───────────────────────── */
+
+  const capacityScore = dashboardYesRatio(stage1Data, STAGE1_CAPACITY_KEYS, 40);
+  const financialCapacity = dashboardYesRatio(stage1Data, STAGE1_FINANCIAL_KEYS, 40);
+  const stage1Track = dashboardYesRatio(stage1Data, STAGE1_TRACK_KEYS, 40);
+  const trackScore = dashboardClamp(
+    stage1Track * 0.7 + (grants.length ? Math.min(100, (grants.length / 3) * 100) : 0) * 0.3,
+  );
+
+  const budgetCoherence = readiness
+    ? requestedUSD > 0
+      ? dashboardClamp(100 - Math.min(100, (Math.abs(budgetTotalUSD - requestedUSD) / requestedUSD) * 100))
+      : 45
+    : 30;
+
+  const essCapacity = dashboardYesRatio(
+    stage1Data,
+    ['hasESSCapacity', 'hasGenderCapacity', 'hasGrievanceMechanism'],
+    40,
+  );
+
+  const factors = [
+    {
+      key: 'governance',
+      value: dashboardClamp(
+        orgComplete * 0.3 + capacityScore * 0.3 + gapScore * 0.2 + sectionScore * 0.2,
+      ),
+      weight: 0.24,
+    },
+    {
+      key: 'financial',
+      value: dashboardClamp(
+        dashboardLevel(stage1Data.fiduciaryLevel) * 0.25 +
+          fmcaScore * 0.3 +
+          budgetCoherence * 0.2 +
+          financialCapacity * 0.15 +
+          orgComplete * 0.1,
+      ),
+      weight: 0.24,
+    },
+    {
+      key: 'delivery',
+      value: dashboardClamp(
+        dashboardLevel(stage1Data.projectManagementLevel) * 0.3 +
+          trackScore * 0.35 +
+          readinessDelivery * 0.2 +
+          answerScore * 0.15,
+      ),
+      weight: 0.2,
+    },
+    {
+      key: 'climate',
+      value: dashboardClamp(
+        dashboardLevel(stage1Data.essLevel) * 0.25 +
+          dashboardLevel(stage1Data.genderLevel) * 0.2 +
+          narrativeScore * 0.3 +
+          objectivesScore * 0.15 +
+          essCapacity * 0.1,
+      ),
+      weight: 0.17,
+    },
+    {
+      key: 'transparency',
+      value: dashboardClamp(
+        orgComplete * 0.3 +
+          documentsScore * 0.25 +
+          sectionScore * 0.25 +
+          narrativeScore * 0.2,
+      ),
+      weight: 0.15,
+    },
+  ];
+
+  const overall = dashboardClamp(
+    factors.reduce((sum, factor) => sum + factor.value * factor.weight, 0),
+  );
+
+  const confidence = dashboardClamp(
+    (stage1 ? 25 : 0) +
+      (stage2 ? 25 : 0) +
+      (readiness ? 25 : 0) +
+      (docsAttached / docsRequired) * 15 +
+      orgComplete * 0.1,
+  );
+
+  /* ── Timeline ──────────────────────────────────────── */
+
+  const reviewDate = admin.lastReviewSent?.sentAt ?? applicantRow?.updated_at ?? null;
+  const accreditationTimeline = [
+    {
+      key: 'profile',
+      status: organization ? 'complete' : 'current',
+      date: organization?.createdAt ?? null,
+    },
+    {
+      key: 'prescreening',
+      status: stage1 ? 'complete' : 'current',
+      date: stage1?.submittedAt ?? null,
+    },
+    {
+      key: 'review',
+      status:
+        preScreeningStatus === 'Passed'
+          ? 'complete'
+          : preScreeningStatus === 'Failed'
+            ? 'blocked'
+            : stage1
+              ? 'current'
+              : 'pending',
+      date: preScreeningStatus === 'Pending' ? null : reviewDate,
+    },
+    {
+      key: 'accreditation',
+      status: stage2
+        ? 'complete'
+        : preScreeningStatus === 'Passed'
+          ? 'current'
+          : 'blocked',
+      date: stage2?.submittedAt ?? null,
+    },
+    {
+      key: 'decision',
+      status: stage2 ? 'current' : 'pending',
+      date: null,
+    },
+  ] as const;
+
+  const readinessTimeline = [
+    {
+      key: 'started',
+      status: readinessRow || readinessDraft ? 'complete' : 'current',
+      date: readinessRow?.submitted_at ?? readinessDraft?.updated_at ?? null,
+    },
+    {
+      key: 'submitted',
+      status: readinessRow ? 'complete' : 'pending',
+      date: readinessRow?.submitted_at ?? null,
+    },
+    {
+      key: 'review',
+      status: readinessRow ? 'current' : 'pending',
+      date: null,
+    },
+  ] as const;
+
+  const progress = dashboardProgress(
+    organization,
+    stage1,
+    stage2,
+    preScreeningStatus,
+    readiness,
+    readinessDraft?.updated_at ?? null,
+    docsAttached,
+    docsRequired,
+  );
+
+  /* ── Actions ───────────────────────────────────────── */
+
+  const actions: { key: string; route: string | null; tone: 'high' | 'medium' | 'low' }[] = [];
+  if (!stage1) {
+    actions.push({ key: 'complete_prescreening', route: '/stage1', tone: 'high' });
+  } else if (preScreeningStatus === 'Pending') {
+    actions.push({ key: 'awaiting_prescreening', route: '/stage1', tone: 'low' });
+  } else if (preScreeningStatus === 'Failed') {
+    actions.push({ key: 'revise_prescreening', route: '/stage1', tone: 'high' });
+  } else if (!stage2) {
+    actions.push({ key: 'start_accreditation', route: '/stage2', tone: 'high' });
+  }
+
+  if (!readinessRow && readinessDraft) {
+    actions.push({ key: 'resume_readiness', route: '/readiness', tone: 'medium' });
+  } else if (!readinessRow) {
+    actions.push({ key: 'start_readiness', route: '/readiness', tone: 'medium' });
+  } else if (docsAttached < docsRequired) {
+    actions.push({ key: 'upload_documents', route: '/readiness', tone: 'medium' });
+  }
+
+  if (organization && orgComplete < 70) {
+    actions.push({ key: 'complete_profile', route: '/stage1', tone: 'low' });
+  }
+
+  /* ── Activity ──────────────────────────────────────── */
+
+  const activity: { key: string; date: string; tone: 'neutral' | 'success' | 'warn' }[] = [];
+  if (organization?.createdAt) {
+    activity.push({ key: 'profile', date: organization.createdAt, tone: 'neutral' });
+  }
+  if (stage1?.submittedAt) {
+    activity.push({ key: 'stage1', date: stage1.submittedAt, tone: 'neutral' });
+  }
+  if (preScreeningStatus !== 'Pending' && reviewDate) {
+    activity.push({
+      key:
+        preScreeningStatus === 'Passed'
+          ? 'prescreening_passed'
+          : 'prescreening_failed',
+      date: reviewDate,
+      tone: preScreeningStatus === 'Passed' ? 'success' : 'warn',
+    });
+  }
+  if (stage2?.submittedAt) {
+    activity.push({ key: 'stage2', date: stage2.submittedAt, tone: 'neutral' });
+  }
+  if (readinessDraft?.updated_at && !readinessRow) {
+    activity.push({ key: 'readiness_draft', date: readinessDraft.updated_at, tone: 'neutral' });
+  }
+  if (readinessRow?.submitted_at) {
+    activity.push({ key: 'readiness', date: readinessRow.submitted_at, tone: 'success' });
+  }
+  activity.sort((a, b) => (a.date < b.date ? 1 : -1));
+
+  const budgetRows = Array.from(budgetRowsMap.entries())
+    .map(([key, amount]) => ({ key, amount }))
+    .sort((a, b) => b.amount - a.amount);
+
+  return json({
+    organization,
+    generatedAt: new Date().toISOString(),
+    preScreeningStatus,
+    timeline: {
+      accreditation: accreditationTimeline,
+      readiness: readinessTimeline,
+    },
+    progress,
+    risk: {
+      overall,
+      benchmark: DJSI_REFERENCE,
+      benchmarkSource: 'DJSI',
+      riskBand: dashboardRiskBand(overall),
+      confidence,
+      factors,
+    },
+    readinessScore: readiness
+      ? dashboardClamp(
+          gapScore * 0.25 +
+            fmcaScore * 0.2 +
+            narrativeScore * 0.2 +
+            documentsScore * 0.2 +
+            objectivesScore * 0.15,
+        )
+      : null,
+    readiness: readiness
+      ? {
+          submittedAt: readinessRow?.submitted_at ?? null,
+          updatedAt: readinessRow?.updated_at ?? null,
+          draftAt: readinessDraft?.updated_at ?? null,
+          requestedUSD,
+          budgetTotalUSD,
+          varianceUSD: budgetTotalUSD - requestedUSD,
+          durationMonths: dashboardNumber(metadata.durationMonths),
+          objectives: objectives.length,
+          documentsAttached: docsAttached,
+          documentsRequired: docsRequired,
+          staffCount: dashboardNumber(institutional.staffCount),
+          annualBudgetUSD: dashboardNumber(institutional.annualOperatingBudgetUSD),
+          outcomes: outcomes.length,
+          budgetRows,
+        }
+      : null,
+    accreditation: {
+      submittedAt: stage2?.submittedAt ?? null,
+      questionsAnswered: answered,
+      questionsTotal: answerKeys.length,
+      sectionsComplete: completeSections,
+      sectionsTotal: statusKeys.length,
+      stage1Complete: Boolean(stage1),
+      draftAt: stage1Draft?.updated_at ?? null,
+    },
+    actions,
+    activity: activity.slice(0, 8),
+    budget: readiness
+      ? {
+          requestedUSD,
+          totalUSD: budgetTotalUSD,
+          varianceUSD: budgetTotalUSD - requestedUSD,
+          rows: budgetRows,
+        }
+      : null,
+  });
+}
+
+/* ------------------------------------------------------------------ *
  * Email (Resend)
  *
  *  - contact@averacapitalaccess.com -> public inbox, also the reply-to
@@ -3530,6 +4202,12 @@ async function handleApi(request: Request, env: Env, path: string): Promise<Resp
       params.get('acronym') ?? '',
       params.get('exclude') ?? '',
     );
+  }
+
+  const orgDashboardMatch = /^\/api\/organizations\/([^/]+)\/dashboard$/.exec(path);
+  if (orgDashboardMatch) {
+    if (method !== 'GET') return methodNotAllowed('GET');
+    return organizationDashboard(env, decodeURIComponent(orgDashboardMatch[1]));
   }
 
   const orgFormsMatch = /^\/api\/organizations\/([^/]+)\/forms$/.exec(path);

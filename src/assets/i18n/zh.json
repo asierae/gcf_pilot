@@ -689,5 +689,203 @@
   },
   "FOOTER": {
     "DISCLAIMER": "我们的应用程序提供工具和建议，以优化您的资助申请流程。请注意，我们不是资助机构，不保证资助获批或资金到账。我们的服务旨在提高您的申请质量和准备程度；但最终资助决定完全由资助机构作出。"
+  },
+  "APPLICANT_DASHBOARD": {
+    "EYEBROW": "机构工作区",
+    "TITLE": "机构仪表板",
+    "LEDE": "跟踪认证与准备度进度，查看机构评分并处理下一步事项。",
+    "UPDATED": "更新于 {{time}}",
+    "REFRESH": "刷新",
+    "REFRESHING": "正在刷新…",
+    "RETRY": "重试",
+    "LOAD_ERROR": "无法加载仪表板，请重试。",
+    "LOADING": "正在加载仪表板",
+    "NO_ORG": "您的账户尚未关联机构。",
+    "NO_ORG_HINT": "请联系 Avera 团队关联您的机构以启用仪表板。",
+    "KPI": {
+      "READINESS": "准备度指数",
+      "READINESS_SUB": "基于准备度申请",
+      "NO_READINESS": "尚无准备度申请",
+      "RISK": "风险与声誉",
+      "PROGRESS": "流程进度",
+      "PROGRESS_SUB": "认证 {{accreditation}}% · 准备度 {{readiness}}%",
+      "FUNDING": "申请资金",
+      "FUNDING_SUB": "预算 {{amount}}",
+      "DOCUMENTS": "已附文件",
+      "DOCUMENTS_SUB": "已上传的支持文件",
+      "ARIA": "机构指标"
+    },
+    "RISK": {
+      "TITLE": "风险与声誉指数",
+      "SUB": "综合评估治理、财务管理、执行能力、气候一致性与透明度。",
+      "SCORE": "综合得分",
+      "OUT_OF": "满分 100",
+      "BENCHMARK": "道琼斯参考",
+      "BENCHMARK_SHORT": "道琼斯参考",
+      "YOUR_SCORE": "您的得分",
+      "AT": "与参考基准持平",
+      "ABOVE": "高于参考 {{value}} 分",
+      "BELOW": "低于参考 {{value}} 分",
+      "CONFIDENCE": "证据可信度",
+      "CONFIDENCE_LOW": "低",
+      "CONFIDENCE_MEDIUM": "中",
+      "CONFIDENCE_HIGH": "高",
+      "FACTORS": "评分因素",
+      "WEIGHT": "权重 {{value}}%",
+      "SOURCE": "参考：道琼斯可持续发展指数行业区间。该指数由 Avera 研究团队根据您提交的机构画像、认证与准备度数据计算，并非道琼斯实时数据。",
+      "BAND_LOW": "低风险",
+      "BAND_MODERATE": "中等风险",
+      "BAND_ELEVATED": "较高风险",
+      "BAND_HIGH": "高风险"
+    },
+    "FACTORS": {
+      "GOVERNANCE": "治理与合规",
+      "FINANCIAL": "财务管理",
+      "DELIVERY": "执行记录",
+      "CLIMATE": "气候使命一致性",
+      "TRANSPARENCY": "透明度与证据"
+    },
+    "TIMELINE": {
+      "ACCREDITATION": "认证",
+      "ACCREDITATION_SUB": "从机构画像到认证审查。",
+      "READINESS": "准备度",
+      "READINESS_SUB": "从准备度申请到审查。",
+      "STATUS": {
+        "COMPLETE": "已完成",
+        "CURRENT": "进行中",
+        "PENDING": "待处理",
+        "BLOCKED": "受阻"
+      },
+      "ACC": {
+        "PROFILE": {
+          "TITLE": "机构画像",
+          "DESC": "法律身份与联系人已登记。"
+        },
+        "PRESCREENING": {
+          "TITLE": "预筛选已提交",
+          "DESC": "第一阶段资格与能力问答。"
+        },
+        "REVIEW": {
+          "TITLE": "预筛选审查",
+          "DESC": "Avera 对预筛选的决定。"
+        },
+        "ACCREDITATION": {
+          "TITLE": "认证已提交",
+          "DESC": "第二阶段标准与叙述证据。"
+        },
+        "DECISION": {
+          "TITLE": "认证审查",
+          "DESC": "对认证材料的审查。"
+        }
+      },
+      "READY": {
+        "STARTED": {
+          "TITLE": "准备度申请已开始",
+          "DESC": "申请草稿已保存。"
+        },
+        "SUBMITTED": {
+          "TITLE": "准备度已提交",
+          "DESC": "提案、预算、逻辑框架与文件。"
+        },
+        "REVIEW": {
+          "TITLE": "准备度审查",
+          "DESC": "Avera 对准备度材料的审查。"
+        }
+      }
+    },
+    "ACTIONS": {
+      "TITLE": "后续操作",
+      "SUB": "当前对机构最有用的步骤。",
+      "EMPTY": "全部完成",
+      "EMPTY_HINT": "没有待办事项。如有需要我们会通过邮件通知您。",
+      "COMPLETE_PROFILE": {
+        "TITLE": "完善机构画像",
+        "DESC": "补充法律地址、网站和联系方式以增强申请材料。",
+        "CTA": "完善画像"
+      },
+      "COMPLETE_PRESCREENING": {
+        "TITLE": "开始预筛选",
+        "DESC": "提交第一阶段以启动认证路径。",
+        "CTA": "打开预筛选"
+      },
+      "AWAITING_PRESCREENING": {
+        "TITLE": "预筛选审查中",
+        "DESC": "您提交的第一阶段材料已交给 Avera 团队。",
+        "CTA": "查看提交"
+      },
+      "REVISE_PRESCREENING": {
+        "TITLE": "修改预筛选",
+        "DESC": "查看反馈并重新提交第一阶段。",
+        "CTA": "打开预筛选"
+      },
+      "START_ACCREDITATION": {
+        "TITLE": "开始第二阶段认证",
+        "DESC": "预筛选已通过。请完成认证标准。",
+        "CTA": "打开认证"
+      },
+      "UPLOAD_DOCUMENTS": {
+        "TITLE": "附上支持文件",
+        "DESC": "添加审查人员需要的法定和财务文件。",
+        "CTA": "打开准备度"
+      },
+      "START_READINESS": {
+        "TITLE": "开始准备度申请",
+        "DESC": "创建包含预算和逻辑框架的 GCF Readiness 2024–2027 提案。",
+        "CTA": "开始准备度"
+      },
+      "RESUME_READINESS": {
+        "TITLE": "继续准备度草稿",
+        "DESC": "从上次保存处继续，准备好后提交。",
+        "CTA": "继续草稿"
+      },
+      "FOCUS_TITLE": "改进重点",
+      "FOCUS_SUB": "这两个因素对您指数的拖累最大。"
+    },
+    "ACTIVITY": {
+      "TITLE": "最近动态",
+      "SUB": "机构已记录的里程碑。",
+      "EMPTY": "尚无动态。",
+      "PROFILE": "机构画像已创建",
+      "STAGE1": "预筛选已提交",
+      "PRESCREENING_PASSED": "预筛选通过",
+      "PRESCREENING_FAILED": "预筛选需要修改",
+      "STAGE2": "认证已提交",
+      "READINESS_DRAFT": "准备度草稿已保存",
+      "READINESS": "准备度已提交"
+    },
+    "SNAPSHOT": {
+      "READINESS_TITLE": "准备度概览",
+      "READINESS_SUB": "准备度申请的预算与证据。",
+      "REQUESTED": "申请金额",
+      "BUDGETED": "预算金额",
+      "VARIANCE": "差额",
+      "DURATION": "期限",
+      "MONTHS": "{{count}} 个月",
+      "OBJECTIVES": "目标",
+      "OBJECTIVES_VALUE": "{{count}} / 5",
+      "DOCUMENTS": "文件",
+      "DOCUMENTS_VALUE": "{{attached}} / {{required}}",
+      "BUDGET_BREAKDOWN": "按类别预算",
+      "NO_BUDGET": "尚无预算明细。",
+      "NO_READINESS_TITLE": "尚无准备度申请",
+      "NO_READINESS_HINT": "创建准备度申请后，可在此查看预算、证据和逻辑框架。",
+      "START_READINESS": "开始准备度",
+      "ACCREDITATION_TITLE": "认证概览",
+      "ACCREDITATION_SUB": "预筛选状态与第二阶段证据覆盖。",
+      "QUESTIONS": "已答问题",
+      "QUESTIONS_VALUE": "{{answered}} / {{total}}",
+      "SECTIONS": "已完成章节",
+      "SECTIONS_VALUE": "{{complete}} / {{total}}",
+      "PRESCREENING": "预筛选",
+      "STAGE2_SUBMITTED": "第二阶段已提交",
+      "NOT_STARTED": "尚未开始",
+      "STAFF": "员工",
+      "ANNUAL_BUDGET": "年度预算"
+    },
+    "STATUS": {
+      "PENDING": "待处理",
+      "PASSED": "通过",
+      "FAILED": "未通过"
+    }
   }
 }

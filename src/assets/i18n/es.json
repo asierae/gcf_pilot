@@ -689,5 +689,203 @@
   },
   "FOOTER": {
     "DISCLAIMER": "Nuestra aplicación ofrece herramientas y orientación para optimizar su proceso de solicitud de subvenciones. Tenga en cuenta que no somos un organismo financiador y no garantizamos la aprobación de subvenciones ni la recepción de fondos. Nuestros servicios están destinados a mejorar la calidad y la preparación de su solicitud; sin embargo, las decisiones finales de financiación corresponden exclusivamente a las organizaciones que conceden las subvenciones."
+  },
+  "APPLICANT_DASHBOARD": {
+    "EYEBROW": "Espacio de la organización",
+    "TITLE": "Panel de la organización",
+    "LEDE": "Sigue el avance de tu acreditación y preparación, consulta la puntuación de tu perfil y actúa sobre lo siguiente.",
+    "UPDATED": "Actualizado {{time}}",
+    "REFRESH": "Actualizar",
+    "REFRESHING": "Actualizando…",
+    "RETRY": "Reintentar",
+    "LOAD_ERROR": "No se pudo cargar el panel. Inténtalo de nuevo.",
+    "LOADING": "Cargando el panel",
+    "NO_ORG": "Tu cuenta aún no está vinculada a una organización.",
+    "NO_ORG_HINT": "Contacta al equipo de Avera para vincular tu organización y desbloquear el panel.",
+    "KPI": {
+      "READINESS": "Índice de preparación",
+      "READINESS_SUB": "Basado en el paquete de preparación",
+      "NO_READINESS": "Aún no hay solicitud de preparación",
+      "RISK": "Riesgo y reputación",
+      "PROGRESS": "Avance del proceso",
+      "PROGRESS_SUB": "Acreditación {{accreditation}}% · Preparación {{readiness}}%",
+      "FUNDING": "Financiamiento solicitado",
+      "FUNDING_SUB": "Presupuestado {{amount}}",
+      "DOCUMENTS": "Documentos adjuntos",
+      "DOCUMENTS_SUB": "Documentos de respaldo cargados",
+      "ARIA": "Indicadores de la organización"
+    },
+    "RISK": {
+      "TITLE": "Índice de riesgo y reputación",
+      "SUB": "Visión combinada de gobernanza, gestión financiera, capacidad de ejecución, alineación climática y transparencia.",
+      "SCORE": "Puntuación general",
+      "OUT_OF": "de 100",
+      "BENCHMARK": "Referencia Dow Jones",
+      "BENCHMARK_SHORT": "Ref. DJSI",
+      "YOUR_SCORE": "Tu puntuación",
+      "AT": "En línea con la referencia",
+      "ABOVE": "{{value}} pts por encima de la referencia",
+      "BELOW": "{{value}} pts por debajo de la referencia",
+      "CONFIDENCE": "Confianza de la evidencia",
+      "CONFIDENCE_LOW": "Baja",
+      "CONFIDENCE_MEDIUM": "Media",
+      "CONFIDENCE_HIGH": "Alta",
+      "FACTORS": "Factores de la puntuación",
+      "WEIGHT": "Peso {{value}}%",
+      "SOURCE": "Referencia: banda sectorial del Índice de Sostenibilidad Dow Jones. Tu índice lo calcula la investigación de Avera a partir de los datos de perfil, acreditación y preparación enviados; no es una fuente Dow Jones en vivo.",
+      "BAND_LOW": "Riesgo bajo",
+      "BAND_MODERATE": "Riesgo moderado",
+      "BAND_ELEVATED": "Riesgo elevado",
+      "BAND_HIGH": "Riesgo alto"
+    },
+    "FACTORS": {
+      "GOVERNANCE": "Gobernanza y cumplimiento",
+      "FINANCIAL": "Gestión financiera",
+      "DELIVERY": "Historial de ejecución",
+      "CLIMATE": "Alineación con el mandato climático",
+      "TRANSPARENCY": "Transparencia y evidencia"
+    },
+    "TIMELINE": {
+      "ACCREDITATION": "Acreditación",
+      "ACCREDITATION_SUB": "Del perfil de la organización a la revisión de acreditación.",
+      "READINESS": "Preparación",
+      "READINESS_SUB": "De la solicitud de preparación a la revisión.",
+      "STATUS": {
+        "COMPLETE": "Completado",
+        "CURRENT": "En curso",
+        "PENDING": "Pendiente",
+        "BLOCKED": "Bloqueado"
+      },
+      "ACC": {
+        "PROFILE": {
+          "TITLE": "Perfil de la organización",
+          "DESC": "Identidad legal y contactos registrados."
+        },
+        "PRESCREENING": {
+          "TITLE": "Preselección enviada",
+          "DESC": "Respuestas de elegibilidad y capacidad de la etapa 1."
+        },
+        "REVIEW": {
+          "TITLE": "Revisión de preselección",
+          "DESC": "Decisión de Avera sobre tu preselección."
+        },
+        "ACCREDITATION": {
+          "TITLE": "Acreditación enviada",
+          "DESC": "Estándares y evidencia narrativa de la etapa 2."
+        },
+        "DECISION": {
+          "TITLE": "Revisión de acreditación",
+          "DESC": "Revisión de tu expediente de acreditación."
+        }
+      },
+      "READY": {
+        "STARTED": {
+          "TITLE": "Solicitud de preparación iniciada",
+          "DESC": "Borrador guardado de tu solicitud."
+        },
+        "SUBMITTED": {
+          "TITLE": "Preparación enviada",
+          "DESC": "Propuesta, presupuesto, marco lógico y documentos."
+        },
+        "REVIEW": {
+          "TITLE": "Revisión de preparación",
+          "DESC": "Revisión de Avera del paquete de preparación."
+        }
+      }
+    },
+    "ACTIONS": {
+      "TITLE": "Próximas acciones",
+      "SUB": "Los pasos más útiles para tu organización ahora.",
+      "EMPTY": "Todo al día",
+      "EMPTY_HINT": "No hay acciones pendientes. Te avisaremos por correo cuando algo requiera tu atención.",
+      "COMPLETE_PROFILE": {
+        "TITLE": "Completa el perfil de tu organización",
+        "DESC": "Añade dirección legal, sitio web y datos de contacto para reforzar tu expediente.",
+        "CTA": "Completar perfil"
+      },
+      "COMPLETE_PRESCREENING": {
+        "TITLE": "Inicia la preselección",
+        "DESC": "Envía la etapa 1 para comenzar tu ruta de acreditación.",
+        "CTA": "Abrir preselección"
+      },
+      "AWAITING_PRESCREENING": {
+        "TITLE": "Preselección en revisión",
+        "DESC": "Tu envío de etapa 1 está con el equipo de Avera.",
+        "CTA": "Ver envío"
+      },
+      "REVISE_PRESCREENING": {
+        "TITLE": "Revisa tu preselección",
+        "DESC": "Revisa los comentarios y vuelve a enviar la etapa 1.",
+        "CTA": "Abrir preselección"
+      },
+      "START_ACCREDITATION": {
+        "TITLE": "Inicia la acreditación (etapa 2)",
+        "DESC": "Tu preselección fue aprobada. Completa los estándares de acreditación.",
+        "CTA": "Abrir acreditación"
+      },
+      "UPLOAD_DOCUMENTS": {
+        "TITLE": "Adjunta documentos de respaldo",
+        "DESC": "Añade los documentos legales y financieros que revisan los evaluadores.",
+        "CTA": "Abrir preparación"
+      },
+      "START_READINESS": {
+        "TITLE": "Inicia una solicitud de preparación",
+        "DESC": "Crea una propuesta GCF Readiness 2024–2027 con presupuesto y marco lógico.",
+        "CTA": "Iniciar preparación"
+      },
+      "RESUME_READINESS": {
+        "TITLE": "Retoma tu borrador de preparación",
+        "DESC": "Continúa donde lo dejaste y envía cuando estés listo.",
+        "CTA": "Retomar borrador"
+      },
+      "FOCUS_TITLE": "Áreas de mejora",
+      "FOCUS_SUB": "Estos dos factores son los que más frenan tu índice."
+    },
+    "ACTIVITY": {
+      "TITLE": "Actividad reciente",
+      "SUB": "Hitos registrados para tu organización.",
+      "EMPTY": "Aún no hay actividad registrada.",
+      "PROFILE": "Perfil de la organización creado",
+      "STAGE1": "Preselección enviada",
+      "PRESCREENING_PASSED": "Preselección aprobada",
+      "PRESCREENING_FAILED": "La preselección requiere revisión",
+      "STAGE2": "Acreditación enviada",
+      "READINESS_DRAFT": "Borrador de preparación guardado",
+      "READINESS": "Preparación enviada"
+    },
+    "SNAPSHOT": {
+      "READINESS_TITLE": "Resumen de preparación",
+      "READINESS_SUB": "Presupuesto y evidencia de tu solicitud de preparación.",
+      "REQUESTED": "Solicitado",
+      "BUDGETED": "Presupuestado",
+      "VARIANCE": "Diferencia",
+      "DURATION": "Duración",
+      "MONTHS": "{{count}} meses",
+      "OBJECTIVES": "Objetivos",
+      "OBJECTIVES_VALUE": "{{count}} de 5",
+      "DOCUMENTS": "Documentos",
+      "DOCUMENTS_VALUE": "{{attached}} de {{required}}",
+      "BUDGET_BREAKDOWN": "Presupuesto por categoría",
+      "NO_BUDGET": "Aún no hay líneas de presupuesto.",
+      "NO_READINESS_TITLE": "Aún no hay solicitud de preparación",
+      "NO_READINESS_HINT": "Crea una solicitud de preparación para ver aquí tu presupuesto, evidencia y marco lógico.",
+      "START_READINESS": "Iniciar preparación",
+      "ACCREDITATION_TITLE": "Resumen de acreditación",
+      "ACCREDITATION_SUB": "Estado de la preselección y cobertura de evidencia de la etapa 2.",
+      "QUESTIONS": "Preguntas respondidas",
+      "QUESTIONS_VALUE": "{{answered}} de {{total}}",
+      "SECTIONS": "Secciones completadas",
+      "SECTIONS_VALUE": "{{complete}} de {{total}}",
+      "PRESCREENING": "Preselección",
+      "STAGE2_SUBMITTED": "Etapa 2 enviada",
+      "NOT_STARTED": "No iniciada",
+      "STAFF": "Personal",
+      "ANNUAL_BUDGET": "Presupuesto anual"
+    },
+    "STATUS": {
+      "PENDING": "Pendiente",
+      "PASSED": "Aprobada",
+      "FAILED": "Rechazada"
+    }
   }
 }
