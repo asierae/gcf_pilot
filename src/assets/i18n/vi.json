@@ -666,5 +666,28 @@
       "STAGE2": "Hồ sơ giai đoạn 2",
       "PROFILE": "Đánh giá hồ sơ"
     }
+  },
+  "NAV": {
+    "WORKSPACE": "Không gian làm việc",
+    "DASHBOARD": "Bảng điều khiển",
+    "PRICING": "Gói và bảng giá",
+    "PRESCREENING": "Sàng lọc sơ bộ",
+    "ACCREDITATION": "Công nhận",
+    "READINESS": "Hồ sơ sẵn sàng",
+    "MY_FORMS": "Biểu mẫu của tôi",
+    "ACCREDITATION_SUBM": "Hồ sơ công nhận",
+    "READINESS_SUBM": "Hồ sơ sẵn sàng",
+    "LEADS": "Yêu cầu",
+    "USERS": "Người dùng",
+    "SETTINGS": "Cài đặt",
+    "USER_MANAGEMENT": "Quản lý người dùng",
+    "UNLOCK_ACCREDITATION": "Vượt qua sàng lọc sơ bộ để mở công nhận (hiện tại: {{status}})",
+    "PRESCREENING_STATUS": "Sàng lọc sơ bộ: {{status}}",
+    "SUBMISSION": "Hồ sơ",
+    "MANAGE_ACCOUNTS": "Quản lý tài khoản và vai trò",
+    "SETTINGS_MENU": "Menu cài đặt"
+  },
+  "FOOTER": {
+    "DISCLAIMER": "Ứng dụng của chúng tôi cung cấp công cụ và hướng dẫn để tối ưu hóa quy trình nộp đơn xin tài trợ. Xin lưu ý rằng chúng tôi không phải là tổ chức tài trợ và không đảm bảo phê duyệt khoản tài trợ cũng như nhận được tiền. Dịch vụ của chúng tôi nhằm nâng cao chất lượng và mức độ sẵn sàng của hồ sơ; tuy nhiên, quyết định tài trợ cuối cùng hoàn toàn thuộc về các tổ chức cấp tài trợ."
   }
 }

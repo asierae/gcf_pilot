@@ -166,6 +166,11 @@ function flagDataUri(code: SupportedLanguage): string {
         min-width: 0;
       }
 
+      :host-context([dir="rtl"]) .lang-switch:not(.is-block) .lang-menu {
+        left: 0;
+        right: auto;
+      }
+
       .lang-option {
         display: flex;
         align-items: center;

@@ -666,5 +666,28 @@
       "STAGE2": "第二阶段申请",
       "PROFILE": "机构画像评估"
     }
+  },
+  "NAV": {
+    "WORKSPACE": "工作区",
+    "DASHBOARD": "仪表板",
+    "PRICING": "方案与价格",
+    "PRESCREENING": "预筛选",
+    "ACCREDITATION": "认证",
+    "READINESS": "准备度申请",
+    "MY_FORMS": "我的表单",
+    "ACCREDITATION_SUBM": "认证提交",
+    "READINESS_SUBM": "准备度提交",
+    "LEADS": "咨询",
+    "USERS": "用户",
+    "SETTINGS": "设置",
+    "USER_MANAGEMENT": "用户管理",
+    "UNLOCK_ACCREDITATION": "通过预筛选以解锁认证（当前：{{status}}）",
+    "PRESCREENING_STATUS": "预筛选：{{status}}",
+    "SUBMISSION": "提交",
+    "MANAGE_ACCOUNTS": "管理账户和角色",
+    "SETTINGS_MENU": "设置菜单"
+  },
+  "FOOTER": {
+    "DISCLAIMER": "我们的应用程序提供工具和建议，以优化您的资助申请流程。请注意，我们不是资助机构，不保证资助获批或资金到账。我们的服务旨在提高您的申请质量和准备程度；但最终资助决定完全由资助机构作出。"
   }
 }

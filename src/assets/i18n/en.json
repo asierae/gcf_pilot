@@ -666,5 +666,28 @@
       "STAGE2": "Stage 2 applications",
       "PROFILE": "Profile assessments"
     }
+  },
+  "NAV": {
+    "WORKSPACE": "Workspace",
+    "DASHBOARD": "Dashboard",
+    "PRICING": "Plans & Pricing",
+    "PRESCREENING": "Pre-screening",
+    "ACCREDITATION": "Accreditation",
+    "READINESS": "Readiness Intake",
+    "MY_FORMS": "My forms",
+    "ACCREDITATION_SUBM": "Accreditation Subm.",
+    "READINESS_SUBM": "Readiness Subm.",
+    "LEADS": "Leads",
+    "USERS": "Users",
+    "SETTINGS": "Settings",
+    "USER_MANAGEMENT": "User Management",
+    "UNLOCK_ACCREDITATION": "Pass pre-screening to unlock Accreditation (currently {{status}})",
+    "PRESCREENING_STATUS": "Pre-screening: {{status}}",
+    "SUBMISSION": "Submission",
+    "MANAGE_ACCOUNTS": "Manage accounts and roles",
+    "SETTINGS_MENU": "Settings menu"
+  },
+  "FOOTER": {
+    "DISCLAIMER": "Our app provides tools and guidance to optimize your grant application process. Please note that we are not a funding body and do not guarantee the approval of grants or the receipt of funds. Our services are intended to improve the quality and readiness of your application; however, final funding decisions rest solely with the grant-giving organizations."
   }
 }

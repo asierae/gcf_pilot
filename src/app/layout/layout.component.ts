@@ -1,4 +1,4 @@
-import { Component, OnInit } from "@angular/core";
+import { Component, OnInit, inject } from "@angular/core";
 import { CommonModule } from "@angular/common";
 import {
   Router,
@@ -10,7 +10,7 @@ import { AuthService } from "../services/auth.service";
 import { OrganizationService } from "../services/organization.service";
 import { SubmissionStatus } from "../models/applicant.model";
 import { LanguageService } from "../services/language.service";
-import { TranslatePipe } from '@ngx-translate/core';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { BreadcrumbComponent } from "../shared/components/breadcrumb/breadcrumb.component";
 import { ChatComponent } from "../shared/components/chat/chat.component";
 import { LanguageSwitcherComponent } from "../shared/components/language-switcher/language-switcher.component";
@@ -32,6 +32,8 @@ import { LanguageSwitcherComponent } from "../shared/components/language-switche
   styleUrl: "./layout.component.css",
 })
 export class LayoutComponent implements OnInit {
+  private translate = inject(TranslateService);
+
   sidebarCollapsed = false;
   gearMenuOpen = false;
   profileMenuOpen = false;
@@ -75,6 +77,12 @@ export class LayoutComponent implements OnInit {
     if (this.preScreeningStatus === "Passed") return "Passed";
     if (this.preScreeningStatus === "Failed") return "Failed";
     return "Pending";
+  }
+
+  get localizedPreScreeningStatus(): string {
+    return this.translate.instant(
+      `DASHBOARD.STATUS.${this.preScreeningStatusLabel.toUpperCase()}`,
+    );
   }
 
   logout(): void {

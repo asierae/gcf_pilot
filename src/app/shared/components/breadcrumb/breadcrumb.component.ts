@@ -1,6 +1,8 @@
-import { Component, inject } from "@angular/core";
+import { Component, DestroyRef, inject } from "@angular/core";
 import { CommonModule } from "@angular/common";
 import { Router, RouterLink, NavigationEnd } from "@angular/router";
+import { TranslateService } from "@ngx-translate/core";
+import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { filter } from "rxjs/operators";
 import { BreadcrumbService } from "../../../services/breadcrumb.service";
 
@@ -9,18 +11,26 @@ export interface Crumb {
   link?: string;
 }
 
-const ROUTE_MAP: Record<string, Crumb[]> = {
-  "/pricing": [{ label: "Plans & Pricing" }],
-  "/stage1": [{ label: "Pre-screening" }],
-  "/stage2": [{ label: "Accreditation" }],
-  "/dashboard/overview": [{ label: "Dashboard" }],
-  "/dashboard": [{ label: "Accreditation Subm." }],
-  "/dashboard/readiness": [{ label: "Readiness Subm." }],
+interface CrumbDef {
+  key: string;
+  link?: string;
+}
+
+const ROUTE_MAP: Record<string, CrumbDef[]> = {
+  "/pricing": [{ key: "NAV.PRICING" }],
+  "/stage1": [{ key: "NAV.PRESCREENING" }],
+  "/stage2": [{ key: "NAV.ACCREDITATION" }],
+  "/dashboard/overview": [{ key: "DASHBOARD.TITLE" }],
+  "/dashboard": [{ key: "NAV.ACCREDITATION_SUBM" }],
+  "/dashboard/readiness": [{ key: "NAV.READINESS_SUBM" }],
   "/dashboard/leads": [
-    { label: "Dashboard", link: "/dashboard/overview" },
-    { label: "Leads" },
+    { key: "DASHBOARD.TITLE", link: "/dashboard/overview" },
+    { key: "NAV.LEADS" },
   ],
-  "/settings/users": [{ label: "Settings" }, { label: "User Management" }],
+  "/settings/users": [
+    { key: "NAV.SETTINGS" },
+    { key: "NAV.USER_MANAGEMENT" },
+  ],
 };
 
 @Component({
@@ -33,12 +43,17 @@ const ROUTE_MAP: Record<string, Crumb[]> = {
 export class BreadcrumbComponent {
   private router = inject(Router);
   private breadcrumbService = inject(BreadcrumbService);
+  private translate = inject(TranslateService);
+  private destroyRef = inject(DestroyRef);
 
   crumbs: Crumb[] = [];
 
   constructor() {
     this.router.events
       .pipe(filter((e) => e instanceof NavigationEnd))
+      .subscribe(() => this.buildCrumbs());
+    this.translate.onLangChange
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(() => this.buildCrumbs());
     this.buildCrumbs();
   }
@@ -50,13 +65,19 @@ export class BreadcrumbComponent {
     if (url.startsWith("/dashboard/submission/")) {
       const ctx = this.breadcrumbService.context();
       this.crumbs = [
-        { label: "Accreditation Subm.", link: "/dashboard" },
-        { label: ctx ?? "Submission" },
+        {
+          label: this.translate.instant("NAV.ACCREDITATION_SUBM"),
+          link: "/dashboard",
+        },
+        { label: ctx ?? this.translate.instant("NAV.SUBMISSION") },
       ];
       return;
     }
 
-    this.crumbs = ROUTE_MAP[url] ?? [];
+    this.crumbs = (ROUTE_MAP[url] ?? []).map((def) => ({
+      label: this.translate.instant(def.key),
+      link: def.link,
+    }));
   }
 
   get visible(): boolean {

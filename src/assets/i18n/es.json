@@ -666,5 +666,28 @@
       "STAGE2": "Solicitudes de etapa 2",
       "PROFILE": "Evaluaciones de perfil"
     }
+  },
+  "NAV": {
+    "WORKSPACE": "Espacio de trabajo",
+    "DASHBOARD": "Panel",
+    "PRICING": "Planes y precios",
+    "PRESCREENING": "Preselección",
+    "ACCREDITATION": "Acreditación",
+    "READINESS": "Solicitud de preparación",
+    "MY_FORMS": "Mis formularios",
+    "ACCREDITATION_SUBM": "Solicitudes de acreditación",
+    "READINESS_SUBM": "Solicitudes de preparación",
+    "LEADS": "Consultas",
+    "USERS": "Usuarios",
+    "SETTINGS": "Configuración",
+    "USER_MANAGEMENT": "Gestión de usuarios",
+    "UNLOCK_ACCREDITATION": "Supere la preselección para desbloquear la acreditación (actualmente: {{status}})",
+    "PRESCREENING_STATUS": "Preselección: {{status}}",
+    "SUBMISSION": "Solicitud",
+    "MANAGE_ACCOUNTS": "Gestionar cuentas y roles",
+    "SETTINGS_MENU": "Menú de configuración"
+  },
+  "FOOTER": {
+    "DISCLAIMER": "Nuestra aplicación ofrece herramientas y orientación para optimizar su proceso de solicitud de subvenciones. Tenga en cuenta que no somos un organismo financiador y no garantizamos la aprobación de subvenciones ni la recepción de fondos. Nuestros servicios están destinados a mejorar la calidad y la preparación de su solicitud; sin embargo, las decisiones finales de financiación corresponden exclusivamente a las organizaciones que conceden las subvenciones."
   }
 }

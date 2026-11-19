@@ -137,7 +137,7 @@
         [class.sidebar-collapsed]="sidebarCollapsed"
         aria-label="App navigation"
       >
-        <div class="nav-caption" aria-hidden="true">Workspace</div>
+        <div class="nav-caption" aria-hidden="true">{{ "NAV.WORKSPACE" | translate }}</div>
         <ul class="nav-menu">
           @if (authService.currentUserValue?.role === "admin") {
             <li>
@@ -145,14 +145,14 @@
                 routerLink="/dashboard/overview"
                 routerLinkActive="active"
                 class="nav-link"
-                [title]="sidebarCollapsed ? 'Dashboard' : ''"
+                [title]="sidebarCollapsed ? ('NAV.DASHBOARD' | translate) : ''"
               >
                 <span class="nav-icon" aria-hidden="true">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M4 20V10M10 20V4M16 20v-7M22 20H2" />
                   </svg>
                 </span>
-                <span class="nav-label">Dashboard</span>
+                <span class="nav-label">{{ "NAV.DASHBOARD" | translate }}</span>
               </a>
             </li>
           }
@@ -162,7 +162,7 @@
                 routerLink="/pricing"
                 routerLinkActive="active"
                 class="nav-link"
-                [title]="sidebarCollapsed ? 'Plans & Pricing' : ''"
+                [title]="sidebarCollapsed ? ('NAV.PRICING' | translate) : ''"
               >
                 <span class="nav-icon" aria-hidden="true">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
@@ -170,7 +170,7 @@
                     <path d="M3 9h18" />
                   </svg>
                 </span>
-                <span class="nav-label">Plans &amp; Pricing</span>
+                <span class="nav-label">{{ "NAV.PRICING" | translate }}</span>
               </a>
             </li>
           }
@@ -181,8 +181,8 @@
               class="nav-link"
               [title]="
                 sidebarCollapsed
-                  ? 'Pre-screening · ' + preScreeningStatusLabel
-                  : 'Pre-screening'
+                  ? ('NAV.PRESCREENING' | translate) + ' · ' + localizedPreScreeningStatus
+                  : ('NAV.PRESCREENING' | translate)
               "
             >
               <span class="nav-icon" aria-hidden="true">
@@ -192,13 +192,13 @@
                   <path d="m9 13 2.2 2.2L15.5 11" />
                 </svg>
               </span>
-              <span class="nav-label">Pre-screening</span>
+              <span class="nav-label">{{ "NAV.PRESCREENING" | translate }}</span>
               @if (authService.currentUserValue?.role === "applicant") {
                 <span
                   class="nav-status"
                   [class]="'nav-status status-' + preScreeningStatus.toLowerCase()"
-                  [title]="'Pre-screening: ' + preScreeningStatusLabel"
-                >{{ preScreeningStatusLabel }}</span>
+                  [title]="'NAV.PRESCREENING_STATUS' | translate: { status: localizedPreScreeningStatus }"
+                >{{ localizedPreScreeningStatus }}</span>
               }
             </a>
           </li>
@@ -208,7 +208,7 @@
                 routerLink="/stage2"
                 routerLinkActive="active"
                 class="nav-link"
-                [title]="sidebarCollapsed ? 'Accreditation' : ''"
+                [title]="sidebarCollapsed ? ('NAV.ACCREDITATION' | translate) : ''"
               >
                 <span class="nav-icon" aria-hidden="true">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
@@ -216,17 +216,13 @@
                     <path d="M14 3v5h5M9 13h6M9 17h6" />
                   </svg>
                 </span>
-                <span class="nav-label">Accreditation</span>
+                <span class="nav-label">{{ "NAV.ACCREDITATION" | translate }}</span>
               </a>
             } @else {
               <span
                 class="nav-link nav-link-locked"
                 aria-disabled="true"
-                [title]="
-                  'Pass pre-screening to unlock Accreditation (currently ' +
-                  preScreeningStatusLabel.toLowerCase() +
-                  ')'
-                "
+                [title]="'NAV.UNLOCK_ACCREDITATION' | translate: { status: localizedPreScreeningStatus }"
               >
                 <span class="nav-icon" aria-hidden="true">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
@@ -234,7 +230,7 @@
                     <path d="M8 10V7a4 4 0 0 1 8 0v3" />
                   </svg>
                 </span>
-                <span class="nav-label">Accreditation</span>
+                <span class="nav-label">{{ "NAV.ACCREDITATION" | translate }}</span>
                 <span class="nav-lock" aria-hidden="true">🔒</span>
               </span>
             }
@@ -244,7 +240,7 @@
               routerLink="/readiness"
               routerLinkActive="active"
               class="nav-link"
-              [title]="sidebarCollapsed ? 'Readiness Intake' : ''"
+              [title]="sidebarCollapsed ? ('NAV.READINESS' | translate) : ''"
             >
               <span class="nav-icon" aria-hidden="true">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
@@ -253,7 +249,7 @@
                   <circle cx="15" cy="19" r="2.2" />
                 </svg>
               </span>
-              <span class="nav-label">Readiness Intake</span>
+              <span class="nav-label">{{ "NAV.READINESS" | translate }}</span>
             </a>
           </li>
           @if (authService.currentUserValue?.role === "applicant") {
@@ -262,7 +258,7 @@
                 routerLink="/my-forms"
                 routerLinkActive="active"
                 class="nav-link"
-                [title]="sidebarCollapsed ? 'My forms' : ''"
+                [title]="sidebarCollapsed ? ('NAV.MY_FORMS' | translate) : ''"
               >
                 <span class="nav-icon" aria-hidden="true">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
@@ -270,7 +266,7 @@
                     <path d="M15 4v5h5M7 13h8M7 17h5" />
                   </svg>
                 </span>
-                <span class="nav-label">My forms</span>
+                <span class="nav-label">{{ "NAV.MY_FORMS" | translate }}</span>
               </a>
             </li>
           }
@@ -281,7 +277,7 @@
                 routerLinkActive="active"
                 [routerLinkActiveOptions]="{ exact: true }"
                 class="nav-link"
-                [title]="sidebarCollapsed ? 'Accreditation Subm.' : ''"
+                [title]="sidebarCollapsed ? ('NAV.ACCREDITATION_SUBM' | translate) : ''"
               >
                 <span class="nav-icon" aria-hidden="true">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
@@ -291,7 +287,7 @@
                     <rect x="14" y="14" width="7" height="7" rx="1.5" />
                   </svg>
                 </span>
-                <span class="nav-label">Accreditation Subm.</span>
+                <span class="nav-label">{{ "NAV.ACCREDITATION_SUBM" | translate }}</span>
               </a>
             </li>
             <li>
@@ -299,7 +295,7 @@
                 routerLink="/dashboard/readiness"
                 routerLinkActive="active"
                 class="nav-link"
-                [title]="sidebarCollapsed ? 'Readiness Subm.' : ''"
+                [title]="sidebarCollapsed ? ('NAV.READINESS_SUBM' | translate) : ''"
               >
                 <span class="nav-icon" aria-hidden="true">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
@@ -308,7 +304,7 @@
                     <circle cx="15" cy="19" r="2.2" />
                   </svg>
                 </span>
-                <span class="nav-label">Readiness Subm.</span>
+                <span class="nav-label">{{ "NAV.READINESS_SUBM" | translate }}</span>
               </a>
             </li>
             <li>
@@ -316,7 +312,7 @@
                 routerLink="/dashboard/leads"
                 routerLinkActive="active"
                 class="nav-link"
-                [title]="sidebarCollapsed ? 'Leads' : ''"
+                [title]="sidebarCollapsed ? ('NAV.LEADS' | translate) : ''"
               >
                 <span class="nav-icon" aria-hidden="true">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
@@ -325,7 +321,7 @@
                     <path d="M17 4.5a3.5 3.5 0 0 1 0 6.9M21 20v-1.5a4 4 0 0 0-3-3.8" />
                   </svg>
                 </span>
-                <span class="nav-label">Leads</span>
+                <span class="nav-label">{{ "NAV.LEADS" | translate }}</span>
               </a>
             </li>
             <li>
@@ -333,7 +329,7 @@
                 routerLink="/settings/users"
                 routerLinkActive="active"
                 class="nav-link"
-                [title]="sidebarCollapsed ? 'Users' : ''"
+                [title]="sidebarCollapsed ? ('NAV.USERS' | translate) : ''"
               >
                 <span class="nav-icon" aria-hidden="true">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
@@ -342,7 +338,7 @@
                     <path d="M16 5.2a3.2 3.2 0 0 1 0 5.6M21 20v-1.4a5 5 0 0 0-3.2-3.6" />
                   </svg>
                 </span>
-                <span class="nav-label">Users</span>
+                <span class="nav-label">{{ "NAV.USERS" | translate }}</span>
               </a>
             </li>
           }
@@ -364,7 +360,7 @@
       @if (gearMenuOpen) {
         <div class="gear-backdrop" (click)="closeGearMenu()"></div>
         <div class="gear-menu" role="menu">
-          <div class="gear-menu-header">Settings</div>
+          <div class="gear-menu-header">{{ "NAV.SETTINGS" | translate }}</div>
           <button
             type="button"
             class="gear-menu-item"
@@ -373,8 +369,8 @@
           >
             <span class="gear-menu-item-icon">👥</span>
             <span class="gear-menu-item-text">
-              <span class="gear-menu-item-label">User Management</span>
-              <span class="gear-menu-item-desc">Manage accounts and roles</span>
+              <span class="gear-menu-item-label">{{ "NAV.USER_MANAGEMENT" | translate }}</span>
+              <span class="gear-menu-item-desc">{{ "NAV.MANAGE_ACCOUNTS" | translate }}</span>
             </span>
             <span class="gear-menu-item-arrow">→</span>
           </button>
@@ -385,8 +381,8 @@
         class="settings-gear-btn"
         [class.gear-open]="gearMenuOpen"
         (click)="toggleGearMenu()"
-        aria-label="Settings menu"
-        title="Settings"
+        [attr.aria-label]="'NAV.SETTINGS_MENU' | translate"
+        [attr.title]="'NAV.SETTINGS' | translate"
       >
         <svg
           viewBox="0 0 24 24"
@@ -411,13 +407,7 @@
   }
 
   <footer class="layout-footer">
-    <p class="footer-disclaimer">
-      Our app provides tools and guidance to optimize your grant application
-      process. Please note that we are not a funding body and do not guarantee
-      the approval of grants or the receipt of funds. Our services are intended
-      to improve the quality and readiness of your application; however, final
-      funding decisions rest solely with the grant-giving organizations.
-    </p>
+    <p class="footer-disclaimer">{{ "FOOTER.DISCLAIMER" | translate }}</p>
     <p class="footer-copy">Avera Capital Access &copy; 2026</p>
   </footer>
 </div>
