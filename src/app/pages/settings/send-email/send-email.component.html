@@ -1,0 +1,337 @@
+<div class="se-page">
+  <div class="se-page-header">
+    <div>
+      <p class="se-eyebrow">{{ "SEND_EMAIL.EYEBROW" | translate }}</p>
+      <h2>{{ "SEND_EMAIL.TITLE" | translate }}</h2>
+      <p class="se-lede">{{ "SEND_EMAIL.LEDE" | translate }}</p>
+    </div>
+  </div>
+
+  <div class="se-layout">
+    <!-- ── Compose column ─────────────────────────────── -->
+    <div class="se-compose">
+      @if (loadError) {
+        <div class="se-alert se-alert-error">
+          {{ loadError }}
+          <button type="button" class="se-retry" (click)="loadUsers()">
+            {{ "SEND_EMAIL.RETRY" | translate }}
+          </button>
+        </div>
+      }
+
+      <!-- Recipients -->
+      <div class="se-card">
+        <div class="se-card-header">
+          <h3>{{ "SEND_EMAIL.RECIPIENTS" | translate }}</h3>
+          <span class="se-count-chip">
+            {{ "SEND_EMAIL.SELECTED_COUNT" | translate: { count: recipientCount } }}
+          </span>
+        </div>
+
+        <label class="se-check-row">
+          <input
+            type="checkbox"
+            [checked]="sendToAll()"
+            (change)="toggleSendToAll($any($event.target).checked)"
+          />
+          <span>{{ "SEND_EMAIL.ALL_USERS" | translate: { count: mailableUsers().length } }}</span>
+        </label>
+
+        @if (!sendToAll()) {
+          <!-- Multiselect with chips -->
+          <div class="se-multiselect">
+            <div
+              class="se-ms-control"
+              [class.se-ms-open]="dropdownOpen"
+              (click)="toggleDropdown()"
+              role="combobox"
+              [attr.aria-expanded]="dropdownOpen"
+              tabindex="0"
+              (keydown.enter)="toggleDropdown()"
+            >
+              @if (selectedUsers().length === 0) {
+                <span class="se-ms-placeholder">
+                  {{ "SEND_EMAIL.RECIPIENTS_PLACEHOLDER" | translate }}
+                </span>
+              } @else {
+                <div class="se-chips">
+                  @for (user of selectedUsers(); track user.id) {
+                    <span class="se-chip" (click)="$event.stopPropagation()">
+                      <span class="se-chip-label">{{ userLabel(user) }}</span>
+                      <button
+                        type="button"
+                        class="se-chip-remove"
+                        (click)="removeUser(user)"
+                        [attr.aria-label]="'SEND_EMAIL.REMOVE_RECIPIENT' | translate"
+                      >
+                        ×
+                      </button>
+                    </span>
+                  }
+                </div>
+              }
+              <span class="se-ms-arrow" aria-hidden="true">▾</span>
+            </div>
+
+            @if (dropdownOpen) {
+              <div class="se-ms-panel">
+                <input
+                  type="text"
+                  class="se-ms-search"
+                  [ngModel]="userSearch"
+                  (ngModelChange)="userSearch = $event"
+                  [placeholder]="'SEND_EMAIL.SEARCH_USERS' | translate"
+                  (click)="$event.stopPropagation()"
+                />
+                @if (filteredUsers.length === 0) {
+                  <div class="se-ms-empty">
+                    {{ "SEND_EMAIL.NO_USERS_FOUND" | translate }}
+                  </div>
+                }
+                <ul class="se-ms-list">
+                  @for (user of filteredUsers; track user.id) {
+                    <li>
+                      <button
+                        type="button"
+                        class="se-ms-option"
+                        [class.se-ms-selected]="isSelected(user)"
+                        (click)="toggleUser(user)"
+                      >
+                        <span class="se-ms-check" aria-hidden="true">
+                          @if (isSelected(user)) { ✓ }
+                        </span>
+                        <span class="se-ms-name">
+                          <span class="se-ms-username">{{ userLabel(user) }}</span>
+                          <span class="se-ms-email">{{ user.email }}</span>
+                        </span>
+                      </button>
+                    </li>
+                  }
+                </ul>
+                @if (selectedUsers().length > 0) {
+                  <button
+                    type="button"
+                    class="se-ms-clear"
+                    (click)="clearSelection(); $event.stopPropagation()"
+                  >
+                    {{ "SEND_EMAIL.CLEAR_ALL" | translate }}
+                  </button>
+                }
+              </div>
+            }
+          </div>
+        } @else {
+          <div class="se-all-note">
+            {{ "SEND_EMAIL.ALL_USERS_NOTE" | translate: { count: mailableUsers().length } }}
+          </div>
+        }
+      </div>
+
+      <!-- Message -->
+      <div class="se-card">
+        <div class="se-card-header">
+          <h3>{{ "SEND_EMAIL.MESSAGE" | translate }}</h3>
+        </div>
+
+        <div class="se-field">
+          <label for="se-subject">
+            {{ "SEND_EMAIL.SUBJECT" | translate }} <span class="req">*</span>
+          </label>
+          <input
+            id="se-subject"
+            type="text"
+            [(ngModel)]="subject"
+            [placeholder]="'SEND_EMAIL.SUBJECT_PLACEHOLDER' | translate"
+            maxlength="200"
+          />
+          <span class="se-hint">{{ "SEND_EMAIL.SUBJECT_HINT" | translate }}</span>
+        </div>
+
+        <div class="se-field">
+          <label for="se-title">
+            {{ "SEND_EMAIL.EMAIL_TITLE" | translate }} <span class="req">*</span>
+          </label>
+          <input
+            id="se-title"
+            type="text"
+            [(ngModel)]="emailTitle"
+            [placeholder]="'SEND_EMAIL.EMAIL_TITLE_PLACEHOLDER' | translate"
+            maxlength="120"
+          />
+          <span class="se-hint">{{ "SEND_EMAIL.EMAIL_TITLE_HINT" | translate }}</span>
+        </div>
+
+        <div class="se-field">
+          <label for="se-text">
+            {{ "SEND_EMAIL.EMAIL_TEXT" | translate }} <span class="req">*</span>
+          </label>
+          <textarea
+            id="se-text"
+            rows="8"
+            [(ngModel)]="emailText"
+            [placeholder]="'SEND_EMAIL.EMAIL_TEXT_PLACEHOLDER' | translate"
+          ></textarea>
+          <span class="se-hint">{{ "SEND_EMAIL.EMAIL_TEXT_HINT" | translate }}</span>
+        </div>
+
+        <div class="se-field">
+          <label for="se-alias">{{ "SEND_EMAIL.SENDER_ALIAS" | translate }}</label>
+          <select id="se-alias" [(ngModel)]="senderAlias" class="se-select">
+            @for (alias of aliases; track alias.value) {
+              <option [value]="alias.value">{{ alias.labelKey | translate }}</option>
+            }
+          </select>
+        </div>
+
+        <div class="se-compose-actions">
+          <button
+            type="button"
+            class="se-send-btn"
+            [disabled]="!canSend"
+            (click)="openConfirm()"
+          >
+            @if (sending) {
+              {{ "SEND_EMAIL.SENDING" | translate }}
+            } @else {
+              {{ "SEND_EMAIL.SEND" | translate }}
+            }
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Log column ─────────────────────────────────── -->
+    <aside class="se-log">
+      <div class="se-card se-log-card">
+        <div class="se-card-header">
+          <h3>{{ "SEND_EMAIL.LOG_TITLE" | translate }}</h3>
+          <button
+            type="button"
+            class="se-log-refresh"
+            (click)="loadLog()"
+            [disabled]="logLoading"
+          >
+            ⟳
+          </button>
+        </div>
+
+        @if (logLoading) {
+          <div class="se-log-empty">{{ "SEND_EMAIL.LOG_LOADING" | translate }}</div>
+        } @else if (log.length === 0) {
+          <div class="se-log-empty">{{ "SEND_EMAIL.LOG_EMPTY" | translate }}</div>
+        } @else {
+          <ul class="se-log-list">
+            @for (entry of log; track entry.id) {
+              <li class="se-log-item">
+                <div class="se-log-top">
+                  <span class="se-log-subject" [title]="entry.subject">
+                    {{ entry.subject }}
+                  </span>
+                  <span
+                    class="se-log-status"
+                    [class.se-log-status-sent]="entry.status === 'sent'"
+                    [class.se-log-status-failed]="entry.status === 'failed'"
+                    [class.se-log-status-partial]="entry.status === 'partial'"
+                  >
+                    {{ entry.status }}
+                  </span>
+                </div>
+                <div class="se-log-meta">
+                  {{ formatLogDate(entry.createdAt) }}
+                </div>
+                <div class="se-log-detail">
+                  {{ "SEND_EMAIL.LOG_RECIPIENTS" | translate: { count: entry.sentCount, total: entry.recipientCount } }}
+                  ·
+                  {{ (entry.senderAlias === 'noreply' ? 'SEND_EMAIL.ALIAS_NOREPLY' : 'SEND_EMAIL.ALIAS_CONTACT') | translate }}
+                  @if (entry.createdBy) {
+                    · {{ entry.createdBy }}
+                  }
+                </div>
+                @if (entry.failedCount > 0) {
+                  <div class="se-log-failed">
+                    {{ "SEND_EMAIL.LOG_FAILED" | translate: { count: entry.failedCount } }}
+                  </div>
+                }
+              </li>
+            }
+          </ul>
+        }
+      </div>
+    </aside>
+  </div>
+</div>
+
+<!-- ── Confirmation dialog ──────────────────────────────── -->
+@if (confirmOpen) {
+  <div class="se-dialog-backdrop" (click)="closeConfirm()">
+    <div
+      class="se-dialog"
+      role="dialog"
+      aria-modal="true"
+      (click)="$event.stopPropagation()"
+    >
+      <h3>{{ "SEND_EMAIL.CONFIRM_TITLE" | translate }}</h3>
+      <p class="se-dialog-message">
+        {{ "SEND_EMAIL.CONFIRM_MESSAGE" | translate }}
+      </p>
+
+      <div class="se-dialog-recipients">
+        <div class="se-dialog-row">
+          <span class="se-dialog-label">{{ "SEND_EMAIL.CONFIRM_RECIPIENTS" | translate }}</span>
+          <span class="se-dialog-value">
+            @if (sendToAll()) {
+              {{ "SEND_EMAIL.ALL_USERS_SHORT" | translate: { count: mailableUsers().length } }}
+            } @else {
+              {{ selectedUsers().length }}
+            }
+          </span>
+        </div>
+        <div class="se-dialog-row">
+          <span class="se-dialog-label">{{ "SEND_EMAIL.CONFIRM_SUBJECT" | translate }}</span>
+          <span class="se-dialog-value">{{ subject }}</span>
+        </div>
+        <div class="se-dialog-row">
+          <span class="se-dialog-label">{{ "SEND_EMAIL.CONFIRM_ALIAS" | translate }}</span>
+          <span class="se-dialog-value">
+            {{ (senderAlias === 'noreply' ? 'SEND_EMAIL.ALIAS_NOREPLY' : 'SEND_EMAIL.ALIAS_CONTACT') | translate }}
+          </span>
+        </div>
+      </div>
+
+      @if (!sendToAll() && selectedUsers().length > 0) {
+        <div class="se-dialog-chips">
+          @for (user of selectedUsers(); track user.id) {
+            <span class="se-chip se-chip-static">
+              <span class="se-chip-label">{{ userLabel(user) }}</span>
+            </span>
+          }
+        </div>
+      }
+
+      <p class="se-dialog-warning">{{ "SEND_EMAIL.CONFIRM_WARNING" | translate }}</p>
+
+      <div class="se-dialog-actions">
+        <button
+          type="button"
+          class="se-dialog-cancel"
+          (click)="closeConfirm()"
+          [disabled]="sending"
+        >
+          {{ "SEND_EMAIL.CANCEL" | translate }}
+        </button>
+        <button
+          type="button"
+          class="se-dialog-confirm"
+          (click)="confirmSend()"
+          [disabled]="sending"
+        >
+          @if (sending) {
+            {{ "SEND_EMAIL.SENDING" | translate }}
+          } @else {
+            {{ "SEND_EMAIL.CONFIRM_SEND" | translate }}
+          }
+        </button>
+      </div>
+    </div>
+  </div>
+}

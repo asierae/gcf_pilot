@@ -23,7 +23,7 @@ export interface EmailContent {
   /** Quiet note under the CTA (response time, storage hint, ...). */
   footnote?: string;
   /** Receipts and internal copies get a different closing note. */
-  audience?: 'applicant' | 'team';
+  audience?: 'applicant' | 'team' | 'broadcast';
 }
 
 export interface EmailBrand {
@@ -152,7 +152,9 @@ export function renderEmailHtml(content: EmailContent, brand: EmailBrand): strin
   const audienceNote =
     content.audience === 'team'
       ? 'Internal notification from the Avera portal. Reply directly to this email to reach the applicant.'
-      : 'You are receiving this because a form was submitted on the Avera portal. If this was not you, please ignore this email.';
+      : content.audience === 'broadcast'
+        ? 'You are receiving this email because you have an account on the Avera Capital Access portal.'
+        : 'You are receiving this because a form was submitted on the Avera portal. If this was not you, please ignore this email.';
 
   return `<!doctype html>
 <html lang="en">

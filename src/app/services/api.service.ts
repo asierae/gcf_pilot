@@ -15,6 +15,7 @@ import {
 } from "../models/organization.model";
 import { AdminStats } from "../models/admin-stats.model";
 import { ApplicantDashboard } from "../models/applicant-dashboard.model";
+import { EmailLogEntry } from "../models/email-log.model";
 
 interface ApiErrorPayload {
   error?: string;
@@ -453,6 +454,31 @@ export class ApiService {
       },
       true,
     );
+  }
+
+  // ── Admin broadcast emails ──────────────────────────────────────────────
+
+  async sendAdminEmail(input: {
+    subject: string;
+    title: string;
+    text: string;
+    recipientIds: string[] | ["all"];
+    senderAlias: "contact" | "noreply";
+    createdBy?: string;
+  }): Promise<{ sent: boolean; sentCount: number; failedCount: number }> {
+    return this.request("/api/admin/emails", {
+      method: "POST",
+      body: JSON.stringify(input),
+    }, true);
+  }
+
+  async getEmailLog(): Promise<EmailLogEntry[]> {
+    const payload = await this.request<{ emails?: EmailLogEntry[] }>(
+      "/api/admin/emails",
+      { method: "GET" },
+      true,
+    );
+    return payload.emails ?? [];
   }
 
   // ── Drafts ──────────────────────────────────────────────────────────────

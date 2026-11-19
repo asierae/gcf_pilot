@@ -350,23 +350,6 @@
             </li>
             <li>
               <a
-                routerLink="/settings/users"
-                routerLinkActive="active"
-                class="nav-link"
-                [title]="sidebarCollapsed ? ('NAV.USERS' | translate) : ''"
-              >
-                <span class="nav-icon" aria-hidden="true">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="9" cy="8" r="3.2" />
-                    <path d="M3 20v-1.4a5 5 0 0 1 5-5h2a5 5 0 0 1 5 5V20" />
-                    <path d="M16 5.2a3.2 3.2 0 0 1 0 5.6M21 20v-1.4a5 5 0 0 0-3.2-3.6" />
-                  </svg>
-                </span>
-                <span class="nav-label">{{ "NAV.USERS" | translate }}</span>
-              </a>
-            </li>
-            <li>
-              <a
                 routerLink="/admin/organizations"
                 routerLinkActive="active"
                 class="nav-link"
@@ -412,6 +395,19 @@
             <span class="gear-menu-item-text">
               <span class="gear-menu-item-label">{{ "NAV.USER_MANAGEMENT" | translate }}</span>
               <span class="gear-menu-item-desc">{{ "NAV.MANAGE_ACCOUNTS" | translate }}</span>
+            </span>
+            <span class="gear-menu-item-arrow">→</span>
+          </button>
+          <button
+            type="button"
+            class="gear-menu-item"
+            role="menuitem"
+            (click)="navigateTo('/settings/send-email')"
+          >
+            <span class="gear-menu-item-icon">✉️</span>
+            <span class="gear-menu-item-text">
+              <span class="gear-menu-item-label">{{ "NAV.SEND_EMAIL" | translate }}</span>
+              <span class="gear-menu-item-desc">{{ "NAV.SEND_EMAIL_DESC" | translate }}</span>
             </span>
             <span class="gear-menu-item-arrow">→</span>
           </button>

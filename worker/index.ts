@@ -2596,6 +2596,265 @@ async function deleteUser(env: Env, id: string): Promise<Response> {
   return empty();
 }
 
+/* ------------------------------------------------------------------ *
+ * Admin broadcast emails
+ * ------------------------------------------------------------------ */
+
+interface EmailLogRow {
+  id: string;
+  subject: string;
+  title: string;
+  sender_alias: string;
+  recipients: string;
+  recipient_count: number;
+  sent_count: number;
+  failed_count: number;
+  status: string;
+  created_by: string;
+  created_at: string;
+}
+
+const EMAIL_LOG_LIMIT = 100;
+/** Concurrent Resend requests per batch when sending a broadcast. */
+const EMAIL_SEND_BATCH = 8;
+
+function rowToEmailLog(row: EmailLogRow): {
+  id: string;
+  subject: string;
+  title: string;
+  senderAlias: string;
+  recipients: string[];
+  recipientCount: number;
+  sentCount: number;
+  failedCount: number;
+  status: string;
+  createdBy: string;
+  createdAt: string;
+} {
+  let recipients: string[] = [];
+  try {
+    const parsed = JSON.parse(row.recipients) as unknown;
+    if (Array.isArray(parsed)) {
+      recipients = parsed.filter((value): value is string => typeof value === 'string');
+    }
+  } catch {
+    recipients = [];
+  }
+
+  return {
+    id: row.id,
+    subject: row.subject,
+    title: row.title,
+    senderAlias: row.sender_alias,
+    recipients,
+    recipientCount: row.recipient_count,
+    sentCount: row.sent_count,
+    failedCount: row.failed_count,
+    status: row.status,
+    createdBy: row.created_by,
+    createdAt: row.created_at,
+  };
+}
+
+async function listEmailLog(env: Env): Promise<Response> {
+  let rows: EmailLogRow[] = [];
+  try {
+    const response = await env.DB.prepare(
+      'SELECT * FROM email_log ORDER BY created_at DESC LIMIT ?',
+    )
+      .bind(EMAIL_LOG_LIMIT)
+      .all<EmailLogRow>();
+    rows = response.results ?? [];
+  } catch (error) {
+    console.error('Could not list email log', error);
+  }
+  return json({ emails: rows.map(rowToEmailLog) });
+}
+
+async function recordEmailLog(
+  env: Env,
+  entry: {
+    subject: string;
+    title: string;
+    senderAlias: string;
+    recipients: string[];
+    sentCount: number;
+    failedCount: number;
+    createdBy: string;
+  },
+): Promise<void> {
+  try {
+    await env.DB.prepare(
+      `INSERT INTO email_log
+         (id, subject, title, sender_alias, recipients, recipient_count,
+          sent_count, failed_count, status, created_by, created_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    )
+      .bind(
+        crypto.randomUUID(),
+        entry.subject,
+        entry.title,
+        entry.senderAlias,
+        JSON.stringify(entry.recipients),
+        entry.recipients.length,
+        entry.sentCount,
+        entry.failedCount,
+        entry.failedCount === 0 ? 'sent' : entry.sentCount === 0 ? 'failed' : 'partial',
+        entry.createdBy,
+        new Date().toISOString(),
+      )
+      .run();
+  } catch (error) {
+    console.error('Could not write email log', error);
+  }
+}
+
+async function loadUsersByIds(env: Env, ids: string[]): Promise<UserRow[]> {
+  const found: UserRow[] = [];
+  const chunkSize = 50;
+  for (let index = 0; index < ids.length; index += chunkSize) {
+    const chunk = ids.slice(index, index + chunkSize);
+    const placeholders = chunk.map(() => '?').join(', ');
+    const response = await env.DB.prepare(
+      `SELECT * FROM users WHERE id IN (${placeholders})`,
+    )
+      .bind(...chunk)
+      .all<UserRow>();
+    found.push(...(response.results ?? []));
+  }
+  return found;
+}
+
+/** Send one copy per recipient so addresses stay private. */
+async function sendBroadcastEmails(
+  env: Env,
+  recipients: UserRow[],
+  message: { subject: string; html: string; text: string; from: string },
+): Promise<{ sentCount: number; failedCount: number }> {
+  let sentCount = 0;
+  let failedCount = 0;
+
+  for (let index = 0; index < recipients.length; index += EMAIL_SEND_BATCH) {
+    const batch = recipients.slice(index, index + EMAIL_SEND_BATCH);
+    const results = await Promise.all(
+      batch.map((user) =>
+        sendEmail(env, {
+          to: user.email,
+          subject: message.subject,
+          html: message.html,
+          text: message.text,
+          from: message.from,
+        }),
+      ),
+    );
+    for (const delivered of results) {
+      if (delivered) sentCount += 1;
+      else failedCount += 1;
+    }
+  }
+
+  return { sentCount, failedCount };
+}
+
+async function sendAdminEmail(request: Request, env: Env): Promise<Response> {
+  const body = await readJson<{
+    subject?: unknown;
+    title?: unknown;
+    text?: unknown;
+    recipientIds?: unknown;
+    senderAlias?: unknown;
+    createdBy?: unknown;
+  }>(request);
+
+  const subject = asString(body.subject, 'subject').trim();
+  const title = asString(body.title, 'title').trim();
+  const text = asString(body.text, 'text').trim();
+  const createdBy = typeof body.createdBy === 'string' ? body.createdBy.trim() : '';
+  const senderAlias = body.senderAlias === 'noreply' ? 'noreply' : 'contact';
+
+  if (!subject) throw new HttpError(400, 'Enter a subject for the email.');
+  if (!title) throw new HttpError(400, 'Enter a title for the email.');
+  if (!text) throw new HttpError(400, 'Enter the message text for the email.');
+
+  const allUsers = Array.isArray(body.recipientIds) && body.recipientIds[0] === 'all';
+  const ids = Array.isArray(body.recipientIds)
+    ? body.recipientIds.filter((value): value is string => typeof value === 'string')
+    : [];
+
+  if (!allUsers && ids.length === 0) {
+    throw new HttpError(400, 'Select at least one recipient.');
+  }
+
+  let users: UserRow[];
+  try {
+    users = allUsers
+      ? ((await env.DB.prepare('SELECT * FROM users').all<UserRow>()).results ?? [])
+      : await loadUsersByIds(env, ids);
+  } catch (error) {
+    console.error('Could not read users for broadcast', error);
+    throw new HttpError(500, 'Could not resolve the selected recipients.');
+  }
+
+  const recipients = users
+    .filter((user) => (allUsers ? user.status !== 'suspended' : true))
+    .filter((user) => EMAIL_PATTERN.test(user.email))
+    .filter((user, index, list) => list.findIndex((u) => u.email === user.email) === index);
+
+  if (recipients.length === 0) {
+    throw new HttpError(400, 'None of the selected users has a valid email address.');
+  }
+
+  // The template needs an intro plus optional paragraphs: split the message
+  // text on blank lines so each block renders as its own paragraph.
+  const paragraphs = text
+    .split(/\r?\n\s*\r?\n|\r?\n/)
+    .map((paragraph) => paragraph.trim())
+    .filter(Boolean);
+  const [intro, ...rest] = paragraphs;
+
+  const site = siteUrl(env);
+  const inbox = contactEmail(env);
+  const content: EmailContent = {
+    kicker: 'Avera Capital Access',
+    title,
+    intro,
+    paragraphs: rest,
+    audience: 'broadcast',
+  };
+
+  const message = {
+    subject,
+    html: renderEmailHtml(content, { site, inbox }),
+    text: renderEmailText(content, { site, inbox }),
+    from: senderAlias === 'noreply' ? noreplyEmail(env) : inbox,
+  };
+
+  const { sentCount, failedCount } = await sendBroadcastEmails(
+    env,
+    recipients,
+    message,
+  );
+
+  await recordEmailLog(env, {
+    subject,
+    title,
+    senderAlias,
+    recipients: recipients.map((user) => user.email),
+    sentCount,
+    failedCount,
+    createdBy,
+  });
+
+  if (sentCount === 0) {
+    return json(
+      { error: 'The email could not be delivered. Check the email log for details.', sentCount, failedCount },
+      502,
+    );
+  }
+
+  return json({ sent: true, sentCount, failedCount });
+}
+
 async function issueUserToken(
   env: Env,
   userId: string,
@@ -4509,6 +4768,13 @@ async function handleApi(request: Request, env: Env, path: string): Promise<Resp
   if (path === '/api/send-review-email') {
     if (method !== 'POST') return methodNotAllowed('POST');
     return sendReviewEmail(request, env);
+  }
+
+  // Admin: broadcast emails
+  if (path === '/api/admin/emails') {
+    if (method === 'GET') return withAdmin(env, request, () => listEmailLog(env));
+    if (method === 'POST') return withAdmin(env, request, () => sendAdminEmail(request, env));
+    return methodNotAllowed('GET, POST');
   }
 
   if (path.startsWith('/api/files/')) {
