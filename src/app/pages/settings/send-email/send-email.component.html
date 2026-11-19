@@ -39,7 +39,7 @@
 
         @if (!sendToAll()) {
           <!-- Multiselect with chips -->
-          <div class="se-multiselect">
+          <div class="se-multiselect" #multiselect>
             <div
               class="se-ms-control"
               [class.se-ms-open]="dropdownOpen"

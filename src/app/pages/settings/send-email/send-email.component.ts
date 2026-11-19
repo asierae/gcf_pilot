@@ -1,4 +1,4 @@
-import { Component, ElementRef, HostListener, OnDestroy, OnInit, computed, signal } from '@angular/core';
+import { Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild, computed, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ApiService, ApiUser } from '../../../services/api.service';
@@ -40,6 +40,9 @@ export class SendEmailComponent implements OnInit, OnDestroy {
   private readonly selectedIds = signal<Set<string>>(new Set());
   readonly sendToAll = signal(false);
 
+  /** Wrapper around the multiselect control + dropdown panel. */
+  @ViewChild('multiselect') private multiselectRef?: ElementRef<HTMLElement>;
+
   /* Multiselect dropdown state */
   dropdownOpen = false;
   userSearch = '';
@@ -67,15 +70,15 @@ export class SendEmailComponent implements OnInit, OnDestroy {
     private readonly breadcrumbService: BreadcrumbService,
     private readonly authService: AuthService,
     private readonly translate: TranslateService,
-    private readonly elementRef: ElementRef,
   ) {}
 
-  /** Close the recipient dropdown when clicking anywhere outside it. */
+  /** Close the recipient dropdown when clicking outside of it. */
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: MouseEvent): void {
     if (!this.dropdownOpen) return;
     const target = event.target as Node | null;
-    if (target && !this.elementRef.nativeElement.contains(target)) {
+    const wrapper = this.multiselectRef?.nativeElement;
+    if (!wrapper || !target || !wrapper.contains(target)) {
       this.closeDropdown();
     }
   }
