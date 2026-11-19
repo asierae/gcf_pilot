@@ -627,7 +627,13 @@
       "TITLE": "Actividad reciente",
       "SUB": "Últimos envíos y consultas",
       "REVIEW": "Revisar consultas →",
-      "EMPTY": "Aún no se ha enviado nada."
+      "EMPTY": "Aún no se ha enviado nada.",
+      "SUB_ACCREDITATION": "Solicitud de acreditación",
+      "SUB_PRESCREENING": "Preselección",
+      "SUB_READINESS": "Solicitud de preparación",
+      "SUB_ENQUIRY": "Consulta",
+      "SUB_PROFILE": "Evaluación de perfil",
+      "SUB_LEAD": "Lead"
     },
     "LOADING": "Cargando estadísticas",
     "STATUS": {
@@ -657,7 +663,8 @@
       "ENQUIRIES": "Consultas",
       "ACCREDITATION": "Acreditación",
       "PASSED": "Aprobaron la preselección",
-      "STAGE2": "Solicitudes de etapa 2"
+      "STAGE2": "Solicitudes de etapa 2",
+      "PROFILE": "Evaluaciones de perfil"
     }
   }
 }

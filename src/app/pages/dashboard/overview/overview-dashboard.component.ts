@@ -52,9 +52,19 @@ const LANGUAGE_LOCALES: Record<string, string> = {
 
 const FUNNEL_LABEL_KEYS: Record<string, string> = {
   Enquiries: "DASHBOARD.FUNNEL.ENQUIRIES",
+  "Profile assessments": "DASHBOARD.FUNNEL.PROFILE",
   Accreditation: "DASHBOARD.FUNNEL.ACCREDITATION",
   "Passed pre-screening": "DASHBOARD.FUNNEL.PASSED",
   "Stage 2 applications": "DASHBOARD.FUNNEL.STAGE2",
+};
+
+const RECENT_SUB_KEYS: Record<string, string> = {
+  "Accreditation submission": "DASHBOARD.ACTIVITY.SUB_ACCREDITATION",
+  "Pre-screening": "DASHBOARD.ACTIVITY.SUB_PRESCREENING",
+  "Readiness submission": "DASHBOARD.ACTIVITY.SUB_READINESS",
+  Enquiry: "DASHBOARD.ACTIVITY.SUB_ENQUIRY",
+  "Profile assessment": "DASHBOARD.ACTIVITY.SUB_PROFILE",
+  Lead: "DASHBOARD.ACTIVITY.SUB_LEAD",
 };
 
 const SOURCE_LABEL_KEYS: Record<string, string> = {
@@ -1176,6 +1186,10 @@ export class OverviewDashboardComponent implements OnInit {
 
   entityLabel(label: string): string {
     return this.dataLabel(label, this.entityLabelKeys);
+  }
+
+  recentSubLabel(label: string): string {
+    return this.dataLabel(label, RECENT_SUB_KEYS);
   }
 
   colorAt(index: number): string {

@@ -627,7 +627,13 @@
       "TITLE": "近期活动",
       "SUB": "最新提交和咨询",
       "REVIEW": "查看咨询 →",
-      "EMPTY": "尚未提交任何内容。"
+      "EMPTY": "尚未提交任何内容。",
+      "SUB_ACCREDITATION": "认证提交",
+      "SUB_PRESCREENING": "预筛选",
+      "SUB_READINESS": "准备度提交",
+      "SUB_ENQUIRY": "咨询",
+      "SUB_PROFILE": "机构画像评估",
+      "SUB_LEAD": "线索"
     },
     "LOADING": "正在加载统计信息",
     "STATUS": {
@@ -657,7 +663,8 @@
       "ENQUIRIES": "咨询",
       "ACCREDITATION": "认证",
       "PASSED": "通过预筛选",
-      "STAGE2": "第二阶段申请"
+      "STAGE2": "第二阶段申请",
+      "PROFILE": "机构画像评估"
     }
   }
 }

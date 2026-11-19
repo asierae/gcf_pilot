@@ -627,7 +627,13 @@
       "TITLE": "Activité récente",
       "SUB": "Dernières soumissions et demandes",
       "REVIEW": "Examiner les demandes →",
-      "EMPTY": "Rien n'a encore été soumis."
+      "EMPTY": "Rien n'a encore été soumis.",
+      "SUB_ACCREDITATION": "Soumission d'accréditation",
+      "SUB_PRESCREENING": "Présélection",
+      "SUB_READINESS": "Soumission de préparation",
+      "SUB_ENQUIRY": "Demande",
+      "SUB_PROFILE": "Évaluation de profil",
+      "SUB_LEAD": "Lead"
     },
     "LOADING": "Chargement des statistiques",
     "STATUS": {
@@ -657,7 +663,8 @@
       "ENQUIRIES": "Demandes",
       "ACCREDITATION": "Accréditation",
       "PASSED": "Présélection réussie",
-      "STAGE2": "Candidatures étape 2"
+      "STAGE2": "Candidatures étape 2",
+      "PROFILE": "Évaluations de profil"
     }
   }
 }

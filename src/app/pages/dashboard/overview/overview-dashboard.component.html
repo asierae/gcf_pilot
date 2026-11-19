@@ -840,7 +840,7 @@
                   <span class="activity-dot"></span>
                   <span class="activity-copy">
                     <strong>{{ item.label }}</strong>
-                    <span>{{ item.sub }}</span>
+                    <span>{{ recentSubLabel(item.sub) }}</span>
                   </span>
                   <time>{{ formatDate(item.date) }}</time>
                 </a>
@@ -853,7 +853,7 @@
       </article>
     </section>
   } @else if (loading) {
-    <div class="skeleton-grid" aria-label="Loading statistics">
+    <div class="skeleton-grid" [attr.aria-label]="'DASHBOARD.LOADING' | translate">
       @for (item of [1, 2, 3, 4, 5, 6]; track item) {
         <div class="skeleton kpi-skeleton"></div>
       }

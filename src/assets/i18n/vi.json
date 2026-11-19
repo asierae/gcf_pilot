@@ -627,7 +627,13 @@
       "TITLE": "Hoạt động gần đây",
       "SUB": "Hồ sơ và yêu cầu mới nhất",
       "REVIEW": "Xem yêu cầu →",
-      "EMPTY": "Chưa có nội dung nào được gửi."
+      "EMPTY": "Chưa có nội dung nào được gửi.",
+      "SUB_ACCREDITATION": "Hồ sơ công nhận",
+      "SUB_PRESCREENING": "Sàng lọc sơ bộ",
+      "SUB_READINESS": "Hồ sơ sẵn sàng",
+      "SUB_ENQUIRY": "Yêu cầu",
+      "SUB_PROFILE": "Đánh giá hồ sơ",
+      "SUB_LEAD": "Khách hàng tiềm năng"
     },
     "LOADING": "Đang tải số liệu",
     "STATUS": {
@@ -657,7 +663,8 @@
       "ENQUIRIES": "Yêu cầu",
       "ACCREDITATION": "Công nhận",
       "PASSED": "Đạt sàng lọc sơ bộ",
-      "STAGE2": "Hồ sơ giai đoạn 2"
+      "STAGE2": "Hồ sơ giai đoạn 2",
+      "PROFILE": "Đánh giá hồ sơ"
     }
   }
 }

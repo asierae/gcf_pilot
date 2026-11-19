@@ -627,7 +627,13 @@
       "TITLE": "Recent activity",
       "SUB": "Latest submissions and enquiries",
       "REVIEW": "Review enquiries →",
-      "EMPTY": "Nothing submitted yet."
+      "EMPTY": "Nothing submitted yet.",
+      "SUB_ACCREDITATION": "Accreditation submission",
+      "SUB_PRESCREENING": "Pre-screening",
+      "SUB_READINESS": "Readiness submission",
+      "SUB_ENQUIRY": "Enquiry",
+      "SUB_PROFILE": "Profile assessment",
+      "SUB_LEAD": "Lead"
     },
     "LOADING": "Loading statistics",
     "STATUS": {
@@ -657,7 +663,8 @@
       "ENQUIRIES": "Enquiries",
       "ACCREDITATION": "Accreditation",
       "PASSED": "Passed pre-screening",
-      "STAGE2": "Stage 2 applications"
+      "STAGE2": "Stage 2 applications",
+      "PROFILE": "Profile assessments"
     }
   }
 }
