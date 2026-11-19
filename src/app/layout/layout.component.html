@@ -365,6 +365,23 @@
                 <span class="nav-label">{{ "NAV.USERS" | translate }}</span>
               </a>
             </li>
+            <li>
+              <a
+                routerLink="/admin/organizations"
+                routerLinkActive="active"
+                class="nav-link"
+                [title]="sidebarCollapsed ? ('NAV.ORGANIZATIONS' | translate) : ''"
+              >
+                <span class="nav-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M20 21V15a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v6" />
+                    <path d="M4 15v-4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v4" />
+                    <path d="M16 15v-4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v4" />
+                  </svg>
+                </span>
+                <span class="nav-label">{{ "NAV.ORGANIZATIONS" | translate }}</span>
+              </a>
+            </li>
           }
         </ul>
       </nav>

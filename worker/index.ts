@@ -217,6 +217,11 @@ interface OrganizationRow {
   contact_name: string | null;
   contact_email: string | null;
   contact_phone: string | null;
+  risk_score: number | null;
+  risk_notes: string | null;
+  admin_notes: string | null;
+  accreditation_status: string | null;
+  priority_level: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -233,6 +238,12 @@ interface OrganizationRecord {
   contactName: string;
   contactEmail: string;
   contactPhone: string;
+  // Admin-editable fields
+  riskScore: number | null;
+  riskNotes: string;
+  adminNotes: string;
+  accreditationStatus: string;
+  priorityLevel: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -529,6 +540,11 @@ function rowToOrganization(row: OrganizationRow): OrganizationRecord {
     contactName: row.contact_name ?? '',
     contactEmail: row.contact_email ?? '',
     contactPhone: row.contact_phone ?? '',
+    riskScore: row.risk_score ?? null,
+    riskNotes: row.risk_notes ?? '',
+    adminNotes: row.admin_notes ?? '',
+    accreditationStatus: row.accreditation_status ?? 'not_started',
+    priorityLevel: row.priority_level ?? 'normal',
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
@@ -544,6 +560,13 @@ function readOrgFields(body: JsonObject): OrganizationRecord {
     return typeof value === 'string' ? value.trim() : '';
   };
 
+  const pickNumber = (key: string): number | null => {
+    const value = body[key];
+    if (value === null || value === undefined || value === '') return null;
+    const num = Number(value);
+    return Number.isFinite(num) ? num : null;
+  };
+
   const organization: OrganizationRecord = {
     id: '',
     name: pick('name'),
@@ -556,6 +579,11 @@ function readOrgFields(body: JsonObject): OrganizationRecord {
     contactName: pick('contactName'),
     contactEmail: pick('contactEmail'),
     contactPhone: pick('contactPhone'),
+    riskScore: pickNumber('riskScore'),
+    riskNotes: pick('riskNotes'),
+    adminNotes: pick('adminNotes'),
+    accreditationStatus: pick('accreditationStatus') || 'not_started',
+    priorityLevel: pick('priorityLevel') || 'normal',
     createdAt: '',
     updatedAt: '',
   };
@@ -682,6 +710,11 @@ function organizationFromStage1(data: JsonObject): OrganizationRecord {
     contactName: read('primaryContactName'),
     contactEmail: read('primaryContactEmail'),
     contactPhone: read('primaryContactPhone'),
+    riskScore: null,
+    riskNotes: '',
+    adminNotes: '',
+    accreditationStatus: 'not_started',
+    priorityLevel: 'normal',
     createdAt: '',
     updatedAt: '',
   };
@@ -710,6 +743,11 @@ function organizationFromReadiness(data: JsonObject): OrganizationRecord {
     contactName: '',
     contactEmail: '',
     contactPhone: '',
+    riskScore: null,
+    riskNotes: '',
+    adminNotes: '',
+    accreditationStatus: 'not_started',
+    priorityLevel: 'normal',
     createdAt: '',
     updatedAt: '',
   };
@@ -733,6 +771,60 @@ async function putOrganization(
   const body = await readJson<JsonObject>(request);
   const organization = await saveOrganization(env, id, readOrgFields(body));
   return json({ organization });
+}
+
+/** Admin: update editable fields for an organization. */
+async function updateOrganizationAdmin(
+  request: Request,
+  env: Env,
+  id: string,
+): Promise<Response> {
+  assertEntityId(id);
+  const body = await readJson<JsonObject>(request);
+
+  const allowedFields = [
+    'riskScore',
+    'riskNotes',
+    'adminNotes',
+    'accreditationStatus',
+    'priorityLevel',
+  ];
+
+  const updates: string[] = [];
+  const values: unknown[] = [];
+
+  for (const field of allowedFields) {
+    if (body[field] !== undefined) {
+      const col = field.replace(/([A-Z])/g, '_$1').toLowerCase();
+      updates.push(`${col} = ?`);
+      if (field === 'riskScore') {
+        const num = body[field];
+        values.push(num === null || num === '' ? null : Number(num));
+      } else {
+        values.push(typeof body[field] === 'string' ? body[field].trim() : String(body[field]));
+      }
+    }
+  }
+
+  if (updates.length === 0) {
+    return json({ error: 'No valid fields provided.' }, 400);
+  }
+
+  updates.push('updated_at = ?');
+  values.push(new Date().toISOString());
+  values.push(id);
+
+  await env.DB.prepare(
+    `UPDATE organizations SET ${updates.join(', ')} WHERE id = ?`,
+  )
+    .bind(...values)
+    .run();
+
+  const row = await env.DB.prepare('SELECT * FROM organizations WHERE id = ?')
+    .bind(id)
+    .first<OrganizationRow>();
+
+  return json({ organization: row ? rowToOrganization(row) : null });
 }
 
 async function acronymAvailable(
@@ -2688,6 +2780,21 @@ async function listApplicants(env: Env): Promise<Response> {
   return json({ applicants: (results ?? []).map(rowToApplicant) });
 }
 
+/** Admin: list all organizations with editable fields. */
+async function listOrganizationsAdmin(env: Env): Promise<Response> {
+  const { results } = await env.DB.prepare(
+    `SELECT
+       id, name, acronym, acronym_norm, legal_address, operational_address,
+       website, country, entity_type, contact_name, contact_email, contact_phone,
+       risk_score, risk_notes, admin_notes, accreditation_status, priority_level,
+       created_at, updated_at
+     FROM organizations
+     ORDER BY created_at DESC`,
+  ).all<OrganizationRow>();
+
+  return json({ organizations: (results ?? []).map(rowToOrganization) });
+}
+
 async function getApplicant(env: Env, id: string): Promise<Response> {
   const row = await env.DB.prepare('SELECT * FROM applicants WHERE id = ?')
     .bind(id)
@@ -4299,6 +4406,12 @@ async function handleApi(request: Request, env: Env, path: string): Promise<Resp
     );
   }
 
+  // Admin: list all organizations with editable fields
+  if (path === '/api/admin/organizations') {
+    if (method !== 'GET') return methodNotAllowed('GET');
+    return withAdmin(env, request, () => listOrganizationsAdmin(env));
+  }
+
   const orgDashboardMatch = /^\/api\/organizations\/([^/]+)\/dashboard$/.exec(path);
   if (orgDashboardMatch) {
     if (method !== 'GET') return methodNotAllowed('GET');
@@ -4317,6 +4430,16 @@ async function handleApi(request: Request, env: Env, path: string): Promise<Resp
     if (method === 'GET') return getOrganization(env, id);
     if (method === 'PUT' || method === 'PATCH') return putOrganization(request, env, id);
     return methodNotAllowed('GET, PUT');
+  }
+
+  // Admin: update individual organization editable fields
+  const adminOrgMatch = /^\/api\/admin\/organizations\/([^/]+)$/.exec(path);
+  if (adminOrgMatch) {
+    const id = decodeURIComponent(adminOrgMatch[1]);
+    if (method === 'PATCH' || method === 'PUT') {
+      return withAdmin(env, request, () => updateOrganizationAdmin(request, env, id));
+    }
+    return methodNotAllowed('PATCH, PUT');
   }
 
   const draftMatch = /^\/api\/drafts\/(stage1|readiness)\/([^/]+)$/.exec(path);

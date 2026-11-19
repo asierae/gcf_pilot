@@ -1,0 +1,174 @@
+@if (loading) {
+  <div class="ao-empty">
+    <span class="ao-empty-icon">⏳</span>
+    <p>Loading organization details…</p>
+  </div>
+} @else if (loadError) {
+  <div class="ao-empty">
+    <span class="ao-empty-icon">⚠️</span>
+    <p>{{ loadError }}</p>
+    <button type="button" class="btn-retry" (click)="loadOrganization(orgId)">
+      {{ "APPLICANT_DASHBOARD.RETRY" | translate }}
+    </button>
+  </div>
+} @else {
+  <div class="ao-edit-page">
+    <!-- Header -->
+    <div class="ao-page-header">
+      <div>
+        <p class="ao-eyebrow">{{ organization?.name }}</p>
+        <h2>{{ "ADMIN_ORGANIZATION_EDIT.TITLE" | translate }}</h2>
+      </div>
+      <a [routerLink]="['/admin/organizations']" class="btn-back">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M15 18l-6-6 6-6" />
+        </svg>
+        {{ "ADMIN_ORGANIZATION_EDIT.BACK" | translate }}
+      </a>
+    </div>
+
+    <!-- Edit form -->
+    @if (saveError) {
+      <div class="ao-error">
+        <span class="ao-error-icon">⚠️</span>
+        <span>{{ saveError }}</span>
+      </div>
+    }
+
+    <form class="ao-edit-form" (ngSubmit)="save()">
+      <!-- Basic fields -->
+      <div class="ao-section">
+        <h3>{{ "ADMIN_ORGANIZATION_EDIT.BASIC_FIELDS" | translate }}</h3>
+
+        <div class="ao-form-grid">
+          <label class="form-field">
+            <span>{{ "ADMIN_ORGANIZATION_EDIT.NAME_LABEL" | translate }} <span class="req">*</span></span>
+            <input type="text" [(ngModel)]="form.name" placeholder="{{ 'ADMIN_ORGANIZATION_EDIT.NAME_PLACEHOLDER' | translate }}" />
+          </label>
+
+          <label class="form-field">
+            <span>{{ "ADMIN_ORGANIZATION_EDIT.ACRONYM_LABEL" | translate }}</span>
+            <input type="text" [(ngModel)]="form.acronym" placeholder="{{ 'ADMIN_ORGANIZATION_EDIT.ACRONYM_PLACEHOLDER' | translate }}" />
+          </label>
+
+          <label class="form-field ao-full-width">
+            <span>{{ "ADMIN_ORGANIZATION_EDIT.LEGAL_ADDRESS_LABEL" | translate }}</span>
+            <textarea [(ngModel)]="form.legalAddress" placeholder="{{ 'ADMIN_ORGANIZATION_EDIT.LEGAL_ADDRESS_PLACEHOLDER' | translate }}" rows="2"></textarea>
+          </label>
+
+          <label class="form-field ao-full-width">
+            <span>{{ "ADMIN_ORGANIZATION_EDIT.OPERATIONAL_ADDRESS_LABEL" | translate }}</span>
+            <textarea [(ngModel)]="form.operationalAddress" placeholder="{{ 'ADMIN_ORGANIZATION_EDIT.OPERATIONAL_ADDRESS_PLACEHOLDER' | translate }}" rows="2"></textarea>
+          </label>
+
+          <label class="form-field">
+            <span>{{ "ADMIN_ORGANIZATION_EDIT.WEBSITE_LABEL" | translate }}</span>
+            <input type="url" [(ngModel)]="form.website" placeholder="{{ 'ADMIN_ORGANIZATION_EDIT.WEBSITE_PLACEHOLDER' | translate }}" />
+          </label>
+
+          <label class="form-field">
+            <span>{{ "ADMIN_ORGANIZATION_EDIT.COUNTRY_LABEL" | translate }}</span>
+            <input type="text" [(ngModel)]="form.country" placeholder="{{ 'ADMIN_ORGANIZATION_EDIT.COUNTRY_PLACEHOLDER' | translate }}" />
+          </label>
+
+          <label class="form-field">
+            <span>{{ "ADMIN_ORGANIZATION_EDIT.ENTITY_TYPE_LABEL" | translate }}</span>
+            <select [(ngModel)]="form.entityType">
+              <option value="">-- {{ "ADMIN_ORGANIZATION_EDIT.SELECT_PLACEHOLDER" | translate }} --</option>
+              @for (option of entityTypes; track option) {
+                <option [value]="option">{{ option }}</option>
+              }
+            </select>
+          </label>
+
+          <label class="form-field">
+            <span>{{ "ADMIN_ORGANIZATION_EDIT.CONTACT_NAME_LABEL" | translate }}</span>
+            <input type="text" [(ngModel)]="form.contactName" placeholder="" />
+          </label>
+
+          <label class="form-field">
+            <span>{{ "ADMIN_ORGANIZATION_EDIT.CONTACT_EMAIL_LABEL" | translate }}</span>
+            <input type="email" [(ngModel)]="form.contactEmail" placeholder="" />
+          </label>
+
+          <label class="form-field">
+            <span>{{ "ADMIN_ORGANIZATION_EDIT.CONTACT_PHONE_LABEL" | translate }}</span>
+            <input type="tel" [(ngModel)]="form.contactPhone" placeholder="" />
+          </label>
+        </div>
+      </div>
+
+      <!-- Admin fields -->
+      <div class="ao-section ao-section-admin">
+        <h3>{{ "ADMIN_ORGANIZATION_EDIT.ADMIN_FIELDS" | translate }}</h3>
+
+        <div class="ao-form-grid">
+          <label class="form-field">
+            <span>{{ "ADMIN_ORGANIZATION_EDIT.RISK_SCORE_LABEL" | translate }}</span>
+            <input
+              type="number"
+              min="0"
+              max="100"
+              [(ngModel)]="form.riskScore"
+              [value]="form.riskScore ?? ''"
+              placeholder="{{ 'ADMIN_ORGANIZATION_EDIT.RISK_SCORE_PLACEHOLDER' | translate }}"
+            />
+            <small class="field-note">{{ "ADMIN_ORGANIZATION_EDIT.RISK_SCORE_HELP" | translate }}</small>
+          </label>
+
+          <label class="form-field ao-full-width">
+            <span>{{ "ADMIN_ORGANIZATION_EDIT.RISK_NOTES_LABEL" | translate }}</span>
+            <textarea [(ngModel)]="form.riskNotes" placeholder="{{ 'ADMIN_ORGANIZATION_EDIT.RISK_NOTES_PLACEHOLDER' | translate }}" rows="2"></textarea>
+          </label>
+
+          <label class="form-field ao-full-width">
+            <span>{{ "ADMIN_ORGANIZATION_EDIT.ADMIN_NOTES_LABEL" | translate }}</span>
+            <textarea [(ngModel)]="form.adminNotes" placeholder="{{ 'ADMIN_ORGANIZATION_EDIT.ADMIN_NOTES_PLACEHOLDER' | translate }}" rows="3"></textarea>
+          </label>
+
+          <label class="form-field">
+            <span>{{ "ADMIN_ORGANIZATION_EDIT.ACCREDITATION_STATUS_LABEL" | translate }}</span>
+            <select [(ngModel)]="form.accreditationStatus">
+              <option value="">-- {{ "ADMIN_ORGANIZATION_EDIT.SELECT_PLACEHOLDER" | translate }} --</option>
+              @for (option of accreditationStatuses; track option.value) {
+                <option [value]="option.value">{{ option.label }}</option>
+              }
+            </select>
+          </label>
+
+          <label class="form-field">
+            <span>{{ "ADMIN_ORGANIZATION_EDIT.PRIORITY_LABEL" | translate }}</span>
+            <select [(ngModel)]="form.priorityLevel">
+              <option value="">-- {{ "ADMIN_ORGANIZATION_EDIT.SELECT_PLACEHOLDER" | translate }} --</option>
+              @for (option of priorityLevels; track option.value) {
+                <option [value]="option.value">{{ option.label }}</option>
+              }
+            </select>
+          </label>
+        </div>
+      </div>
+
+      <!-- Metadata -->
+      <div class="ao-section ao-section-meta">
+        <p class="ao-meta-note">
+          <strong>Created:</strong> {{ formatDate(organization?.createdAt) }} |
+          <strong>Updated:</strong> {{ formatDate(organization?.updatedAt) }}
+        </p>
+      </div>
+
+      <!-- Save button -->
+      <div class="form-actions">
+        <button type="button" class="btn-cancel-form" (click)="goBack()">
+          {{ "ADMIN_ORGANIZATION_EDIT.BACK" | translate }}
+        </button>
+        <button type="submit" class="btn-save-form" [disabled]="saving || saveError">
+          @if (saving) {
+            <span>{{ "ADMIN_ORGANIZATION_EDIT.SAVING" | translate }}</span>
+          } @else {
+            <span>{{ "ADMIN_ORGANIZATION_EDIT.SAVE" | translate }}</span>
+          }
+        </button>
+      </div>
+    </form>
+  </div>
+}

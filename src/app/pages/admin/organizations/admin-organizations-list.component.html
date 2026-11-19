@@ -1,0 +1,109 @@
+<div class="ao-page">
+  <div class="ao-page-header">
+    <div>
+      <p class="ao-eyebrow">Workspace settings</p>
+      <h2>{{ "ADMIN_ORGANIZATIONS.TITLE" | translate }}</h2>
+      <p>{{ "ADMIN_ORGANIZATIONS.LEDE" | translate }}</p>
+    </div>
+  </div>
+
+  <!-- Search -->
+  <div class="ao-toolbar">
+    <input
+      type="search"
+      class="ao-search"
+      placeholder="{{ 'ADMIN_ORGANIZATIONS.SEARCH' | translate }}"
+      [(ngModel)]="search"
+    />
+    <span class="ao-count">{{ countMessage }}</span>
+  </div>
+
+  <!-- Loading / Error / Empty states -->
+  @if (loading) {
+    <div class="ao-empty">
+      <span class="ao-empty-icon">⏳</span>
+      <p>{{ "ADMIN_ORGANIZATIONS.LOADING" | translate }}</p>
+    </div>
+  } @else if (loadError) {
+    <div class="ao-empty">
+      <span class="ao-empty-icon">⚠️</span>
+      <p>{{ loadError }}</p>
+      <button type="button" class="btn-retry" (click)="loadOrganizations()">
+        {{ "APPLICANT_DASHBOARD.RETRY" | translate }}
+      </button>
+    </div>
+  } @else if (filteredOrganizations.length === 0) {
+    <div class="ao-empty">
+      <span class="ao-empty-icon">{{ search ? '🔍' : '🏢' }}</span>
+      @if (search) {
+        <p>{{ "ADMIN_ORGANIZATIONS.EMPTY_HINT" | translate }}</p>
+      } @else {
+        <p>{{ "ADMIN_ORGANIZATIONS.EMPTY_TITLE" | translate }}</p>
+      }
+    </div>
+  } @else {
+    <!-- Table -->
+    <div class="ao-table-wrap">
+      <table class="ao-table">
+        <thead>
+          <tr>
+            <th class="col-name">{{ "ADMIN_ORGANIZATIONS.TABLE.NAME" | translate }}</th>
+            <th class="col-acronym">{{ "ADMIN_ORGANIZATIONS.TABLE.ACRONYM" | translate }}</th>
+            <th class="col-country">{{ "ADMIN_ORGANIZATIONS.TABLE.COUNTRY" | translate }}</th>
+            <th class="col-entity-type">{{ "ADMIN_ORGANIZATIONS.TABLE.ENTITY_TYPE" | translate }}</th>
+            <th class="col-risk-score">{{ "ADMIN_ORGANIZATIONS.TABLE.RISK_SCORE" | translate }}</th>
+            <th class="col-accreditation-status">{{ "ADMIN_ORGANIZATIONS.TABLE.ACCREDITATION_STATUS" | translate }}</th>
+            <th class="col-priority">{{ "ADMIN_ORGANIZATIONS.TABLE.PRIORITY" | translate }}</th>
+            <th class="col-actions">{{ "ADMIN_ORGANIZATIONS.TABLE.ACTIONS" | translate }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (org of filteredOrganizations; track org.id) {
+            <tr>
+              <td class="col-name">
+                <a
+                  [routerLink]="['/admin/organizations', org.id]"
+                  class="org-link"
+                >
+                  <span class="org-name">{{ org.name }}</span>
+                </a>
+                <span class="org-acronym" *ngIf="org.acronym">({{ org.acronym }})</span>
+              </td>
+              <td class="col-acronym">{{ org.acronym || '—' }}</td>
+              <td class="col-country">{{ org.country }}</td>
+              <td class="col-entity-type">{{ entityLabel(org.entityType) }}</td>
+              <td class="col-risk-score">
+                <span class="risk-score-badge" [class]="'risk-band-' + riskBand(org.riskScore)">
+                  {{ org.riskScore ?? '—' }}
+                </span>
+              </td>
+              <td class="col-accreditation-status">
+                <span class="status-badge" [class]="'status-' + accreditationStatusClass(org.accreditationStatus)">
+                  {{ accreditationStatusLabel(org.accreditationStatus) }}
+                </span>
+              </td>
+              <td class="col-priority">
+                <span class="priority-badge" [class]="'priority-' + (org.priorityLevel || 'low').toLowerCase()">
+                  {{ priorityLabel(org.priorityLevel) }}
+                </span>
+              </td>
+              <td class="col-actions">
+                <a
+                  [routerLink]="['/admin/organizations', org.id]"
+                  class="btn-action btn-edit-org"
+                  title="Edit organization"
+                  aria-label="Edit organization"
+                >
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="m14 4 6 6L9 21H3v-6L14 4Z" />
+                    <path d="m12 6 6 6" />
+                  </svg>
+                </a>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>

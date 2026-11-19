@@ -12,6 +12,8 @@ import { SubmissionDetailComponent } from "./pages/dashboard/submission-detail/s
 import { ReadinessDashboardComponent } from "./pages/dashboard/readiness-dashboard/readiness-dashboard.component";
 import { LeadsImportComponent } from "./pages/dashboard/leads-import/leads-import.component";
 import { UserManagementComponent } from "./pages/settings/user-management/user-management.component";
+import { AdminOrganizationsListComponent } from "./pages/admin/organizations/admin-organizations-list.component";
+import { AdminOrganizationEditComponent } from "./pages/admin/organizations/admin-organization-edit.component";
 import { PricingComponent } from "./pages/pricing/pricing.component";
 import { ReadinessWizardComponent } from "./pages/readiness/readiness-wizard.component";
 import { GetAssessedComponent } from "./pages/get-assessed/get-assessed.component";
@@ -77,6 +79,16 @@ export const routes: Routes = [
         path: "settings/users",
         component: UserManagementComponent,
         canActivate: [adminGuard],
+      },
+      {
+        path: "admin/organizations",
+        component: AdminOrganizationsListComponent,
+       canActivate: [adminGuard],
+      },
+      {
+        path: "admin/organizations/:id",
+        component: AdminOrganizationEditComponent,
+       canActivate: [adminGuard],
       },
       {
         path: "pricing",

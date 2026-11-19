@@ -394,6 +394,34 @@ export class ApiService {
     );
   }
 
+  // Admin: list all organizations with editable fields
+  async getOrganizationsAdmin(): Promise<OrganizationRecord[]> {
+    const payload = await this.request<{ organizations?: OrganizationRecord[] }>(
+      `/api/admin/organizations`,
+      { method: "GET" },
+      true,
+    );
+    return payload.organizations ?? [];
+  }
+
+  // Admin: update editable fields for an organization
+  async updateOrganizationAdmin(
+    id: string,
+    updates: Partial<
+      Pick<
+        OrganizationRecord,
+        'riskScore' | 'riskNotes' | 'adminNotes' | 'accreditationStatus' | 'priorityLevel'
+      >
+    >,
+  ): Promise<OrganizationRecord> {
+    const payload = await this.request<{ organization: OrganizationRecord }>(
+      `/api/admin/organizations/${encodeURIComponent(id)}`,
+      { method: "PATCH", body: JSON.stringify(updates) },
+      true,
+    );
+    return payload.organization;
+  }
+
   // ── Drafts ──────────────────────────────────────────────────────────────
 
   async getDraft(

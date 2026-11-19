@@ -1,0 +1,130 @@
+:host { display: block; color: #e2e8f0; font-family: 'Inter', 'Segoe UI', Roboto, sans-serif; }
+
+.ao-page-header {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  gap: 1rem; flex-wrap: wrap; margin-bottom: 1.5rem;
+}
+.ao-page-header h2 { margin: 0 0 0.25rem; font-size: 1.5rem; color: #f8fafc; }
+.ao-page-header p { margin: 0; color: #64748b; font-size: 0.875rem; }
+.ao-eyebrow {
+  margin: 0 0 0.4rem; font-size: 0.65rem; font-weight: 700;
+  letter-spacing: 0.14em; text-transform: uppercase; color: #e8c06a;
+}
+.btn-back {
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  padding: 0.5rem 1rem; border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 8px; background: none; color: #94a3b8;
+  font-size: 0.85rem; cursor: pointer; text-decoration: none;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+.btn-back:hover { background: rgba(255,255,255,0.05); color: #f8fafc; }
+.btn-back svg { width: 16px; height: 16px; }
+
+/* Empty states */
+.ao-empty { text-align: center; padding: 3rem 1rem; }
+.ao-empty-icon { font-size: 2.5rem; display: block; margin-bottom: 0.75rem; }
+.ao-empty p { margin: 0; color: #475569; font-size: 0.875rem; }
+
+.ao-error {
+  display: flex; align-items: center; gap: 0.75rem;
+  background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: 8px; padding: 0.75rem 1rem; margin-bottom: 1rem;
+  color: #fca5a5;
+}
+.ao-error-icon { font-size: 1.25rem; }
+
+/* Edit form */
+.ao-edit-form { max-width: 900px; }
+
+.ao-section {
+  background: rgba(255,255,255,0.03); border: 1px solid rgba(212,169,78,0.2);
+  border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem;
+}
+.ao-section.admin {
+  background: rgba(155,131,121,0.05); border-color: rgba(165,126,39,0.3);
+}
+.ao-section.meta {
+  background: rgba(0,0,0,0.2);
+  border: none;
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+}
+.ao-section h3 {
+  margin: 0 0 1rem; font-size: 1.125rem; color: #f8fafc;
+  font-weight: 600;
+}
+
+.ao-form-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;
+}
+.form-field {
+  display: flex; flex-direction: column; gap: 0.35rem;
+  font-size: 0.8rem; font-weight: 600; color: #94a3b8;
+}
+.ao-full-width { grid-column: 1 / -1; }
+
+.form-field input,
+.form-field textarea,
+.form-field select {
+  padding: 0.55rem 0.7rem; background: rgba(15,23,42,0.7);
+  border: 1px solid rgba(255,255,255,0.12); border-radius: 8px;
+  color: #f1f5f9; font-size: 0.875rem; font-family: inherit; outline: none;
+  transition: border-color 0.2s;
+}
+.form-field input:focus,
+.form-field textarea:focus,
+.form-field select:focus {
+  border-color: rgba(212,169,78,0.5); box-shadow: 0 0 0 3px rgba(212,169,78,0.1);
+}
+.form-field textarea { resize: vertical; min-height: 60px; }
+.form-field select option { background: #1e293b; }
+
+.req { color: #f87171; }
+.field-note {
+  font-size: 0.72rem; color: #475569; font-weight: 400; margin-top: 0.25rem;
+}
+
+.ao-meta-note {
+  font-size: 0.78rem; color: #64748b;
+}
+
+.form-actions {
+  display: flex; justify-content: flex-end; gap: 0.65rem;
+  margin-top: 1rem; padding-top: 1rem;
+  border-top: 1px solid rgba(255,255,255,0.06);
+}
+.btn-cancel-form {
+  padding: 0.5rem 0.875rem; border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 8px; background: none; color: #94a3b8;
+  font-size: 0.85rem; font-weight: 600; cursor: pointer;
+}
+.btn-cancel-form:hover { background: rgba(255,255,255,0.05); }
+.btn-save-form {
+  padding: 0.5rem 1.125rem;
+  background: linear-gradient(135deg, #d4a94e, #a8812f);
+  border: none; border-radius: 8px; color: #0f172a;
+  font-size: 0.85rem; font-weight: 700; cursor: pointer; transition: opacity 0.2s;
+}
+.btn-save-form:hover { opacity: 0.88; }
+.btn-save-form:disabled { opacity: 0.55; cursor: default; }
+
+.btn-retry {
+  margin-top: 0.75rem;
+  padding: 0.45rem 1rem;
+  border-radius: 8px;
+  border: 1px solid rgba(232, 192, 106, 0.35);
+  background: rgba(232, 192, 106, 0.12);
+  color: #f5dfa8;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.btn-retry:hover { background: rgba(232, 192, 106, 0.2); }
+
+.select-placeholder { color: #475569; }
+
+@media (max-width: 768px) {
+  .ao-page-header { flex-wrap: wrap; }
+  .ao-form-grid { grid-template-columns: 1fr; }
+  .ao-section { padding: 1rem; }
+}

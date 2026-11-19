@@ -17,6 +17,12 @@ export interface OrganizationRecord {
   contactName: string;
   contactEmail: string;
   contactPhone: string;
+  // Admin-editable fields
+  riskScore: number | null;
+  riskNotes: string;
+  adminNotes: string;
+  accreditationStatus: string;
+  priorityLevel: string;
   createdAt: string;
   updatedAt: string;
 }

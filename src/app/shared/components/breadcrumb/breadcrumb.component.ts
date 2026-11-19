@@ -32,6 +32,8 @@ const ROUTE_MAP: Record<string, CrumbDef[]> = {
     { key: "NAV.SETTINGS" },
     { key: "NAV.USER_MANAGEMENT" },
   ],
+  "/admin/organizations": [{ key: "ADMIN_ORGANIZATIONS.TITLE" }],
+  "/admin/organizations/edit": [{ key: "ADMIN_ORGANIZATION_EDIT.TITLE" }],
 };
 
 @Component({
@@ -71,6 +73,18 @@ export class BreadcrumbComponent {
           link: "/dashboard",
         },
         { label: ctx ?? this.translate.instant("NAV.SUBMISSION") },
+      ];
+      return;
+    }
+
+    // Admin organizations edit: /admin/organizations/:id
+    if (url.startsWith("/admin/organizations/") && url !== "/admin/organizations") {
+      this.crumbs = [
+        {
+          label: this.translate.instant("ADMIN_ORGANIZATIONS.TITLE"),
+          link: "/admin/organizations",
+        },
+        { label: this.translate.instant("ADMIN_ORGANIZATION_EDIT.TITLE") },
       ];
       return;
     }

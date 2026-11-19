@@ -80,6 +80,12 @@ CREATE TABLE IF NOT EXISTS organizations (
   contact_name        TEXT NOT NULL DEFAULT '',
   contact_email       TEXT NOT NULL DEFAULT '',
   contact_phone       TEXT NOT NULL DEFAULT '',
+  -- Admin-editable fields
+  risk_score          INTEGER DEFAULT NULL,
+  risk_notes          TEXT NOT NULL DEFAULT '',
+  admin_notes         TEXT NOT NULL DEFAULT '',
+  accreditation_status TEXT NOT NULL DEFAULT 'not_started',
+  priority_level      TEXT NOT NULL DEFAULT 'normal',
   created_at          TEXT NOT NULL,
   updated_at          TEXT NOT NULL
 );
