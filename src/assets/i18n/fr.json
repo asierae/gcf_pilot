@@ -242,5 +242,422 @@
       "TERMS": "Conditions",
       "DISCLOSURES": "Mentions légales"
     }
+  },
+  "PROFILE": {
+    "META_TITLE": "Évaluation du profil — Avera Capital Access",
+    "BRAND_TITLE": "Avera",
+    "BRAND_SUB": "Capital Access",
+    "ALL_PATHWAYS": "Tous les parcours",
+    "PROGRESS": "Progression",
+    "KICKER": "Évaluation du profil",
+    "STEP_OF": "Étape {{current}} sur {{total}}",
+    "STEP_EYEBROW": "Étape {{current}} · {{title}}",
+    "NOT_SPECIFIED": "Non précisé",
+    "STEPS": [
+      {
+        "TITLE": "Profil institutionnel",
+        "DESCRIPTION": "Profil géographique, domaines d'expertise et coordonnées professionnelles."
+      },
+      {
+        "TITLE": "Objectifs d'accès au capital",
+        "DESCRIPTION": "Ce que vous souhaitez accomplir, le besoin de financement indicatif et le calendrier."
+      },
+      {
+        "TITLE": "Indicateurs de préparation",
+        "DESCRIPTION": "Ce que votre institution a déjà en place. Aucun document n'est requis à ce stade."
+      },
+      {
+        "TITLE": "Intégrité et conformité",
+        "DESCRIPTION": "Déclarations générales uniquement — aucun document sensible à ce stade."
+      },
+      {
+        "TITLE": "Préférences d'engagement",
+        "DESCRIPTION": "Ce qui compte le plus pour vous et comment vous souhaitez qu'Avera vous recontacte."
+      }
+    ],
+    "OPTIONS": {
+      "REGION": [
+        "Afrique",
+        "Asie-Pacifique",
+        "Asie centrale",
+        "Europe de l'Est",
+        "Europe de l'Ouest",
+        "Moyen-Orient et Afrique du Nord",
+        "Amérique du Nord",
+        "Amérique latine et Caraïbes",
+        "Mondial / Plusieurs régions",
+        "Autre"
+      ],
+      "ENTITY": [
+        "Banque / Institution financière",
+        "Institution de financement du développement",
+        "Gouvernement / Institution publique",
+        "Entreprise privée / Investisseur",
+        "ONG / Organisme à but non lucratif",
+        "Développeur de projets",
+        "Autre"
+      ],
+      "SPECIALTY": [
+        "Finance climatique / Investissement vert",
+        "Énergies renouvelables / Transition énergétique",
+        "Adaptation climatique / Résilience",
+        "Agriculture / Systèmes alimentaires",
+        "Eau / Assainissement",
+        "Nature / Foresterie / Biodiversité",
+        "Infrastructure / Transport",
+        "Services financiers / Banque",
+        "Développement de projets / Conseil en investissement",
+        "Gouvernance institutionnelle / Renforcement des capacités",
+        "Autre"
+      ],
+      "DOCUMENT": [
+        "États financiers audités",
+        "Politiques de gouvernance et de contrôle interne",
+        "Cadre de gestion des risques environnementaux et sociaux",
+        "Politiques de lutte contre le blanchiment d'argent et la corruption",
+        "Historique de projets climatiques ou de financements"
+      ],
+      "OBJECTIVE": [
+        "Accréditation au GCF et préparation institutionnelle",
+        "Financement de projets / Investissement",
+        "Développement de projets / Appui aux propositions",
+        "Due diligence institutionnelle / Intelligence des risques",
+        "Partenariats stratégiques / Mobilisation de capitaux",
+        "Pas certain — besoin d'orientation"
+      ],
+      "FINANCING": [
+        "Non déterminé",
+        "Moins de 1 million USD",
+        "1–10 millions USD",
+        "10–50 millions USD",
+        "50–100 millions USD",
+        "100–250 millions USD",
+        "250–500 millions USD",
+        "500 millions–1 milliard USD",
+        "Plus de 1 milliard USD",
+        "Autre — préciser le montant",
+        "Ne recherche pas de financement"
+      ],
+      "TIMELINE": [
+        "Immédiatement",
+        "Dans 3 à 6 mois",
+        "Dans 6 à 12 mois",
+        "Planification à long terme"
+      ],
+      "HISTORY": [
+        "Moins d'un an",
+        "1–2 ans",
+        "Plus de 3 ans"
+      ],
+      "PROJECT_STAGE": [
+        "Concept initial",
+        "Étude de faisabilité disponible",
+        "Proposition d'investissement préparée",
+        "Recherche de financement / Bouclage financier"
+      ],
+      "PROJECT_SECTOR": [
+        "Énergie",
+        "Agriculture / Systèmes alimentaires",
+        "Eau",
+        "Transport",
+        "Foresterie / Nature",
+        "Urbain / Infrastructure",
+        "Intersectoriel / Autre"
+      ],
+      "ACCESS": [
+        "Entité à accès direct",
+        "Entité à accès international",
+        "Pas encore déterminé"
+      ],
+      "ISSUE": [
+        "Aucun problème matériel connu",
+        "Oui — nécessite une discussion confidentielle",
+        "Pas certain / Nécessite un examen"
+      ],
+      "ENGAGEMENT": [
+        "Recevoir une proposition de diagnostic payant",
+        "Demander un entretien introductif",
+        "Explorer les options uniquement"
+      ]
+    },
+    "S1": {
+      "BASED_TITLE": "Où êtes-vous établi",
+      "REGION": "Région",
+      "COUNTRY": "Pays",
+      "COUNTRY_PH": "Rechercher un pays",
+      "ORG_TITLE": "À propos de votre organisation",
+      "ORG_NAME": "Nom de l'organisation",
+      "ORG_NAME_PH": "ex. Green Energy Corporation",
+      "ACRONYM": "Sigle",
+      "ACRONYM_PH": "ex. GEC",
+      "ENTITY_TYPE": "Type d'entité",
+      "WEBSITE": "Site web",
+      "EMAIL": "E-mail de contact professionnel",
+      "EMAIL_PH": "vous@organisation.org",
+      "SPECIALTY_TITLE": "Spécialité institutionnelle",
+      "SELECT_ALL": "Sélectionnez tout ce qui s'applique.",
+      "SPECIALTY_OTHER": "Précisez une autre spécialité",
+      "SPECIALTY_OTHER_PH": "Décrivez votre spécialité",
+      "SELECT": "Sélectionner…"
+    },
+    "S2": {
+      "OBJECTIVE": "Objectif principal",
+      "FINANCE_TITLE": "Besoin de financement indicatif",
+      "FINANCING": "Quel financement envisagez-vous ?",
+      "FINANCING_DETAIL": "Montant indicatif",
+      "FINANCING_DETAIL_PH": "ex. 25 millions USD",
+      "TIMELINE": "Calendrier"
+    },
+    "S3": {
+      "HISTORY": "Historique d'exploitation institutionnel",
+      "DOCS_TITLE": "Documents déjà en place",
+      "DOCS_HELP": "Sélectionnez ce dont vous disposez déjà. Aucun document n'est demandé à ce stade.",
+      "PROJECT_TITLE": "Détails du projet",
+      "PROJECT_STAGE": "Étape du projet",
+      "PROJECT_COUNTRY": "Pays du projet",
+      "PROJECT_COUNTRY_PH": "Rechercher des pays",
+      "PROJECT_SECTOR": "Secteur du projet",
+      "ACCESS_TITLE": "Type d'accès",
+      "ACCESS_HELP": "Comment comptez-vous accéder aux ressources du GCF ?"
+    },
+    "S4": {
+      "TITLE": "Intégrité et conformité",
+      "HELP": "Au cours des cinq dernières années, votre institution ou ses dirigeants ont-ils été impliqués dans des problèmes matériels d'intégrité, de sanctions ou de conformité ?",
+      "DISCLAIMER": "Il s'agit uniquement d'une déclaration générale. Aucun document sensible n'est demandé à ce stade."
+    },
+    "S5": {
+      "TITLE": "Ce qui compte le plus",
+      "CHALLENGE": "Quel est le principal défi auquel vous faites face ?",
+      "CHALLENGE_PH": "Décrivez brièvement le défi…",
+      "NEXT_STEP": "Prochaine étape souhaitée",
+      "CONTACT_TITLE": "Coordonnées",
+      "NAME": "Nom complet",
+      "NAME_PH": "Votre nom",
+      "ROLE": "Fonction",
+      "ROLE_PH": "ex. Directeur du financement climatique",
+      "CONSENT": "J'accepte qu'Avera me contacte au sujet de cette demande et conserve ces informations de manière confidentielle."
+    },
+    "NAV": {
+      "BACK": "Retour",
+      "CONTINUE": "Continuer",
+      "SUBMIT": "Envoyer le profil",
+      "SUBMITTING": "Envoi…"
+    },
+    "VALIDATION": {
+      "STEP1": "Sélectionnez votre région et votre type d'entité, et indiquez votre pays et le nom de l'organisation.",
+      "EMAIL": "Saisissez un e-mail de contact professionnel valide.",
+      "SPECIALTY": "Précisez votre autre spécialité.",
+      "WEBSITE": "Saisissez un site web commençant par https://, ou laissez vide.",
+      "OBJECTIVE": "Sélectionnez votre objectif principal.",
+      "FINANCING": "Précisez votre besoin de financement indicatif.",
+      "HISTORY": "Sélectionnez l'historique d'exploitation de votre institution.",
+      "COMPLIANCE": "Veuillez répondre à la question de conformité.",
+      "NAME": "Saisissez le nom du contact.",
+      "CONSENT": "Le consentement est requis pour envoyer cette demande."
+    },
+    "SUCCESS": {
+      "EYEBROW": "Demande reçue",
+      "TITLE": "Merci, {{name}}.",
+      "BODY": "Nous avons bien reçu l'évaluation du profil de {{org}}. Un conseiller Avera l'examinera et vous répondra sous deux jours ouvrables.",
+      "ACCOUNT": "Un compte portail a été créé pour {{email}}. Vous recevrez un e-mail avec les informations de connexion.",
+      "USERNAME": "Votre nom d'utilisateur : {{username}}",
+      "NEXT_STEP": "Prochaine étape recommandée",
+      "SCORE": "Score de préparation indicatif",
+      "SCORE_HELP": "Ce score est indicatif et repose sur les informations fournies. Il ne constitue pas une détermination d'éligibilité.",
+      "SUMMARY": "Votre soumission",
+      "RESTART": "Démarrer une nouvelle évaluation",
+      "BACK": "Retour aux parcours",
+      "DISCLAIMER": "Cette évaluation est confidentielle et ne constitue ni une offre, ni une détermination d'éligibilité, ni un engagement de financement."
+    },
+    "SUMMARY": {
+      "REGION": "Région",
+      "COUNTRY": "Pays",
+      "ORGANISATION": "Organisation",
+      "ENTITY": "Type d'entité",
+      "EMAIL": "E-mail de contact",
+      "SPECIALTY": "Spécialité",
+      "OBJECTIVE": "Objectif",
+      "FINANCING": "Besoin de financement",
+      "TIMELINE": "Calendrier",
+      "HISTORY": "Historique d'exploitation",
+      "DOCUMENTS": "Documents disponibles",
+      "NEXT_STEP": "Prochaine étape souhaitée"
+    },
+    "READINESS": {
+      "HIGH": "Plusieurs indicateurs de préparation présents",
+      "MEDIUM": "Un examen plus approfondi de la préparation est conseillé",
+      "LOW": "Un examen de préparation fondamental est conseillé"
+    },
+    "ROUTES": {
+      "COMPLIANCE": "Clarification confidentielle de conformité",
+      "ACCREDITATION": "Diagnostic de préparation à l'accréditation institutionnelle",
+      "PROJECT": "Examen de préparation à l'investissement du projet",
+      "DUE_DILIGENCE": "Examen d'intégrité et intelligence des risques",
+      "PARTNERSHIP": "Stratégie de mobilisation de capitaux et de partenariats",
+      "SCOPING": "Cadrage du conseil stratégique"
+    },
+    "NOTIFY": {
+      "RECEIVED": "Votre évaluation de profil a bien été reçue.",
+      "FAILED": "La demande n'a pas pu être envoyée. Veuillez réessayer."
+    }
+  },
+  "DASHBOARD": {
+    "EYEBROW": "Administration · Vue d'ensemble du système",
+    "TITLE": "Tableau de bord",
+    "LEDE": "Indicateurs en direct sur les organisations, les soumissions et les demandes.",
+    "REFRESHED": "Dernière actualisation à {{time}}",
+    "OPERATIONAL": "Tous les systèmes opérationnels",
+    "REFRESH": "Actualiser",
+    "REFRESHING": "Actualisation…",
+    "RETRY": "Réessayer",
+    "LOAD_ERROR": "Impossible de charger les statistiques du système. Veuillez réessayer.",
+    "KEY_METRICS": "Indicateurs clés",
+    "DELTA_PREV": "Par rapport au mois précédent",
+    "DELTA_NONE": "Aucune donnée pour le mois précédent",
+    "NEW": "nouveau",
+    "FLAT": "stable",
+    "KPI": {
+      "ORGANIZATIONS": "Organisations",
+      "ACCREDITATION": "Accréditation",
+      "READINESS": "Préparation",
+      "ENQUIRIES": "Demandes",
+      "FUNDING": "Financement demandé",
+      "USERS": "Utilisateurs du portail",
+      "ORGANIZATIONS_SUB": "{{countries}} pays · score moyen {{score}}/100",
+      "ACCREDITATION_SUB": "{{passed}} approuvées · {{rate}} % d'approbation",
+      "READINESS_SUB": "{{stage2}} étape 2 · demande moyenne {{ask}}",
+      "ENQUIRIES_SUB": "{{profile}} évaluations de profil",
+      "FUNDING_SUB": "{{budget}} budgétés dans les propositions",
+      "USERS_SUB": "{{active}} actifs · {{pending}} en attente"
+    },
+    "REACH": {
+      "TITLE": "Portée mondiale",
+      "SUB": "D'où proviennent les organisations, les soumissions et les demandes",
+      "COUNTRIES": "{{count}} pays",
+      "ARIA": "Carte mondiale des organisations et des demandes",
+      "RECORDS": "{{count}} enregistrements",
+      "FEWER": "Moins",
+      "ERROR": "Impossible de charger les données de la carte mondiale."
+    },
+    "PIPELINE": {
+      "TITLE": "Étapes du pipeline",
+      "SUB": "Enregistrements à chaque étape du parcours",
+      "CONVERSION": "{{value}} % des demandes",
+      "FOOT": "Demande → accréditation"
+    },
+    "GROWTH": {
+      "TITLE": "Croissance du pipeline",
+      "SUB": "Soumissions et demandes mensuelles · 12 derniers mois",
+      "ARIA": "Croissance mensuelle du pipeline"
+    },
+    "HEALTH": {
+      "TITLE": "Santé du pipeline",
+      "SUB": "Approbation, préparation et couverture de l'étape 2",
+      "APPROVAL_CAPTION": "approbation",
+      "APPROVAL": "Taux d'approbation",
+      "SCORE_CAPTION": "/ 100 points",
+      "SCORE": "Score de préparation",
+      "STAGE2_CAPTION": "étape 2",
+      "STAGE2": "Couverture de l'étape 2",
+      "FUNDING_REQUESTED": "Financement demandé",
+      "AVG_ASK": "Demande moyenne par proposition",
+      "BUDGET_PLANNED": "Budget prévu",
+      "PENDING_INVITATIONS": "Invitations en attente"
+    },
+    "VOLUME": {
+      "TITLE": "Volume des soumissions",
+      "SUB": "Totaux mensuels empilés par flux",
+      "TOTAL": "{{value}} au total",
+      "ARIA": "Volume mensuel des soumissions"
+    },
+    "FUNDING": {
+      "TITLE": "Tendance de financement",
+      "SUB": "Capital demandé dans les propositions de préparation",
+      "TOTAL": "{{value}} au total",
+      "ARIA": "Financement mensuel demandé",
+      "AVG": "moy."
+    },
+    "BUDGET": {
+      "TITLE": "Répartition budgétaire",
+      "SUB": "Dépenses prévues par catégorie",
+      "EMPTY": "Aucune ligne budgétaire enregistrée pour l'instant.",
+      "CATEGORIES": {
+        "INTERNATIONAL_CONSULTANTS": "Consultants internationaux",
+        "NATIONAL_CONSULTANTS": "Consultants nationaux",
+        "TRAVEL": "Déplacements et per diem",
+        "WORKSHOPS": "Ateliers et formation",
+        "EQUIPMENT": "Équipement et logiciels",
+        "AUDIT": "Audit externe",
+        "PROJECT_MANAGEMENT": "Gestion de projet",
+        "OTHER": "Autre"
+      }
+    },
+    "SCORES": {
+      "TITLE": "Scores de préparation",
+      "SUB": "Répartition des évaluations de profil",
+      "ARIA": "Répartition des scores de préparation",
+      "AVG_NOTE": "Score moyen du profil :",
+      "EMPTY": "Aucun score de profil enregistré pour l'instant."
+    },
+    "TYPES": {
+      "TITLE": "Types d'organisation",
+      "SUB": "Part des entités enregistrées",
+      "TOTAL": "total",
+      "EMPTY": "Aucun type d'organisation enregistré pour l'instant."
+    },
+    "SCREENING": {
+      "TITLE": "Présélection",
+      "SUB": "Statut des soumissions d'accréditation"
+    },
+    "LEADS": {
+      "TITLE": "Pipeline des demandes",
+      "SUB": "Leads par statut et source",
+      "TOTAL": "{{value}} au total"
+    },
+    "ACCOUNTS": {
+      "TITLE": "Comptes du portail",
+      "SUB": "Utilisateurs par état et par rôle"
+    },
+    "COUNTRIES": {
+      "TITLE": "Principaux pays",
+      "SUB": "Où le pipeline est concentré",
+      "EMPTY": "Aucune donnée par pays enregistrée pour l'instant."
+    },
+    "ACTIVITY": {
+      "TITLE": "Activité récente",
+      "SUB": "Dernières soumissions et demandes",
+      "REVIEW": "Examiner les demandes →",
+      "EMPTY": "Rien n'a encore été soumis."
+    },
+    "LOADING": "Chargement des statistiques",
+    "STATUS": {
+      "PASSED": "Approuvé",
+      "PENDING": "En attente",
+      "FAILED": "Non conforme",
+      "QUALIFIED": "Qualifié",
+      "CONTACTED": "Contacté",
+      "REJECTED": "Rejeté"
+    },
+    "USERS": {
+      "ACTIVE": "Actifs",
+      "PENDING": "En attente",
+      "SUSPENDED": "Bloqués"
+    },
+    "SOURCES": {
+      "PROFILE": "Évaluations de profil",
+      "MANUAL": "Saisies manuelles",
+      "READINESS": "Vérifications de préparation",
+      "CONTACT": "Formulaires de contact"
+    },
+    "ROLES": {
+      "ADMIN": "Administrateurs",
+      "APPLICANT": "Candidats"
+    },
+    "FUNNEL": {
+      "ENQUIRIES": "Demandes",
+      "ACCREDITATION": "Accréditation",
+      "PASSED": "Présélection réussie",
+      "STAGE2": "Candidatures étape 2"
+    }
   }
 }

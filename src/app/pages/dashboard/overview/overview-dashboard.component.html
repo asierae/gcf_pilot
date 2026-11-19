@@ -1,19 +1,19 @@
 <div class="overview">
   <header class="ov-header">
     <div class="ov-title">
-      <p class="eyebrow">Administration · System overview</p>
-      <h1>Dashboard</h1>
+      <p class="eyebrow">{{ "DASHBOARD.EYEBROW" | translate }}</p>
+      <h1>{{ "DASHBOARD.TITLE" | translate }}</h1>
       <p class="lede">
-        Live metrics across organizations, submissions and enquiries.
+        {{ "DASHBOARD.LEDE" | translate }}
       </p>
       @if (lastUpdated) {
-        <p class="updated-at">Last refreshed at {{ lastUpdated }}</p>
+        <p class="updated-at">{{ "DASHBOARD.REFRESHED" | translate: { time: lastUpdated } }}</p>
       }
     </div>
     <div class="header-actions">
-      <span class="status-pill"><span></span> All systems operational</span>
+      <span class="status-pill"><span></span> {{ "DASHBOARD.OPERATIONAL" | translate }}</span>
       <button type="button" class="btn-refresh" (click)="load()" [disabled]="loading">
-        {{ loading ? "Refreshing…" : "Refresh" }}
+        {{ (loading ? "DASHBOARD.REFRESHING" : "DASHBOARD.REFRESH") | translate }}
       </button>
     </div>
   </header>
@@ -21,19 +21,19 @@
   @if (error) {
     <div class="alert" role="alert">
       {{ error }}
-      <button type="button" (click)="load()">Retry</button>
+      <button type="button" (click)="load()">{{ "DASHBOARD.RETRY" | translate }}</button>
     </div>
   }
 
   @if (stats; as data) {
-    <section class="kpi-grid" aria-label="Key metrics">
+    <section class="kpi-grid" [attr.aria-label]="'DASHBOARD.KEY_METRICS' | translate">
       @for (kpi of kpis; track kpi.label) {
         <article class="kpi" [class]="'kpi tone-' + kpi.tone">
           <div class="kpi-top">
             <span class="kpi-icon">{{ kpi.icon }}</span>
             <span
               class="kpi-delta"
-              [title]="kpi.delta !== null ? 'Compared with the previous month' : 'No data for the previous month'"
+              [title]="kpi.delta !== null ? ('DASHBOARD.DELTA_PREV' | translate) : ('DASHBOARD.DELTA_NONE' | translate)"
               [class.up]="trendTone(kpi.delta) === 'up'"
               [class.down]="trendTone(kpi.delta) === 'down'"
               [class.flat]="trendTone(kpi.delta) === 'flat'"
@@ -58,11 +58,11 @@
           <div class="panel-title">
             <span class="panel-icon">◍</span>
             <div>
-              <h2>Global reach</h2>
-              <p>Where organizations, submissions and enquiries come from</p>
+              <h2>{{ "DASHBOARD.REACH.TITLE" | translate }}</h2>
+              <p>{{ "DASHBOARD.REACH.SUB" | translate }}</p>
             </div>
           </div>
-          <span class="panel-pill">{{ data.countries }} countries</span>
+          <span class="panel-pill">{{ "DASHBOARD.REACH.COUNTRIES" | translate: { count: data.countries } }}</span>
         </div>
 
         @if (map; as world) {
@@ -71,7 +71,7 @@
               class="map-svg"
               [attr.viewBox]="'0 0 ' + world.width + ' ' + world.height"
               role="img"
-              aria-label="World map of organizations and enquiries"
+              [attr.aria-label]="'DASHBOARD.REACH.ARIA' | translate"
             >
               <defs>
                 <linearGradient id="oceanFill" x1="0" y1="0" x2="0" y2="1">
@@ -99,7 +99,7 @@
                   (mouseleave)="clearHoverCountry()"
                 >
                   <title>
-                    {{ shape.name }}{{ shape.count ? " · " + shape.count + " records" : "" }}
+                    {{ countryNameByCode(shape.code, shape.name) }}@if (shape.count) { · {{ "DASHBOARD.REACH.RECORDS" | translate: { count: shape.count } }} }
                   </title>
                 </path>
               }
@@ -140,20 +140,20 @@
                 [style.top.%]="tip.topPct"
               >
                 <strong>{{ countryName(tip.point.country) }}</strong>
-                <span class="tip-total">{{ tip.point.count }} records</span>
+                <span class="tip-total">{{ "DASHBOARD.REACH.RECORDS" | translate: { count: tip.point.count } }}</span>
                 <ul>
-                  <li><i class="dot gold"></i>Organizations <b>{{ tip.point.organizations }}</b></li>
-                  <li><i class="dot violet"></i>Accreditation <b>{{ tip.point.accreditation }}</b></li>
-                  <li><i class="dot mint"></i>Readiness <b>{{ tip.point.readiness }}</b></li>
-                  <li><i class="dot sky"></i>Enquiries <b>{{ tip.point.leads }}</b></li>
+                  <li><i class="dot gold"></i>{{ "DASHBOARD.KPI.ORGANIZATIONS" | translate }} <b>{{ tip.point.organizations }}</b></li>
+                  <li><i class="dot violet"></i>{{ "DASHBOARD.KPI.ACCREDITATION" | translate }} <b>{{ tip.point.accreditation }}</b></li>
+                  <li><i class="dot mint"></i>{{ "DASHBOARD.KPI.READINESS" | translate }} <b>{{ tip.point.readiness }}</b></li>
+                  <li><i class="dot sky"></i>{{ "DASHBOARD.KPI.ENQUIRIES" | translate }} <b>{{ tip.point.leads }}</b></li>
                 </ul>
               </div>
             }
 
             <div class="map-legend">
-              <span>Fewer</span>
+              <span>{{ "DASHBOARD.REACH.FEWER" | translate }}</span>
               <span class="legend-scale"></span>
-              <span>{{ world.max }} records</span>
+              <span>{{ "DASHBOARD.REACH.RECORDS" | translate: { count: world.max } }}</span>
             </div>
           </div>
 
@@ -168,24 +168,24 @@
 
           <div class="map-summary">
             <div>
-              <span>Organizations</span>
+              <span>{{ "DASHBOARD.KPI.ORGANIZATIONS" | translate }}</span>
               <strong>{{ formatNumber(data.organizations) }}</strong>
             </div>
             <div>
-              <span>Accreditation</span>
+              <span>{{ "DASHBOARD.KPI.ACCREDITATION" | translate }}</span>
               <strong>{{ formatNumber(data.accreditationSubmissions) }}</strong>
             </div>
             <div>
-              <span>Readiness</span>
+              <span>{{ "DASHBOARD.KPI.READINESS" | translate }}</span>
               <strong>{{ formatNumber(data.readinessSubmissions) }}</strong>
             </div>
             <div>
-              <span>Enquiries</span>
+              <span>{{ "DASHBOARD.KPI.ENQUIRIES" | translate }}</span>
               <strong>{{ formatNumber(data.leads) }}</strong>
             </div>
           </div>
         } @else if (mapError) {
-          <p class="panel-empty">World map data could not be loaded.</p>
+          <p class="panel-empty">{{ "DASHBOARD.REACH.ERROR" | translate }}</p>
         } @else {
           <div class="map-skeleton" aria-hidden="true"></div>
         }
@@ -196,8 +196,8 @@
           <div class="panel-title">
             <span class="panel-icon">⧗</span>
             <div>
-              <h2>Pipeline stages</h2>
-              <p>Records at each stage of the journey</p>
+              <h2>{{ "DASHBOARD.PIPELINE.TITLE" | translate }}</h2>
+              <p>{{ "DASHBOARD.PIPELINE.SUB" | translate }}</p>
             </div>
           </div>
         </div>
@@ -216,13 +216,13 @@
                 ></div>
               </div>
               @if (row.conversion !== null) {
-                <span class="funnel-conv">{{ row.conversion }}% of enquiries</span>
+                <span class="funnel-conv">{{ "DASHBOARD.PIPELINE.CONVERSION" | translate: { value: row.conversion } }}</span>
               }
             </div>
           }
         </div>
         <div class="funnel-foot">
-          <span>Enquiry → accreditation</span>
+          <span>{{ "DASHBOARD.PIPELINE.FOOT" | translate }}</span>
           <strong>{{ percent(data.accreditationSubmissions, data.leads) }}%</strong>
         </div>
       </article>
@@ -234,8 +234,8 @@
           <div class="panel-title">
             <span class="panel-icon">↗</span>
             <div>
-              <h2>Pipeline growth</h2>
-              <p>Monthly submissions and enquiries · last 12 months</p>
+              <h2>{{ "DASHBOARD.GROWTH.TITLE" | translate }}</h2>
+              <p>{{ "DASHBOARD.GROWTH.SUB" | translate }}</p>
             </div>
           </div>
           <div class="legend-inline">
@@ -251,7 +251,7 @@
               class="chart-svg"
               [attr.viewBox]="'0 0 ' + chart.width + ' ' + chart.height"
               role="img"
-              aria-label="Monthly pipeline growth"
+              [attr.aria-label]="'DASHBOARD.GROWTH.ARIA' | translate"
             >
               <defs>
                 @for (series of chart.series; track series.key) {
@@ -357,8 +357,8 @@
           <div class="panel-title">
             <span class="panel-icon">◔</span>
             <div>
-              <h2>Pipeline health</h2>
-              <p>Approval, readiness and stage 2 coverage</p>
+              <h2>{{ "DASHBOARD.HEALTH.TITLE" | translate }}</h2>
+              <p>{{ "DASHBOARD.HEALTH.SUB" | translate }}</p>
             </div>
           </div>
         </div>
@@ -366,54 +366,54 @@
         <div class="gauges">
           @if (approvalGauge; as gauge) {
             <div class="gauge">
-              <svg viewBox="-70 -70 140 140" role="img" aria-label="Approval rate">
+              <svg viewBox="-70 -70 140 140" role="img" [attr.aria-label]="'DASHBOARD.HEALTH.APPROVAL' | translate">
                 <path class="gauge-track" [attr.d]="gauge.background" />
                 <path [attr.d]="gauge.foreground" [attr.fill]="gauge.color" />
                 <text class="gauge-value" x="0" y="4" text-anchor="middle">{{ gauge.value }}%</text>
-                <text class="gauge-caption" x="0" y="22" text-anchor="middle">approval</text>
+                <text class="gauge-caption" x="0" y="22" text-anchor="middle">{{ "DASHBOARD.HEALTH.APPROVAL_CAPTION" | translate }}</text>
               </svg>
-              <span>Approval rate</span>
+              <span>{{ "DASHBOARD.HEALTH.APPROVAL" | translate }}</span>
             </div>
           }
           @if (scoreGauge; as gauge) {
             <div class="gauge">
-              <svg viewBox="-70 -70 140 140" role="img" aria-label="Average readiness score">
+              <svg viewBox="-70 -70 140 140" role="img" [attr.aria-label]="'DASHBOARD.HEALTH.SCORE' | translate">
                 <path class="gauge-track" [attr.d]="gauge.background" />
                 <path [attr.d]="gauge.foreground" [attr.fill]="gauge.color" />
                 <text class="gauge-value" x="0" y="4" text-anchor="middle">{{ gauge.value }}</text>
-                <text class="gauge-caption" x="0" y="22" text-anchor="middle">/ 100 score</text>
+                <text class="gauge-caption" x="0" y="22" text-anchor="middle">{{ "DASHBOARD.HEALTH.SCORE_CAPTION" | translate }}</text>
               </svg>
-              <span>Readiness score</span>
+              <span>{{ "DASHBOARD.HEALTH.SCORE" | translate }}</span>
             </div>
           }
           @if (coverageGauge; as gauge) {
             <div class="gauge">
-              <svg viewBox="-70 -70 140 140" role="img" aria-label="Stage 2 coverage">
+              <svg viewBox="-70 -70 140 140" role="img" [attr.aria-label]="'DASHBOARD.HEALTH.STAGE2' | translate">
                 <path class="gauge-track" [attr.d]="gauge.background" />
                 <path [attr.d]="gauge.foreground" [attr.fill]="gauge.color" />
                 <text class="gauge-value" x="0" y="4" text-anchor="middle">{{ gauge.value }}%</text>
-                <text class="gauge-caption" x="0" y="22" text-anchor="middle">stage 2</text>
+                <text class="gauge-caption" x="0" y="22" text-anchor="middle">{{ "DASHBOARD.HEALTH.STAGE2_CAPTION" | translate }}</text>
               </svg>
-              <span>Stage 2 coverage</span>
+              <span>{{ "DASHBOARD.HEALTH.STAGE2" | translate }}</span>
             </div>
           }
         </div>
 
         <ul class="metric-list">
           <li>
-            <span>Funding requested</span>
+            <span>{{ "DASHBOARD.HEALTH.FUNDING_REQUESTED" | translate }}</span>
             <strong>{{ formatMoney(data.fundingRequestedUSD) }}</strong>
           </li>
           <li>
-            <span>Average ask per proposal</span>
+            <span>{{ "DASHBOARD.HEALTH.AVG_ASK" | translate }}</span>
             <strong>{{ formatMoney(data.avgFundingPerSubmission) }}</strong>
           </li>
           <li>
-            <span>Budget planned</span>
+            <span>{{ "DASHBOARD.HEALTH.BUDGET_PLANNED" | translate }}</span>
             <strong>{{ formatMoney(data.budgetPlannedUSD) }}</strong>
           </li>
           <li>
-            <span>Pending invitations</span>
+            <span>{{ "DASHBOARD.HEALTH.PENDING_INVITATIONS" | translate }}</span>
             <strong>{{ data.userCounts["pending"] || 0 }}</strong>
           </li>
         </ul>
@@ -426,11 +426,11 @@
           <div class="panel-title">
             <span class="panel-icon">▥</span>
             <div>
-              <h2>Submission volume</h2>
-              <p>Stacked monthly totals by stream</p>
+              <h2>{{ "DASHBOARD.VOLUME.TITLE" | translate }}</h2>
+              <p>{{ "DASHBOARD.VOLUME.SUB" | translate }}</p>
             </div>
           </div>
-          <span class="panel-pill">{{ formatNumber(data.accreditationSubmissions + data.readinessSubmissions + data.leads) }} total</span>
+          <span class="panel-pill">{{ "DASHBOARD.VOLUME.TOTAL" | translate: { value: formatNumber(data.accreditationSubmissions + data.readinessSubmissions + data.leads) } }}</span>
         </div>
 
         @if (stacked; as chart) {
@@ -438,7 +438,7 @@
             class="chart-svg"
             [attr.viewBox]="'0 0 ' + chart.width + ' ' + chart.height"
             role="img"
-            aria-label="Monthly submission volume"
+            [attr.aria-label]="'DASHBOARD.VOLUME.ARIA' | translate"
           >
             @for (tick of chart.yTicks; track tick.label) {
               <line
@@ -476,9 +476,9 @@
             }
           </svg>
           <div class="legend-inline legend-foot">
-            <span><i style="background: #38bdf8"></i>Accreditation</span>
-            <span><i style="background: #e8c06a"></i>Readiness</span>
-            <span><i style="background: #34d399"></i>Enquiries</span>
+            <span><i style="background: #38bdf8"></i>{{ "DASHBOARD.KPI.ACCREDITATION" | translate }}</span>
+            <span><i style="background: #e8c06a"></i>{{ "DASHBOARD.KPI.READINESS" | translate }}</span>
+            <span><i style="background: #34d399"></i>{{ "DASHBOARD.KPI.ENQUIRIES" | translate }}</span>
           </div>
         }
       </article>
@@ -488,11 +488,11 @@
           <div class="panel-title">
             <span class="panel-icon">€</span>
             <div>
-              <h2>Funding trend</h2>
-              <p>Capital requested in readiness proposals</p>
+              <h2>{{ "DASHBOARD.FUNDING.TITLE" | translate }}</h2>
+              <p>{{ "DASHBOARD.FUNDING.SUB" | translate }}</p>
             </div>
           </div>
-          <span class="panel-pill">{{ formatMoney(data.fundingRequestedUSD) }} total</span>
+          <span class="panel-pill">{{ "DASHBOARD.FUNDING.TOTAL" | translate: { value: formatMoney(data.fundingRequestedUSD) } }}</span>
         </div>
 
         @if (fundingChart; as chart) {
@@ -500,7 +500,7 @@
             class="chart-svg"
             [attr.viewBox]="'0 0 640 250'"
             role="img"
-            aria-label="Monthly funding requested"
+            [attr.aria-label]="'DASHBOARD.FUNDING.ARIA' | translate"
           >
             <defs>
               <linearGradient id="fundingFill" x1="0" y1="0" x2="0" y2="1">
@@ -515,7 +515,7 @@
             <path class="chart-area" [attr.d]="chart.area" fill="url(#fundingFill)" />
             @if (chart.avgY !== null) {
               <line class="avg-line" x1="32" x2="608" [attr.y1]="chart.avgY" [attr.y2]="chart.avgY" />
-              <text class="avg-label" x="608" [attr.y]="chart.avgY - 5" text-anchor="end">avg</text>
+              <text class="avg-label" x="608" [attr.y]="chart.avgY - 5" text-anchor="end">{{ "DASHBOARD.FUNDING.AVG" | translate }}</text>
             }
             <path class="chart-line funding" [attr.d]="chart.line" />
             @for (point of chart.points; track point.label) {
@@ -537,8 +537,8 @@
           <div class="panel-title">
             <span class="panel-icon">◫</span>
             <div>
-              <h2>Budget allocation</h2>
-              <p>Planned spend by category</p>
+              <h2>{{ "DASHBOARD.BUDGET.TITLE" | translate }}</h2>
+              <p>{{ "DASHBOARD.BUDGET.SUB" | translate }}</p>
             </div>
           </div>
         </div>
@@ -561,7 +561,7 @@
             }
           </div>
         } @else {
-          <p class="panel-empty">No budget line items recorded yet.</p>
+          <p class="panel-empty">{{ "DASHBOARD.BUDGET.EMPTY" | translate }}</p>
         }
       </article>
 
@@ -570,8 +570,8 @@
           <div class="panel-title">
             <span class="panel-icon">▮</span>
             <div>
-              <h2>Readiness scores</h2>
-              <p>Profile assessment distribution</p>
+              <h2>{{ "DASHBOARD.SCORES.TITLE" | translate }}</h2>
+              <p>{{ "DASHBOARD.SCORES.SUB" | translate }}</p>
             </div>
           </div>
         </div>
@@ -580,7 +580,7 @@
             class="chart-svg score-svg"
             [attr.viewBox]="'0 0 ' + chart.width + ' ' + chart.height"
             role="img"
-            aria-label="Readiness score distribution"
+            [attr.aria-label]="'DASHBOARD.SCORES.ARIA' | translate"
           >
             <defs>
               <linearGradient id="scoreFill" x1="0" y1="0" x2="0" y2="1">
@@ -628,9 +628,9 @@
               />
             }
           </svg>
-          <p class="chart-note">Average profile score: <strong>{{ data.avgReadinessScore }}/100</strong></p>
+          <p class="chart-note">{{ "DASHBOARD.SCORES.AVG_NOTE" | translate }} <strong>{{ data.avgReadinessScore }}/100</strong></p>
         } @else {
-          <p class="panel-empty">No profile scores recorded yet.</p>
+          <p class="panel-empty">{{ "DASHBOARD.SCORES.EMPTY" | translate }}</p>
         }
       </article>
 
@@ -639,8 +639,8 @@
           <div class="panel-title">
             <span class="panel-icon">◕</span>
             <div>
-              <h2>Organization types</h2>
-              <p>Share of registered entities</p>
+              <h2>{{ "DASHBOARD.TYPES.TITLE" | translate }}</h2>
+              <p>{{ "DASHBOARD.TYPES.SUB" | translate }}</p>
             </div>
           </div>
         </div>
@@ -650,7 +650,7 @@
               class="donut-svg"
               viewBox="-90 -90 180 180"
               role="img"
-              aria-label="Organization types"
+              [attr.aria-label]="'DASHBOARD.TYPES.TITLE' | translate"
               (mouseleave)="hoverDonut(null)"
             >
               @for (slice of donutSlices; track slice.label) {
@@ -667,25 +667,25 @@
                 {{ donutHover ? donutHover.value : data.organizations }}
               </text>
               <text class="donut-caption" x="0" y="18" text-anchor="middle">
-                {{ donutHover ? donutHover.label : "total" }}
+                {{ donutHover ? donutHover.label : ("DASHBOARD.TYPES.TOTAL" | translate) }}
               </text>
             </svg>
             <ul class="legend">
               @for (type of data.entityTypes; track type.label; let i = $index) {
                 <li
-                  [class.is-active]="donutHover && donutHover.label === type.label"
+                  [class.is-active]="donutHover && donutHover.label === entityLabel(type.label)"
                   (mouseenter)="hoverDonut(donutSlices[i])"
                   (mouseleave)="hoverDonut(null)"
                 >
                   <span class="swatch" [style.background]="colorAt(i)"></span>
-                  <span class="legend-label">{{ type.label }}</span>
+                  <span class="legend-label">{{ entityLabel(type.label) }}</span>
                   <strong>{{ type.value }}</strong>
                 </li>
               }
             </ul>
           </div>
         } @else {
-          <p class="panel-empty">No organization types recorded yet.</p>
+          <p class="panel-empty">{{ "DASHBOARD.TYPES.EMPTY" | translate }}</p>
         }
       </article>
     </section>
@@ -696,8 +696,8 @@
           <div class="panel-title">
             <span class="panel-icon">✓</span>
             <div>
-              <h2>Pre-screening</h2>
-              <p>Accreditation submission status</p>
+              <h2>{{ "DASHBOARD.SCREENING.TITLE" | translate }}</h2>
+              <p>{{ "DASHBOARD.SCREENING.SUB" | translate }}</p>
             </div>
           </div>
         </div>
@@ -724,11 +724,11 @@
           <div class="panel-title">
             <span class="panel-icon">◇</span>
             <div>
-              <h2>Enquiry pipeline</h2>
-              <p>Leads by status and source</p>
+              <h2>{{ "DASHBOARD.LEADS.TITLE" | translate }}</h2>
+              <p>{{ "DASHBOARD.LEADS.SUB" | translate }}</p>
             </div>
           </div>
-          <span class="panel-pill">{{ data.leads }} total</span>
+          <span class="panel-pill">{{ "DASHBOARD.LEADS.TOTAL" | translate: { value: formatNumber(data.leads) } }}</span>
         </div>
         <div class="bar-list">
           @for (row of leadStatusRows; track row.label) {
@@ -758,8 +758,8 @@
           <div class="panel-title">
             <span class="panel-icon">♙</span>
             <div>
-              <h2>Portal accounts</h2>
-              <p>Users by state and role</p>
+              <h2>{{ "DASHBOARD.ACCOUNTS.TITLE" | translate }}</h2>
+              <p>{{ "DASHBOARD.ACCOUNTS.SUB" | translate }}</p>
             </div>
           </div>
         </div>
@@ -793,8 +793,8 @@
           <div class="panel-title">
             <span class="panel-icon">◎</span>
             <div>
-              <h2>Top countries</h2>
-              <p>Where the pipeline is concentrated</p>
+              <h2>{{ "DASHBOARD.COUNTRIES.TITLE" | translate }}</h2>
+              <p>{{ "DASHBOARD.COUNTRIES.SUB" | translate }}</p>
             </div>
           </div>
         </div>
@@ -817,7 +817,7 @@
             }
           </div>
         } @else {
-          <p class="panel-empty">No country data recorded yet.</p>
+          <p class="panel-empty">{{ "DASHBOARD.COUNTRIES.EMPTY" | translate }}</p>
         }
       </article>
 
@@ -826,11 +826,11 @@
           <div class="panel-title">
             <span class="panel-icon">◷</span>
             <div>
-              <h2>Recent activity</h2>
-              <p>Latest submissions and enquiries</p>
+              <h2>{{ "DASHBOARD.ACTIVITY.TITLE" | translate }}</h2>
+              <p>{{ "DASHBOARD.ACTIVITY.SUB" | translate }}</p>
             </div>
           </div>
-          <a class="panel-link" routerLink="/dashboard/leads">Review enquiries →</a>
+          <a class="panel-link" routerLink="/dashboard/leads">{{ "DASHBOARD.ACTIVITY.REVIEW" | translate }}</a>
         </div>
         @if (data.recent.length) {
           <ul class="activity-list">
@@ -848,7 +848,7 @@
             }
           </ul>
         } @else {
-          <p class="panel-empty">Nothing submitted yet.</p>
+          <p class="panel-empty">{{ "DASHBOARD.ACTIVITY.EMPTY" | translate }}</p>
         }
       </article>
     </section>

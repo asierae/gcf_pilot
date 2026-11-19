@@ -242,5 +242,422 @@
       "TERMS": "Terms",
       "DISCLOSURES": "Disclosures"
     }
+  },
+  "PROFILE": {
+    "META_TITLE": "Profile assessment — Avera Capital Access",
+    "BRAND_TITLE": "Avera",
+    "BRAND_SUB": "Capital Access",
+    "ALL_PATHWAYS": "All pathways",
+    "PROGRESS": "Progress",
+    "KICKER": "Profile assessment",
+    "STEP_OF": "Step {{current}} of {{total}}",
+    "STEP_EYEBROW": "Step {{current}} · {{title}}",
+    "NOT_SPECIFIED": "Not specified",
+    "STEPS": [
+      {
+        "TITLE": "Institutional profile",
+        "DESCRIPTION": "Geographic profile, areas of expertise and professional contact details."
+      },
+      {
+        "TITLE": "Capital access objectives",
+        "DESCRIPTION": "What you want to achieve, the indicative financing need and the timeline."
+      },
+      {
+        "TITLE": "Readiness indicators",
+        "DESCRIPTION": "What your institution already has in place. No documents are required yet."
+      },
+      {
+        "TITLE": "Integrity & compliance",
+        "DESCRIPTION": "High-level declarations only — no sensitive records at this stage."
+      },
+      {
+        "TITLE": "Engagement preferences",
+        "DESCRIPTION": "What matters most, and how you would prefer Avera to follow up."
+      }
+    ],
+    "OPTIONS": {
+      "REGION": [
+        "Africa",
+        "Asia-Pacific",
+        "Central Asia",
+        "Eastern Europe",
+        "Western Europe",
+        "Middle East & North Africa",
+        "North America",
+        "Latin America & Caribbean",
+        "Global / Multiple regions",
+        "Other"
+      ],
+      "ENTITY": [
+        "Bank / Financial institution",
+        "Development finance institution",
+        "Government / Public institution",
+        "Private company / Investor",
+        "NGO / Non-profit",
+        "Project developer",
+        "Other"
+      ],
+      "SPECIALTY": [
+        "Climate finance / Green investment",
+        "Renewable energy / Energy transition",
+        "Climate adaptation / Resilience",
+        "Agriculture / Food systems",
+        "Water / Sanitation",
+        "Nature / Forestry / Biodiversity",
+        "Infrastructure / Transport",
+        "Financial services / Banking",
+        "Project development / Investment advisory",
+        "Institutional governance / Capacity building",
+        "Other"
+      ],
+      "DOCUMENT": [
+        "Audited financial statements",
+        "Governance and internal control policies",
+        "Environmental and social risk management framework",
+        "Anti-money laundering / anti-corruption policies",
+        "Climate project or financing track record"
+      ],
+      "OBJECTIVE": [
+        "GCF accreditation and institutional readiness",
+        "Project financing / investment",
+        "Project development / proposal support",
+        "Institutional due diligence / risk intelligence",
+        "Strategic partnerships / capital mobilisation",
+        "Not sure — need guidance"
+      ],
+      "FINANCING": [
+        "Not determined",
+        "Below USD 1 million",
+        "USD 1–10 million",
+        "USD 10–50 million",
+        "USD 50–100 million",
+        "USD 100–250 million",
+        "USD 250–500 million",
+        "USD 500 million–1 billion",
+        "Above USD 1 billion",
+        "Other — specify amount",
+        "Not seeking financing"
+      ],
+      "TIMELINE": [
+        "Immediately",
+        "Within 3–6 months",
+        "Within 6–12 months",
+        "Long-term planning"
+      ],
+      "HISTORY": [
+        "Less than 1 year",
+        "1–2 years",
+        "3+ years"
+      ],
+      "PROJECT_STAGE": [
+        "Early concept",
+        "Feasibility study available",
+        "Investment proposal prepared",
+        "Seeking financing / financial close"
+      ],
+      "PROJECT_SECTOR": [
+        "Energy",
+        "Agriculture / Food systems",
+        "Water",
+        "Transport",
+        "Forestry / Nature",
+        "Urban / Infrastructure",
+        "Cross-sector / Other"
+      ],
+      "ACCESS": [
+        "Direct access entity",
+        "International access entity",
+        "Not yet determined"
+      ],
+      "ISSUE": [
+        "No known material issues",
+        "Yes — requires confidential discussion",
+        "Unsure / Requires review"
+      ],
+      "ENGAGEMENT": [
+        "Receive a proposal for a paid diagnostic",
+        "Request an introductory discussion",
+        "Exploring options only"
+      ]
+    },
+    "S1": {
+      "BASED_TITLE": "Where you are based",
+      "REGION": "Region",
+      "COUNTRY": "Country",
+      "COUNTRY_PH": "Search for a country",
+      "ORG_TITLE": "About your organisation",
+      "ORG_NAME": "Organisation name",
+      "ORG_NAME_PH": "e.g. Green Energy Corporation",
+      "ACRONYM": "Acronym",
+      "ACRONYM_PH": "e.g. GEC",
+      "ENTITY_TYPE": "Entity type",
+      "WEBSITE": "Website",
+      "EMAIL": "Professional contact email",
+      "EMAIL_PH": "you@organisation.org",
+      "SPECIALTY_TITLE": "Institutional specialty",
+      "SELECT_ALL": "Select all that apply.",
+      "SPECIALTY_OTHER": "Please specify another specialty",
+      "SPECIALTY_OTHER_PH": "Describe your specialty",
+      "SELECT": "Select…"
+    },
+    "S2": {
+      "OBJECTIVE": "Primary objective",
+      "FINANCE_TITLE": "Indicative financing need",
+      "FINANCING": "How much financing are you considering?",
+      "FINANCING_DETAIL": "Indicative amount",
+      "FINANCING_DETAIL_PH": "e.g. USD 25 million",
+      "TIMELINE": "Timeline"
+    },
+    "S3": {
+      "HISTORY": "Institutional operating history",
+      "DOCS_TITLE": "Documents already in place",
+      "DOCS_HELP": "Select what you already have available. Documents are not requested at this stage.",
+      "PROJECT_TITLE": "Project details",
+      "PROJECT_STAGE": "Project stage",
+      "PROJECT_COUNTRY": "Project countries",
+      "PROJECT_COUNTRY_PH": "Search for countries",
+      "PROJECT_SECTOR": "Project sector",
+      "ACCESS_TITLE": "Access type",
+      "ACCESS_HELP": "How do you expect to access GCF resources?"
+    },
+    "S4": {
+      "TITLE": "Integrity & compliance",
+      "HELP": "Have there been any material integrity, sanctions or compliance issues involving your institution or its senior officers in the last five years?",
+      "DISCLAIMER": "This is a high-level declaration only. No sensitive records are requested at this stage."
+    },
+    "S5": {
+      "TITLE": "What matters most",
+      "CHALLENGE": "What is the main challenge you are facing?",
+      "CHALLENGE_PH": "Describe the challenge briefly…",
+      "NEXT_STEP": "Preferred next step",
+      "CONTACT_TITLE": "Contact details",
+      "NAME": "Full name",
+      "NAME_PH": "Your name",
+      "ROLE": "Role",
+      "ROLE_PH": "e.g. Head of Climate Finance",
+      "CONSENT": "I consent to Avera contacting me about this enquiry and storing these details confidentially."
+    },
+    "NAV": {
+      "BACK": "Back",
+      "CONTINUE": "Continue",
+      "SUBMIT": "Submit profile",
+      "SUBMITTING": "Submitting…"
+    },
+    "VALIDATION": {
+      "STEP1": "Please select your region and entity type, and enter your country and organisation name.",
+      "EMAIL": "Please enter a valid professional contact email.",
+      "SPECIALTY": "Please specify your other specialty.",
+      "WEBSITE": "Enter a website starting with https://, or leave it blank.",
+      "OBJECTIVE": "Please select your primary objective.",
+      "FINANCING": "Please specify your indicative financing need.",
+      "HISTORY": "Please select your institutional operating history.",
+      "COMPLIANCE": "Please answer the compliance question.",
+      "NAME": "Please enter your contact name.",
+      "CONSENT": "Consent is required to submit this enquiry."
+    },
+    "SUCCESS": {
+      "EYEBROW": "Enquiry received",
+      "TITLE": "Thank you, {{name}}.",
+      "BODY": "We have received the profile assessment for {{org}}. An Avera adviser will review it and respond within two business days.",
+      "ACCOUNT": "A portal account has been created for {{email}}. You will receive an email with sign-in details.",
+      "USERNAME": "Your username: {{username}}",
+      "NEXT_STEP": "Recommended next step",
+      "SCORE": "Indicative readiness score",
+      "SCORE_HELP": "This score is indicative only and based on the information provided. It is not an eligibility determination.",
+      "SUMMARY": "Your submission",
+      "RESTART": "Start a new assessment",
+      "BACK": "Back to pathways",
+      "DISCLAIMER": "This assessment is confidential and does not constitute an offer, eligibility determination or commitment of funding."
+    },
+    "SUMMARY": {
+      "REGION": "Region",
+      "COUNTRY": "Country",
+      "ORGANISATION": "Organisation",
+      "ENTITY": "Entity type",
+      "EMAIL": "Contact email",
+      "SPECIALTY": "Specialty",
+      "OBJECTIVE": "Objective",
+      "FINANCING": "Financing need",
+      "TIMELINE": "Timeline",
+      "HISTORY": "Operating history",
+      "DOCUMENTS": "Documents available",
+      "NEXT_STEP": "Preferred next step"
+    },
+    "READINESS": {
+      "HIGH": "Several readiness indicators present",
+      "MEDIUM": "Further readiness review advisable",
+      "LOW": "Foundational readiness review advisable"
+    },
+    "ROUTES": {
+      "COMPLIANCE": "Confidential compliance clarification",
+      "ACCREDITATION": "Institutional Accreditation Readiness Diagnostic",
+      "PROJECT": "Project Investment Readiness Review",
+      "DUE_DILIGENCE": "Institutional Integrity & Risk Intelligence Review",
+      "PARTNERSHIP": "Capital Mobilisation & Partnership Strategy",
+      "SCOPING": "Strategic Advisory Scoping"
+    },
+    "NOTIFY": {
+      "RECEIVED": "Your profile assessment has been received.",
+      "FAILED": "The enquiry could not be submitted. Please try again."
+    }
+  },
+  "DASHBOARD": {
+    "EYEBROW": "Administration · System overview",
+    "TITLE": "Dashboard",
+    "LEDE": "Live metrics across organizations, submissions and enquiries.",
+    "REFRESHED": "Last refreshed at {{time}}",
+    "OPERATIONAL": "All systems operational",
+    "REFRESH": "Refresh",
+    "REFRESHING": "Refreshing…",
+    "RETRY": "Retry",
+    "LOAD_ERROR": "Could not load the system statistics. Please try again.",
+    "KEY_METRICS": "Key metrics",
+    "DELTA_PREV": "Compared with the previous month",
+    "DELTA_NONE": "No data for the previous month",
+    "NEW": "new",
+    "FLAT": "flat",
+    "KPI": {
+      "ORGANIZATIONS": "Organizations",
+      "ACCREDITATION": "Accreditation",
+      "READINESS": "Readiness",
+      "ENQUIRIES": "Enquiries",
+      "FUNDING": "Funding requested",
+      "USERS": "Portal users",
+      "ORGANIZATIONS_SUB": "{{countries}} countries · {{score}}/100 avg score",
+      "ACCREDITATION_SUB": "{{passed}} passed · {{rate}}% approval",
+      "READINESS_SUB": "{{stage2}} stage 2 · {{ask}} avg ask",
+      "ENQUIRIES_SUB": "{{profile}} profile assessments",
+      "FUNDING_SUB": "{{budget}} budgeted in proposals",
+      "USERS_SUB": "{{active}} active · {{pending}} pending"
+    },
+    "REACH": {
+      "TITLE": "Global reach",
+      "SUB": "Where organizations, submissions and enquiries come from",
+      "COUNTRIES": "{{count}} countries",
+      "ARIA": "World map of organizations and enquiries",
+      "RECORDS": "{{count}} records",
+      "FEWER": "Fewer",
+      "ERROR": "World map data could not be loaded."
+    },
+    "PIPELINE": {
+      "TITLE": "Pipeline stages",
+      "SUB": "Records at each stage of the journey",
+      "CONVERSION": "{{value}}% of enquiries",
+      "FOOT": "Enquiry → accreditation"
+    },
+    "GROWTH": {
+      "TITLE": "Pipeline growth",
+      "SUB": "Monthly submissions and enquiries · last 12 months",
+      "ARIA": "Monthly pipeline growth"
+    },
+    "HEALTH": {
+      "TITLE": "Pipeline health",
+      "SUB": "Approval, readiness and stage 2 coverage",
+      "APPROVAL_CAPTION": "approval",
+      "APPROVAL": "Approval rate",
+      "SCORE_CAPTION": "/ 100 score",
+      "SCORE": "Readiness score",
+      "STAGE2_CAPTION": "stage 2",
+      "STAGE2": "Stage 2 coverage",
+      "FUNDING_REQUESTED": "Funding requested",
+      "AVG_ASK": "Average ask per proposal",
+      "BUDGET_PLANNED": "Budget planned",
+      "PENDING_INVITATIONS": "Pending invitations"
+    },
+    "VOLUME": {
+      "TITLE": "Submission volume",
+      "SUB": "Stacked monthly totals by stream",
+      "TOTAL": "{{value}} total",
+      "ARIA": "Monthly submission volume"
+    },
+    "FUNDING": {
+      "TITLE": "Funding trend",
+      "SUB": "Capital requested in readiness proposals",
+      "TOTAL": "{{value}} total",
+      "ARIA": "Monthly funding requested",
+      "AVG": "avg"
+    },
+    "BUDGET": {
+      "TITLE": "Budget allocation",
+      "SUB": "Planned spend by category",
+      "EMPTY": "No budget line items recorded yet.",
+      "CATEGORIES": {
+        "INTERNATIONAL_CONSULTANTS": "International consultants",
+        "NATIONAL_CONSULTANTS": "National consultants",
+        "TRAVEL": "Travel & per diem",
+        "WORKSHOPS": "Workshops & training",
+        "EQUIPMENT": "Equipment & software",
+        "AUDIT": "External audit",
+        "PROJECT_MANAGEMENT": "Project management",
+        "OTHER": "Other"
+      }
+    },
+    "SCORES": {
+      "TITLE": "Readiness scores",
+      "SUB": "Profile assessment distribution",
+      "ARIA": "Readiness score distribution",
+      "AVG_NOTE": "Average profile score:",
+      "EMPTY": "No profile scores recorded yet."
+    },
+    "TYPES": {
+      "TITLE": "Organization types",
+      "SUB": "Share of registered entities",
+      "TOTAL": "total",
+      "EMPTY": "No organization types recorded yet."
+    },
+    "SCREENING": {
+      "TITLE": "Pre-screening",
+      "SUB": "Accreditation submission status"
+    },
+    "LEADS": {
+      "TITLE": "Enquiry pipeline",
+      "SUB": "Leads by status and source",
+      "TOTAL": "{{value}} total"
+    },
+    "ACCOUNTS": {
+      "TITLE": "Portal accounts",
+      "SUB": "Users by state and role"
+    },
+    "COUNTRIES": {
+      "TITLE": "Top countries",
+      "SUB": "Where the pipeline is concentrated",
+      "EMPTY": "No country data recorded yet."
+    },
+    "ACTIVITY": {
+      "TITLE": "Recent activity",
+      "SUB": "Latest submissions and enquiries",
+      "REVIEW": "Review enquiries →",
+      "EMPTY": "Nothing submitted yet."
+    },
+    "LOADING": "Loading statistics",
+    "STATUS": {
+      "PASSED": "Passed",
+      "PENDING": "Pending",
+      "FAILED": "Failed",
+      "QUALIFIED": "Qualified",
+      "CONTACTED": "Contacted",
+      "REJECTED": "Rejected"
+    },
+    "USERS": {
+      "ACTIVE": "Active",
+      "PENDING": "Pending",
+      "SUSPENDED": "Blocked"
+    },
+    "SOURCES": {
+      "PROFILE": "Profile assessments",
+      "MANUAL": "Manual entries",
+      "READINESS": "Readiness checks",
+      "CONTACT": "Contact forms"
+    },
+    "ROLES": {
+      "ADMIN": "Administrators",
+      "APPLICANT": "Applicants"
+    },
+    "FUNNEL": {
+      "ENQUIRIES": "Enquiries",
+      "ACCREDITATION": "Accreditation",
+      "PASSED": "Passed pre-screening",
+      "STAGE2": "Stage 2 applications"
+    }
   }
 }

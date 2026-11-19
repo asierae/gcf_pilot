@@ -1,6 +1,8 @@
-import { Component, OnInit } from "@angular/core";
+import { Component, DestroyRef, OnInit, inject } from "@angular/core";
 import { CommonModule } from "@angular/common";
 import { RouterLink } from "@angular/router";
+import { TranslatePipe, TranslateService } from "@ngx-translate/core";
+import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import {
   arc,
   area,
@@ -28,9 +30,39 @@ import {
 } from "../../../models/admin-stats.model";
 import { countryCode, countryLabel } from "../../../shared/data/countries";
 import { countryCentroid } from "../../../shared/data/country-coordinates";
+import { PROFILE_ENTITY_TYPES } from "../../profile-assessment/profile-assessment.component";
 
 const MAP_WIDTH = 920;
 const MAP_HEIGHT = 440;
+
+const EN_MONTHS = [
+  "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+  "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
+];
+
+const LANGUAGE_LOCALES: Record<string, string> = {
+  en: "en-US",
+  ru: "ru-RU",
+  es: "es-ES",
+  fr: "fr-FR",
+  zh: "zh-CN",
+  ar: "ar",
+  vi: "vi-VN",
+};
+
+const FUNNEL_LABEL_KEYS: Record<string, string> = {
+  Enquiries: "DASHBOARD.FUNNEL.ENQUIRIES",
+  Accreditation: "DASHBOARD.FUNNEL.ACCREDITATION",
+  "Passed pre-screening": "DASHBOARD.FUNNEL.PASSED",
+  "Stage 2 applications": "DASHBOARD.FUNNEL.STAGE2",
+};
+
+const SOURCE_LABEL_KEYS: Record<string, string> = {
+  profile: "DASHBOARD.SOURCES.PROFILE",
+  manual: "DASHBOARD.SOURCES.MANUAL",
+  readiness: "DASHBOARD.SOURCES.READINESS",
+  contact: "DASHBOARD.SOURCES.CONTACT",
+};
 
 type StreamKey = "accreditation" | "readiness" | "leads";
 
@@ -238,11 +270,15 @@ interface StatusRow {
 @Component({
   selector: "app-overview-dashboard",
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, TranslatePipe],
   templateUrl: "./overview-dashboard.component.html",
   styleUrl: "./overview-dashboard.component.css",
 })
 export class OverviewDashboardComponent implements OnInit {
+  private readonly destroyRef = inject(DestroyRef);
+  private world: WorldCollection | null = null;
+  private lastUpdatedAt: Date | null = null;
+
   stats: AdminStats | null = null;
   loading = true;
   error = "";
@@ -271,18 +307,6 @@ export class OverviewDashboardComponent implements OnInit {
   funnelRows: FunnelRow[] = [];
   countryRows: MoneyRow[] = [];
 
-  readonly streamColors: Record<StreamKey, string> = {
-    accreditation: "#38bdf8",
-    readiness: "#e8c06a",
-    leads: "#34d399",
-  };
-
-  readonly streamLabels: Record<StreamKey, string> = {
-    accreditation: "Accreditation",
-    readiness: "Readiness",
-    leads: "Enquiries",
-  };
-
   readonly palette = [
     "#e8c06a",
     "#38bdf8",
@@ -294,13 +318,41 @@ export class OverviewDashboardComponent implements OnInit {
     "#94a3b8",
   ];
 
+  private readonly entityLabelKeys: Record<string, string> = Object.fromEntries(
+    PROFILE_ENTITY_TYPES.map((label, index) => [
+      label,
+      `PROFILE.OPTIONS.ENTITY.${index}`,
+    ]),
+  );
+
+  private readonly budgetLabelKeys: Record<string, string> = {
+    "International consultants": "DASHBOARD.BUDGET.CATEGORIES.INTERNATIONAL_CONSULTANTS",
+    "National consultants": "DASHBOARD.BUDGET.CATEGORIES.NATIONAL_CONSULTANTS",
+    "Travel & per diem": "DASHBOARD.BUDGET.CATEGORIES.TRAVEL",
+    "Workshops & training": "DASHBOARD.BUDGET.CATEGORIES.WORKSHOPS",
+    "Equipment & software": "DASHBOARD.BUDGET.CATEGORIES.EQUIPMENT",
+    "External audit": "DASHBOARD.BUDGET.CATEGORIES.AUDIT",
+    "Project management": "DASHBOARD.BUDGET.CATEGORIES.PROJECT_MANAGEMENT",
+    Other: "DASHBOARD.BUDGET.CATEGORIES.OTHER",
+  };
+
   constructor(
     private api: ApiService,
     private breadcrumbService: BreadcrumbService,
+    private translate: TranslateService,
   ) {}
 
   ngOnInit(): void {
-    this.breadcrumbService.setContext("Dashboard");
+    this.breadcrumbService.setContext(this.translate.instant("DASHBOARD.TITLE"));
+    this.translate.onLangChange
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => {
+        this.breadcrumbService.setContext(
+          this.translate.instant("DASHBOARD.TITLE"),
+        );
+        this.syncUpdatedLabel();
+        if (this.stats) this.render(this.stats, this.world);
+      });
     void this.load();
   }
 
@@ -312,52 +364,64 @@ export class OverviewDashboardComponent implements OnInit {
         this.api.getAdminStats(),
         loadWorld().catch(() => null),
       ]);
-      this.stats = stats;
-      this.lastUpdated = new Date().toLocaleTimeString("en-US", {
-        hour: "2-digit",
-        minute: "2-digit",
-      });
-      this.kpis = this.buildKpis(stats);
-      this.donutSlices = this.buildDonut(stats.entityTypes ?? []);
-      this.growth = this.buildGrowth(stats.monthlySeries ?? []);
-      this.stacked = this.buildStacked(stats.monthlySeries ?? []);
-      this.fundingChart = this.buildChart(
-        stats.fundingByMonth ?? [],
-        (value) => this.formatMoney(value),
-      );
-      this.budgetRows = this.buildMoneyRows(
-        stats.budgetByCategory ?? [],
-        stats.budgetPlannedUSD,
-      );
-      this.scoreChart = this.buildScoreChart(
-        stats.scoreBuckets ?? [],
-        stats.avgReadinessScore ?? 0,
-      );
-      this.funnelRows = this.buildFunnel(stats.funnel ?? []);
-      this.countryRows = this.buildCountryRows(stats.countryBreakdown ?? []);
-
-      const approval = Math.max(0, Math.min(100, stats.conversionRate ?? 0));
-      const score = Math.max(0, Math.min(100, stats.avgReadinessScore ?? 0));
-      const coverage = stats.accreditationSubmissions
-        ? Math.round(
-            (stats.stage2Submissions / stats.accreditationSubmissions) * 100,
-          )
-        : 0;
-      this.approvalGauge = this.buildGauge(approval, "#34d399");
-      this.scoreGauge = this.buildGauge(score, "#e8c06a");
-      this.coverageGauge = this.buildGauge(coverage, "#38bdf8");
-
-      if (world) {
-        this.map = this.buildMap(stats, world);
-        this.mapError = false;
-      } else {
-        this.map = null;
-        this.mapError = true;
-      }
+      this.world = world;
+      this.lastUpdatedAt = new Date();
+      this.syncUpdatedLabel();
+      this.render(stats, world);
     } catch {
-      this.error = "Could not load the system statistics. Please try again.";
+      this.error = this.translate.instant("DASHBOARD.LOAD_ERROR");
     } finally {
       this.loading = false;
+    }
+  }
+
+  private syncUpdatedLabel(): void {
+    if (!this.lastUpdatedAt) {
+      this.lastUpdated = "";
+      return;
+    }
+    this.lastUpdated = new Intl.DateTimeFormat(this.locale, {
+      hour: "2-digit",
+      minute: "2-digit",
+    }).format(this.lastUpdatedAt);
+  }
+
+  private render(data: AdminStats, world: WorldCollection | null): void {
+    this.stats = data;
+    this.kpis = this.buildKpis(data);
+    this.donutSlices = this.buildDonut(data.entityTypes ?? []);
+    this.growth = this.buildGrowth(data.monthlySeries ?? []);
+    this.stacked = this.buildStacked(data.monthlySeries ?? []);
+    this.fundingChart = this.buildChart(
+      data.fundingByMonth ?? [],
+      (value) => this.formatMoney(value),
+    );
+    this.budgetRows = this.buildMoneyRows(
+      data.budgetByCategory ?? [],
+      data.budgetPlannedUSD,
+    );
+    this.scoreChart = this.buildScoreChart(
+      data.scoreBuckets ?? [],
+      data.avgReadinessScore ?? 0,
+    );
+    this.funnelRows = this.buildFunnel(data.funnel ?? []);
+    this.countryRows = this.buildCountryRows(data.countryBreakdown ?? []);
+
+    const approval = Math.max(0, Math.min(100, data.conversionRate ?? 0));
+    const score = Math.max(0, Math.min(100, data.avgReadinessScore ?? 0));
+    const coverage = data.accreditationSubmissions
+      ? Math.round((data.stage2Submissions / data.accreditationSubmissions) * 100)
+      : 0;
+    this.approvalGauge = this.buildGauge(approval, "#34d399");
+    this.scoreGauge = this.buildGauge(score, "#e8c06a");
+    this.coverageGauge = this.buildGauge(coverage, "#38bdf8");
+
+    if (world) {
+      this.map = this.buildMap(data, world);
+      this.mapError = false;
+    } else {
+      this.map = null;
+      this.mapError = true;
     }
   }
 
@@ -408,56 +472,72 @@ export class OverviewDashboardComponent implements OnInit {
 
     return [
       make(
-        "Organizations",
+        this.t("DASHBOARD.KPI.ORGANIZATIONS"),
         this.formatNumber(data.organizations),
         "◈",
         "gold",
-        `${data.countries} countries · ${data.avgReadinessScore}/100 avg score`,
+        this.t("DASHBOARD.KPI.ORGANIZATIONS_SUB", {
+          countries: data.countries,
+          score: data.avgReadinessScore,
+        }),
         trend("organizations"),
         values("organizations"),
       ),
       make(
-        "Accreditation",
+        this.t("DASHBOARD.KPI.ACCREDITATION"),
         this.formatNumber(data.accreditationSubmissions),
         "▤",
         "sky",
-        `${data.statusCounts["Passed"] || 0} passed · ${data.conversionRate}% approval`,
+        this.t("DASHBOARD.KPI.ACCREDITATION_SUB", {
+          passed: data.statusCounts["Passed"] || 0,
+          rate: data.conversionRate,
+        }),
         trend("accreditation"),
         values("accreditation"),
       ),
       make(
-        "Readiness",
+        this.t("DASHBOARD.KPI.READINESS"),
         this.formatNumber(data.readinessSubmissions),
         "◎",
         "violet",
-        `${data.stage2Submissions} stage 2 · ${this.formatMoney(data.avgFundingPerSubmission)} avg ask`,
+        this.t("DASHBOARD.KPI.READINESS_SUB", {
+          stage2: data.stage2Submissions,
+          ask: this.formatMoney(data.avgFundingPerSubmission),
+        }),
         trend("readiness"),
         values("readiness"),
       ),
       make(
-        "Enquiries",
+        this.t("DASHBOARD.KPI.ENQUIRIES"),
         this.formatNumber(data.leads),
         "✦",
         "mint",
-        `${data.leadSourceCounts["profile"] || 0} profile assessments`,
+        this.t("DASHBOARD.KPI.ENQUIRIES_SUB", {
+          profile: data.leadSourceCounts["profile"] || 0,
+        }),
         trend("leads"),
         values("leads"),
       ),
       make(
-        "Funding requested",
+        this.t("DASHBOARD.KPI.FUNDING"),
         this.formatMoney(data.fundingRequestedUSD),
         "$",
         "gold",
-        `${this.formatMoney(data.budgetPlannedUSD)} budgeted in proposals`,
+        this.t("DASHBOARD.KPI.FUNDING_SUB", {
+          budget: this.formatMoney(data.budgetPlannedUSD),
+        }),
         fundingTrend,
         fundingValues,
       ),
       make(
-        "Portal users",
+        this.t("DASHBOARD.KPI.USERS"),
         this.formatNumber(data.users),
         "♙",
         "slate",
-        `${data.userCounts["active"] || 0} active · ${data.userCounts["pending"] || 0} pending`,
+        this.t("DASHBOARD.KPI.USERS_SUB", {
+          active: data.userCounts["active"] || 0,
+          pending: data.userCounts["pending"] || 0,
+        }),
         trend("users"),
         values("users"),
       ),
@@ -607,7 +687,7 @@ export class OverviewDashboardComponent implements OnInit {
     const plotTop = 18;
     const plotBottom = height - 30;
     const x = scalePoint<string>()
-      .domain(rows.map((row) => row.label))
+      .domain(rows.map((row) => this.monthLabel(row.key, row.label)))
       .range([plotLeft, plotRight]);
     const max = Math.max(
       1,
@@ -623,17 +703,18 @@ export class OverviewDashboardComponent implements OnInit {
       .range([plotBottom, plotTop]);
 
     const definitions: { key: StreamKey; label: string; color: string }[] = [
-      { key: "accreditation", label: "Accreditation", color: "#38bdf8" },
-      { key: "readiness", label: "Readiness", color: "#e8c06a" },
-      { key: "leads", label: "Enquiries", color: "#34d399" },
+      { key: "accreditation", label: this.streamLabel("accreditation"), color: "#38bdf8" },
+      { key: "readiness", label: this.streamLabel("readiness"), color: "#e8c06a" },
+      { key: "leads", label: this.streamLabel("leads"), color: "#34d399" },
     ];
 
+    const months = rows.map((row) => this.monthLabel(row.key, row.label));
     const series = definitions.map((definition) => {
-      const points: ChartPoint[] = rows.map((row) => ({
-        x: x(row.label) ?? plotLeft,
+      const points: ChartPoint[] = rows.map((row, index) => ({
+        x: x(months[index]) ?? plotLeft,
         y: y(row[definition.key]),
         value: row[definition.key],
-        label: row.label,
+        label: months[index],
       }));
       return {
         key: definition.key,
@@ -659,7 +740,10 @@ export class OverviewDashboardComponent implements OnInit {
       height,
       series,
       yTicks: y.ticks(4).map((value) => ({ y: y(value), label: String(value) })),
-      xLabels: rows.map((row) => ({ x: x(row.label) ?? plotLeft, label: row.label })),
+      xLabels: rows.map((row, index) => ({
+        x: x(months[index]) ?? plotLeft,
+        label: months[index],
+      })),
       plotLeft,
       plotRight,
       plotTop,
@@ -706,12 +790,13 @@ export class OverviewDashboardComponent implements OnInit {
     const plotTop = 16;
     const plotBottom = height - 30;
     const keys: { key: StreamKey; color: string; label: string }[] = [
-      { key: "accreditation", color: "#38bdf8", label: "Accreditation" },
-      { key: "readiness", color: "#e8c06a", label: "Readiness" },
-      { key: "leads", color: "#34d399", label: "Enquiries" },
+      { key: "accreditation", color: "#38bdf8", label: this.streamLabel("accreditation") },
+      { key: "readiness", color: "#e8c06a", label: this.streamLabel("readiness") },
+      { key: "leads", color: "#34d399", label: this.streamLabel("leads") },
     ];
+    const months = rows.map((row) => this.monthLabel(row.key, row.label));
     const x = scaleBand<string>()
-      .domain(rows.map((row) => row.label))
+      .domain(months)
       .range([plotLeft, plotRight])
       .padding(0.34);
     const max = Math.max(1, ...rows.map((row) => row.total));
@@ -720,7 +805,8 @@ export class OverviewDashboardComponent implements OnInit {
       .nice()
       .range([plotBottom, plotTop]);
 
-    const bars = rows.map((row) => {
+    const bars = rows.map((row, index) => {
+      const month = months[index];
       let cumulative = 0;
       const segments: StackSegment[] = [];
       for (const key of keys) {
@@ -730,7 +816,7 @@ export class OverviewDashboardComponent implements OnInit {
         cumulative += value;
         const top = y(cumulative);
         segments.push({
-          x: x(row.label) ?? 0,
+          x: x(month) ?? 0,
           y: top,
           width: x.bandwidth(),
           height: Math.max(0, bottom - top),
@@ -740,9 +826,9 @@ export class OverviewDashboardComponent implements OnInit {
         });
       }
       return {
-        label: row.label,
+        label: month,
         total: row.total,
-        x: x(row.label) ?? 0,
+        x: x(month) ?? 0,
         width: x.bandwidth(),
         segments,
       };
@@ -801,7 +887,7 @@ export class OverviewDashboardComponent implements OnInit {
         x: x(index),
         y: y(row.value),
         value: row.value,
-        label: row.label,
+        label: this.shortMonth(row.label),
       })),
       yTicks: y.ticks(4).map((value) => ({
         label: tickFormat(value),
@@ -828,7 +914,7 @@ export class OverviewDashboardComponent implements OnInit {
     return pieGenerator(rows).map((segment, index) => ({
       path: arcGenerator(segment as never) ?? "",
       color: this.colorAt(index),
-      label: segment.data.label,
+      label: this.dataLabel(segment.data.label, this.entityLabelKeys),
       value: segment.data.value,
     }));
   }
@@ -871,7 +957,7 @@ export class OverviewDashboardComponent implements OnInit {
   private buildMoneyRows(rows: StatRank[], total: number): MoneyRow[] {
     const max = Math.max(1, ...rows.map((row) => row.value));
     return rows.map((row, index) => ({
-      label: row.label,
+      label: this.dataLabel(row.label, this.budgetLabelKeys),
       value: row.value,
       display: this.formatMoney(row.value),
       pct: Math.round((row.value / max) * 100),
@@ -882,7 +968,7 @@ export class OverviewDashboardComponent implements OnInit {
   private buildCountryRows(rows: CountryBreakdown[]): MoneyRow[] {
     const max = Math.max(1, ...rows.map((row) => row.total));
     return rows.map((row) => ({
-      label: countryLabel(row.country),
+      label: this.countryName(row.country),
       value: row.total,
       display: this.formatNumber(row.total),
       pct: Math.round((row.total / max) * 100),
@@ -934,7 +1020,7 @@ export class OverviewDashboardComponent implements OnInit {
   private buildFunnel(rows: StatRank[]): FunnelRow[] {
     const first = Math.max(1, rows[0]?.value ?? 0);
     return rows.map((row, index) => ({
-      label: row.label,
+      label: this.dataLabel(row.label, FUNNEL_LABEL_KEYS),
       value: row.value,
       widthPct: Math.max(6, Math.round((row.value / first) * 100)),
       conversion:
@@ -947,7 +1033,7 @@ export class OverviewDashboardComponent implements OnInit {
   get screeningRows(): StatusRow[] {
     const counts = this.stats?.statusCounts ?? {};
     return ["Passed", "Pending", "Failed"].map((label) => ({
-      label,
+      label: this.t(`DASHBOARD.STATUS.${label.toUpperCase()}`),
       value: counts[label] ?? 0,
       tone: label.toLowerCase(),
     }));
@@ -956,7 +1042,7 @@ export class OverviewDashboardComponent implements OnInit {
   get leadStatusRows(): StatusRow[] {
     const counts = this.stats?.leadStatusCounts ?? {};
     return ["Qualified", "Contacted", "Pending", "Rejected"].map((label) => ({
-      label,
+      label: this.t(`DASHBOARD.STATUS.${label.toUpperCase()}`),
       value: counts[label] ?? 0,
       tone: label.toLowerCase(),
     }));
@@ -965,13 +1051,16 @@ export class OverviewDashboardComponent implements OnInit {
   get sourceRows(): StatRank[] {
     const counts = this.stats?.leadSourceCounts ?? {};
     return Object.entries(counts)
-      .map(([label, value]) => ({ label, value }))
+      .map(([label, value]) => ({
+        label: this.dataLabel(label.toLowerCase(), SOURCE_LABEL_KEYS),
+        value,
+      }))
       .sort((a, b) => b.value - a.value);
   }
 
   userRows(counts: Record<string, number>): StatusRow[] {
     return ["active", "pending", "suspended"].map((label) => ({
-      label: label.charAt(0).toUpperCase() + label.slice(1),
+      label: this.t(`DASHBOARD.USERS.${label.toUpperCase()}`),
       value: counts[label] ?? 0,
       tone: label,
     }));
@@ -979,7 +1068,10 @@ export class OverviewDashboardComponent implements OnInit {
 
   roleRows(counts: Record<string, number>): StatRank[] {
     return Object.entries(counts)
-      .map(([label, value]) => ({ label, value }))
+      .map(([label, value]) => ({
+        label: this.t(`DASHBOARD.ROLES.${label.toUpperCase()}`),
+        value,
+      }))
       .sort((a, b) => b.value - a.value);
   }
 
@@ -993,8 +1085,53 @@ export class OverviewDashboardComponent implements OnInit {
 
   /* ── Formatting ───────────────────────────────────────── */
 
+  get locale(): string {
+    const lang = this.translate.currentLang();
+    return LANGUAGE_LOCALES[lang ?? "en"] ?? "en-US";
+  }
+
+  private t(key: string, params?: Record<string, unknown>): string {
+    return this.translate.instant(key, params);
+  }
+
+  private streamLabel(key: StreamKey): string {
+    const suffix =
+      key === "accreditation"
+        ? "ACCREDITATION"
+        : key === "readiness"
+          ? "READINESS"
+          : "ENQUIRIES";
+    return this.t(`DASHBOARD.KPI.${suffix}`);
+  }
+
+  private monthLabel(key: string, fallback: string): string {
+    if (!key) return fallback;
+    const date = new Date(`${key}-01T00:00:00Z`);
+    if (Number.isNaN(date.getTime())) return fallback;
+    return new Intl.DateTimeFormat(this.locale, {
+      month: "short",
+      timeZone: "UTC",
+    }).format(date);
+  }
+
+  private shortMonth(label: string): string {
+    const index = EN_MONTHS.indexOf(label);
+    if (index < 0) return label;
+    return new Intl.DateTimeFormat(this.locale, {
+      month: "short",
+      timeZone: "UTC",
+    }).format(new Date(Date.UTC(2024, index, 1)));
+  }
+
+  private dataLabel(label: string, map: Record<string, string>): string {
+    const key = map[label];
+    if (!key) return label;
+    const translated = this.t(key);
+    return translated === key ? label : translated;
+  }
+
   formatMoney(value: number): string {
-    return new Intl.NumberFormat("en-US", {
+    return new Intl.NumberFormat(this.locale, {
       style: "currency",
       currency: "USD",
       notation: "compact",
@@ -1003,14 +1140,14 @@ export class OverviewDashboardComponent implements OnInit {
   }
 
   formatNumber(value: number): string {
-    return new Intl.NumberFormat("en-US").format(value || 0);
+    return new Intl.NumberFormat(this.locale).format(value || 0);
   }
 
   formatDate(iso: string): string {
     const date = new Date(iso);
     return Number.isNaN(date.getTime())
       ? "—"
-      : date.toLocaleDateString("en-US", {
+      : date.toLocaleDateString(this.locale, {
           month: "short",
           day: "numeric",
           year: "numeric",
@@ -1022,7 +1159,23 @@ export class OverviewDashboardComponent implements OnInit {
   }
 
   countryName(name: string): string {
-    return countryLabel(name);
+    return countryLabel(name, this.locale);
+  }
+
+  countryNameByCode(code: string, fallback: string): string {
+    if (!code) return fallback;
+    try {
+      const label = new Intl.DisplayNames([this.locale], {
+        type: "region",
+      }).of(code);
+      return label || fallback;
+    } catch {
+      return fallback;
+    }
+  }
+
+  entityLabel(label: string): string {
+    return this.dataLabel(label, this.entityLabelKeys);
   }
 
   colorAt(index: number): string {
@@ -1030,8 +1183,8 @@ export class OverviewDashboardComponent implements OnInit {
   }
 
   trendLabel(delta: number | null): string {
-    if (delta === null) return "new";
-    if (delta === 0) return "flat";
+    if (delta === null) return this.t("DASHBOARD.NEW");
+    if (delta === 0) return this.t("DASHBOARD.FLAT");
     return `${delta > 0 ? "↑" : "↓"} ${Math.abs(delta)}%`;
   }
 

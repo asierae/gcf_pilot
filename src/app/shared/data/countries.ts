@@ -206,12 +206,12 @@ export function countryCode(name: string): string | null {
   return best?.code ?? null;
 }
 
-/** Canonical English display name for a country, keeping unknown values. */
-export function countryLabel(name: string): string {
+/** Canonical display name for a country in the requested locale. */
+export function countryLabel(name: string, locale = "en"): string {
   const code = countryCode(name);
   if (code) {
     try {
-      const label = new Intl.DisplayNames(["en"], { type: "region" }).of(code);
+      const label = new Intl.DisplayNames([locale], { type: "region" }).of(code);
       if (label) return label;
     } catch {
       // Fall back to the stored spelling.

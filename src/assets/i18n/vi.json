@@ -242,5 +242,422 @@
       "TERMS": "Điều khoản",
       "DISCLOSURES": "Công bố"
     }
+  },
+  "PROFILE": {
+    "META_TITLE": "Đánh giá hồ sơ — Avera Capital Access",
+    "BRAND_TITLE": "Avera",
+    "BRAND_SUB": "Capital Access",
+    "ALL_PATHWAYS": "Tất cả lộ trình",
+    "PROGRESS": "Tiến độ",
+    "KICKER": "Đánh giá hồ sơ",
+    "STEP_OF": "Bước {{current}} / {{total}}",
+    "STEP_EYEBROW": "Bước {{current}} · {{title}}",
+    "NOT_SPECIFIED": "Chưa xác định",
+    "STEPS": [
+      {
+        "TITLE": "Hồ sơ tổ chức",
+        "DESCRIPTION": "Vị trí địa lý, lĩnh vực chuyên môn và thông tin liên hệ chuyên nghiệp."
+      },
+      {
+        "TITLE": "Mục tiêu tiếp cận vốn",
+        "DESCRIPTION": "Điều bạn muốn đạt được, nhu cầu tài chính ước tính và thời gian."
+      },
+      {
+        "TITLE": "Chỉ số sẵn sàng",
+        "DESCRIPTION": "Những gì tổ chức của bạn đã có. Chưa cần tài liệu ở giai đoạn này."
+      },
+      {
+        "TITLE": "Liêm chính và tuân thủ",
+        "DESCRIPTION": "Chỉ khai báo tổng quát — không yêu cầu hồ sơ nhạy cảm ở giai đoạn này."
+      },
+      {
+        "TITLE": "Ưu tiên hợp tác",
+        "DESCRIPTION": "Điều quan trọng nhất và cách bạn muốn Avera theo dõi."
+      }
+    ],
+    "OPTIONS": {
+      "REGION": [
+        "Châu Phi",
+        "Châu Á - Thái Bình Dương",
+        "Trung Á",
+        "Đông Âu",
+        "Tây Âu",
+        "Trung Đông và Bắc Phi",
+        "Bắc Mỹ",
+        "Mỹ Latinh và Caribe",
+        "Toàn cầu / Nhiều khu vực",
+        "Khác"
+      ],
+      "ENTITY": [
+        "Ngân hàng / Tổ chức tài chính",
+        "Tổ chức tài chính phát triển",
+        "Chính phủ / Tổ chức công",
+        "Doanh nghiệp tư nhân / Nhà đầu tư",
+        "Tổ chức phi chính phủ / Phi lợi nhuận",
+        "Nhà phát triển dự án",
+        "Khác"
+      ],
+      "SPECIALTY": [
+        "Tài chính khí hậu / Đầu tư xanh",
+        "Năng lượng tái tạo / Chuyển dịch năng lượng",
+        "Thích ứng khí hậu / Khả năng phục hồi",
+        "Nông nghiệp / Hệ thống lương thực",
+        "Nước / Vệ sinh",
+        "Thiên nhiên / Lâm nghiệp / Đa dạng sinh học",
+        "Hạ tầng / Giao thông",
+        "Dịch vụ tài chính / Ngân hàng",
+        "Phát triển dự án / Tư vấn đầu tư",
+        "Quản trị tổ chức / Nâng cao năng lực",
+        "Khác"
+      ],
+      "DOCUMENT": [
+        "Báo cáo tài chính đã kiểm toán",
+        "Chính sách quản trị và kiểm soát nội bộ",
+        "Khung quản lý rủi ro môi trường và xã hội",
+        "Chính sách chống rửa tiền / chống tham nhũng",
+        "Kinh nghiệm dự án khí hậu hoặc tài trợ"
+      ],
+      "OBJECTIVE": [
+        "Công nhận GCF và sự sẵn sàng của tổ chức",
+        "Tài trợ dự án / Đầu tư",
+        "Phát triển dự án / Hỗ trợ đề xuất",
+        "Thẩm định tổ chức / Thông tin rủi ro",
+        "Quan hệ đối tác chiến lược / Huy động vốn",
+        "Chưa chắc — cần hướng dẫn"
+      ],
+      "FINANCING": [
+        "Chưa xác định",
+        "Dưới 1 triệu USD",
+        "1–10 triệu USD",
+        "10–50 triệu USD",
+        "50–100 triệu USD",
+        "100–250 triệu USD",
+        "250–500 triệu USD",
+        "500 triệu–1 tỷ USD",
+        "Trên 1 tỷ USD",
+        "Khác — ghi rõ số tiền",
+        "Không tìm kiếm tài trợ"
+      ],
+      "TIMELINE": [
+        "Ngay lập tức",
+        "Trong 3–6 tháng",
+        "Trong 6–12 tháng",
+        "Kế hoạch dài hạn"
+      ],
+      "HISTORY": [
+        "Dưới 1 năm",
+        "1–2 năm",
+        "Trên 3 năm"
+      ],
+      "PROJECT_STAGE": [
+        "Ý tưởng ban đầu",
+        "Đã có nghiên cứu khả thi",
+        "Đã chuẩn bị đề xuất đầu tư",
+        "Đang tìm tài trợ / Đóng tài chính"
+      ],
+      "PROJECT_SECTOR": [
+        "Năng lượng",
+        "Nông nghiệp / Hệ thống lương thực",
+        "Nước",
+        "Giao thông",
+        "Lâm nghiệp / Thiên nhiên",
+        "Đô thị / Hạ tầng",
+        "Đa ngành / Khác"
+      ],
+      "ACCESS": [
+        "Tổ chức tiếp cận trực tiếp",
+        "Tổ chức tiếp cận quốc tế",
+        "Chưa xác định"
+      ],
+      "ISSUE": [
+        "Không có vấn đề trọng yếu nào",
+        "Có — cần trao đổi bảo mật",
+        "Chưa chắc / Cần xem xét"
+      ],
+      "ENGAGEMENT": [
+        "Nhận đề xuất chẩn đoán có phí",
+        "Yêu cầu trao đổi giới thiệu",
+        "Chỉ đang tìm hiểu các lựa chọn"
+      ]
+    },
+    "S1": {
+      "BASED_TITLE": "Vị trí của bạn",
+      "REGION": "Khu vực",
+      "COUNTRY": "Quốc gia",
+      "COUNTRY_PH": "Tìm quốc gia",
+      "ORG_TITLE": "Về tổ chức của bạn",
+      "ORG_NAME": "Tên tổ chức",
+      "ORG_NAME_PH": "ví dụ: Green Energy Corporation",
+      "ACRONYM": "Tên viết tắt",
+      "ACRONYM_PH": "ví dụ: GEC",
+      "ENTITY_TYPE": "Loại hình tổ chức",
+      "WEBSITE": "Trang web",
+      "EMAIL": "Email liên hệ chuyên nghiệp",
+      "EMAIL_PH": "you@organisation.org",
+      "SPECIALTY_TITLE": "Chuyên môn của tổ chức",
+      "SELECT_ALL": "Chọn tất cả các mục phù hợp.",
+      "SPECIALTY_OTHER": "Vui lòng ghi rõ chuyên môn khác",
+      "SPECIALTY_OTHER_PH": "Mô tả chuyên môn của bạn",
+      "SELECT": "Chọn…"
+    },
+    "S2": {
+      "OBJECTIVE": "Mục tiêu chính",
+      "FINANCE_TITLE": "Nhu cầu tài chính ước tính",
+      "FINANCING": "Bạn đang xem xét khoản tài trợ nào?",
+      "FINANCING_DETAIL": "Số tiền ước tính",
+      "FINANCING_DETAIL_PH": "ví dụ: 25 triệu USD",
+      "TIMELINE": "Thời gian"
+    },
+    "S3": {
+      "HISTORY": "Lịch sử hoạt động của tổ chức",
+      "DOCS_TITLE": "Tài liệu đã có",
+      "DOCS_HELP": "Chọn những gì bạn đã có. Chưa yêu cầu tài liệu ở giai đoạn này.",
+      "PROJECT_TITLE": "Chi tiết dự án",
+      "PROJECT_STAGE": "Giai đoạn dự án",
+      "PROJECT_COUNTRY": "Quốc gia dự án",
+      "PROJECT_COUNTRY_PH": "Tìm quốc gia",
+      "PROJECT_SECTOR": "Lĩnh vực dự án",
+      "ACCESS_TITLE": "Hình thức tiếp cận",
+      "ACCESS_HELP": "Bạn dự kiến tiếp cận nguồn lực GCF như thế nào?"
+    },
+    "S4": {
+      "TITLE": "Liêm chính và tuân thủ",
+      "HELP": "Trong năm năm qua, tổ chức của bạn hoặc các lãnh đạo cấp cao có liên quan đến bất kỳ vấn đề trọng yếu nào về liêm chính, trừng phạt hoặc tuân thủ không?",
+      "DISCLAIMER": "Đây chỉ là khai báo tổng quát. Không yêu cầu hồ sơ nhạy cảm ở giai đoạn này."
+    },
+    "S5": {
+      "TITLE": "Điều quan trọng nhất",
+      "CHALLENGE": "Thách thức chính bạn đang gặp là gì?",
+      "CHALLENGE_PH": "Mô tả ngắn gọn thách thức…",
+      "NEXT_STEP": "Bước tiếp theo mong muốn",
+      "CONTACT_TITLE": "Thông tin liên hệ",
+      "NAME": "Họ và tên",
+      "NAME_PH": "Tên của bạn",
+      "ROLE": "Chức vụ",
+      "ROLE_PH": "ví dụ: Trưởng bộ phận Tài chính Khí hậu",
+      "CONSENT": "Tôi đồng ý để Avera liên hệ với tôi về yêu cầu này và lưu trữ thông tin này một cách bảo mật."
+    },
+    "NAV": {
+      "BACK": "Quay lại",
+      "CONTINUE": "Tiếp tục",
+      "SUBMIT": "Gửi hồ sơ",
+      "SUBMITTING": "Đang gửi…"
+    },
+    "VALIDATION": {
+      "STEP1": "Vui lòng chọn khu vực và loại hình tổ chức, đồng thời nhập quốc gia và tên tổ chức.",
+      "EMAIL": "Vui lòng nhập email liên hệ chuyên nghiệp hợp lệ.",
+      "SPECIALTY": "Vui lòng ghi rõ chuyên môn khác của bạn.",
+      "WEBSITE": "Nhập trang web bắt đầu bằng https:// hoặc để trống.",
+      "OBJECTIVE": "Vui lòng chọn mục tiêu chính.",
+      "FINANCING": "Vui lòng ghi rõ nhu cầu tài chính ước tính.",
+      "HISTORY": "Vui lòng chọn lịch sử hoạt động của tổ chức.",
+      "COMPLIANCE": "Vui lòng trả lời câu hỏi tuân thủ.",
+      "NAME": "Vui lòng nhập tên người liên hệ.",
+      "CONSENT": "Cần có sự đồng ý để gửi yêu cầu này."
+    },
+    "SUCCESS": {
+      "EYEBROW": "Đã nhận yêu cầu",
+      "TITLE": "Cảm ơn bạn, {{name}}.",
+      "BODY": "Chúng tôi đã nhận đánh giá hồ sơ của {{org}}. Cố vấn Avera sẽ xem xét và phản hồi trong vòng hai ngày làm việc.",
+      "ACCOUNT": "Tài khoản cổng đã được tạo cho {{email}}. Bạn sẽ nhận được email với thông tin đăng nhập.",
+      "USERNAME": "Tên người dùng của bạn: {{username}}",
+      "NEXT_STEP": "Bước tiếp theo được đề xuất",
+      "SCORE": "Điểm sẵn sàng ước tính",
+      "SCORE_HELP": "Điểm này chỉ mang tính ước tính và dựa trên thông tin được cung cấp. Đây không phải là xác định điều kiện đủ.",
+      "SUMMARY": "Nội dung bạn đã gửi",
+      "RESTART": "Bắt đầu đánh giá mới",
+      "BACK": "Quay lại các lộ trình",
+      "DISCLAIMER": "Đánh giá này là bảo mật và không cấu thành lời đề nghị, xác định điều kiện đủ hay cam kết tài trợ."
+    },
+    "SUMMARY": {
+      "REGION": "Khu vực",
+      "COUNTRY": "Quốc gia",
+      "ORGANISATION": "Tổ chức",
+      "ENTITY": "Loại hình tổ chức",
+      "EMAIL": "Email liên hệ",
+      "SPECIALTY": "Chuyên môn",
+      "OBJECTIVE": "Mục tiêu",
+      "FINANCING": "Nhu cầu tài chính",
+      "TIMELINE": "Thời gian",
+      "HISTORY": "Lịch sử hoạt động",
+      "DOCUMENTS": "Tài liệu có sẵn",
+      "NEXT_STEP": "Bước tiếp theo mong muốn"
+    },
+    "READINESS": {
+      "HIGH": "Đã có nhiều chỉ số sẵn sàng",
+      "MEDIUM": "Nên xem xét thêm về mức độ sẵn sàng",
+      "LOW": "Nên xem xét cơ bản về mức độ sẵn sàng"
+    },
+    "ROUTES": {
+      "COMPLIANCE": "Làm rõ tuân thủ bảo mật",
+      "ACCREDITATION": "Chẩn đoán mức sẵn sàng công nhận tổ chức",
+      "PROJECT": "Đánh giá mức sẵn sàng đầu tư dự án",
+      "DUE_DILIGENCE": "Đánh giá liêm chính và thông tin rủi ro",
+      "PARTNERSHIP": "Chiến lược huy động vốn và đối tác",
+      "SCOPING": "Xác định phạm vi tư vấn chiến lược"
+    },
+    "NOTIFY": {
+      "RECEIVED": "Đã nhận đánh giá hồ sơ của bạn.",
+      "FAILED": "Không thể gửi yêu cầu. Vui lòng thử lại."
+    }
+  },
+  "DASHBOARD": {
+    "EYEBROW": "Quản trị · Tổng quan hệ thống",
+    "TITLE": "Bảng điều khiển",
+    "LEDE": "Số liệu trực tiếp về tổ chức, hồ sơ và yêu cầu.",
+    "REFRESHED": "Cập nhật lần cuối lúc {{time}}",
+    "OPERATIONAL": "Tất cả hệ thống hoạt động bình thường",
+    "REFRESH": "Làm mới",
+    "REFRESHING": "Đang làm mới…",
+    "RETRY": "Thử lại",
+    "LOAD_ERROR": "Không thể tải số liệu hệ thống. Vui lòng thử lại.",
+    "KEY_METRICS": "Chỉ số chính",
+    "DELTA_PREV": "So với tháng trước",
+    "DELTA_NONE": "Không có dữ liệu tháng trước",
+    "NEW": "mới",
+    "FLAT": "không đổi",
+    "KPI": {
+      "ORGANIZATIONS": "Tổ chức",
+      "ACCREDITATION": "Công nhận",
+      "READINESS": "Sẵn sàng",
+      "ENQUIRIES": "Yêu cầu",
+      "FUNDING": "Tài trợ đề nghị",
+      "USERS": "Người dùng cổng",
+      "ORGANIZATIONS_SUB": "{{countries}} quốc gia · điểm trung bình {{score}}/100",
+      "ACCREDITATION_SUB": "{{passed}} đã duyệt · {{rate}}% phê duyệt",
+      "READINESS_SUB": "{{stage2}} giai đoạn 2 · đề nghị trung bình {{ask}}",
+      "ENQUIRIES_SUB": "{{profile}} đánh giá hồ sơ",
+      "FUNDING_SUB": "{{budget}} đã dự toán trong đề xuất",
+      "USERS_SUB": "{{active}} đang hoạt động · {{pending}} đang chờ"
+    },
+    "REACH": {
+      "TITLE": "Phạm vi toàn cầu",
+      "SUB": "Nguồn gốc của tổ chức, hồ sơ và yêu cầu",
+      "COUNTRIES": "{{count}} quốc gia",
+      "ARIA": "Bản đồ thế giới về tổ chức và yêu cầu",
+      "RECORDS": "{{count}} bản ghi",
+      "FEWER": "Ít hơn",
+      "ERROR": "Không thể tải dữ liệu bản đồ thế giới."
+    },
+    "PIPELINE": {
+      "TITLE": "Các giai đoạn",
+      "SUB": "Bản ghi ở từng giai đoạn",
+      "CONVERSION": "{{value}}% số yêu cầu",
+      "FOOT": "Yêu cầu → công nhận"
+    },
+    "GROWTH": {
+      "TITLE": "Tăng trưởng quy trình",
+      "SUB": "Hồ sơ và yêu cầu hàng tháng · 12 tháng gần đây",
+      "ARIA": "Tăng trưởng quy trình hàng tháng"
+    },
+    "HEALTH": {
+      "TITLE": "Sức khỏe quy trình",
+      "SUB": "Phê duyệt, mức sẵn sàng và độ phủ giai đoạn 2",
+      "APPROVAL_CAPTION": "phê duyệt",
+      "APPROVAL": "Tỷ lệ phê duyệt",
+      "SCORE_CAPTION": "/ 100 điểm",
+      "SCORE": "Điểm sẵn sàng",
+      "STAGE2_CAPTION": "giai đoạn 2",
+      "STAGE2": "Độ phủ giai đoạn 2",
+      "FUNDING_REQUESTED": "Tài trợ đề nghị",
+      "AVG_ASK": "Đề nghị trung bình mỗi đề xuất",
+      "BUDGET_PLANNED": "Ngân sách dự kiến",
+      "PENDING_INVITATIONS": "Lời mời đang chờ"
+    },
+    "VOLUME": {
+      "TITLE": "Khối lượng hồ sơ",
+      "SUB": "Tổng hợp hàng tháng theo luồng",
+      "TOTAL": "tổng {{value}}",
+      "ARIA": "Khối lượng hồ sơ hàng tháng"
+    },
+    "FUNDING": {
+      "TITLE": "Xu hướng tài trợ",
+      "SUB": "Vốn đề nghị trong đề xuất sẵn sàng",
+      "TOTAL": "tổng {{value}}",
+      "ARIA": "Tài trợ đề nghị hàng tháng",
+      "AVG": "TB"
+    },
+    "BUDGET": {
+      "TITLE": "Phân bổ ngân sách",
+      "SUB": "Chi tiêu dự kiến theo danh mục",
+      "EMPTY": "Chưa có mục ngân sách nào được ghi nhận.",
+      "CATEGORIES": {
+        "INTERNATIONAL_CONSULTANTS": "Tư vấn quốc tế",
+        "NATIONAL_CONSULTANTS": "Tư vấn trong nước",
+        "TRAVEL": "Đi lại và phụ cấp",
+        "WORKSHOPS": "Hội thảo và đào tạo",
+        "EQUIPMENT": "Thiết bị và phần mềm",
+        "AUDIT": "Kiểm toán độc lập",
+        "PROJECT_MANAGEMENT": "Quản lý dự án",
+        "OTHER": "Khác"
+      }
+    },
+    "SCORES": {
+      "TITLE": "Điểm sẵn sàng",
+      "SUB": "Phân bố đánh giá hồ sơ",
+      "ARIA": "Phân bố điểm sẵn sàng",
+      "AVG_NOTE": "Điểm hồ sơ trung bình:",
+      "EMPTY": "Chưa có điểm hồ sơ nào được ghi nhận."
+    },
+    "TYPES": {
+      "TITLE": "Loại hình tổ chức",
+      "SUB": "Tỷ lệ các tổ chức đã đăng ký",
+      "TOTAL": "tổng",
+      "EMPTY": "Chưa có loại hình tổ chức nào được ghi nhận."
+    },
+    "SCREENING": {
+      "TITLE": "Sàng lọc sơ bộ",
+      "SUB": "Trạng thái hồ sơ công nhận"
+    },
+    "LEADS": {
+      "TITLE": "Quy trình yêu cầu",
+      "SUB": "Khách hàng tiềm năng theo trạng thái và nguồn",
+      "TOTAL": "tổng {{value}}"
+    },
+    "ACCOUNTS": {
+      "TITLE": "Tài khoản cổng",
+      "SUB": "Người dùng theo trạng thái và vai trò"
+    },
+    "COUNTRIES": {
+      "TITLE": "Quốc gia hàng đầu",
+      "SUB": "Nơi quy trình tập trung",
+      "EMPTY": "Chưa có dữ liệu quốc gia nào được ghi nhận."
+    },
+    "ACTIVITY": {
+      "TITLE": "Hoạt động gần đây",
+      "SUB": "Hồ sơ và yêu cầu mới nhất",
+      "REVIEW": "Xem yêu cầu →",
+      "EMPTY": "Chưa có nội dung nào được gửi."
+    },
+    "LOADING": "Đang tải số liệu",
+    "STATUS": {
+      "PASSED": "Đạt",
+      "PENDING": "Đang chờ",
+      "FAILED": "Không đạt",
+      "QUALIFIED": "Đủ điều kiện",
+      "CONTACTED": "Đã liên hệ",
+      "REJECTED": "Từ chối"
+    },
+    "USERS": {
+      "ACTIVE": "Hoạt động",
+      "PENDING": "Đang chờ",
+      "SUSPENDED": "Bị chặn"
+    },
+    "SOURCES": {
+      "PROFILE": "Đánh giá hồ sơ",
+      "MANUAL": "Nhập thủ công",
+      "READINESS": "Kiểm tra sẵn sàng",
+      "CONTACT": "Biểu mẫu liên hệ"
+    },
+    "ROLES": {
+      "ADMIN": "Quản trị viên",
+      "APPLICANT": "Ứng viên"
+    },
+    "FUNNEL": {
+      "ENQUIRIES": "Yêu cầu",
+      "ACCREDITATION": "Công nhận",
+      "PASSED": "Đạt sàng lọc sơ bộ",
+      "STAGE2": "Hồ sơ giai đoạn 2"
+    }
   }
 }

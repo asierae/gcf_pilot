@@ -242,5 +242,422 @@
       "TERMS": "条款",
       "DISCLOSURES": "披露"
     }
+  },
+  "PROFILE": {
+    "META_TITLE": "机构画像评估 — Avera Capital Access",
+    "BRAND_TITLE": "Avera",
+    "BRAND_SUB": "Capital Access",
+    "ALL_PATHWAYS": "所有路径",
+    "PROGRESS": "进度",
+    "KICKER": "机构画像评估",
+    "STEP_OF": "第 {{current}} 步，共 {{total}} 步",
+    "STEP_EYEBROW": "第 {{current}} 步 · {{title}}",
+    "NOT_SPECIFIED": "未填写",
+    "STEPS": [
+      {
+        "TITLE": "机构概况",
+        "DESCRIPTION": "地理概况、专业领域及专业联系方式。"
+      },
+      {
+        "TITLE": "资本获取目标",
+        "DESCRIPTION": "您希望实现的目标、指示性融资需求和时间安排。"
+      },
+      {
+        "TITLE": "准备度指标",
+        "DESCRIPTION": "贵机构已具备的条件。此阶段无需提供文件。"
+      },
+      {
+        "TITLE": "诚信与合规",
+        "DESCRIPTION": "仅作概括性声明——此阶段不要求提供敏感记录。"
+      },
+      {
+        "TITLE": "合作偏好",
+        "DESCRIPTION": "您最看重的事项，以及希望 Avera 如何跟进。"
+      }
+    ],
+    "OPTIONS": {
+      "REGION": [
+        "非洲",
+        "亚太",
+        "中亚",
+        "东欧",
+        "西欧",
+        "中东和北非",
+        "北美",
+        "拉丁美洲和加勒比",
+        "全球 / 多个地区",
+        "其他"
+      ],
+      "ENTITY": [
+        "银行 / 金融机构",
+        "开发性金融机构",
+        "政府 / 公共机构",
+        "私营企业 / 投资者",
+        "非政府组织 / 非营利机构",
+        "项目开发商",
+        "其他"
+      ],
+      "SPECIALTY": [
+        "气候金融 / 绿色投资",
+        "可再生能源 / 能源转型",
+        "气候适应 / 韧性",
+        "农业 / 粮食系统",
+        "水 / 卫生",
+        "自然 / 林业 / 生物多样性",
+        "基础设施 / 交通",
+        "金融服务 / 银行",
+        "项目开发 / 投资咨询",
+        "机构治理 / 能力建设",
+        "其他"
+      ],
+      "DOCUMENT": [
+        "经审计的财务报表",
+        "治理与内部控制政策",
+        "环境与社会风险管理框架",
+        "反洗钱 / 反腐败政策",
+        "气候项目或融资业绩记录"
+      ],
+      "OBJECTIVE": [
+        "GCF 认证与机构准备度",
+        "项目融资 / 投资",
+        "项目开发 / 提案支持",
+        "机构尽职调查 / 风险情报",
+        "战略合作 / 资本动员",
+        "不确定 — 需要指导"
+      ],
+      "FINANCING": [
+        "尚未确定",
+        "低于 100 万美元",
+        "100 万–1000 万美元",
+        "1000 万–5000 万美元",
+        "5000 万–1 亿美元",
+        "1 亿–2.5 亿美元",
+        "2.5 亿–5 亿美元",
+        "5 亿–10 亿美元",
+        "超过 10 亿美元",
+        "其他 — 请注明金额",
+        "无需融资"
+      ],
+      "TIMELINE": [
+        "立即",
+        "3–6 个月内",
+        "6–12 个月内",
+        "长期规划"
+      ],
+      "HISTORY": [
+        "不足 1 年",
+        "1–2 年",
+        "3 年以上"
+      ],
+      "PROJECT_STAGE": [
+        "早期概念",
+        "已有可行性研究",
+        "已准备投资提案",
+        "寻求融资 / 财务交割"
+      ],
+      "PROJECT_SECTOR": [
+        "能源",
+        "农业 / 粮食系统",
+        "水",
+        "交通",
+        "林业 / 自然",
+        "城市 / 基础设施",
+        "跨行业 / 其他"
+      ],
+      "ACCESS": [
+        "直接准入实体",
+        "国际准入实体",
+        "尚未确定"
+      ],
+      "ISSUE": [
+        "无已知重大事项",
+        "是 — 需保密讨论",
+        "不确定 / 需要审查"
+      ],
+      "ENGAGEMENT": [
+        "获取付费诊断方案",
+        "请求初步沟通",
+        "仅了解选项"
+      ]
+    },
+    "S1": {
+      "BASED_TITLE": "您所在地区",
+      "REGION": "地区",
+      "COUNTRY": "国家",
+      "COUNTRY_PH": "搜索国家",
+      "ORG_TITLE": "关于贵机构",
+      "ORG_NAME": "机构名称",
+      "ORG_NAME_PH": "例如：Green Energy Corporation",
+      "ACRONYM": "缩写",
+      "ACRONYM_PH": "例如：GEC",
+      "ENTITY_TYPE": "机构类型",
+      "WEBSITE": "网站",
+      "EMAIL": "专业联系邮箱",
+      "EMAIL_PH": "you@organisation.org",
+      "SPECIALTY_TITLE": "机构专业领域",
+      "SELECT_ALL": "请选择所有适用项。",
+      "SPECIALTY_OTHER": "请注明其他专业领域",
+      "SPECIALTY_OTHER_PH": "描述您的专业领域",
+      "SELECT": "请选择…"
+    },
+    "S2": {
+      "OBJECTIVE": "主要目标",
+      "FINANCE_TITLE": "指示性融资需求",
+      "FINANCING": "您考虑的融资金额是多少？",
+      "FINANCING_DETAIL": "指示性金额",
+      "FINANCING_DETAIL_PH": "例如：2500 万美元",
+      "TIMELINE": "时间安排"
+    },
+    "S3": {
+      "HISTORY": "机构运营历史",
+      "DOCS_TITLE": "已具备的文件",
+      "DOCS_HELP": "请选择您已具备的文件。此阶段不要求提供文件。",
+      "PROJECT_TITLE": "项目详情",
+      "PROJECT_STAGE": "项目阶段",
+      "PROJECT_COUNTRY": "项目所在国家",
+      "PROJECT_COUNTRY_PH": "搜索国家",
+      "PROJECT_SECTOR": "项目行业",
+      "ACCESS_TITLE": "准入类型",
+      "ACCESS_HELP": "您预计如何获取 GCF 资源？"
+    },
+    "S4": {
+      "TITLE": "诚信与合规",
+      "HELP": "过去五年内，贵机构或其高级管理人员是否涉及任何重大诚信、制裁或合规问题？",
+      "DISCLAIMER": "这仅为概括性声明。此阶段不要求提供敏感记录。"
+    },
+    "S5": {
+      "TITLE": "最重要的事项",
+      "CHALLENGE": "您面临的主要挑战是什么？",
+      "CHALLENGE_PH": "简要描述该挑战…",
+      "NEXT_STEP": "首选下一步",
+      "CONTACT_TITLE": "联系方式",
+      "NAME": "姓名",
+      "NAME_PH": "您的姓名",
+      "ROLE": "职务",
+      "ROLE_PH": "例如：气候金融主管",
+      "CONSENT": "我同意 Avera 就本次咨询与我联系，并保密存储这些信息。"
+    },
+    "NAV": {
+      "BACK": "返回",
+      "CONTINUE": "继续",
+      "SUBMIT": "提交机构画像",
+      "SUBMITTING": "提交中…"
+    },
+    "VALIDATION": {
+      "STEP1": "请选择您的地区和机构类型，并填写国家和机构名称。",
+      "EMAIL": "请输入有效的专业联系邮箱。",
+      "SPECIALTY": "请注明其他专业领域。",
+      "WEBSITE": "请输入以 https:// 开头的网站，或留空。",
+      "OBJECTIVE": "请选择您的主要目标。",
+      "FINANCING": "请注明您的指示性融资需求。",
+      "HISTORY": "请选择贵机构的运营历史。",
+      "COMPLIANCE": "请回答合规问题。",
+      "NAME": "请输入联系人姓名。",
+      "CONSENT": "提交此咨询需要您的同意。"
+    },
+    "SUCCESS": {
+      "EYEBROW": "已收到咨询",
+      "TITLE": "谢谢您，{{name}}。",
+      "BODY": "我们已收到 {{org}} 的机构画像评估。Avera 顾问将进行审阅，并在两个工作日内回复。",
+      "ACCOUNT": "已为 {{email}} 创建门户账户。您将收到包含登录信息的邮件。",
+      "USERNAME": "您的用户名：{{username}}",
+      "NEXT_STEP": "建议的下一步",
+      "SCORE": "指示性准备度评分",
+      "SCORE_HELP": "该评分仅供参考，基于所提供的信息。它不构成资格认定。",
+      "SUMMARY": "您的提交内容",
+      "RESTART": "开始新的评估",
+      "BACK": "返回路径选择",
+      "DISCLAIMER": "本评估为保密内容，不构成要约、资格认定或融资承诺。"
+    },
+    "SUMMARY": {
+      "REGION": "地区",
+      "COUNTRY": "国家",
+      "ORGANISATION": "机构",
+      "ENTITY": "机构类型",
+      "EMAIL": "联系邮箱",
+      "SPECIALTY": "专业领域",
+      "OBJECTIVE": "目标",
+      "FINANCING": "融资需求",
+      "TIMELINE": "时间安排",
+      "HISTORY": "运营历史",
+      "DOCUMENTS": "可提供文件",
+      "NEXT_STEP": "首选下一步"
+    },
+    "READINESS": {
+      "HIGH": "具备多项准备度指标",
+      "MEDIUM": "建议进一步进行准备度审查",
+      "LOW": "建议进行基础准备度审查"
+    },
+    "ROUTES": {
+      "COMPLIANCE": "保密合规澄清",
+      "ACCREDITATION": "机构认证准备度诊断",
+      "PROJECT": "项目投资准备度审查",
+      "DUE_DILIGENCE": "机构诚信与风险情报审查",
+      "PARTNERSHIP": "资本动员与合作战略",
+      "SCOPING": "战略咨询范围界定"
+    },
+    "NOTIFY": {
+      "RECEIVED": "您的机构画像评估已收到。",
+      "FAILED": "咨询提交失败，请重试。"
+    }
+  },
+  "DASHBOARD": {
+    "EYEBROW": "管理 · 系统概览",
+    "TITLE": "仪表板",
+    "LEDE": "组织、提交和咨询的实时指标。",
+    "REFRESHED": "上次刷新时间 {{time}}",
+    "OPERATIONAL": "所有系统运行正常",
+    "REFRESH": "刷新",
+    "REFRESHING": "刷新中…",
+    "RETRY": "重试",
+    "LOAD_ERROR": "无法加载系统统计信息，请重试。",
+    "KEY_METRICS": "关键指标",
+    "DELTA_PREV": "与上月相比",
+    "DELTA_NONE": "上月无数据",
+    "NEW": "新增",
+    "FLAT": "持平",
+    "KPI": {
+      "ORGANIZATIONS": "组织",
+      "ACCREDITATION": "认证",
+      "READINESS": "准备度",
+      "ENQUIRIES": "咨询",
+      "FUNDING": "申请资金",
+      "USERS": "门户用户",
+      "ORGANIZATIONS_SUB": "{{countries}} 个国家/地区 · 平均得分 {{score}}/100",
+      "ACCREDITATION_SUB": "{{passed}} 个通过 · {{rate}}% 批准率",
+      "READINESS_SUB": "{{stage2}} 个第二阶段 · 平均申请 {{ask}}",
+      "ENQUIRIES_SUB": "{{profile}} 份机构画像评估",
+      "FUNDING_SUB": "提案中已预算 {{budget}}",
+      "USERS_SUB": "{{active}} 个活跃 · {{pending}} 个待定"
+    },
+    "REACH": {
+      "TITLE": "全球覆盖",
+      "SUB": "组织、提交和咨询的来源",
+      "COUNTRIES": "{{count}} 个国家/地区",
+      "ARIA": "组织和咨询世界地图",
+      "RECORDS": "{{count}} 条记录",
+      "FEWER": "较少",
+      "ERROR": "无法加载世界地图数据。"
+    },
+    "PIPELINE": {
+      "TITLE": "流程阶段",
+      "SUB": "各阶段记录数",
+      "CONVERSION": "占咨询的 {{value}}%",
+      "FOOT": "咨询 → 认证"
+    },
+    "GROWTH": {
+      "TITLE": "流程增长",
+      "SUB": "每月提交和咨询 · 过去 12 个月",
+      "ARIA": "每月流程增长"
+    },
+    "HEALTH": {
+      "TITLE": "流程健康度",
+      "SUB": "批准、准备度和第二阶段覆盖率",
+      "APPROVAL_CAPTION": "批准",
+      "APPROVAL": "批准率",
+      "SCORE_CAPTION": "/ 100 分",
+      "SCORE": "准备度得分",
+      "STAGE2_CAPTION": "第二阶段",
+      "STAGE2": "第二阶段覆盖率",
+      "FUNDING_REQUESTED": "申请资金",
+      "AVG_ASK": "每份提案平均申请",
+      "BUDGET_PLANNED": "计划预算",
+      "PENDING_INVITATIONS": "待处理邀请"
+    },
+    "VOLUME": {
+      "TITLE": "提交量",
+      "SUB": "按流程堆叠的每月总计",
+      "TOTAL": "共 {{value}}",
+      "ARIA": "每月提交量"
+    },
+    "FUNDING": {
+      "TITLE": "资金趋势",
+      "SUB": "准备度提案中申请的资金",
+      "TOTAL": "共 {{value}}",
+      "ARIA": "每月申请资金",
+      "AVG": "平均"
+    },
+    "BUDGET": {
+      "TITLE": "预算分配",
+      "SUB": "按类别计划的支出",
+      "EMPTY": "尚未记录预算项目。",
+      "CATEGORIES": {
+        "INTERNATIONAL_CONSULTANTS": "国际顾问",
+        "NATIONAL_CONSULTANTS": "本国顾问",
+        "TRAVEL": "差旅与津贴",
+        "WORKSHOPS": "研讨会与培训",
+        "EQUIPMENT": "设备与软件",
+        "AUDIT": "外部审计",
+        "PROJECT_MANAGEMENT": "项目管理",
+        "OTHER": "其他"
+      }
+    },
+    "SCORES": {
+      "TITLE": "准备度得分",
+      "SUB": "机构画像评估分布",
+      "ARIA": "准备度得分分布",
+      "AVG_NOTE": "平均画像得分：",
+      "EMPTY": "尚未记录画像得分。"
+    },
+    "TYPES": {
+      "TITLE": "组织类型",
+      "SUB": "注册实体占比",
+      "TOTAL": "总计",
+      "EMPTY": "尚未记录组织类型。"
+    },
+    "SCREENING": {
+      "TITLE": "预筛选",
+      "SUB": "认证提交状态"
+    },
+    "LEADS": {
+      "TITLE": "咨询流程",
+      "SUB": "按状态和来源划分的线索",
+      "TOTAL": "共 {{value}}"
+    },
+    "ACCOUNTS": {
+      "TITLE": "门户账户",
+      "SUB": "按状态和角色划分的用户"
+    },
+    "COUNTRIES": {
+      "TITLE": "主要国家/地区",
+      "SUB": "流程集中的地区",
+      "EMPTY": "尚未记录国家/地区数据。"
+    },
+    "ACTIVITY": {
+      "TITLE": "近期活动",
+      "SUB": "最新提交和咨询",
+      "REVIEW": "查看咨询 →",
+      "EMPTY": "尚未提交任何内容。"
+    },
+    "LOADING": "正在加载统计信息",
+    "STATUS": {
+      "PASSED": "通过",
+      "PENDING": "待定",
+      "FAILED": "未通过",
+      "QUALIFIED": "合格",
+      "CONTACTED": "已联系",
+      "REJECTED": "已拒绝"
+    },
+    "USERS": {
+      "ACTIVE": "活跃",
+      "PENDING": "待定",
+      "SUSPENDED": "已封锁"
+    },
+    "SOURCES": {
+      "PROFILE": "机构画像评估",
+      "MANUAL": "手动录入",
+      "READINESS": "准备度检查",
+      "CONTACT": "联系表单"
+    },
+    "ROLES": {
+      "ADMIN": "管理员",
+      "APPLICANT": "申请人"
+    },
+    "FUNNEL": {
+      "ENQUIRIES": "咨询",
+      "ACCREDITATION": "认证",
+      "PASSED": "通过预筛选",
+      "STAGE2": "第二阶段申请"
+    }
   }
 }

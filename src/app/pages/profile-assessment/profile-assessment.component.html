@@ -1,7 +1,7 @@
 <div class="wizard-shell">
   <header class="wizard-topbar">
     <div class="topbar-inner">
-      <a routerLink="/home" class="wizard-brand" aria-label="Avera Capital Access home">
+      <a routerLink="/home" class="wizard-brand" [attr.aria-label]="'PROFILE.BRAND_TITLE' | translate">
         <span class="brand-mark" aria-hidden="true">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
             <path d="M12 2.5 21 7.5v9L12 21.5 3 16.5v-9l9-5Z" />
@@ -11,22 +11,25 @@
           </svg>
         </span>
         <span class="brand-text">
-          <span class="brand-name">Profile assessment</span>
-          <span class="brand-sub">Institutional assessment · Confidential enquiry</span>
+          <span class="brand-name">{{ 'PROFILE.BRAND_TITLE' | translate }}</span>
+          <span class="brand-sub">{{ 'PROFILE.BRAND_SUB' | translate }}</span>
         </span>
       </a>
       <div class="topbar-actions">
-        <a routerLink="/get-assessed" class="btn btn-ghost">All pathways</a>
+        <app-language-switcher [ariaLabel]="'HEADER.LANGUAGE' | translate" />
+        <a routerLink="/get-assessed" class="btn btn-ghost">{{ 'PROFILE.ALL_PATHWAYS' | translate }}</a>
       </div>
     </div>
   </header>
 
   <div class="wizard-body">
     @if (!submitted) {
-      <nav class="stepper" aria-label="Assessment progress">
+      <nav class="stepper" [attr.aria-label]="'PROFILE.PROGRESS' | translate">
         <div class="stepper-meta">
-          <p class="stepper-kicker">Avera Capital Access · Initial assessment</p>
-          <p class="stepper-count">Step {{ currentStep + 1 }} of {{ steps.length }}</p>
+          <p class="stepper-kicker">{{ 'PROFILE.KICKER' | translate }}</p>
+          <p class="stepper-count">
+            {{ 'PROFILE.STEP_OF' | translate: { current: currentStep + 1, total: steps.length } }}
+          </p>
         </div>
 
         <div
@@ -35,7 +38,7 @@
           [attr.aria-valuenow]="stepProgress"
           aria-valuemin="0"
           aria-valuemax="100"
-          aria-label="Assessment progress"
+          [attr.aria-label]="'PROFILE.PROGRESS' | translate"
         >
           <span class="progress-fill" [style.width.%]="stepProgress"></span>
         </div>
@@ -57,7 +60,7 @@
                     {{ i + 1 }}
                   }
                 </span>
-                <span class="step-label">{{ step.title }}</span>
+                <span class="step-label">{{ stepTitle(i) }}</span>
               </button>
             </li>
           }
@@ -66,9 +69,11 @@
 
       <main class="main-content">
         <header class="step-heading">
-          <p class="step-eyebrow">Step {{ currentStep + 1 }} · {{ steps[currentStep].title }}</p>
-          <h1>{{ steps[currentStep].title }}</h1>
-          <p class="step-subtitle">{{ descriptions[currentStep] }}</p>
+          <p class="step-eyebrow">
+            {{ 'PROFILE.STEP_EYEBROW' | translate: { current: currentStep + 1, title: stepTitle(currentStep) } }}
+          </p>
+          <h1>{{ stepTitle(currentStep) }}</h1>
+          <p class="step-subtitle">{{ stepDescription(currentStep) }}</p>
         </header>
 
         @if (errorMessage) {
@@ -79,43 +84,43 @@
           <!-- ── Step 1: institutional profile ── -->
           @if (currentStep === 0) {
             <div class="form-card">
-              <h3>Where is your institution based?</h3>
+              <h3>{{ 'PROFILE.S1.BASED_TITLE' | translate }}</h3>
               <div class="form-row">
                 <div class="form-group">
-                  <label for="pa-region">Region <span class="required">*</span></label>
+                  <label for="pa-region">{{ 'PROFILE.S1.REGION' | translate }} <span class="required">*</span></label>
                   <select id="pa-region" [(ngModel)]="state.region" name="region">
-                    <option value="">Select an option</option>
+                    <option value="">{{ 'PROFILE.S1.SELECT' | translate }}</option>
                     @for (region of regions; track region) {
-                      <option [value]="region">{{ region }}</option>
+                      <option [value]="region">{{ optionLabel('REGION', region) }}</option>
                     }
                   </select>
                 </div>
                 <div class="form-group">
-                  <label for="pa-country">Country of registration <span class="required">*</span></label>
+                  <label for="pa-country">{{ 'PROFILE.S1.COUNTRY' | translate }} <span class="required">*</span></label>
                   <app-country-select
                     inputId="pa-country"
                     name="country"
                     [(ngModel)]="state.country"
-                    placeholder="Select country…"
+                    [placeholder]="'PROFILE.S1.COUNTRY_PH' | translate"
                   ></app-country-select>
                 </div>
               </div>
             </div>
 
             <div class="form-card">
-              <h3>Organisation</h3>
+              <h3>{{ 'PROFILE.S1.ORG_TITLE' | translate }}</h3>
               <div class="form-row">
                 <div class="form-group">
-                  <label for="pa-org">Legal organisation name <span class="required">*</span></label>
-                  <input id="pa-org" type="text" [(ngModel)]="state.organization" name="organization" placeholder="Registered organisation name" />
+                  <label for="pa-org">{{ 'PROFILE.S1.ORG_NAME' | translate }} <span class="required">*</span></label>
+                  <input id="pa-org" type="text" [(ngModel)]="state.organization" name="organization" [placeholder]="'PROFILE.S1.ORG_NAME_PH' | translate" />
                 </div>
                 <div class="form-group">
-                  <label for="pa-acronym">Organisation acronym</label>
-                  <input id="pa-acronym" type="text" [(ngModel)]="state.acronym" name="acronym" placeholder="e.g., ABC" />
+                  <label for="pa-acronym">{{ 'PROFILE.S1.ACRONYM' | translate }}</label>
+                  <input id="pa-acronym" type="text" [(ngModel)]="state.acronym" name="acronym" [placeholder]="'PROFILE.S1.ACRONYM_PH' | translate" />
                 </div>
               </div>
               <div class="form-group">
-                <span class="group-label">Entity type <span class="required">*</span></span>
+                <span class="group-label">{{ 'PROFILE.S1.ENTITY_TYPE' | translate }} <span class="required">*</span></span>
                 <div class="choice-list">
                   @for (type of entityTypes; track type) {
                     <label class="choice-option">
@@ -126,26 +131,26 @@
                       (change)="state.entityType = type"
                     />
                       <span class="radio-custom"></span>
-                      <span>{{ type }}</span>
+                      <span>{{ optionLabel('ENTITY', type) }}</span>
                     </label>
                   }
                 </div>
               </div>
               <div class="form-row">
                 <div class="form-group">
-                  <label for="pa-website">Official website</label>
+                  <label for="pa-website">{{ 'PROFILE.S1.WEBSITE' | translate }}</label>
                   <input id="pa-website" type="url" [(ngModel)]="state.website" name="website" placeholder="https://example.org" />
                 </div>
                 <div class="form-group">
-                  <label for="pa-email">Professional contact email <span class="required">*</span></label>
-                  <input id="pa-email" type="email" [(ngModel)]="state.contactEmail" name="contactEmail" placeholder="name@organisation.org" autocomplete="email" />
+                  <label for="pa-email">{{ 'PROFILE.S1.EMAIL' | translate }} <span class="required">*</span></label>
+                  <input id="pa-email" type="email" [(ngModel)]="state.contactEmail" name="contactEmail" [placeholder]="'PROFILE.S1.EMAIL_PH' | translate" autocomplete="email" />
                 </div>
               </div>
             </div>
 
             <div class="form-card">
-              <h3>Institutional specialty</h3>
-              <p class="field-help">Select all that apply.</p>
+              <h3>{{ 'PROFILE.S1.SPECIALTY_TITLE' | translate }}</h3>
+              <p class="field-help">{{ 'PROFILE.S1.SELECT_ALL' | translate }}</p>
               <div class="choice-list">
                 @for (item of specialties; track item) {
                   <label class="choice-option">
@@ -157,14 +162,14 @@
                       (change)="toggleSpecialty(item, $any($event.target).checked)"
                     />
                     <span class="checkbox-custom"></span>
-                    <span>{{ item }}</span>
+                    <span>{{ optionLabel('SPECIALTY', item) }}</span>
                   </label>
                 }
               </div>
               @if (state.specialty.includes('Other')) {
                 <div class="form-group">
-                  <label for="pa-specialty-other">Please specify another specialty</label>
-                  <input id="pa-specialty-other" type="text" [(ngModel)]="state.specialtyOther" name="specialtyOther" placeholder="Describe your specialty" />
+                  <label for="pa-specialty-other">{{ 'PROFILE.S1.SPECIALTY_OTHER' | translate }}</label>
+                  <input id="pa-specialty-other" type="text" [(ngModel)]="state.specialtyOther" name="specialtyOther" [placeholder]="'PROFILE.S1.SPECIALTY_OTHER_PH' | translate" />
                 </div>
               }
             </div>
@@ -173,7 +178,7 @@
           <!-- ── Step 2: objectives ── -->
           @if (currentStep === 1) {
             <div class="form-card">
-              <h3>Primary objective <span class="required">*</span></h3>
+              <h3>{{ 'PROFILE.S2.OBJECTIVE' | translate }} <span class="required">*</span></h3>
               <div class="choice-list">
                 @for (objective of objectives; track objective) {
                   <label class="choice-option">
@@ -184,35 +189,35 @@
                       (change)="state.objective = objective"
                     />
                     <span class="radio-custom"></span>
-                    <span>{{ objective }}</span>
+                    <span>{{ optionLabel('OBJECTIVE', objective) }}</span>
                   </label>
                 }
               </div>
             </div>
 
             <div class="form-card">
-              <h3>Financing and timeline</h3>
+              <h3>{{ 'PROFILE.S2.FINANCE_TITLE' | translate }}</h3>
               <div class="form-group">
-                <label for="pa-funding">Indicative financing need</label>
+                <label for="pa-funding">{{ 'PROFILE.S2.FINANCING' | translate }}</label>
                 <select id="pa-funding" [(ngModel)]="state.financing" name="financing">
-                  <option value="">Select an option</option>
+                  <option value="">{{ 'PROFILE.S1.SELECT' | translate }}</option>
                   @for (option of financingOptions; track option) {
-                    <option [value]="option">{{ option }}</option>
+                    <option [value]="option">{{ optionLabel('FINANCING', option) }}</option>
                   }
                 </select>
               </div>
               @if (state.financing === 'Other — specify amount') {
                 <div class="form-group">
-                  <label for="pa-funding-detail">Financing need (USD)</label>
-                  <input id="pa-funding-detail" type="text" [(ngModel)]="state.financingDetail" name="financingDetail" placeholder="e.g., USD 2.5 billion" />
+                  <label for="pa-funding-detail">{{ 'PROFILE.S2.FINANCING_DETAIL' | translate }}</label>
+                  <input id="pa-funding-detail" type="text" [(ngModel)]="state.financingDetail" name="financingDetail" [placeholder]="'PROFILE.S2.FINANCING_DETAIL_PH' | translate" />
                 </div>
               }
               <div class="form-group">
-                <label for="pa-timeline">Intended timeline</label>
+                <label for="pa-timeline">{{ 'PROFILE.S2.TIMELINE' | translate }}</label>
                 <select id="pa-timeline" [(ngModel)]="state.timeline" name="timeline">
-                  <option value="">Select an option</option>
+                  <option value="">{{ 'PROFILE.S1.SELECT' | translate }}</option>
                   @for (option of timelines; track option) {
-                    <option [value]="option">{{ option }}</option>
+                    <option [value]="option">{{ optionLabel('TIMELINE', option) }}</option>
                   }
                 </select>
               </div>
@@ -222,7 +227,7 @@
           <!-- ── Step 3: readiness ── -->
           @if (currentStep === 2) {
             <div class="form-card">
-              <h3>Institutional operating history <span class="required">*</span></h3>
+              <h3>{{ 'PROFILE.S3.HISTORY' | translate }} <span class="required">*</span></h3>
               <div class="choice-list">
                 @for (option of historyOptions; track option) {
                   <label class="choice-option">
@@ -233,17 +238,15 @@
                       (change)="state.operatingHistory = option"
                     />
                     <span class="radio-custom"></span>
-                    <span>{{ option }}</span>
+                    <span>{{ optionLabel('HISTORY', option) }}</span>
                   </label>
                 }
               </div>
             </div>
 
             <div class="form-card">
-              <h3>Available policies, documents and capabilities</h3>
-              <p class="field-help">
-                Select all that apply. This is a preliminary self-declaration, not a formal verification.
-              </p>
+              <h3>{{ 'PROFILE.S3.DOCS_TITLE' | translate }}</h3>
+              <p class="field-help">{{ 'PROFILE.S3.DOCS_HELP' | translate }}</p>
               <div class="choice-list">
                 @for (document of documents; track document) {
                   <label class="choice-option">
@@ -255,7 +258,7 @@
                       (change)="toggleDocument(document, $any($event.target).checked)"
                     />
                     <span class="checkbox-custom"></span>
-                    <span>{{ document }}</span>
+                    <span>{{ optionLabel('DOCUMENT', document) }}</span>
                   </label>
                 }
               </div>
@@ -263,34 +266,34 @@
 
             @if (isProjectObjective) {
               <div class="form-card">
-                <h3>Project details</h3>
+                <h3>{{ 'PROFILE.S3.PROJECT_TITLE' | translate }}</h3>
                 <div class="form-row">
                   <div class="form-group">
-                    <label for="pa-project-stage">Current project stage</label>
+                    <label for="pa-project-stage">{{ 'PROFILE.S3.PROJECT_STAGE' | translate }}</label>
                     <select id="pa-project-stage" [(ngModel)]="state.projectStage" name="projectStage">
-                      <option value="">Select an option</option>
+                      <option value="">{{ 'PROFILE.S1.SELECT' | translate }}</option>
                       @for (option of projectStages; track option) {
-                        <option [value]="option">{{ option }}</option>
+                        <option [value]="option">{{ optionLabel('PROJECT_STAGE', option) }}</option>
                       }
                     </select>
                   </div>
                   <div class="form-group">
-                    <label for="pa-project-country">Implementation country</label>
+                    <label for="pa-project-country">{{ 'PROFILE.S3.PROJECT_COUNTRY' | translate }}</label>
                     <app-country-select
                       inputId="pa-project-country"
                       name="projectCountry"
                       [multiple]="true"
                       [(ngModel)]="state.projectCountry"
-                      placeholder="Select implementation countries"
+                      [placeholder]="'PROFILE.S3.PROJECT_COUNTRY_PH' | translate"
                     ></app-country-select>
                   </div>
                 </div>
                 <div class="form-group">
-                  <label for="pa-project-sector">Primary project sector</label>
+                  <label for="pa-project-sector">{{ 'PROFILE.S3.PROJECT_SECTOR' | translate }}</label>
                   <select id="pa-project-sector" [(ngModel)]="state.projectSector" name="projectSector">
-                    <option value="">Select an option</option>
+                    <option value="">{{ 'PROFILE.S1.SELECT' | translate }}</option>
                     @for (option of projectSectors; track option) {
-                      <option [value]="option">{{ option }}</option>
+                      <option [value]="option">{{ optionLabel('PROJECT_SECTOR', option) }}</option>
                     }
                   </select>
                 </div>
@@ -299,8 +302,8 @@
 
             @if (isAccreditationObjective) {
               <div class="form-card">
-                <h3>Accreditation route</h3>
-                <p class="field-help">Are you seeking accreditation as a direct access or international access entity?</p>
+                <h3>{{ 'PROFILE.S3.ACCESS_TITLE' | translate }}</h3>
+                <p class="field-help">{{ 'PROFILE.S3.ACCESS_HELP' | translate }}</p>
                 <div class="choice-list">
                   @for (option of accessTypes; track option) {
                     <label class="choice-option">
@@ -311,7 +314,7 @@
                         (change)="state.accessType = option"
                       />
                       <span class="radio-custom"></span>
-                      <span>{{ option }}</span>
+                      <span>{{ optionLabel('ACCESS', option) }}</span>
                     </label>
                   }
                 </div>
@@ -322,10 +325,8 @@
           <!-- ── Step 4: integrity ── -->
           @if (currentStep === 3) {
             <div class="form-card">
-              <h3>Preliminary integrity and compliance <span class="required">*</span></h3>
-              <p class="field-help">
-                Please provide only high-level declarations. Do not submit sensitive personal or investigation records in this form.
-              </p>
+              <h3>{{ 'PROFILE.S4.TITLE' | translate }} <span class="required">*</span></h3>
+              <p class="field-help">{{ 'PROFILE.S4.HELP' | translate }}</p>
               <div class="choice-list">
                 @for (option of issueOptions; track option) {
                   <label class="choice-option">
@@ -336,32 +337,30 @@
                       (change)="state.complianceIssues = option"
                     />
                     <span class="radio-custom"></span>
-                    <span>{{ option }}</span>
+                    <span>{{ optionLabel('ISSUE', option) }}</span>
                   </label>
                 }
               </div>
-              <p class="disclaimer">
-                This preliminary enquiry is not a sanctions check, legal opinion, regulatory clearance, or GCF eligibility determination.
-              </p>
+              <p class="disclaimer">{{ 'PROFILE.S4.DISCLAIMER' | translate }}</p>
             </div>
           }
 
           <!-- ── Step 5: engagement ── -->
           @if (currentStep === 4) {
             <div class="form-card">
-              <h3>How can AVERA support you?</h3>
+              <h3>{{ 'PROFILE.S5.TITLE' | translate }}</h3>
               <div class="form-group">
-                <label for="pa-challenge">Main challenge or support requested</label>
+                <label for="pa-challenge">{{ 'PROFILE.S5.CHALLENGE' | translate }}</label>
                 <textarea
                   id="pa-challenge"
                   rows="4"
                   [(ngModel)]="state.challenge"
                   name="challenge"
-                  placeholder="Describe your objectives, institutional challenges, or project needs."
+                  [placeholder]="'PROFILE.S5.CHALLENGE_PH' | translate"
                 ></textarea>
               </div>
               <div class="form-group">
-                <span class="group-label">Preferred next step</span>
+                <span class="group-label">{{ 'PROFILE.S5.NEXT_STEP' | translate }}</span>
                 <div class="choice-list">
                   @for (option of engagementOptions; track option) {
                     <label class="choice-option">
@@ -372,7 +371,7 @@
                         (change)="state.engagement = option"
                       />
                       <span class="radio-custom"></span>
-                      <span>{{ option }}</span>
+                      <span>{{ optionLabel('ENGAGEMENT', option) }}</span>
                     </label>
                   }
                 </div>
@@ -380,22 +379,22 @@
             </div>
 
             <div class="form-card">
-              <h3>Contact details</h3>
+              <h3>{{ 'PROFILE.S5.CONTACT_TITLE' | translate }}</h3>
               <div class="form-row">
                 <div class="form-group">
-                  <label for="pa-name">Contact name <span class="required">*</span></label>
-                  <input id="pa-name" type="text" [(ngModel)]="state.contactName" name="contactName" placeholder="Full name" />
+                  <label for="pa-name">{{ 'PROFILE.S5.NAME' | translate }} <span class="required">*</span></label>
+                  <input id="pa-name" type="text" [(ngModel)]="state.contactName" name="contactName" [placeholder]="'PROFILE.S5.NAME_PH' | translate" />
                 </div>
                 <div class="form-group">
-                  <label for="pa-role">Position / title</label>
-                  <input id="pa-role" type="text" [(ngModel)]="state.contactRole" name="contactRole" placeholder="Job title" />
+                  <label for="pa-role">{{ 'PROFILE.S5.ROLE' | translate }}</label>
+                  <input id="pa-role" type="text" [(ngModel)]="state.contactRole" name="contactRole" [placeholder]="'PROFILE.S5.ROLE_PH' | translate" />
                 </div>
               </div>
               <label class="consent-option">
                 <input type="checkbox" [(ngModel)]="state.consent" name="consent" />
                 <span class="checkbox-custom"></span>
                 <span>
-                  I consent to AVERA using the information provided to evaluate my enquiry and contact me about relevant advisory services. <span class="required">*</span>
+                  {{ 'PROFILE.S5.CONSENT' | translate }} <span class="required">*</span>
                 </span>
               </label>
             </div>
@@ -403,16 +402,16 @@
 
           <div class="form-navigation">
             @if (currentStep > 0) {
-              <button type="button" class="btn-nav btn-prev" (click)="previousStep()">← Back</button>
+              <button type="button" class="btn-nav btn-prev" (click)="previousStep()">{{ 'PROFILE.NAV.BACK' | translate }}</button>
             }
             <div class="nav-spacer"></div>
             <button type="submit" class="btn-nav btn-next" [disabled]="submitting">
               @if (submitting) {
-                Submitting…
+                {{ 'PROFILE.NAV.SUBMITTING' | translate }}
               } @else if (currentStep < steps.length - 1) {
-                Continue →
+                {{ 'PROFILE.NAV.CONTINUE' | translate }}
               } @else {
-                Submit my enquiry →
+                {{ 'PROFILE.NAV.SUBMIT' | translate }}
               }
             </button>
           </div>
@@ -427,63 +426,60 @@
               <path d="m8.5 12 2.5 2.5 4.5-5" />
             </svg>
           </span>
-          <p class="step-eyebrow">Assessment complete</p>
-          <h1>Thank you, {{ result?.contactName || state.contactName }}.</h1>
+          <p class="step-eyebrow">{{ 'PROFILE.SUCCESS.EYEBROW' | translate }}</p>
+          <h1>{{ 'PROFILE.SUCCESS.TITLE' | translate: { name: result?.contactName || state.contactName } }}</h1>
           <p class="step-subtitle">
-            Your profile assessment for {{ result?.organization || state.organization }} has been saved.
-            This is an indicative self-screening, not an accreditation or funding decision.
+            {{ 'PROFILE.SUCCESS.BODY' | translate: { org: result?.organization || state.organization } }}
           </p>
         </div>
 
         @if (accountCreated) {
           <div class="alert-box account-notice">
-            A portal access request has been created for <strong>{{ state.contactEmail }}</strong>@if (accountUsername) {
-              (username <strong>{{ accountUsername }}</strong>)
-            }. The account is inactive until an Avera administrator approves it and sends an invitation.
+            <p>{{ 'PROFILE.SUCCESS.ACCOUNT' | translate: { email: state.contactEmail } }}</p>
+            @if (accountUsername) {
+              <p class="account-username">{{ 'PROFILE.SUCCESS.USERNAME' | translate: { username: accountUsername } }}</p>
+            }
           </div>
         }
 
         <div class="result-grid">
           <div class="form-card result-card">
-            <p class="result-kicker">Suggested next step</p>
+            <p class="result-kicker">{{ 'PROFILE.SUCCESS.NEXT_STEP' | translate }}</p>
             <h2>{{ suggestedRoute }}</h2>
             <span class="result-pill">{{ readinessLabel }}</span>
           </div>
           <div class="form-card result-card">
-            <p class="result-kicker">Indicative readiness score</p>
+            <p class="result-kicker">{{ 'PROFILE.SUCCESS.SCORE' | translate }}</p>
             <p class="result-score">{{ readinessScore }}<small>/100</small></p>
-            <p class="field-help">Based on the declarations provided in steps 2 and 3.</p>
+            <p class="field-help">{{ 'PROFILE.SUCCESS.SCORE_HELP' | translate }}</p>
           </div>
         </div>
 
         <div class="form-card">
-          <h3>Enquiry summary</h3>
+          <h3>{{ 'PROFILE.SUCCESS.SUMMARY' | translate }}</h3>
           <dl class="summary-list">
-            <div><dt>Region</dt><dd>{{ state.region }}</dd></div>
-            <div><dt>Country</dt><dd>{{ state.country }}</dd></div>
-            <div><dt>Organisation</dt><dd>{{ state.organization }}</dd></div>
-            <div><dt>Entity type</dt><dd>{{ state.entityType }}</dd></div>
-            <div><dt>Contact email</dt><dd>{{ state.contactEmail }}</dd></div>
-            <div><dt>Specialty</dt><dd>{{ specialtySummary || 'Not specified' }}</dd></div>
-            <div><dt>Objective</dt><dd>{{ state.objective }}</dd></div>
-            <div><dt>Financing need</dt><dd>{{ financingSummary }}</dd></div>
-            <div><dt>Timeline</dt><dd>{{ state.timeline || 'Not specified' }}</dd></div>
-            <div><dt>Operating history</dt><dd>{{ state.operatingHistory }}</dd></div>
-            <div><dt>Documents available</dt><dd>{{ documentsSummary }}</dd></div>
-            <div><dt>Preferred next step</dt><dd>{{ state.engagement || 'Not specified' }}</dd></div>
+            <div><dt>{{ 'PROFILE.SUMMARY.REGION' | translate }}</dt><dd>{{ optionLabel('REGION', state.region) }}</dd></div>
+            <div><dt>{{ 'PROFILE.SUMMARY.COUNTRY' | translate }}</dt><dd>{{ state.country }}</dd></div>
+            <div><dt>{{ 'PROFILE.SUMMARY.ORGANISATION' | translate }}</dt><dd>{{ state.organization }}</dd></div>
+            <div><dt>{{ 'PROFILE.SUMMARY.ENTITY' | translate }}</dt><dd>{{ optionLabel('ENTITY', state.entityType) }}</dd></div>
+            <div><dt>{{ 'PROFILE.SUMMARY.EMAIL' | translate }}</dt><dd>{{ state.contactEmail }}</dd></div>
+            <div><dt>{{ 'PROFILE.SUMMARY.SPECIALTY' | translate }}</dt><dd>{{ specialtySummary || ('PROFILE.NOT_SPECIFIED' | translate) }}</dd></div>
+            <div><dt>{{ 'PROFILE.SUMMARY.OBJECTIVE' | translate }}</dt><dd>{{ optionLabel('OBJECTIVE', state.objective) }}</dd></div>
+            <div><dt>{{ 'PROFILE.SUMMARY.FINANCING' | translate }}</dt><dd>{{ financingSummary }}</dd></div>
+            <div><dt>{{ 'PROFILE.SUMMARY.TIMELINE' | translate }}</dt><dd>{{ state.timeline ? optionLabel('TIMELINE', state.timeline) : ('PROFILE.NOT_SPECIFIED' | translate) }}</dd></div>
+            <div><dt>{{ 'PROFILE.SUMMARY.HISTORY' | translate }}</dt><dd>{{ optionLabel('HISTORY', state.operatingHistory) }}</dd></div>
+            <div><dt>{{ 'PROFILE.SUMMARY.DOCUMENTS' | translate }}</dt><dd>{{ documentsSummary }}</dd></div>
+            <div><dt>{{ 'PROFILE.SUMMARY.NEXT_STEP' | translate }}</dt><dd>{{ state.engagement ? optionLabel('ENGAGEMENT', state.engagement) : ('PROFILE.NOT_SPECIFIED' | translate) }}</dd></div>
           </dl>
         </div>
 
         <div class="form-navigation result-actions">
-          <button type="button" class="btn-nav btn-prev" (click)="restart()">Start over</button>
+          <button type="button" class="btn-nav btn-prev" (click)="restart()">{{ 'PROFILE.SUCCESS.RESTART' | translate }}</button>
           <div class="nav-spacer"></div>
-          <a routerLink="/get-assessed" class="btn-nav btn-next">Back to pathways</a>
+          <a routerLink="/get-assessed" class="btn-nav btn-next">{{ 'PROFILE.SUCCESS.BACK' | translate }}</a>
         </div>
 
-        <p class="disclaimer">
-          AVERA is an independent advisory provider, not the Green Climate Fund.
-          This tool does not determine accreditation eligibility, verify compliance, or guarantee finance.
-        </p>
+        <p class="disclaimer">{{ 'PROFILE.SUCCESS.DISCLAIMER' | translate }}</p>
       </main>
     }
   </div>

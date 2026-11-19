@@ -1,11 +1,14 @@
-import { Component, OnDestroy } from '@angular/core';
+import { Component, DestroyRef, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CountrySelectComponent } from '../../shared/components/country-select/country-select.component';
 import { RouterLink } from '@angular/router';
 import { Title } from '@angular/platform-browser';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ApiService } from '../../services/api.service';
 import { NotificationService } from '../../services/notification.service';
+import { LanguageSwitcherComponent } from '../../shared/components/language-switcher/language-switcher.component';
 import { LeadRecord } from '../../models/applicant.model';
 
 export const PROFILE_REGIONS = [
@@ -255,38 +258,57 @@ export function suggestedProfileRoute(state: ProfileFormState): string {
   return 'Strategic Advisory Scoping';
 }
 
-const STEP_TITLES = [
-  'Institutional profile',
-  'Capital access objectives',
-  'Readiness indicators',
-  'Integrity & compliance',
-  'Engagement preferences',
-];
-
-const STEP_DESCRIPTIONS = [
-  'Geographic profile, areas of expertise and professional contact details.',
-  'What you want to achieve, the indicative financing need and the timeline.',
-  'What your institution already has in place. No documents are required yet.',
-  'High-level declarations only — no sensitive records at this stage.',
-  'What matters most, and how you would prefer Avera to follow up.',
-];
-
 const EMAIL_PATTERN = /^\S+@\S+\.\S+$/;
+
+/** Canonical English route names returned by the API, mapped to i18n keys. */
+const PROFILE_ROUTE_KEYS: Record<string, string> = {
+  "Confidential compliance clarification": "PROFILE.ROUTES.COMPLIANCE",
+  "Institutional Accreditation Readiness Diagnostic":
+    "PROFILE.ROUTES.ACCREDITATION",
+  "Project Investment Readiness Review": "PROFILE.ROUTES.PROJECT",
+  "Institutional Integrity & Risk Intelligence Review":
+    "PROFILE.ROUTES.DUE_DILIGENCE",
+  "Capital Mobilisation & Partnership Strategy": "PROFILE.ROUTES.PARTNERSHIP",
+  "Strategic Advisory Scoping": "PROFILE.ROUTES.SCOPING",
+};
+
+type ProfileOptionGroup =
+  | "REGION"
+  | "ENTITY"
+  | "SPECIALTY"
+  | "DOCUMENT"
+  | "OBJECTIVE"
+  | "FINANCING"
+  | "TIMELINE"
+  | "HISTORY"
+  | "PROJECT_STAGE"
+  | "PROJECT_SECTOR"
+  | "ACCESS"
+  | "ISSUE"
+  | "ENGAGEMENT";
 
 @Component({
   selector: 'app-profile-assessment',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, CountrySelectComponent],
+  imports: [
+    CommonModule,
+    FormsModule,
+    RouterLink,
+    CountrySelectComponent,
+    TranslatePipe,
+    LanguageSwitcherComponent,
+  ],
   templateUrl: './profile-assessment.component.html',
   styleUrl: './profile-assessment.component.css',
 })
 export class ProfileAssessmentComponent implements OnDestroy {
-  readonly steps = STEP_TITLES.map((title, index) => ({
+  private readonly destroyRef = inject(DestroyRef);
+
+  readonly steps = [0, 1, 2, 3, 4].map((index) => ({
     id: `step-${index}`,
-    title,
+    index,
   }));
 
-  readonly descriptions = STEP_DESCRIPTIONS;
   readonly regions = PROFILE_REGIONS;
   readonly entityTypes = PROFILE_ENTITY_TYPES;
   readonly specialties = PROFILE_SPECIALTIES;
@@ -300,6 +322,22 @@ export class ProfileAssessmentComponent implements OnDestroy {
   readonly accessTypes = PROFILE_ACCESS_TYPES;
   readonly issueOptions = PROFILE_ISSUES;
   readonly engagementOptions = PROFILE_ENGAGEMENT;
+
+  private readonly optionGroups: Record<ProfileOptionGroup, string[]> = {
+    REGION: PROFILE_REGIONS,
+    ENTITY: PROFILE_ENTITY_TYPES,
+    SPECIALTY: PROFILE_SPECIALTIES,
+    DOCUMENT: PROFILE_DOCUMENTS,
+    OBJECTIVE: PROFILE_OBJECTIVES,
+    FINANCING: PROFILE_FINANCING,
+    TIMELINE: PROFILE_TIMELINES,
+    HISTORY: PROFILE_HISTORY,
+    PROJECT_STAGE: PROFILE_PROJECT_STAGES,
+    PROJECT_SECTOR: PROFILE_PROJECT_SECTORS,
+    ACCESS: PROFILE_ACCESS_TYPES,
+    ISSUE: PROFILE_ISSUES,
+    ENGAGEMENT: PROFILE_ENGAGEMENT,
+  };
 
   state: ProfileFormState = emptyProfileForm();
   currentStep = 0;
@@ -317,13 +355,36 @@ export class ProfileAssessmentComponent implements OnDestroy {
     private readonly title: Title,
     private readonly api: ApiService,
     private readonly notification: NotificationService,
+    private readonly translate: TranslateService,
   ) {
     this.previousTitle = this.title.getTitle();
     this.syncDocumentTitle();
+    this.translate.onLangChange
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => this.syncDocumentTitle());
   }
 
   ngOnDestroy(): void {
     this.title.setTitle(this.previousTitle);
+  }
+
+  stepTitle(index: number): string {
+    return this.translate.instant(`PROFILE.STEPS.${index}.TITLE`);
+  }
+
+  stepDescription(index: number): string {
+    return this.translate.instant(`PROFILE.STEPS.${index}.DESCRIPTION`);
+  }
+
+  /** Translates a canonical English option while keeping it as the stored value. */
+  optionLabel(group: ProfileOptionGroup, value: string): string {
+    if (!value) return value;
+    const list = this.optionGroups[group];
+    const index = list.indexOf(value);
+    if (index < 0) return value;
+    const key = `PROFILE.OPTIONS.${group}.${index}`;
+    const label = this.translate.instant(key);
+    return label === key ? value : label;
   }
 
   get stepProgress(): number {
@@ -344,29 +405,47 @@ export class ProfileAssessmentComponent implements OnDestroy {
   }
 
   get suggestedRoute(): string {
-    return this.result?.suggestedRoute || suggestedProfileRoute(this.state);
+    const raw = this.result?.suggestedRoute || suggestedProfileRoute(this.state);
+    const key = PROFILE_ROUTE_KEYS[raw];
+    return key ? this.translate.instant(key) : raw;
   }
 
   get readinessLabel(): string {
-    return profileReadinessLabel(this.readinessScore);
+    const score = this.readinessScore;
+    const key =
+      score >= 75
+        ? "PROFILE.READINESS.HIGH"
+        : score >= 45
+          ? "PROFILE.READINESS.MEDIUM"
+          : "PROFILE.READINESS.LOW";
+    return this.translate.instant(key);
   }
 
   get specialtySummary(): string {
     return this.state.specialty
-      .map((item) => (item === 'Other' ? this.state.specialtyOther : item))
+      .map((item) =>
+        item === "Other"
+          ? this.state.specialtyOther
+          : this.optionLabel("SPECIALTY", item),
+      )
       .filter(Boolean)
-      .join(', ');
+      .join(", ");
   }
 
   get financingSummary(): string {
-    if (!this.state.financing) return 'Not specified';
-    return this.state.financing === 'Other — specify amount'
-      ? this.state.financingDetail || 'Not specified'
-      : this.state.financing;
+    if (!this.state.financing) return this.translate.instant("PROFILE.NOT_SPECIFIED");
+    return this.state.financing === "Other — specify amount"
+      ? this.state.financingDetail ||
+          this.translate.instant("PROFILE.NOT_SPECIFIED")
+      : this.optionLabel("FINANCING", this.state.financing);
   }
 
   get documentsSummary(): string {
-    return this.state.documents.join(', ') || 'Not specified';
+    return (
+      this.state.documents
+        .map((item) => this.optionLabel("DOCUMENT", item))
+        .join(", ") || this.translate.instant("PROFILE.NOT_SPECIFIED")
+    );
   }
 
   goToStep(index: number): void {
@@ -414,36 +493,36 @@ export class ProfileAssessmentComponent implements OnDestroy {
 
     if (this.currentStep === 0) {
       if (!state.region || !state.country.trim() || !state.organization.trim() || !state.entityType) {
-        message = 'Please select your region and entity type, and enter your country and organisation name.';
+        message = this.translate.instant('PROFILE.VALIDATION.STEP1');
       } else if (!EMAIL_PATTERN.test(state.contactEmail)) {
-        message = 'Please enter a valid professional contact email.';
+        message = this.translate.instant('PROFILE.VALIDATION.EMAIL');
       } else if (state.specialty.includes('Other') && !state.specialtyOther.trim()) {
-        message = 'Please specify your other specialty.';
+        message = this.translate.instant('PROFILE.VALIDATION.SPECIALTY');
       } else if (state.website && !/^https?:\/\//i.test(state.website.trim())) {
-        message = 'Enter a website starting with https://, or leave it blank.';
+        message = this.translate.instant('PROFILE.VALIDATION.WEBSITE');
       }
     } else if (this.currentStep === 1) {
       if (!state.objective) {
-        message = 'Please select your primary objective.';
+        message = this.translate.instant('PROFILE.VALIDATION.OBJECTIVE');
       } else if (
         state.financing === 'Other — specify amount' &&
         !state.financingDetail.trim()
       ) {
-        message = 'Please specify your indicative financing need.';
+        message = this.translate.instant('PROFILE.VALIDATION.FINANCING');
       }
     } else if (this.currentStep === 2) {
       if (!state.operatingHistory) {
-        message = 'Please select your institutional operating history.';
+        message = this.translate.instant('PROFILE.VALIDATION.HISTORY');
       }
     } else if (this.currentStep === 3) {
       if (!state.complianceIssues) {
-        message = 'Please answer the compliance question.';
+        message = this.translate.instant('PROFILE.VALIDATION.COMPLIANCE');
       }
     } else if (this.currentStep === 4) {
       if (!state.contactName.trim()) {
-        message = 'Please enter your contact name.';
+        message = this.translate.instant('PROFILE.VALIDATION.NAME');
       } else if (!state.consent) {
-        message = 'Consent is required to submit this enquiry.';
+        message = this.translate.instant('PROFILE.VALIDATION.CONSENT');
       }
     }
 
@@ -452,7 +531,6 @@ export class ProfileAssessmentComponent implements OnDestroy {
   }
 
   toggleSpecialty(value: string, checked: boolean): void {
-    if (value === 'Other') return;
     const set = new Set(this.state.specialty);
     if (checked) set.add(value);
     else set.delete(value);
@@ -505,19 +583,26 @@ export class ProfileAssessmentComponent implements OnDestroy {
       this.accountCreated = response.userCreated;
       this.accountUsername = response.username ?? '';
       this.submitted = true;
-      this.notification.success('Your profile assessment has been received.');
+      this.notification.success(
+        this.translate.instant('PROFILE.NOTIFY.RECEIVED'),
+      );
       this.scrollToTop();
     } catch (error) {
       this.errorMessage =
         error instanceof Error && error.message
           ? error.message
-          : 'The enquiry could not be submitted. Please try again.';
+          : this.translate.instant('PROFILE.NOTIFY.FAILED');
     } finally {
       this.submitting = false;
     }
   }
 
   private syncDocumentTitle(): void {
-    this.title.setTitle('Profile assessment — Avera Capital Access');
+    const translated = this.translate.instant('PROFILE.META_TITLE');
+    this.title.setTitle(
+      translated && translated !== 'PROFILE.META_TITLE'
+        ? translated
+        : 'Profile assessment — Avera Capital Access',
+    );
   }
 }
