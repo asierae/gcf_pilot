@@ -23,6 +23,55 @@
     </span>
   </div>
 
+  <!-- Bulk actions -->
+  @if (selectedCount > 0) {
+    <div class="bulk-bar">
+      <span class="bulk-count">{{ selectedCount }} selected</span>
+      <div class="bulk-actions">
+        <button
+          type="button"
+          class="btn-bulk"
+          (click)="bulkSetStatus('active')"
+          [disabled]="bulkBusy"
+        >
+          Activate
+        </button>
+        <button
+          type="button"
+          class="btn-bulk"
+          (click)="bulkSetStatus('pending')"
+          [disabled]="bulkBusy"
+        >
+          Set pending
+        </button>
+        <button
+          type="button"
+          class="btn-bulk btn-bulk-danger"
+          (click)="bulkSetStatus('suspended')"
+          [disabled]="bulkBusy"
+        >
+          Block
+        </button>
+        <button
+          type="button"
+          class="btn-bulk btn-bulk-danger"
+          (click)="bulkDelete()"
+          [disabled]="bulkBusy"
+        >
+          Delete
+        </button>
+        <button
+          type="button"
+          class="btn-bulk btn-bulk-clear"
+          (click)="clearSelection()"
+          [disabled]="bulkBusy"
+        >
+          Clear
+        </button>
+      </div>
+    </div>
+  }
+
   <!-- Create / Edit form -->
   @if (showForm) {
     <div class="user-form-panel">
@@ -55,7 +104,7 @@
           <select [(ngModel)]="form.status">
             <option value="pending">Pending invitation</option>
             <option value="active">Active</option>
-            <option value="suspended">Suspended</option>
+            <option value="suspended">Blocked</option>
           </select>
         </label>
 
@@ -120,6 +169,16 @@
       <table class="um-table">
         <thead>
           <tr>
+            <th class="col-check">
+              <input
+                type="checkbox"
+                class="row-check"
+                aria-label="Select all users"
+                [checked]="allVisibleSelected"
+                [indeterminate]="someVisibleSelected"
+                (change)="toggleSelectAll($any($event.target).checked)"
+              />
+            </th>
             <th>User</th>
             <th>Role</th>
             <th>Organization</th>
@@ -131,7 +190,19 @@
         </thead>
         <tbody>
           @for (user of filteredUsers; track user.id) {
-            <tr [class.row-editing]="editingUser?.id === user.id && showForm">
+            <tr
+              [class.row-editing]="editingUser?.id === user.id && showForm"
+              [class.row-selected]="isSelected(user)"
+            >
+              <td class="col-check">
+                <input
+                  type="checkbox"
+                  class="row-check"
+                  [attr.aria-label]="'Select ' + user.username"
+                  [checked]="isSelected(user)"
+                  (change)="toggleSelect(user, $any($event.target).checked)"
+                />
+              </td>
               <td class="col-user">
                 <div class="user-avatar" [class]="'avatar-' + user.role">
                   {{ getInitials(user) }}
@@ -148,9 +219,19 @@
                 {{ user.organizationName || user.organizationId || '—' }}
               </td>
               <td>
-                <span class="status-badge" [class]="getStatusClass(user.status)">
-                  {{ user.status }}
-                </span>
+                <select
+                  class="status-select"
+                  [class]="'status-select status-' + user.status"
+                  [class.is-saving]="statusSavingId === user.id"
+                  [ngModel]="user.status"
+                  (ngModelChange)="changeStatus(user, $event)"
+                  [disabled]="statusSavingId === user.id || bulkBusy"
+                  [attr.aria-label]="'Status for ' + user.username"
+                >
+                  @for (option of statusOptions; track option.value) {
+                    <option [value]="option.value">{{ option.label }}</option>
+                  }
+                </select>
               </td>
               <td class="col-access">
                 @if (user.hasPassword) {
@@ -172,7 +253,7 @@
                     @if (invitingId === user.id) {
                       Sending…
                     } @else {
-                      Send invitation
+                      Invite
                     }
                   </button>
                 }

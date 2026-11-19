@@ -39,6 +39,15 @@ export class UserManagementComponent implements OnInit, OnDestroy {
   saving = false;
   invitingId: string | null = null;
   deletingId: string | null = null;
+  statusSavingId: string | null = null;
+  bulkBusy = false;
+  selectedIds = new Set<string>();
+
+  readonly statusOptions: { value: UserStatus; label: string }[] = [
+    { value: 'active', label: 'Active' },
+    { value: 'pending', label: 'Pending' },
+    { value: 'suspended', label: 'Blocked' },
+  ];
 
   constructor(
     private readonly api: ApiService,
@@ -60,6 +69,10 @@ export class UserManagementComponent implements OnInit, OnDestroy {
     this.loadError = '';
     try {
       this.users = await this.api.getUsers();
+      const ids = new Set(this.users.map((user) => user.id));
+      this.selectedIds = new Set(
+        Array.from(this.selectedIds).filter((id) => ids.has(id)),
+      );
     } catch (error) {
       this.loadError =
         error instanceof Error ? error.message : 'Could not load users.';
@@ -76,6 +89,151 @@ export class UserManagementComponent implements OnInit, OnDestroy {
         .filter(Boolean)
         .some((value) => String(value).toLowerCase().includes(q)),
     );
+  }
+
+  /* ── Selection & status ─────────────────────────────────── */
+
+  get allVisibleSelected(): boolean {
+    const rows = this.filteredUsers;
+    return rows.length > 0 && rows.every((user) => this.selectedIds.has(user.id));
+  }
+
+  get someVisibleSelected(): boolean {
+    return (
+      this.selectedIds.size > 0 &&
+      this.filteredUsers.some((user) => this.selectedIds.has(user.id)) &&
+      !this.allVisibleSelected
+    );
+  }
+
+  get selectedCount(): number {
+    return this.selectedIds.size;
+  }
+
+  isSelected(user: ApiUser): boolean {
+    return this.selectedIds.has(user.id);
+  }
+
+  toggleSelect(user: ApiUser, checked: boolean): void {
+    if (checked) this.selectedIds.add(user.id);
+    else this.selectedIds.delete(user.id);
+  }
+
+  toggleSelectAll(checked: boolean): void {
+    if (checked) {
+      for (const user of this.filteredUsers) this.selectedIds.add(user.id);
+    } else {
+      for (const user of this.filteredUsers) this.selectedIds.delete(user.id);
+    }
+  }
+
+  clearSelection(): void {
+    this.selectedIds.clear();
+  }
+
+  statusLabel(status: UserStatus): string {
+    if (status === 'active') return 'Active';
+    if (status === 'pending') return 'Pending';
+    return 'Blocked';
+  }
+
+  async changeStatus(user: ApiUser, status: string): Promise<void> {
+    const next = status as UserStatus;
+    if (next === user.status || this.statusSavingId) {
+      return;
+    }
+
+    this.statusSavingId = user.id;
+    try {
+      const updated = await this.api.updateUser(user.id, { status: next });
+      user.status = updated?.status ?? next;
+      if (this.editingUser?.id === user.id) this.form.status = user.status;
+      this.notificationService.success(
+        `${user.username} is now ${this.statusLabel(user.status).toLowerCase()}.`,
+      );
+    } catch (error) {
+      this.notificationService.error(
+        error instanceof Error
+          ? error.message
+          : 'Could not change the user status.',
+      );
+      await this.loadUsers();
+    } finally {
+      this.statusSavingId = null;
+    }
+  }
+
+  async bulkSetStatus(status: UserStatus): Promise<void> {
+    if (this.bulkBusy || this.selectedIds.size === 0) return;
+    const ids = Array.from(this.selectedIds);
+    const targets = this.users.filter((user) => ids.includes(user.id));
+    const changed = targets.filter((user) => user.status !== status);
+    if (!changed.length) {
+      this.notificationService.info(
+        `Selected users are already ${this.statusLabel(status).toLowerCase()}.`,
+      );
+      return;
+    }
+
+    this.bulkBusy = true;
+    try {
+      await Promise.all(
+        changed.map((user) => this.api.updateUser(user.id, { status })),
+      );
+      for (const user of changed) user.status = status;
+      if (this.editingUser && changed.some((user) => user.id === this.editingUser?.id)) {
+        this.form.status = status;
+      }
+      this.notificationService.success(
+        `${changed.length} user${changed.length === 1 ? '' : 's'} set to ${this.statusLabel(status).toLowerCase()}.`,
+      );
+      this.selectedIds.clear();
+    } catch (error) {
+      this.notificationService.error(
+        error instanceof Error
+          ? error.message
+          : 'Could not update the selected users.',
+      );
+      await this.loadUsers();
+    } finally {
+      this.bulkBusy = false;
+    }
+  }
+
+  async bulkDelete(): Promise<void> {
+    if (this.bulkBusy || this.selectedIds.size === 0) return;
+    const ids = Array.from(this.selectedIds);
+    const targets = this.users.filter((user) => ids.includes(user.id));
+    if (
+      !confirm(
+        `Delete ${targets.length} user${targets.length === 1 ? '' : 's'}? This cannot be undone.`,
+      )
+    ) {
+      return;
+    }
+
+    this.bulkBusy = true;
+    try {
+      await Promise.all(targets.map((user) => this.api.deleteUser(user.id)));
+      this.users = this.users.filter((user) => !ids.includes(user.id));
+      if (this.editingUser && ids.includes(this.editingUser.id)) {
+        this.showForm = false;
+        this.editingUser = null;
+      }
+      this.notificationService.success(
+        `${targets.length} user${targets.length === 1 ? '' : 's'} deleted.`,
+      );
+      this.selectedIds.clear();
+    } catch (error) {
+      this.notificationService.error(
+        error instanceof Error
+          ? error.message
+          : 'Could not delete the selected users.',
+      );
+      await this.loadUsers();
+    } finally {
+      this.bulkBusy = false;
+    }
   }
 
   openCreateForm(): void {
@@ -220,10 +378,6 @@ export class UserManagementComponent implements OnInit, OnDestroy {
 
   getRoleClass(role: UserRole): string {
     return role === 'admin' ? 'badge-admin' : 'badge-applicant';
-  }
-
-  getStatusClass(status: UserStatus): string {
-    return `badge-status-${status}`;
   }
 
   formatDate(iso?: string): string {

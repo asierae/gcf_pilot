@@ -182,6 +182,48 @@ a {
   color: var(--teal);
 }
 
+.avera-nav-login.is-signed-in {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 10px 4px 4px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: rgba(212, 228, 236, 0.9);
+}
+
+.avera-nav-login.is-signed-in:hover {
+  border-color: rgba(232, 192, 106, 0.4);
+  color: #f5dfa8;
+}
+
+.nav-avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: rgba(232, 192, 106, 0.18);
+  color: #f5dfa8;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.nav-user {
+  max-width: 110px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 600;
+}
+
+.nav-portal {
+  color: #e8c06a;
+}
+
 .avera-nav-mobile-actions {
   display: none;
 }
@@ -190,6 +232,18 @@ a {
   font-size: 15px;
   font-weight: 500;
   color: rgba(212, 228, 236, 0.82);
+}
+
+.avera-nav-mobile-login.is-signed-in {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.avera-nav-mobile-login.is-signed-in .nav-avatar {
+  width: 30px;
+  height: 30px;
+  font-size: 11px;
 }
 
 .avera-burger {

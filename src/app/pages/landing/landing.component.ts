@@ -47,6 +47,25 @@ export class LandingComponent implements AfterViewInit, OnDestroy {
       .subscribe(() => this.syncDocumentTitle());
   }
 
+  /** Signed-in visitors get a direct route back into the portal. */
+  get isLoggedIn(): boolean {
+    return this.authService.isLoggedIn;
+  }
+
+  get userName(): string {
+    return this.authService.currentUserValue?.username ?? '';
+  }
+
+  get userInitials(): string {
+    return this.userName.slice(0, 2).toUpperCase();
+  }
+
+  get portalLink(): string {
+    return this.authService.currentUserValue?.role === 'admin'
+      ? '/dashboard/overview'
+      : '/my-forms';
+  }
+
   @HostListener('window:scroll')
   onWindowScroll(): void {
     const next = window.scrollY > 24;

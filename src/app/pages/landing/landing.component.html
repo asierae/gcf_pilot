@@ -36,9 +36,20 @@
       <a href="#contact" (click)="closeMenu()">{{ 'LANDING.NAV.CONTACT' | translate }}</a>
 
       <div class="avera-nav-mobile-actions">
-        <a routerLink="/login" class="avera-nav-mobile-login" (click)="closeMenu()">
-          {{ 'LANDING.NAV.SIGN_IN' | translate }}
-        </a>
+        @if (isLoggedIn) {
+          <a
+            [routerLink]="portalLink"
+            class="avera-nav-mobile-login is-signed-in"
+            (click)="closeMenu()"
+          >
+            <span class="nav-avatar">{{ userInitials }}</span>
+            <span>{{ userName }} · {{ 'LANDING.NAV.GO_TO_PORTAL' | translate }} →</span>
+          </a>
+        } @else {
+          <a routerLink="/login" class="avera-nav-mobile-login" (click)="closeMenu()">
+            {{ 'LANDING.NAV.SIGN_IN' | translate }}
+          </a>
+        }
         <a routerLink="/get-assessed" class="avera-btn avera-btn-nav" (click)="closeMenu()">
           {{ 'LANDING.NAV.CTA_SHORT' | translate }} <span aria-hidden="true">→</span>
         </a>
@@ -48,7 +59,19 @@
     <div class="avera-nav-actions">
       <app-language-switcher [ariaLabel]="'LANDING.NAV.LANGUAGE' | translate" />
 
-      <a routerLink="/login" class="avera-nav-login">{{ 'LANDING.NAV.SIGN_IN' | translate }}</a>
+      @if (isLoggedIn) {
+        <a
+          [routerLink]="portalLink"
+          class="avera-nav-login is-signed-in"
+          [title]="'LANDING.NAV.GO_TO_PORTAL' | translate"
+        >
+          <span class="nav-avatar">{{ userInitials }}</span>
+          <span class="nav-user">{{ userName }}</span>
+          <span class="nav-portal">{{ 'LANDING.NAV.GO_TO_PORTAL' | translate }} →</span>
+        </a>
+      } @else {
+        <a routerLink="/login" class="avera-nav-login">{{ 'LANDING.NAV.SIGN_IN' | translate }}</a>
+      }
       <a routerLink="/get-assessed" class="avera-btn avera-btn-nav">
         {{ 'LANDING.NAV.CTA_SHORT' | translate }} <span aria-hidden="true">→</span>
       </a>
@@ -446,7 +469,11 @@
             <li>{{ 'LANDING.PORTAL.ITEM4' | translate }}</li>
           </ul>
 
-          <a routerLink="/login" class="avera-btn avera-btn-primary" data-reveal>
+          <a
+            [routerLink]="isLoggedIn ? portalLink : '/login'"
+            class="avera-btn avera-btn-primary"
+            data-reveal
+          >
             {{ 'LANDING.PORTAL.CTA' | translate }} <span aria-hidden="true">→</span>
           </a>
         </div>
@@ -748,7 +775,7 @@
 
       <div class="avera-footer-col">
         <h4>{{ 'LANDING.FOOTER.ACCESS' | translate }}</h4>
-        <a routerLink="/login">{{ 'LANDING.FOOTER.LINK_PORTAL' | translate }}</a>
+        <a [routerLink]="isLoggedIn ? portalLink : '/login'">{{ 'LANDING.FOOTER.LINK_PORTAL' | translate }}</a>
         <a routerLink="/stage1">{{ 'LANDING.FOOTER.LINK_ASSESSMENT' | translate }}</a>
         <a routerLink="/readiness">{{ 'LANDING.FOOTER.LINK_WIZARD' | translate }}</a>
         <a routerLink="/dashboard">{{ 'LANDING.FOOTER.LINK_DASHBOARD' | translate }}</a>
