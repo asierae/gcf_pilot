@@ -25,7 +25,19 @@
 
     <div class="ga-nav-actions">
       <app-language-switcher [ariaLabel]="'LANDING.NAV.LANGUAGE' | translate" />
-      <a routerLink="/login" class="ga-signin">{{ 'LANDING.NAV.SIGN_IN' | translate }}</a>
+      @if (isLoggedIn) {
+        <a
+          [routerLink]="portalLink"
+          class="ga-signin is-signed-in"
+          [title]="'LANDING.NAV.GO_TO_PORTAL' | translate"
+        >
+          <span class="ga-nav-avatar">{{ userInitials }}</span>
+          <span class="ga-nav-user">{{ userName }}</span>
+          <span class="ga-nav-portal">{{ 'LANDING.NAV.GO_TO_PORTAL' | translate }} →</span>
+        </a>
+      } @else {
+        <a routerLink="/login" class="ga-signin">{{ 'LANDING.NAV.SIGN_IN' | translate }}</a>
+      }
     </div>
   </header>
 

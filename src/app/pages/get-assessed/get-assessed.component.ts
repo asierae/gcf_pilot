@@ -5,6 +5,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { LanguageSwitcherComponent } from '../../shared/components/language-switcher/language-switcher.component';
 import { CONTACT_EMAIL } from '../../config/email.config';
+import { AuthService } from '../../services/auth.service';
 
 /**
  * Public pathway chooser shown by every "Get assessed" call to action.
@@ -23,6 +24,7 @@ export class GetAssessedComponent implements OnDestroy {
   readonly contactMailto = `mailto:${CONTACT_EMAIL}?subject=GCF%20pathway%20guidance`;
 
   private readonly destroyRef = inject(DestroyRef);
+  private readonly authService = inject(AuthService);
   private previousTitle = 'Avera Capital Access';
 
   constructor(
@@ -38,6 +40,25 @@ export class GetAssessedComponent implements OnDestroy {
 
   ngOnDestroy(): void {
     this.title.setTitle(this.previousTitle);
+  }
+
+  /** Signed-in visitors get a direct route back into the portal. */
+  get isLoggedIn(): boolean {
+    return this.authService.isLoggedIn;
+  }
+
+  get userName(): string {
+    return this.authService.currentUserValue?.username ?? '';
+  }
+
+  get userInitials(): string {
+    return this.userName.slice(0, 2).toUpperCase();
+  }
+
+  get portalLink(): string {
+    return this.authService.currentUserValue?.role === 'admin'
+      ? '/dashboard/overview'
+      : '/my-forms';
   }
 
   private syncDocumentTitle(): void {
