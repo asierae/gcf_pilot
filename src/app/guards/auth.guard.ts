@@ -56,6 +56,13 @@ export const adminGuard: CanActivateFn = () => {
     return true;
   }
 
+  // Signed-in applicants get their own dashboard instead of being bounced to
+  // the login screen when they land on an admin-only route.
+  if (auth.isLoggedIn) {
+    router.navigate(['/dashboard/applicant']);
+    return false;
+  }
+
   router.navigate(['/login']);
   return false;
 };

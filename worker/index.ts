@@ -1337,7 +1337,13 @@ function dashboardProgress(
 }
 
 async function organizationDashboard(env: Env, orgId: string): Promise<Response> {
-  assertEntityId(orgId);
+  // Applicant accounts may reference an organization id saved before the
+  // strict id format existed (e.g. an admin typing "avera"). This endpoint is
+  // read-only, so accept any single path segment and simply return an empty
+  // dashboard when nothing matches instead of failing the whole page.
+  if (!orgId || orgId.length > 80 || orgId.includes('..')) {
+    return json({ error: 'Organization not found.' }, 404);
+  }
 
   const orgRow = await env.DB.prepare('SELECT * FROM organizations WHERE id = ?')
     .bind(orgId)
@@ -2768,9 +2774,25 @@ async function createStage1(request: Request, env: Env): Promise<Response> {
 
     await deleteDraftRow(env, 'stage1', id);
 
+    const account = await ensureSubmissionUser(env, {
+      email: readText(data, 'primaryContactEmail'),
+      organizationName: readText(data, 'applicantName') || organization.name || id,
+      organizationAcronym:
+        readText(data, 'applicantAcronym') || organization.acronym,
+      organizationId: id,
+    });
+
     await notifySubmission(env, applicantSubmissionNotice('pre-screening', data, now));
 
-    return json({ applicant, organization }, 200);
+    return json(
+      {
+        applicant,
+        organization,
+        userCreated: account.created,
+        username: account.username || undefined,
+      },
+      200,
+    );
   }
 
   const applicant: ApplicantRecord = {
@@ -2800,9 +2822,25 @@ async function createStage1(request: Request, env: Env): Promise<Response> {
 
   await deleteDraftRow(env, 'stage1', id);
 
+  const account = await ensureSubmissionUser(env, {
+    email: readText(data, 'primaryContactEmail'),
+    organizationName: readText(data, 'applicantName') || organization.name || id,
+    organizationAcronym:
+      readText(data, 'applicantAcronym') || organization.acronym,
+    organizationId: id,
+  });
+
   await notifySubmission(env, applicantSubmissionNotice('pre-screening', data, now));
 
-  return json({ applicant, organization }, 201);
+  return json(
+    {
+      applicant,
+      organization,
+      userCreated: account.created,
+      username: account.username || undefined,
+    },
+    201,
+  );
 }
 
 async function createStage2(request: Request, env: Env): Promise<Response> {
@@ -2842,11 +2880,31 @@ async function createStage2(request: Request, env: Env): Promise<Response> {
 
     await notifySubmission(env, applicantSubmissionNotice('stage 2', data, now));
 
-    return json({ applicant }, 200);
+    const account = await ensureSubmissionUser(env, {
+      email: readText(data, 'primaryContactEmail'),
+      organizationName:
+        readText(data, 'applicantName') ||
+        readText(stage1Data, 'applicantName') ||
+        id,
+      organizationAcronym:
+        readText(data, 'applicantAcronym') ||
+        readText(stage1Data, 'applicantAcronym'),
+      organizationId: id,
+    });
+
+    return json(
+      {
+        applicant,
+        userCreated: account.created,
+        username: account.username || undefined,
+      },
+      200,
+    );
   }
 
+  let organization: OrganizationRecord | null = null;
   if (Object.keys(stage1Data).length) {
-    await saveOrganization(env, id, organizationFromStage1(stage1Data));
+    organization = await saveOrganization(env, id, organizationFromStage1(stage1Data));
   }
 
   const applicant: ApplicantRecord = {
@@ -2876,7 +2934,23 @@ async function createStage2(request: Request, env: Env): Promise<Response> {
 
   await notifySubmission(env, applicantSubmissionNotice('stage 2', data, now));
 
-  return json({ applicant }, 201);
+  const account = await ensureSubmissionUser(env, {
+    email: readText(data, 'primaryContactEmail'),
+    organizationName:
+      organization?.name || readText(data, 'applicantName') || id,
+    organizationAcronym:
+      organization?.acronym || readText(data, 'applicantAcronym'),
+    organizationId: id,
+  });
+
+  return json(
+    {
+      applicant,
+      userCreated: account.created,
+      username: account.username || undefined,
+    },
+    201,
+  );
 }
 
 async function deleteApplicants(request: Request, env: Env): Promise<Response> {
@@ -3497,6 +3571,27 @@ async function ensureProfileUser(
     organizationName: lead.organization,
     organizationAcronym: lead.acronym,
   });
+}
+
+/**
+ * Accreditation (stage 1 / stage 2) submissions are also an access request:
+ * unknown contact emails get an inactive (pending) applicant account, exactly
+ * like readiness and profile assessment submissions. Provisioning must never
+ * reject an otherwise valid submission.
+ */
+async function ensureSubmissionUser(
+  env: Env,
+  input: PortalAccountInput,
+): Promise<{ username: string; created: boolean }> {
+  try {
+    return await ensurePortalUser(env, input);
+  } catch (error) {
+    console.error(
+      'Could not provision a portal account for the accreditation submission',
+      error,
+    );
+    return { username: '', created: false };
+  }
 }
 
 /** Aggregated, read-only metrics for the admin system overview. */

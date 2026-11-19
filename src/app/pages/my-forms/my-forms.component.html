@@ -10,9 +10,14 @@
         Track every form your organization has submitted or saved as a draft.
       </p>
     </div>
-    <button type="button" class="btn btn-ghost" (click)="reload()" [disabled]="loading">
-      Refresh
-    </button>
+    <div class="page-actions">
+      <a class="btn btn-primary" routerLink="/dashboard/applicant">
+        {{ "APPLICANT_DASHBOARD.TITLE" | translate }}
+      </a>
+      <button type="button" class="btn btn-ghost" (click)="reload()" [disabled]="loading">
+        Refresh
+      </button>
+    </div>
   </header>
 
   @if (error) {

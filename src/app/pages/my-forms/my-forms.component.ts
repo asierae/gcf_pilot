@@ -1,6 +1,7 @@
 import { Component, OnInit } from "@angular/core";
 import { CommonModule } from "@angular/common";
 import { RouterLink } from "@angular/router";
+import { TranslatePipe } from "@ngx-translate/core";
 import { AuthService } from "../../services/auth.service";
 import { OrganizationService } from "../../services/organization.service";
 import { OrganizationForms } from "../../models/organization.model";
@@ -20,7 +21,7 @@ interface FormCard {
 @Component({
   selector: "app-my-forms",
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, TranslatePipe],
   templateUrl: "./my-forms.component.html",
   styleUrl: "./my-forms.component.css",
 })

@@ -142,9 +142,13 @@ Public (no token):
 
 - `POST /api/applicants/stage1` — `{ data, id? }` (`id` keeps the record in
   sync with the `organizations/<id>/...` upload folder and creates/updates the
-  organization profile)
+  organization profile). If `data.primaryContactEmail` is not a portal account
+  yet, a passwordless `applicant` user with status `pending` is created for
+  manual approval (same behaviour as readiness / profile assessment); the
+  response adds `userCreated` and `username`.
 - `POST /api/applicants/stage2` — `{ data, stage1Data, id? }` (upserts into the
-  existing applicant/organization row when `id` already exists)
+  existing applicant/organization row when `id` already exists). It provisions
+  a pending applicant account for an unknown `data.primaryContactEmail` too.
 - `GET /api/applicants/latest?stage=1|2` — latest stage payload (wizard prefill)
 - `GET /api/organizations/:id` — organization profile (public by design: the
   applicant accounts live in the browser, so there is no token to send)
