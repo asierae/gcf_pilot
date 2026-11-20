@@ -67,28 +67,29 @@ Ninguna tarea activa. Stage 2 (alineación GCF, i18n, borradores por año y corr
 
 ## Últimos cambios realizados
 
-1. `f1f9c6f` — borradores de Stage 2 por `(organization_id, year)` con autoguardado y correo "under review" al enviar; migración aplicada en local/remoto.
-2. `1581b6d` — i18n del wizard Stage 2 en los 7 idiomas.
-3. `fe188c2` — campos de la guía GCF aislados para que no afecten a la pre-acreditación.
-4. `a5e7988`, `0fe0828` — Stage 2 alineado con la guía oficial de GCF: preguntas y campos que faltaban, enlaces a políticas y corrección de textos truncados.
-5. `34dd3ed` — Country de "My organization" pasa de input de texto al dropdown de países compartido.
-6. `33455ba`, `0622f69` — página "My organization" del applicant, con endpoint propio que rechaza servidor-side cualquier campo ajeno a los siete editables del perfil.
-7. `fdc91fb` — estilo de los botones de descarga del PDF y arreglo del desbordamiento de texto en el PDF.
-8. `8fce205` — PDF de riesgo/reputación firmado por Avera (Worker + `worker/risk-report-pdf.ts`), botones en admin y dashboard del solicitante, y corrección del `ngModel` sin `name` en el formulario del admin.
-9. `243fd8c` — scores de auditoría Avera por factor con override opcional en `organizationDashboard`, edición en el admin y visualización pública (migración aplicada en local y remota).
-10. `36cbee0` — columnas de leads reordenadas (Organization, sin Region, Priority antes de Comments) y acciones para abrir Website/Email.
-11. `6d91f84` — leads: prioridad en dropdown, orden en servidor y cliente y migración con backfill de favoritos, aplicada en local y remota.
-12. `97361e0` — breadcrumb siempre visible arriba a la izquierda (incluido RTL y rutas sin mapear) y menú público oculto en `/stage1` anónimo.
-13. `e94d19f` — migración `favorite` aplicada a BD local por defecto y D1 remota (fix de "Could not update the row" al marcar favoritos).
-14. `495b056` — tabla de leads: `thead`/`tbody` alineados (selección → favorito) y `.favorite-check` para el toggle de favorito.
-15. `336e495` — aviso de email duplicado al hacer blur en readiness, Stage 1 y perfil.
-16. `17f26dd` — `USER.EMAIL_EXISTS` movido a nivel superior en los 7 idiomas.
-17. `38f5c55` — columna Country más ancha y panel del dropdown limitado al ancho disponible.
-18. `bc9007a` — perfil sin `region`; `country` dentro de "About your organisation".
-19. `588f372` — renombrado a Pre-Accreditation en UI/i18n/correos.
-20. `cb1c220` — persistencia de `favorite` en D1 (schema + migración + insert/update/read).
-21. `632895a` — handlers de favoritos corregidos (`$any($event.target).checked`).
-22. `029fa28` — CTA "Get assessed" oculto con sesión iniciada.
+1. `ec2b7e2` — tabla de leads con columnas más anchas y scroll horizontal.
+2. `f1f9c6f` — borradores de Stage 2 por `(organization_id, year)` con autoguardado y correo "under review" al enviar; migración aplicada en local/remoto.
+3. `1581b6d` — i18n del wizard Stage 2 en los 7 idiomas.
+4. `fe188c2` — campos de la guía GCF aislados para que no afecten a la pre-acreditación.
+5. `a5e7988`, `0fe0828` — Stage 2 alineado con la guía oficial de GCF: preguntas y campos que faltaban, enlaces a políticas y corrección de textos truncados.
+6. `34dd3ed` — Country de "My organization" pasa de input de texto al dropdown de países compartido.
+7. `33455ba`, `0622f69` — página "My organization" del applicant, con endpoint propio que rechaza servidor-side cualquier campo ajeno a los siete editables del perfil.
+8. `fdc91fb` — estilo de los botones de descarga del PDF y arreglo del desbordamiento de texto en el PDF.
+9. `8fce205` — PDF de riesgo/reputación firmado por Avera (Worker + `worker/risk-report-pdf.ts`), botones en admin y dashboard del solicitante, y corrección del `ngModel` sin `name` en el formulario del admin.
+10. `243fd8c` — scores de auditoría Avera por factor con override opcional en `organizationDashboard`, edición en el admin y visualización pública (migración aplicada en local y remota).
+11. `36cbee0` — columnas de leads reordenadas (Organization, sin Region, Priority antes de Comments) y acciones para abrir Website/Email.
+12. `6d91f84` — leads: prioridad en dropdown, orden en servidor y cliente y migración con backfill de favoritos, aplicada en local y remota.
+13. `97361e0` — breadcrumb siempre visible arriba a la izquierda (incluido RTL y rutas sin mapear) y menú público oculto en `/stage1` anónimo.
+14. `e94d19f` — migración `favorite` aplicada a BD local por defecto y D1 remota (fix de "Could not update the row" al marcar favoritos).
+15. `495b056` — tabla de leads: `thead`/`tbody` alineados (selección → favorito) y `.favorite-check` para el toggle de favorito.
+16. `336e495` — aviso de email duplicado al hacer blur en readiness, Stage 1 y perfil.
+17. `17f26dd` — `USER.EMAIL_EXISTS` movido a nivel superior en los 7 idiomas.
+18. `38f5c55` — columna Country más ancha y panel del dropdown limitado al ancho disponible.
+19. `bc9007a` — perfil sin `region`; `country` dentro de "About your organisation".
+20. `588f372` — renombrado a Pre-Accreditation en UI/i18n/correos.
+21. `cb1c220` — persistencia de `favorite` en D1 (schema + migración + insert/update/read).
+22. `632895a` — handlers de favoritos corregidos (`$any($event.target).checked`).
+23. `029fa28` — CTA "Get assessed" oculto con sesión iniciada.
 
 ## Decisiones recientes
 
@@ -103,6 +104,7 @@ Ninguna tarea activa. Stage 2 (alineación GCF, i18n, borradores por año y corr
 - "My organization": el applicant usa `PATCH /api/organizations/:id/profile`, con allow-list de siete campos. El endpoint rechaza con 400 cualquier clave ajena (incluidos `name`, `acronym`, `contactEmail` y todos los campos admin/auditoría) y comprueba que la organización exista para no crear filas nuevas. ⚠️ No hay autenticación de solicitante en el servidor: las rutas de applicant son públicas, por lo que este endpoint sigue siendo vulnerable a IDOR si se conoce el id; la restricción actual es de campos, no de propiedad. Para exigir propiedad real haría falta un token firmado con `organizationId`.
 - Borradores Stage 2: tabla `stage2_drafts` con clave compuesta `(organization_id, year)`; el selector ofrece el año actual y los tres anteriores más cualquier año con borrador. Al cambiar de año se vuelca primero el timer pendiente con el año antiguo para no escribir datos en la clave nueva. `onYearChange` valida el rango 2000..año+1 (un `change` vacío del `<select>` producía `0` y peticiones 400).
 - Correo "under review": `notifyStage2UnderReview` se llama tras `notifySubmission` en ambas ramas de `createStage2`; usa `primaryContactEmail` del payload y es best-effort (sin `RESEND_API_KEY` o email inválido no envía y no cambia la respuesta del POST). Los textos de correos siguen en inglés, igual que el resto del Worker.
+- Tabla de leads: ancho mínimo ampliado a 1720 px (1620 px en la vista previa) para que las columnas respiren; el contenedor `.table-scroll` ya tenía `overflow-x: auto` y ahora tiene scrollbar estilizado. Verificado: `clientWidth` 683 px vs `scrollWidth` 1720 px.
 - Alineación con la guía GCF 2026-07: el wizard de Stage 2 incluye las 70 preguntas del formulario oficial (ítems 1.1–13.4). Los campos que la guía marca como "additional questions (not pre-populated)" solo se muestran en Stage 2 mediante el input `applicationMode` del componente compartido `stage1-steps`; el pre-screening (Stage 1) sigue con sus campos originales. Cada sección muestra enlaces a los documentos oficiales (políticas, decisiones del Board, ESMS handbook, areas of work). No se eliminó nada del formulario: los campos `s12_status`/`s13_status` y sus comentarios son seguimiento interno de Avera, no parte del formulario GCF.
 
 ## Próximas tareas recomendadas
