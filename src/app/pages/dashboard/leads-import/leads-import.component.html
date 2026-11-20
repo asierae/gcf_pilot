@@ -71,6 +71,7 @@
       <table class="leads-table preview-table">
         <thead>
           <tr>
+            <th>Favorite</th>
             <th>Region</th>
             <th>Country</th>
             <th>Organization</th>
@@ -88,9 +89,11 @@
             <td>
               <input
                 class="cell-input"
-                [value]="lead.region"
+                type="checkbox"
+                [checked]="lead.favorite"
                 (change)="
-                  updatePendingField(i, 'region', $any($event.target).value)
+                  lead.favorite = $event.target.checked;
+                  updatePendingField(i, 'favorite', lead.favorite)
                 "
               />
             </td>
@@ -322,6 +325,7 @@
                 <span class="checkbox-box"></span>
               </label>
             </th>
+            <th>Favorite</th>
             <th>Region</th>
             <th>Country</th>
             <th>Organization</th>
@@ -340,6 +344,17 @@
             *ngFor="let lead of paginatedLeads"
             [class.saving]="savingFieldId === lead.id"
           >
+            <td>
+              <input
+                class="cell-input"
+                type="checkbox"
+                [checked]="lead.favorite"
+                (change)="
+                  lead.favorite = $event.target.checked;
+                  updateSavedField(lead, 'favorite')
+                "
+              />
+            </td>
             <td class="col-check">
               <label
                 class="checkbox-wrap"

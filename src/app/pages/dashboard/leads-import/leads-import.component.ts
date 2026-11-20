@@ -446,9 +446,28 @@ export class LeadsImportComponent implements OnInit, OnDestroy {
 
   get filteredLeads(): LeadRecord[] {
     const query = this.searchQuery.trim().toLowerCase();
-    if (!query) {
-      return this.savedLeads;
-    }
+    const leads = !query ? this.savedLeads : this.savedLeads.filter(
+      (lead) =>
+        lead.organization.toLowerCase().includes(query) ||
+        lead.acronym.toLowerCase().includes(query) ||
+        lead.country.toLowerCase().includes(query) ||
+        (lead.contactName?.toLowerCase() || '').includes(query) ||
+        (lead.contactEmail?.toLowerCase() || '').includes(query) ||
+        (lead.objective?.toLowerCase() || '').includes(query) ||
+        (lead.financing?.toLowerCase() || '').includes(query) ||
+        (lead.complianceIssues?.toLowerCase() || '').includes(query) ||
+        (lead.challenge?.toLowerCase() || '').includes(query) ||
+        (lead.objective?.toLowerCase() || '').includes(query)
+    );
+    return leads.sort((a, b) => {
+      // Favorited leads appear first
+      const aFavorite = a.favorite ? 1 : 0;
+      const bFavorite = b.favorite ? 1 : 0;
+      if (aFavorite !== bFavorite) {
+        return bFavorite - aFavorite; // favorite first
+      }
+      return 0;
+    });
 
     return this.savedLeads.filter((lead) =>
       this.getSearchableText(lead).includes(query),
