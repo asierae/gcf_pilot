@@ -84,17 +84,8 @@
           <!-- ── Step 1: institutional profile ── -->
           @if (currentStep === 0) {
             <div class="form-card">
-              <h3>{{ 'PROFILE.S1.BASED_TITLE' | translate }}</h3>
+              <h3>{{ 'PROFILE.S1.ORG_TITLE' | translate }}</h3>
               <div class="form-row">
-                <div class="form-group">
-                  <label for="pa-region">{{ 'PROFILE.S1.REGION' | translate }} <span class="required">*</span></label>
-                  <select id="pa-region" [(ngModel)]="state.region" name="region">
-                    <option value="">{{ 'PROFILE.S1.SELECT' | translate }}</option>
-                    @for (region of regions; track region) {
-                      <option [value]="region">{{ optionLabel('REGION', region) }}</option>
-                    }
-                  </select>
-                </div>
                 <div class="form-group">
                   <label for="pa-country">{{ 'PROFILE.S1.COUNTRY' | translate }} <span class="required">*</span></label>
                   <app-country-select
@@ -105,10 +96,6 @@
                   ></app-country-select>
                 </div>
               </div>
-            </div>
-
-            <div class="form-card">
-              <h3>{{ 'PROFILE.S1.ORG_TITLE' | translate }}</h3>
               <div class="form-row">
                 <div class="form-group">
                   <label for="pa-org">{{ 'PROFILE.S1.ORG_NAME' | translate }} <span class="required">*</span></label>
@@ -458,7 +445,6 @@
         <div class="form-card">
           <h3>{{ 'PROFILE.SUCCESS.SUMMARY' | translate }}</h3>
           <dl class="summary-list">
-            <div><dt>{{ 'PROFILE.SUMMARY.REGION' | translate }}</dt><dd>{{ optionLabel('REGION', state.region) }}</dd></div>
             <div><dt>{{ 'PROFILE.SUMMARY.COUNTRY' | translate }}</dt><dd>{{ state.country }}</dd></div>
             <div><dt>{{ 'PROFILE.SUMMARY.ORGANISATION' | translate }}</dt><dd>{{ state.organization }}</dd></div>
             <div><dt>{{ 'PROFILE.SUMMARY.ENTITY' | translate }}</dt><dd>{{ optionLabel('ENTITY', state.entityType) }}</dd></div>

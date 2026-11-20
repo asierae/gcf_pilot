@@ -11,19 +11,6 @@ import { NotificationService } from '../../services/notification.service';
 import { LanguageSwitcherComponent } from '../../shared/components/language-switcher/language-switcher.component';
 import { LeadRecord } from '../../models/applicant.model';
 
-export const PROFILE_REGIONS = [
-  'Africa',
-  'Asia-Pacific',
-  'Central Asia',
-  'Eastern Europe',
-  'Western Europe',
-  'Middle East & North Africa',
-  'North America',
-  'Latin America & Caribbean',
-  'Global / Multiple regions',
-  'Other',
-];
-
 export const PROFILE_ENTITY_TYPES = [
   'Bank / Financial institution',
   'Development finance institution',
@@ -133,7 +120,6 @@ export const PROFILE_ENGAGEMENT = [
 
 /** Everything the form collects, ready to be stored as a lead. */
 export interface ProfileFormState {
-  region: string;
   country: string;
   organization: string;
   acronym: string;
@@ -162,7 +148,6 @@ export interface ProfileFormState {
 
 export function emptyProfileForm(): ProfileFormState {
   return {
-    region: '',
     country: '',
     organization: '',
     acronym: '',
@@ -273,7 +258,6 @@ const PROFILE_ROUTE_KEYS: Record<string, string> = {
 };
 
 type ProfileOptionGroup =
-  | "REGION"
   | "ENTITY"
   | "SPECIALTY"
   | "DOCUMENT"
@@ -309,7 +293,6 @@ export class ProfileAssessmentComponent implements OnDestroy {
     index,
   }));
 
-  readonly regions = PROFILE_REGIONS;
   readonly entityTypes = PROFILE_ENTITY_TYPES;
   readonly specialties = PROFILE_SPECIALTIES;
   readonly documents = PROFILE_DOCUMENTS;
@@ -324,7 +307,6 @@ export class ProfileAssessmentComponent implements OnDestroy {
   readonly engagementOptions = PROFILE_ENGAGEMENT;
 
   private readonly optionGroups: Record<ProfileOptionGroup, string[]> = {
-    REGION: PROFILE_REGIONS,
     ENTITY: PROFILE_ENTITY_TYPES,
     SPECIALTY: PROFILE_SPECIALTIES,
     DOCUMENT: PROFILE_DOCUMENTS,
@@ -492,7 +474,7 @@ export class ProfileAssessmentComponent implements OnDestroy {
     let message = '';
 
     if (this.currentStep === 0) {
-      if (!state.region || !state.country.trim() || !state.organization.trim() || !state.entityType) {
+      if (!state.country.trim() || !state.organization.trim() || !state.entityType) {
         message = this.translate.instant('PROFILE.VALIDATION.STEP1');
       } else if (!EMAIL_PATTERN.test(state.contactEmail)) {
         message = this.translate.instant('PROFILE.VALIDATION.EMAIL');
@@ -549,7 +531,6 @@ export class ProfileAssessmentComponent implements OnDestroy {
     this.errorMessage = '';
 
     const payload: Omit<LeadRecord, 'id' | 'createdAt' | 'updatedAt'> = {
-      region: this.state.region,
       country: this.state.country.trim(),
       organization: this.state.organization.trim(),
       acronym: this.state.acronym.trim(),
