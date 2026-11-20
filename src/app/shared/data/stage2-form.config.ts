@@ -276,8 +276,8 @@ export function buildWizardNav(): WizardNavGroup[] {
   }));
 
   return [
-    { id: 'stage1', label: 'Pre-Accreditation (Stage 1)', steps: stage1Items },
-    { id: 'stage2', label: 'Accreditation Application (Stage 2)', steps: stage2Items }
+    { id: 'stage1', label: 'STAGE2.GROUP_STAGE1', steps: stage1Items },
+    { id: 'stage2', label: 'STAGE2.GROUP_STAGE2', steps: stage2Items }
   ];
 }
 

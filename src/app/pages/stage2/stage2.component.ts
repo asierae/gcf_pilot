@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule, Location } from '@angular/common';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { StorageService } from '../../services/storage.service';
@@ -29,7 +30,7 @@ import { StepIconComponent } from '../../shared/components/step-icon/step-icon.c
 @Component({
   selector: 'app-stage2',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, Stage1StepsComponent, FileUploadComponent, StepIconComponent, RouterLink],
+  imports: [CommonModule, ReactiveFormsModule, Stage1StepsComponent, FileUploadComponent, StepIconComponent, RouterLink, TranslatePipe],
   templateUrl: './stage2.component.html',
   styleUrl: './stage2.component.css'
 })
@@ -57,6 +58,7 @@ export class Stage2Component implements OnInit {
     private notificationService: NotificationService,
     private authService: AuthService,
     private organizationService: OrganizationService,
+    private translate: TranslateService,
     private route: ActivatedRoute,
     private location: Location,
   ) {}
@@ -217,7 +219,7 @@ export class Stage2Component implements OnInit {
     if (this.form.valid) {
       void this.submitForm();
     } else {
-      this.notificationService.error('Please fill in all required fields before submitting.');
+      this.notificationService.error(this.translate.instant('STAGE2.ERROR'));
     }
   }
 
@@ -228,7 +230,7 @@ export class Stage2Component implements OnInit {
         this.applicantId,
       );
       this.submitSuccess = true;
-      this.notificationService.success('Application submitted successfully!');
+      this.notificationService.success(this.translate.instant('STAGE2.SAVED'));
     } catch (error) {
       this.notificationService.error(
         error instanceof Error

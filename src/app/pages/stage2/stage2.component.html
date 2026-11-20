@@ -11,22 +11,22 @@
           </svg>
         </span>
         <span class="brand-text">
-          <span class="brand-name">Accreditation Application</span>
-          <span class="brand-sub">GCF full form · Stage 1 &amp; 2</span>
+          <span class="brand-name">{{ 'STAGE2.TITLE' | translate }}</span>
+          <span class="brand-sub">{{ 'STAGE2.SUBTITLE' | translate }}</span>
         </span>
       </a>
 
       <div class="topbar-actions">
         <span class="save-state">
           <span class="save-dot" aria-hidden="true"></span>
-          Step {{ currentStep + 1 }} of {{ totalSteps }}
+          {{ 'STAGE2.STEP' | translate: { current: currentStep + 1, total: totalSteps } }}
         </span>
         @if (!isAdmin && viewMode === 'form') {
           <button type="button" class="btn btn-ghost" (click)="backToGrid()">
-            All sections
+            {{ 'STAGE2.ALL_SECTIONS' | translate }}
           </button>
         }
-        <a routerLink="/get-assessed" class="btn btn-ghost">All pathways</a>
+        <a routerLink="/get-assessed" class="btn btn-ghost">{{ 'STAGE2.ALL_PATHWAYS' | translate }}</a>
       </div>
     </div>
   </header>
@@ -40,14 +40,14 @@
             <path d="m8.5 12 2.5 2.5 4.5-5" />
           </svg>
         </span>
-        <h2>Application Submitted Successfully</h2>
-        <p>Your full accreditation application (Stage 1 + Stage 2) has been saved.</p>
+        <h2>{{ 'STAGE2.TITLE' | translate }} — {{ 'STAGE2.SAVED' | translate }}</h2>
+        <p>{{ 'STAGE2.SAVED' | translate }}</p>
       </div>
     } @else {
       <nav class="stepper" aria-label="Application progress">
         <div class="stepper-meta">
-          <p class="stepper-kicker">GCF accreditation · Pre-Accreditation + full application</p>
-          <p class="stepper-count">{{ stepProgress | number: '1.0-0' }}% complete</p>
+          <p class="stepper-kicker">{{ 'STAGE2.KICKER' | translate }}</p>
+          <p class="stepper-count">{{ 'STAGE2.PROGRESS' | translate: { value: (stepProgress | number: '1.0-0') } }}</p>
         </div>
 
         <div
@@ -63,7 +63,7 @@
 
         @for (group of navGroups; track group.id) {
           <div class="step-group">
-            <p class="step-group-label">{{ group.label }}</p>
+            <p class="step-group-label">{{ group.label | translate }}</p>
             <ol class="step-list step-list--many">
               @for (item of group.steps; track item.id) {
                 <li
@@ -94,7 +94,7 @@
         <div class="card-grid-container">
           @for (group of navGroups; track group.id) {
             <div class="card-grid-group">
-              <h3>{{ group.label }}</h3>
+              <h3>{{ group.label | translate }}</h3>
               <div class="card-grid">
                 @for (item of group.steps; track item.id) {
                   <div class="section-card" [class.completed]="currentStep > item.index" (click)="goToStep(item.index)">
@@ -107,9 +107,9 @@
                     </div>
                     <div class="card-status">
                       @if (currentStep > item.index) {
-                        <span class="status-badge complete">✓ Completed</span>
+                        <span class="status-badge complete">✓ {{ 'STAGE2.COMPLETED' | translate }}</span>
                       } @else {
-                        <span class="status-badge pending">Pending</span>
+                        <span class="status-badge pending">{{ 'STAGE2.PENDING' | translate }}</span>
                       }
                     </div>
                   </div>
@@ -122,13 +122,13 @@
         <div class="wizard-content">
           @if (!isAdmin) {
             <button type="button" class="btn btn-ghost btn-back" (click)="backToGrid()">
-              ← Back to sections
+              ← {{ 'STAGE2.BACK_TO_SECTIONS' | translate }}
             </button>
           }
 
           <header class="step-heading">
             <p class="step-eyebrow">
-              {{ isStage1Step ? 'Stage 1 · Pre-Accreditation' : 'Stage 2 · Accreditation requirements' }}
+              {{ (isStage1Step ? 'STAGE2.GROUP_STAGE1' : 'STAGE2.GROUP_STAGE2') | translate }}
             </p>
             <h1>{{ currentStepLabel }}</h1>
             <p class="step-subtitle">
@@ -153,13 +153,13 @@
               <div class="form-step">
                 @if (currentScreeningStep.screeningRequirement) {
                   <div class="alert-box info">
-                    <strong>Screening requirement:</strong> {{ currentScreeningStep.screeningRequirement }}
+                    <strong>{{ 'STAGE2.SCREENING_REQUIREMENT' | translate }}</strong> {{ currentScreeningStep.screeningRequirement }}
                   </div>
                 }
 
                 @if (currentScreeningStep.referenceLinks?.length) {
                   <div class="reference-links">
-                    <strong>Official references:</strong>
+                    <strong>{{ 'STAGE2.OFFICIAL_REFERENCES' | translate }}</strong>
                     @for (link of currentScreeningStep.referenceLinks; track link.url) {
                       <a [href]="link.url" target="_blank" rel="noopener noreferrer">{{ link.label }}</a>
                     }
@@ -168,14 +168,14 @@
 
                 @if (currentStep === stage2EntryStep) {
                   <div class="form-card">
-                    <h3>Application Settings</h3>
+                    <h3>{{ 'STAGE2.APPLICATION_SETTINGS' | translate }}</h3>
                     <div class="form-group">
-                      <label>Maximum E&amp;S Risk Category of Intended Projects <span class="required">*</span></label>
+                      <label>{{ 'STAGE2.MAX_RISK_LABEL' | translate }} <span class="required">*</span></label>
                       <select formControlName="maxRiskCategory">
-                        <option value="">Select category...</option>
-                        <option value="high">High risk (Category A / Intermediation-1)</option>
-                        <option value="medium">Medium risk (Category B / Intermediation-2)</option>
-                        <option value="minimal">Minimal to no risk (Category C / Intermediation-3)</option>
+                        <option value="">{{ 'STAGE2.SELECT_CATEGORY' | translate }}</option>
+                        <option value="high">{{ 'STAGE2.RISK_HIGH' | translate }}</option>
+                        <option value="medium">{{ 'STAGE2.RISK_MEDIUM' | translate }}</option>
+                        <option value="minimal">{{ 'STAGE2.RISK_MINIMAL' | translate }}</option>
                       </select>
                     </div>
                   </div>
@@ -192,29 +192,29 @@
                         <label class="radio-option compact">
                           <input type="radio" [formControlName]="question.key + '_answer'" value="yes">
                           <span class="radio-custom"></span>
-                          <span>Yes</span>
+                          <span>{{ 'STAGE2.YES' | translate }}</span>
                         </label>
                         <label class="radio-option compact">
                           <input type="radio" [formControlName]="question.key + '_answer'" value="no">
                           <span class="radio-custom"></span>
-                          <span>No</span>
+                          <span>{{ 'STAGE2.NO' | translate }}</span>
                         </label>
                       </div>
                     </div>
                     <div class="form-group">
-                      <label>Narrative explanation (reference supporting documentation) <span class="required">*</span></label>
+                      <label>{{ 'STAGE2.NARRATIVE_LABEL' | translate }} <span class="required">*</span></label>
                       <textarea
                         [formControlName]="question.key + '_narrative'"
                         rows="4"
-                        placeholder="Provide a narrative explanation with reference to supporting documentation (100–500 words)..."
+                        [attr.placeholder]="'STAGE2.NARRATIVE_PLACEHOLDER' | translate"
                       ></textarea>
                     </div>
                     <app-file-upload
                       [formControlName]="question.key + '_files'"
                       [entityId]="applicantId"
                       [section]="currentScreeningStep.id"
-                      label="Upload mandatory / supplementary evidence"
-                      hint="Drag & drop or click to browse"
+                      [label]="'STAGE2.UPLOAD_LABEL' | translate"
+                      [hint]="'STAGE2.UPLOAD_HINT' | translate"
                     />
                   </div>
                 }
@@ -222,22 +222,22 @@
                 @if (currentScreeningStep.sectionStatusKey && currentScreeningStep.sectionCommentsKey) {
                   <div class="form-card section-feedback">
                     <div class="form-group">
-                      <label>Section status <span class="required">*</span></label>
+                      <label>{{ 'STAGE2.SECTION_STATUS' | translate }} <span class="required">*</span></label>
                       <div class="status-group">
                         <label class="radio-option compact">
                           <input type="radio" [formControlName]="currentScreeningStep.sectionStatusKey" value="complete">
                           <span class="radio-custom"></span>
-                          <span class="status-badge complete">Complete</span>
+                          <span class="status-badge complete">{{ 'STAGE2.COMPLETED' | translate }}</span>
                         </label>
                         <label class="radio-option compact">
                           <input type="radio" [formControlName]="currentScreeningStep.sectionStatusKey" value="pending">
                           <span class="radio-custom"></span>
-                          <span class="status-badge pending">Pending</span>
+                          <span class="status-badge pending">{{ 'STAGE2.PENDING' | translate }}</span>
                         </label>
                       </div>
                     </div>
                     <div class="form-group">
-                      <label>Comments</label>
+                      <label>{{ 'STAGE2.SECTION_COMMENTS' | translate }}</label>
                       <textarea
                         [formControlName]="currentScreeningStep.sectionCommentsKey"
                         rows="4"
@@ -250,7 +250,7 @@
                 @if (currentStep === totalSteps - 1) {
                   <div class="submit-section">
                     <button type="submit" class="btn-submit">
-                      <span>Submit Application</span>
+                      <span>{{ 'STAGE2.SUBMIT' | translate }}</span>
                       <span class="btn-icon" aria-hidden="true">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
                           <path d="M21 3 10.5 13.5M21 3l-6.5 18-4-8-8-4L21 3Z" />
@@ -264,11 +264,11 @@
 
             <div class="form-navigation">
               @if (currentStep > 0) {
-                <button type="button" class="btn-nav btn-prev" (click)="prevStep()">← Previous</button>
+                <button type="button" class="btn-nav btn-prev" (click)="prevStep()">← {{ 'STAGE2.PREVIOUS' | translate }}</button>
               }
               <div class="nav-spacer"></div>
               @if (currentStep < totalSteps - 1) {
-                <button type="button" class="btn-nav btn-next" (click)="nextStep()">Next →</button>
+                <button type="button" class="btn-nav btn-next" (click)="nextStep()">{{ 'STAGE2.NEXT' | translate }} →</button>
               }
             </div>
           </form>
