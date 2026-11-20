@@ -50,9 +50,11 @@
             {{ 'LANDING.NAV.SIGN_IN' | translate }}
           </a>
         }
-        <a routerLink="/get-assessed" class="avera-btn avera-btn-nav" (click)="closeMenu()">
-          {{ 'LANDING.NAV.CTA_SHORT' | translate }} <span aria-hidden="true">→</span>
-        </a>
+        @if (!isLoggedIn) {
+          <a routerLink="/get-assessed" class="avera-btn avera-btn-nav" (click)="closeMenu()">
+            {{ 'LANDING.NAV.CTA_SHORT' | translate }} <span aria-hidden="true">→</span>
+          </a>
+        }
       </div>
     </nav>
 
@@ -72,9 +74,11 @@
       } @else {
         <a routerLink="/login" class="avera-nav-login">{{ 'LANDING.NAV.SIGN_IN' | translate }}</a>
       }
-      <a routerLink="/get-assessed" class="avera-btn avera-btn-nav">
-        {{ 'LANDING.NAV.CTA_SHORT' | translate }} <span aria-hidden="true">→</span>
-      </a>
+      @if (!isLoggedIn) {
+        <a routerLink="/get-assessed" class="avera-btn avera-btn-nav">
+          {{ 'LANDING.NAV.CTA_SHORT' | translate }} <span aria-hidden="true">→</span>
+        </a>
+      }
     </div>
 
     <button
