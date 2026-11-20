@@ -351,18 +351,39 @@
   overflow-x: auto;
   overflow-y: hidden;
   margin: 0 -0.25rem;
+  padding-bottom: 0.4rem;
   border-radius: 12px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(232, 192, 106, 0.35) transparent;
+}
+
+.table-scroll::-webkit-scrollbar {
+  height: 9px;
+}
+
+.table-scroll::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 99px;
+}
+
+.table-scroll::-webkit-scrollbar-thumb {
+  background: rgba(232, 192, 106, 0.32);
+  border-radius: 99px;
+}
+
+.table-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgba(232, 192, 106, 0.55);
 }
 
 .leads-table {
   width: 100%;
-  min-width: 1180px;
+  min-width: 1720px;
   border-collapse: separate;
   border-spacing: 0;
 }
 
 .preview-table {
-  min-width: 1240px;
+  min-width: 1620px;
 }
 
 .leads-table th,
