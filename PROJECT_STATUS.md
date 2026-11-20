@@ -20,27 +20,28 @@ Portal Avera/GCF: SPA Angular 18 + un Cloudflare Worker con D1/R2. Cubre leads, 
 | Campo `region` eliminado de formularios; `country` integrado en la tarjeta de organización del perfil | `bc9007a` | `pages/profile-assessment/profile-assessment.component.*` |
 | CTA "Get assessed" oculto en la landing cuando hay sesión | `029fa28` | `pages/landing/landing.component.html` |
 | Aviso al salir del email si ya pertenece a un usuario activo (readiness, pre-acreditación, perfil) | `17f26dd`, `336e495` | `services/user.service.ts` (`findByEmail`), `pages/readiness/*`, `pages/stage1/*`, `shared/components/stage1-steps/*`, `pages/profile-assessment/*`, `src/assets/i18n/*.json` (`USER.EMAIL_EXISTS`) |
-| Corrección del checkbox de favoritos en la tabla de leads: columnas `thead`/`tbody` alineadas y estilo propio para el toggle | sin commitear | `pages/dashboard/leads-import/leads-import.component.html`, `.css` |
+| Corrección del checkbox de favoritos en la tabla de leads: columnas `thead`/`tbody` alineadas y estilo propio para el toggle | `495b056` | `pages/dashboard/leads-import/leads-import.component.html`, `.css` |
+| Migración `favorite` aplicada a la BD local por defecto y a D1 remota | sin commitear (solo BD) | `worker/migrations/2026-11-22_leads_favorite.sql` |
 
 Verificación de la última tarea: `tsc --noEmit`, `worker:typecheck` y `ng build` en verde; mensaje de email duplicado comprobado en navegador en los tres formularios. Para el fix de favoritos: `tsc --noEmit`, `worker:typecheck` y `ng build` en verde; comprobado en navegador que al hacer clic en "Favorite" se marca el favorito (persiste tras recargar y llama a `PATCH /api/leads/:id`) sin seleccionar la fila, y que la columna de selección sigue controlando "Delete selected".
 
 ## En desarrollo
 
-Ninguna tarea activa. La última entrega (fix del checkbox de favoritos en leads) está cerrada y verificada, pendiente de commit.
+Ninguna tarea activa. El fix del checkbox de favoritos está cerrado, commiteado (`495b056`) y verificado; la migración `favorite` ya está aplicada en local (por defecto y `gcf-verify`) y en D1 remota.
 
 ## Pendientes
 
-1. **Aplicar en D1 remoto** `worker/migrations/2026-11-22_leads_favorite.sql` (hoy solo está aplicada en la BD local; la columna `favorite` aún no existe en producción).
-2. **Hacer push** de los 8 commits a `origin/master`.
-3. Sustituir la comprobación de email duplicado por una consulta al backend (D1 `users`): `UserService.findByEmail()` solo conoce las cuentas semilla del navegador, por lo que no detecta cuentas creadas en producción.
-4. Ampliar tests: hay 9 specs (mayoría de servicios); ninguno cubre favoritos, notas de revisión ni el aviso de email.
-5. Probar el envío real de correos con `RESEND_API_KEY` (en local no hay clave; el worker omite el envío).
-6. Rotar/quitar las cuentas demo con contraseñas conocidas que siembra `worker/schema.sql` (documentado en `worker/README.md`).
+1. **Hacer push** de los commits a `origin/master`.
+2. Sustituir la comprobación de email duplicado por una consulta al backend (D1 `users`): `UserService.findByEmail()` solo conoce las cuentas semilla del navegador, por lo que no detecta cuentas creadas en producción.
+3. Ampliar tests: hay 9 specs (mayoría de servicios); ninguno cubre favoritos, notas de revisión ni el aviso de email.
+4. Probar el envío real de correos con `RESEND_API_KEY` (en local no hay clave; el worker omite el envío).
+5. Rotar/quitar las cuentas demo con contraseñas conocidas que siembra `worker/schema.sql` (documentado en `worker/README.md`).
 
 ## Bugs conocidos
 
 - Ninguno bloqueante. El error `TS18048` en `leads-import.component.ts:656` quedó resuelto en `4fd507a`.
-- Resuelto (sin commitear): en la tabla de leads guardados, el checkbox de favorito estaba debajo de la cabecera "Select all" y el checkbox de selección para borrar debajo de "Favorite". Al hacer clic en "Favorite" se seleccionaba la fila para borrar. Ahora `thead` y `tbody` tienen el mismo orden y el favorito usa un estilo propio (`.favorite-check`).
+- Resuelto (`495b056`): en la tabla de leads guardados, el checkbox de favorito estaba debajo de la cabecera "Select all" y el checkbox de selección para borrar debajo de "Favorite". Al hacer clic en "Favorite" se seleccionaba la fila para borrar. Ahora `thead` y `tbody` tienen el mismo orden y el favorito usa un estilo propio (`.favorite-check`).
+- Resuelto (2026-11-20): marcar favorito devolvía "Could not update the row on the server" porque la columna `favorite` faltaba en la BD local por defecto y en D1 remota. La migración `2026-11-22_leads_favorite.sql` ya está aplicada en local (por defecto y `gcf-verify`) y en remoto.
 - Sin `RESEND_API_KEY`, `/api/send-review-email`, reset y ambientes devuelven 501 y la UI cae a Gmail compose: es comportamiento previsto, no un fallo.
 - `wrangler dev` con `--persist-to %TEMP%\gcf-verify` usa una BD distinta de la local por defecto: las migraciones aplicadas en un persist dir no afectan al otro.
 
@@ -54,15 +55,16 @@ Ninguna tarea activa. La última entrega (fix del checkbox de favoritos en leads
 
 ## Últimos cambios realizados
 
-1. sin commitear — tabla de leads: `thead`/`tbody` alineados (selección → favorito) y `.favorite-check` para el toggle de favorito.
-2. `336e495` — aviso de email duplicado al hacer blur en readiness, Stage 1 y perfil.
-3. `17f26dd` — `USER.EMAIL_EXISTS` movido a nivel superior en los 7 idiomas.
-4. `38f5c55` — columna Country más ancha y panel del dropdown limitado al ancho disponible.
-5. `bc9007a` — perfil sin `region`; `country` dentro de "About your organisation".
-6. `588f372` — renombrado a Pre-Accreditation en UI/i18n/correos.
-7. `cb1c220` — persistencia de `favorite` en D1 (schema + migración + insert/update/read).
-8. `632895a` — handlers de favoritos corregidos (`$any($event.target).checked`).
-9. `029fa28` — CTA "Get assessed" oculto con sesión iniciada.
+1. 2026-11-20 — migración `favorite` aplicada a BD local por defecto y D1 remota (fix de "Could not update the row" al marcar favoritos).
+2. `495b056` — tabla de leads: `thead`/`tbody` alineados (selección → favorito) y `.favorite-check` para el toggle de favorito.
+3. `336e495` — aviso de email duplicado al hacer blur en readiness, Stage 1 y perfil.
+4. `17f26dd` — `USER.EMAIL_EXISTS` movido a nivel superior en los 7 idiomas.
+5. `38f5c55` — columna Country más ancha y panel del dropdown limitado al ancho disponible.
+6. `bc9007a` — perfil sin `region`; `country` dentro de "About your organisation".
+7. `588f372` — renombrado a Pre-Accreditation en UI/i18n/correos.
+8. `cb1c220` — persistencia de `favorite` en D1 (schema + migración + insert/update/read).
+9. `632895a` — handlers de favoritos corregidos (`$any($event.target).checked`).
+10. `029fa28` — CTA "Get assessed" oculto con sesión iniciada.
 
 ## Decisiones recientes
 
@@ -75,11 +77,10 @@ Ninguna tarea activa. La última entrega (fix del checkbox de favoritos en leads
 
 ## Próximas tareas recomendadas
 
-1. Aplicar la migración de favoritos en remoto y verificar con `GET /api/leads` que un lead marcado sigue marcado tras recargar.
-2. Hacer push y confirmar que el repositorio remoto queda sincronizado.
-3. Mover la comprobación de email a un endpoint `/api/users/check-email` (o similar), reutilizando la restricción `users.email` única.
-4. Añadir tests de regresión para: favoritos (toggle + persistencia + orden), aviso de email en blur y panel de notas del solicitante.
-5. Configurar `RESEND_API_KEY` en un entorno de prueba y revisar el correo de estado "Passed" (debe indicar que Stage 2 está accesible).
+1. Hacer push y confirmar que el repositorio remoto queda sincronizado.
+2. Mover la comprobación de email a un endpoint `/api/users/check-email` (o similar), reutilizando la restricción `users.email` única.
+3. Añadir tests de regresión para: favoritos (toggle + persistencia + orden), aviso de email en blur y panel de notas del solicitante.
+4. Configurar `RESEND_API_KEY` en un entorno de prueba y revisar el correo de estado "Passed" (debe indicar que Stage 2 está accesible).
 
 ## Archivos y módulos importantes por tarea
 
