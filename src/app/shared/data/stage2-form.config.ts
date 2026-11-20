@@ -6,6 +6,11 @@ export interface ScreeningQuestion {
   help?: string;
 }
 
+export interface ReferenceLink {
+  label: string;
+  url: string;
+}
+
 export interface Stage2ScreeningStep {
   id: string;
   title: string;
@@ -13,6 +18,8 @@ export interface Stage2ScreeningStep {
   sectionNumber: number;
   description: string;
   screeningRequirement?: string;
+  /** Official GCF/IFC documents linked from the application form guidance. */
+  referenceLinks?: ReferenceLink[];
   questions: ScreeningQuestion[];
   sectionCommentsKey?: string;
   sectionStatusKey?: string;
@@ -26,6 +33,10 @@ export const STAGE2_SCREENING_STEPS: Stage2ScreeningStep[] = [
     sectionNumber: 4,
     description: 'Information on how the institution will contribute to the mandate of the Fund.',
     screeningRequirement: 'The applicant provides information on how it will contribute to the mandate of the Fund (e.g., policy or strategy on climate change/green growth/paradigm shift in place).',
+    referenceLinks: [
+      { label: 'Board decision B.10/06', url: 'https://www.greenclimate.fund/decision/b10-06' },
+      { label: 'Screening requirements and supplementary tables', url: 'https://www.greenclimate.fund/sites/default/files/page/screening-requirements-and-supplementary-tables.pdf' },
+    ],
     questions: [
       {
         key: 's4_1_1',
@@ -106,18 +117,30 @@ export const STAGE2_SCREENING_STEPS: Stage2ScreeningStep[] = [
     icon: '🛡️',
     sectionNumber: 8,
     description: 'Code of ethics, anti-corruption, whistleblower protection and investigation function.',
-    screeningRequirement: 'The applicant defines and adheres to ethical standards that promote full transparency and accountability, to be upheld by employees and those contracted or functionally related to the organization. The applicant is committed, as an organization, to maintaining the highest levels of integrity/accountability and to preventing and combating prohibited practices in the implementation of funded projects. The applicant is committed to protecting whistle-blowers, providing publicly accessible avenues for confidential reporting of allegations, and it has, or commits to rely on, an objective investigation function that can capably and professionally investigate allegations of prohibited practices in Fund-related activity. The applicant has capacity and processes to conduct due diligence of prohibited practices (which may include screening against financial sanctions of the United Nations Security Council) on potential or existing counterparties with which it engages, including executing entities, implementing entities, or any other entity or person involved in project implementation, and to maintain/retain relevant records.',
+    screeningRequirement: 'The applicant defines and adheres to ethical standards that promote full transparency and accountability, to be upheld by employees and those contracted or functionally related to the organization. The applicant is committed, as an organization, to maintaining the highest levels of integrity/accountability and to preventing and combating prohibited practices in the implementation of funded projects. The applicant is committed to protecting whistle-blowers, providing publicly accessible avenues for confidential reporting of allegations, and it has, or commits to rely on, an objective investigation function that can capably and professionally investigate allegations of prohibited practices in Fund-related activity. The applicant has capacity and processes to conduct due diligence of prohibited practices (which may include screening against financial sanctions of the United Nations Security Council) on potential or existing counterparties with which it engages, including executing entities, implementing entities, or any other entity or person involved in project implementation, and to maintain/retain relevant records. If applicable, the applicant has processes (i) to have a person responsible for integrity risk management matters that also may include inter alia AML/CFT; (ii) to identify and mitigate compliance risks following a risk-based approach; (iii) to monitor counterparty relationships and activities; and (iv) to provide training and advice on integrity risk matters.',
+    referenceLinks: [
+      { label: 'Policy on Prohibited Practices', url: 'https://www.greenclimate.fund/document/policy-prohibited-practices' },
+      { label: 'AML/CFT Policy', url: 'https://www.greenclimate.fund/document/anti-money-laundering-and-countering-financing-terrorism-policy' },
+      { label: 'AML/CFT Standards', url: 'https://www.greenclimate.fund/document/standards-implementation-anti-money-laundering-and-countering-financing-terrorism-policy' },
+      { label: 'Policy on the Protection of Whistleblowers and Witnesses', url: 'https://www.greenclimate.fund/document/policy-protection-whistleblowers-and-witnesses' },
+    ],
     questions: [
       { key: 's8_1_1', label: '8.1.1 The applicant has a Code of Ethics or an alternative set of management policies or provisions, defining: - the ethical standards to be upheld, including transparency and accountability; - the parties required to adhere to the standards (incl. governance bodies, employees, consultants and independent experts).' },
       { key: 's8_1_2', label: '8.1.2 The applicant makes aware all individuals with a functional and/or contractual relationship to the organizations of such Codes of Ethics or equivalent policies/provisions.' },
       { key: 's8_1_3', label: '8.1.3 The applicant has in place an ethics committee or has allocated such functions to another relevant governance body within the organization.' },
       { key: 's8_2_1', label: '8.2.1 The applicant’s leadership or governing bodies have clearly communicated a zero-tolerance policy towards fraud, financial misconduct and other Prohibited Practices. The policy applies to staff, consultants, contractors, and any other parties involved in the applicant’s operations.' },
-      { key: 's8_2_2', label: '8.2.2 The applicant has policies or mechanisms for protecting whistlebreakers and has clear and publicly-accessible ways for people to confidentially report suspected ethics violations, misconduct, or other prohibited practices.' },
+      { key: 's8_2_2', label: '8.2.2 The applicant has policies or mechanisms for protecting whistleblowers and has clear and publicly-accessible ways for people to confidentially report suspected ethics violations, misconduct, or other prohibited practices.', help: 'The reporting channel must have at least two different easily accessible avenues, be available in local languages, allow anonymous reporting and be published on the applicant\'s public website.' },
       { key: 's8_2_3', label: '8.2.3 The applicant has an independent and objective investigation function that can capably and professionally investigate allegations of Prohibited Practices and staff misconduct.' },
       { key: 's8_2_4', label: '8.2.4 The applicant has policies that promote organisational culture conducive to fairness, accountability and full transparency across the organization’s activities and operations.' },
       { key: 's8_3_1', label: '8.3.1 The investigation function can capably and professionally investigate allegations and is headed by an officer who reports to a level of the organization that allows the investigation function to fulfil its responsibilities objectively and independently.' },
       { key: 's8_3_2', label: '8.3.2 The investigation function has terms of reference that describe the purpose, authority, independence and accountability of the function.' },
-      { key: 's8_3_3', label: '8.3.3 The investigation function has published formal guidelines.' }
+      { key: 's8_3_3', label: '8.3.3 The investigation function has published formal guidelines and/or standard procedures for confidentially processing complaints, investigating allegations, and reporting findings.' },
+      { key: 's8_3_4', label: '8.3.4 The applicant\'s investigation function periodically reports case trends and makes these available to senior management and relevant business functions to the extent possible.' },
+      {
+        key: 's8_4_1',
+        label: '8.4.1 The applicant has in place policies on anti-money laundering (AML) and countering the financing of terrorism (CFT), aligned to the GCF AML/CFT Policy; maintains adequate controls and procedures to conduct KYC or equivalent due diligence on all counterparties, applying sanctions screening and other integrity checks using a risk-based approach; and has designated a person responsible for overseeing AML/CFT matters and provides risk-based training to relevant staff.',
+        help: 'Banks and financial institutions must also provide the supplementary evidence in full: processes to monitor counterparty relationships, mechanisms to trace/wire electronic transfers, and two monitoring reports on electronic funds transfers.'
+      }
     ]
   },
   {
@@ -126,13 +149,18 @@ export const STAGE2_SCREENING_STEPS: Stage2ScreeningStep[] = [
     icon: '📐',
     sectionNumber: 9,
     description: 'Capacity to identify, formulate and appraise projects or programmes.',
-    screeningRequirement: 'The applicant is able to identify, formulate and appraise projects within its jurisdiction with appropriate fiduciary oversight.',
+    screeningRequirement: 'The applicant is able to identify, formulate and appraise projects or programmes within the respective jurisdiction (subnational, national, regional or international, as applicable), including capabilities to examine and incorporate technical, financial, environmental, socioeconomic and legal aspects at the appraisal stage, and is guided by appropriate fiduciary oversight procedures.',
+    referenceLinks: [
+      { label: 'Accreditation Framework', url: 'https://www.greenclimate.fund/document/accreditation-framework-green-climate-fund' },
+      { label: 'Board decision B.42/13 (fast-track extension)', url: 'https://www.greenclimate.fund/decision/b42-13' },
+    ],
     questions: [
       { key: 's9_1_1', label: '9.1.1 The applicant has proven track record in identifying and designing projects or programmes using appropriate and transparent procedures.' },
-      { key: 's9_1_2', label: '9.1.2 The applicant has capacity to clearly state project objectives and outcomes with KPIs, baselines and targets.' },
-      { key: 's9_1_3', label: '9.1.3 The applicant is able to examine and incorporate technical, financial, economic, legal, environmental, social and climate change aspects.' },
-      { key: 's9_1_4', label: '9.1.4 The applicant has fiduciary oversight procedures to ensure quality of the appraisal process.' },
-      { key: 's9_2_1', label: '9.2.1 The applicant has appropriate registration/licensing by a financial oversight body (if on-lending/blending applies).', help: 'Only applicable if the applicant intends to use financial instruments other than grants.' }
+      { key: 's9_1_2', label: '9.1.2 The applicant has capacity to clearly state project objectives and outcomes in preparing funding proposals and to incorporate key performance indicators with baselines and targets into the project design.' },
+      { key: 's9_1_3', label: '9.1.3 The applicant is able to examine and incorporate technical, financial, economic and legal aspects into the funding proposals, as well as environmental, social and climate change aspects, using relevant assessments (e.g. risk, impact, feasibility) to inform the appraisal process.' },
+      { key: 's9_1_4', label: '9.1.4 The applicant has fiduciary oversight procedures in place to ensure quality of the appraisal process and monitoring of follow-up actions.' },
+      { key: 's9_2_1', label: '9.2.1 The applicant has appropriate registration and/or licensing by a financial oversight body or regulator in applicable jurisdictions.', help: 'Only applicable if the applicant intends to use financial instruments other than grants (on-lending, blending, equity investments or guarantees).' },
+      { key: 's9_2_2', label: '9.2.2 The applicant has track record and experience in on-lending and/or blending of funds in providing loans, equity and/or guarantees to public and private sector entities.', help: 'Provide a summary of the track record over the past three (3) years and two (2) examples of project agreements or implementation reports.' }
     ]
   },
   {
@@ -142,6 +170,12 @@ export const STAGE2_SCREENING_STEPS: Stage2ScreeningStep[] = [
     sectionNumber: 10,
     description: 'Environmental and Social Management System (ESMS) and due diligence.',
     screeningRequirement: 'The applicant has a functional, inclusive, accountable, participatory and transparent environmental and social management system (ESMS) with commitment through a policy and effective framework to identify, assess, manage, and monitor environmental and social risks and impacts associated with an entity’s operations, projects or investments commensurate with the risk category. The applicant demonstrates commitment, a track record and consistency of the systems and approaches for environmental and social due diligence commensurate with the relevant risk category.',
+    referenceLinks: [
+      { label: 'IFC ESMS handbook (IFC PS 1–8)', url: 'https://www.ifc.org/content/dam/ifc/doc/mgrt/esms-handbook-general-v21.pdf' },
+      { label: 'Sustainability guidance note: screening and categorizing GCF-financed activities', url: 'https://www.greenclimate.fund/document/sustainability-guidance-note-screening-and-categorizing-gcf-financed-activities' },
+      { label: 'Revised Environmental and Social Policy', url: 'https://www.greenclimate.fund/document/revised-environmental-and-social-policy' },
+      { label: 'Interim Environmental and Social Safeguards', url: 'https://www.greenclimate.fund/document/interim-environmental-and-social-safeguards-fund-performance-standards-international' },
+    ],
     questions: [
       { key: 's10_1_1', label: '10.1.1 The applicant has a policy mandated by its highest decision-making body addressing E&S risks, impacts and safeguarding.' },
       { key: 's10_1_2', label: '10.1.2 The applicant\'s policy/ESMS clearly states the ESS standards the applicant adheres to and how they compare with the GCF Interim Environmental and Social Standards.' },
@@ -176,6 +210,10 @@ export const STAGE2_SCREENING_STEPS: Stage2ScreeningStep[] = [
     sectionNumber: 12,
     description: 'Commitment to comply with the GCF Indigenous Peoples Policy.',
     screeningRequirement: 'The applicant demonstrates awareness at the accreditation stage and commitment within the ESMS to meet the requirements of and comply with the Indigenous Peoples Policy at the funded activity stage.',
+    referenceLinks: [
+      { label: 'Indigenous Peoples Policy', url: 'https://www.greenclimate.fund/document/indigenous-peoples-policy' },
+      { label: 'Operational guidelines for the Indigenous Peoples Policy', url: 'https://www.greenclimate.fund/document/operational-guidelines-indigenous-peoples-policy' },
+    ],
     sectionCommentsKey: 's12_comments',
     sectionStatusKey: 's12_status',
     questions: [
@@ -189,6 +227,9 @@ export const STAGE2_SCREENING_STEPS: Stage2ScreeningStep[] = [
     sectionNumber: 13,
     description: 'Gender policy and capacity for gender mainstreaming.',
     screeningRequirement: 'The applicant demonstrates gender policy, strategy or any other commitment to meet the principles and requirements of the GCF updated Gender Policy and track record of such commitment.',
+    referenceLinks: [
+      { label: 'Updated Gender Policy and Gender Action Plan', url: 'https://www.greenclimate.fund/document/gender-policy' },
+    ],
     sectionCommentsKey: 's13_comments',
     sectionStatusKey: 's13_status',
     questions: [

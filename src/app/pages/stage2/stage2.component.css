@@ -666,6 +666,23 @@ textarea {
   color: var(--app-accent);
 }
 
+.reference-links {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 1rem;
+  margin: -0.35rem 0 1rem;
+  color: var(--app-subtle);
+  font-size: 0.74rem;
+}
+.reference-links strong { color: var(--app-muted); }
+.reference-links a {
+  color: var(--app-accent);
+  text-decoration: none;
+  border-bottom: 1px solid rgba(232, 192, 106, 0.35);
+}
+.reference-links a:hover { color: #f5dfa8; }
+
 /* ── Navigation / submit ── */
 .form-navigation {
   display: flex;

@@ -147,12 +147,22 @@
                 [stepIndex]="currentStep"
                 [entityId]="applicantId"
                 [identityLocked]="identityLocked"
+                [applicationMode]="true"
               ></app-stage1-steps>
             } @else if (currentScreeningStep) {
               <div class="form-step">
                 @if (currentScreeningStep.screeningRequirement) {
                   <div class="alert-box info">
                     <strong>Screening requirement:</strong> {{ currentScreeningStep.screeningRequirement }}
+                  </div>
+                }
+
+                @if (currentScreeningStep.referenceLinks?.length) {
+                  <div class="reference-links">
+                    <strong>Official references:</strong>
+                    @for (link of currentScreeningStep.referenceLinks; track link.url) {
+                      <a [href]="link.url" target="_blank" rel="noopener noreferrer">{{ link.label }}</a>
+                    }
                   </div>
                 }
 
