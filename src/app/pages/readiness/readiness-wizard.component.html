@@ -328,8 +328,12 @@
               type="email"
               [(ngModel)]="application.metadata.ndaEmail"
               (ngModelChange)="onUserInput()"
+              (blur)="checkEmailTaken()"
               placeholder="name@ministry.gov"
             />
+            @if (emailTaken) {
+              <p class="field-error">{{ 'USER.EMAIL_EXISTS' | translate }}</p>
+            }
           </label>
         </div>
       </section>

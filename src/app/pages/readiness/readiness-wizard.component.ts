@@ -1,4 +1,5 @@
 import { CommonModule, Location } from '@angular/common';
+import { TranslatePipe } from '@ngx-translate/core';
 import { Component, OnDestroy, OnInit, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterModule } from '@angular/router';
@@ -26,6 +27,7 @@ import {
 import { AttachmentService } from '../../services/attachment.service';
 import { AuthService } from '../../services/auth.service';
 import { OrganizationService } from '../../services/organization.service';
+import { UserService } from '../../services/user.service';
 import { StoredAttachment } from '../../models/attachment.model';
 import { OrganizationRecord } from '../../models/organization.model';
 import { resolveAttachmentUrl } from '../../shared/utils/attachment-url.util';
@@ -68,7 +70,7 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 @Component({
   selector: 'app-readiness-wizard',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule, CountrySelectComponent],
+  imports: [CommonModule, FormsModule, RouterModule, CountrySelectComponent, TranslatePipe],
   templateUrl: './readiness-wizard.component.html',
   styleUrl: './readiness-wizard.component.css',
 })
@@ -201,6 +203,7 @@ export class ReadinessWizardComponent implements OnInit, OnDestroy {
   private readonly attachmentService = inject(AttachmentService);
   private readonly authService = inject(AuthService);
   private readonly organizationService = inject(OrganizationService);
+  private readonly userService = inject(UserService);
   private readonly route = inject(ActivatedRoute);
   private readonly location = inject(Location);
   private saveTimer: ReturnType<typeof setTimeout> | null = null;
@@ -392,7 +395,16 @@ export class ReadinessWizardComponent implements OnInit, OnDestroy {
   }
 
   // ── Persistence ──────────────────────────────────────────────
+  /** True after blur if an active account already uses the entered email. */
+  emailTaken = false;
+
+  checkEmailTaken(): void {
+    const email = this.application.metadata.ndaEmail ?? '';
+    this.emailTaken = !!email.trim() && !!this.userService.findByEmail(email);
+  }
+
   onUserInput(): void {
+    this.emailTaken = false;
     this.errorSummary = '';
     this.submitError = '';
     this.scheduleSave();

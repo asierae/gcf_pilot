@@ -7,6 +7,7 @@ import { Title } from '@angular/platform-browser';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ApiService } from '../../services/api.service';
+import { UserService } from '../../services/user.service';
 import { NotificationService } from '../../services/notification.service';
 import { LanguageSwitcherComponent } from '../../shared/components/language-switcher/language-switcher.component';
 import { LeadRecord } from '../../models/applicant.model';
@@ -287,6 +288,7 @@ type ProfileOptionGroup =
 })
 export class ProfileAssessmentComponent implements OnDestroy {
   private readonly destroyRef = inject(DestroyRef);
+  private readonly userService = inject(UserService);
 
   readonly steps = [0, 1, 2, 3, 4].map((index) => ({
     id: `step-${index}`,
@@ -322,6 +324,14 @@ export class ProfileAssessmentComponent implements OnDestroy {
   };
 
   state: ProfileFormState = emptyProfileForm();
+  /** True after blur if an active account already uses the entered email. */
+  emailTaken = false;
+
+  checkEmailTaken(): void {
+    const email = this.state.contactEmail ?? '';
+    this.emailTaken = !!email.trim() && !!this.userService.findByEmail(email);
+  }
+
   currentStep = 0;
   submitting = false;
   submitted = false;

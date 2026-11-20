@@ -1,4 +1,5 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
+import { TranslatePipe } from '@ngx-translate/core';
 import { CommonModule, Location } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import {
@@ -13,6 +14,7 @@ import { StorageService } from '../../services/storage.service';
 import { NotificationService } from '../../services/notification.service';
 import { AuthService } from '../../services/auth.service';
 import { OrganizationService } from '../../services/organization.service';
+import { UserService } from '../../services/user.service';
 import { OrganizationRecord } from '../../models/organization.model';
 import { FileUploadComponent } from '../../shared/components/file-upload/file-upload.component';
 import { CountrySelectComponent } from '../../shared/components/country-select/country-select.component';
@@ -38,6 +40,7 @@ import {
     FileUploadComponent,
     RouterLink,
     CountrySelectComponent,
+    TranslatePipe,
   ],
   templateUrl: './stage1.component.html',
   styleUrl: './stage1.component.css'
@@ -47,6 +50,14 @@ export class Stage1Component implements OnInit, OnDestroy {
   form: FormGroup;
   submitted = false;
   submitSuccess = false;
+
+  /** True after blur if an active account already uses the entered email. */
+  emailTaken = false;
+
+  checkEmailTaken(): void {
+    const email = this.form.get('primaryContactEmail')?.value ?? '';
+    this.emailTaken = !!String(email).trim() && !!this.userService.findByEmail(String(email));
+  }
 
   /**
    * Organization id. It is the R2 folder (`organizations/<id>/...`), the draft
@@ -117,6 +128,7 @@ export class Stage1Component implements OnInit, OnDestroy {
     private notificationService: NotificationService,
     private authService: AuthService,
     private organizationService: OrganizationService,
+    private userService: UserService,
     private route: ActivatedRoute,
     private location: Location,
   ) {
