@@ -117,6 +117,7 @@ type SubmissionStatus = 'Pending' | 'Passed' | 'Failed';
 
 const SUBMISSION_STATUSES: SubmissionStatus[] = ['Pending', 'Passed', 'Failed'];
 const LEAD_STATUSES = ['Pending', 'Contacted', 'Qualified', 'Rejected'];
+const LEAD_PRIORITIES = ['low', 'medium', 'high', 'critical'];
 
 interface StagePayload {
   submittedAt: string;
@@ -186,8 +187,8 @@ interface LeadRecord {
   readinessScore: number;
   suggestedRoute: string;
   source: string;
-  /** Starred in the admin leads table; starred rows are listed first. */
-  favorite?: boolean;
+  /** Drives the admin leads ordering: critical first, low last. */
+  priority?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -222,8 +223,8 @@ interface LeadRow {
   readiness_score: number | null;
   suggested_route: string | null;
   source: string | null;
-  /** 1 when the lead is starred in the admin table, 0 otherwise. */
-  favorite: number | null;
+  /** low | medium | high | critical. */
+  priority: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -542,7 +543,7 @@ function rowToLead(row: LeadRow): LeadRecord {
     readinessScore: row.readiness_score ?? 0,
     suggestedRoute: row.suggested_route ?? '',
     source: row.source ?? 'manual',
-    favorite: row.favorite === 1,
+    priority: row.priority ?? 'low',
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
@@ -3730,6 +3731,7 @@ function normalizeLeadInput(raw: unknown): Omit<LeadRecord, 'id' | 'createdAt' |
     typeof lead[key] === 'string' ? (lead[key] as string) : '';
 
   const status = read('status');
+  const priority = read('priority');
   const documents = Array.isArray(lead.availableDocuments)
     ? lead.availableDocuments.filter((item): item is string => typeof item === 'string')
     : typeof lead.availableDocuments === 'string'
@@ -3767,7 +3769,7 @@ function normalizeLeadInput(raw: unknown): Omit<LeadRecord, 'id' | 'createdAt' |
     source: ['manual', 'import', 'profile'].includes(read('source'))
       ? read('source')
       : 'manual',
-    favorite: lead.favorite === true || lead.favorite === 1,
+    priority: LEAD_PRIORITIES.includes(priority) ? priority : 'low',
   };
 }
 
@@ -3779,7 +3781,11 @@ function readInt(raw: unknown, min: number, max: number): number {
 
 async function listLeads(env: Env): Promise<Response> {
   const { results } = await env.DB.prepare(
-    'SELECT * FROM leads ORDER BY created_at DESC',
+    `SELECT * FROM leads
+      ORDER BY CASE priority
+        WHEN 'critical' THEN 0 WHEN 'high' THEN 1
+        WHEN 'medium' THEN 2 WHEN 'low' THEN 3 ELSE 4 END,
+        created_at DESC`,
   ).all<LeadRow>();
 
   return json({ leads: (results ?? []).map(rowToLead) });
@@ -3812,7 +3818,7 @@ async function createLeads(request: Request, env: Env): Promise<Response> {
             contact_name, contact_role, objective, financing, timeline,
             operating_history, available_documents, project_stage, project_country,
             project_sector, access_type, compliance_issues, challenge, engagement,
-            consent, readiness_score, suggested_route, source, favorite,
+            consent, readiness_score, suggested_route, source, priority,
             created_at, updated_at)
          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       ).bind(
@@ -3845,7 +3851,7 @@ async function createLeads(request: Request, env: Env): Promise<Response> {
         lead.readinessScore,
         lead.suggestedRoute,
         lead.source,
-        lead.favorite ? 1 : 0,
+        lead.priority,
         lead.createdAt,
         lead.updatedAt,
       ),
@@ -3873,7 +3879,7 @@ async function updateLead(
             available_documents = ?, project_stage = ?, project_country = ?,
             project_sector = ?, access_type = ?, compliance_issues = ?,
             challenge = ?, engagement = ?, consent = ?, readiness_score = ?,
-            suggested_route = ?, source = ?, favorite = ?, updated_at = ?
+            suggested_route = ?, source = ?, priority = ?, updated_at = ?
       WHERE id = ?`,
   )
     .bind(
@@ -3905,7 +3911,7 @@ async function updateLead(
       lead.readinessScore,
       lead.suggestedRoute,
       lead.source,
-      lead.favorite ? 1 : 0,
+      lead.priority,
       now,
       id,
     )
@@ -4497,7 +4503,7 @@ async function createProfileAssessment(
         contact_name, contact_role, objective, financing, timeline,
         operating_history, available_documents, project_stage, project_country,
         project_sector, access_type, compliance_issues, challenge, engagement,
-        consent, readiness_score, suggested_route, source, favorite, created_at, updated_at)
+        consent, readiness_score, suggested_route, source, priority, created_at, updated_at)
      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
   )
     .bind(
@@ -4530,7 +4536,7 @@ async function createProfileAssessment(
       created.readinessScore,
       created.suggestedRoute,
       created.source,
-      created.favorite ? 1 : 0,
+      created.priority,
       created.createdAt,
       created.updatedAt,
     )

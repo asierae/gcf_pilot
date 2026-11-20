@@ -45,6 +45,10 @@ export type LeadStatus = 'Pending' | 'Contacted' | 'Qualified' | 'Rejected';
 
 export const LEAD_STATUS_OPTIONS: LeadStatus[] = ['Pending', 'Contacted', 'Qualified', 'Rejected'];
 
+export type LeadPriority = 'low' | 'medium' | 'high' | 'critical';
+
+export const LEAD_PRIORITY_OPTIONS: LeadPriority[] = ['low', 'medium', 'high', 'critical'];
+
 export interface LeadRecord {
   id?: string;
   country: string;
@@ -75,7 +79,7 @@ export interface LeadRecord {
   readinessScore?: number;
   suggestedRoute?: string;
   source?: string;
-  favorite?: boolean;
+  priority?: LeadPriority;
   region?: string;
   createdAt?: string;
   updatedAt?: string;

@@ -71,7 +71,7 @@
       <table class="leads-table preview-table">
         <thead>
           <tr>
-            <th>Favorite</th>
+            <th>Priority</th>
             <th>Region</th>
             <th>Country</th>
             <th>Organization</th>
@@ -87,14 +87,16 @@
         <tbody>
           <tr *ngFor="let lead of pendingLeads; index as i">
             <td>
-              <input
-                class="favorite-check"
-                type="checkbox"
-                [checked]="lead.favorite"
-                (change)="togglePendingFavorite(i, $any($event.target).checked)"
-                aria-label="Favorite"
-                title="Toggle favorite"
-              />
+              <select
+                [class]="getPriorityClass(lead.priority || 'low')"
+                [ngModel]="lead.priority || 'low'"
+                (ngModelChange)="updatePendingField(i, 'priority', $event)"
+                aria-label="Lead priority"
+              >
+                <option *ngFor="let priority of priorityOptions" [value]="priority">
+                  {{ priority }}
+                </option>
+              </select>
             </td>
              <td class="cell-country">
               <app-country-select
@@ -324,7 +326,7 @@
                 <span class="checkbox-box"></span>
               </label>
             </th>
-            <th>Favorite</th>
+            <th>Priority</th>
             <th>Region</th>
             <th>Country</th>
             <th>Organization</th>
@@ -358,14 +360,16 @@
               </label>
             </td>
             <td>
-              <input
-                class="favorite-check"
-                type="checkbox"
-                [checked]="lead.favorite"
-                (change)="toggleSavedFavorite(lead, $any($event.target).checked)"
-                [attr.aria-label]="'Favorite ' + lead.organization"
-                title="Toggle favorite"
-              />
+              <select
+                [class]="getPriorityClass(lead.priority || 'low')"
+                [ngModel]="lead.priority || 'low'"
+                (ngModelChange)="updateSavedField(lead, 'priority', $event)"
+                [attr.aria-label]="'Priority for ' + lead.organization"
+              >
+                <option *ngFor="let priority of priorityOptions" [value]="priority">
+                  {{ priority }}
+                </option>
+              </select>
             </td>
             <td>
               <input
@@ -707,6 +711,18 @@
               </select>
             </label>
 
+            <label class="add-field">
+              <span>Priority</span>
+              <select
+                class="add-input add-select"
+                [(ngModel)]="addFormData.priority"
+              >
+                <option *ngFor="let p of priorityOptions" [value]="p">
+                  {{ p }}
+                </option>
+              </select>
+            </label>
+
             <label class="add-field add-field-wide">
               <span>Climate Specialty / Profile</span>
               <input
@@ -829,6 +845,12 @@
                 <span>Status</span>
                 <select class="add-input add-select" [(ngModel)]="detailLead.status">
                   <option *ngFor="let s of statusOptions" [value]="s">{{ s }}</option>
+                </select>
+              </label>
+              <label class="add-field">
+                <span>Priority</span>
+                <select class="add-input add-select" [(ngModel)]="detailLead.priority">
+                  <option *ngFor="let p of priorityOptions" [value]="p">{{ p }}</option>
                 </select>
               </label>
               <label class="add-field">

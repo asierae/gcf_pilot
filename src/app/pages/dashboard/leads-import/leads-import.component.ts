@@ -12,6 +12,8 @@ import { CountrySelectComponent } from "../../../shared/components/country-selec
 import {
   LeadRecord,
   LEAD_STATUS_OPTIONS,
+  LEAD_PRIORITY_OPTIONS,
+  LeadPriority,
   LeadStatus,
 } from "../../../models/applicant.model";
 import { StorageService } from "../../../services/storage.service";
@@ -46,6 +48,13 @@ export class LeadsImportComponent implements OnInit, OnDestroy {
   deleteConfirmOpen = false;
   searchQuery = "";
   readonly statusOptions = LEAD_STATUS_OPTIONS;
+  readonly priorityOptions = LEAD_PRIORITY_OPTIONS;
+  private readonly priorityRank: Record<LeadPriority, number> = {
+    critical: 0,
+    high: 1,
+    medium: 2,
+    low: 3,
+  };
   readonly pageSize = 20;
   currentPage = 1;
 
@@ -57,7 +66,7 @@ export class LeadsImportComponent implements OnInit, OnDestroy {
   private previousBodyOverflow = "";
 
   // Single lead form
-  addFormData: Partial<LeadRecord> = { status: "Pending" };
+  addFormData: Partial<LeadRecord> = { status: "Pending", priority: "low" };
   addFormSaving = false;
   addFormError = "";
 
@@ -201,7 +210,7 @@ export class LeadsImportComponent implements OnInit, OnDestroy {
   }
 
   resetAddForm(): void {
-    this.addFormData = { status: "Pending" };
+    this.addFormData = { status: "Pending", priority: "low" };
     this.addFormError = "";
   }
 
@@ -227,6 +236,7 @@ export class LeadsImportComponent implements OnInit, OnDestroy {
         climateSpecialty: (this.addFormData.climateSpecialty ?? "").trim(),
         comments: (this.addFormData.comments ?? "").trim(),
         status: (this.addFormData.status as LeadStatus) ?? "Pending",
+        priority: this.normalizePriority(this.addFormData.priority ?? ""),
       };
 
       const [created] = await this.storageService.saveLeads([lead]);
@@ -336,7 +346,7 @@ export class LeadsImportComponent implements OnInit, OnDestroy {
 
     this.pendingLeads[index] = {
       ...this.pendingLeads[index],
-      [field]: field === "status" ? this.normalizeStatus(value) : value,
+      [field]: this.normalizeFieldValue(field, value),
     };
   }
 
@@ -386,42 +396,6 @@ export class LeadsImportComponent implements OnInit, OnDestroy {
     }
   }
 
-  togglePendingFavorite(index: number, favorite: boolean): void {
-    const lead = this.pendingLeads[index];
-    if (!lead) {
-      return;
-    }
-    this.pendingLeads[index] = { ...lead, favorite };
-  }
-
-  async toggleSavedFavorite(
-    lead: LeadRecord,
-    favorite: boolean,
-  ): Promise<void> {
-    if (!lead.id) {
-      return;
-    }
-    const index = this.savedLeads.findIndex((item) => item.id === lead.id);
-    if (index === -1) {
-      return;
-    }
-
-    const previous = lead.favorite;
-    const updatedLead: LeadRecord = { ...lead, favorite };
-    this.savedLeads[index] = updatedLead;
-    this.savingFieldId = lead.id;
-
-    try {
-      const { id, createdAt, updatedAt, ...payload } = updatedLead;
-      await this.storageService.updateLead(lead.id, payload);
-    } catch {
-      this.savedLeads[index] = { ...lead, favorite: previous };
-      this.parseError = "Could not update the row on the server.";
-    } finally {
-      this.savingFieldId = null;
-    }
-  }
-
   async updateSavedField(
     lead: LeadRecord,
     field: LeadField,
@@ -431,8 +405,7 @@ export class LeadsImportComponent implements OnInit, OnDestroy {
       return;
     }
 
-    const normalizedValue =
-      field === "status" ? this.normalizeStatus(value) : value;
+    const normalizedValue = this.normalizeFieldValue(field, value);
     const previous = lead[field];
     const updatedLead: LeadRecord = {
       ...lead,
@@ -488,12 +461,12 @@ export class LeadsImportComponent implements OnInit, OnDestroy {
         )
       : this.savedLeads;
 
-    // Favorited leads appear first, the rest keep their current order.
-    return [...leads].sort((a, b) => {
-      const aFavorite = a.favorite ? 1 : 0;
-      const bFavorite = b.favorite ? 1 : 0;
-      return bFavorite - aFavorite;
-    });
+    // Highest priority first; leads with the same level keep their order.
+    return [...leads].sort(
+      (a, b) =>
+        this.priorityRank[a.priority ?? "low"] -
+        this.priorityRank[b.priority ?? "low"],
+    );
   }
 
   get paginatedLeads(): LeadRecord[] {
@@ -525,6 +498,10 @@ export class LeadsImportComponent implements OnInit, OnDestroy {
 
   getStatusClass(status: LeadStatus): string {
     return `status-select status-${status.toLowerCase()}`;
+  }
+
+  getPriorityClass(priority: LeadPriority): string {
+    return `priority-select priority-${priority.toLowerCase()}`;
   }
 
   get visibleIds(): string[] {
@@ -677,6 +654,9 @@ export class LeadsImportComponent implements OnInit, OnDestroy {
         "",
       comments: normalizedRow["comments"] || normalizedRow["comment"] || "",
       status: this.normalizeStatus(statusValue),
+      priority: this.normalizePriority(
+        normalizedRow["priority"] || normalizedRow["prioridad"] || "",
+      ),
     };
   }
 
@@ -685,6 +665,23 @@ export class LeadsImportComponent implements OnInit, OnDestroy {
       (status) => status.toLowerCase() === String(value).trim().toLowerCase(),
     );
     return statusOption ?? "Pending";
+  }
+
+  private normalizePriority(value: string): LeadPriority {
+    const priorityOption = this.priorityOptions.find(
+      (priority) => priority.toLowerCase() === String(value).trim().toLowerCase(),
+    );
+    return priorityOption ?? "low";
+  }
+
+  private normalizeFieldValue(field: LeadField, value: string): LeadRecord[LeadField] {
+    if (field === "status") {
+      return this.normalizeStatus(value);
+    }
+    if (field === "priority") {
+      return this.normalizePriority(value);
+    }
+    return value;
   }
 
   private leadKey(lead: LeadRecord): string {
@@ -710,6 +707,7 @@ export class LeadsImportComponent implements OnInit, OnDestroy {
       lead.climateSpecialty,
       lead.comments,
       lead.status,
+      lead.priority,
     ]
       .join(" ")
       .toLowerCase();

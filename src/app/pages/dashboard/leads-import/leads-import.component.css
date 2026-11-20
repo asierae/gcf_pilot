@@ -408,16 +408,6 @@
   text-align: center !important;
 }
 
-/* The favorite toggle is a plain checkbox rather than a bulk-selection box.
-   Keep it visually distinct so it is not mistaken for the delete selector. */
-.favorite-check {
-  width: 1.05rem;
-  height: 1.05rem;
-  margin: 0;
-  cursor: pointer;
-  accent-color: #e8c06a;
-}
-
 /* Keep the country cell wide enough that its floating dropdown does not
    stretch over the neighbouring inputs. */
 .leads-table td.cell-country {
@@ -481,7 +471,8 @@
   min-width: 9rem;
 }
 
-.status-select {
+.status-select,
+.priority-select {
   width: 100%;
   min-width: 7.5rem;
   appearance: none;
@@ -498,7 +489,8 @@
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2394a3b8' d='M3 4.5L6 7.5L9 4.5'/%3E%3C/svg%3E");
 }
 
-.status-select:focus {
+.status-select:focus,
+.priority-select:focus {
   outline: none;
   box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.14);
 }
@@ -527,9 +519,34 @@
   border-color: rgba(239, 68, 68, 0.35);
 }
 
-.status-select option {
+.status-select option,
+.priority-select option {
   background: #1e293b;
   color: #e2e8f0;
+}
+
+.priority-low {
+  background-color: rgba(148, 163, 184, 0.13);
+  color: #cbd5e1;
+  border-color: rgba(148, 163, 184, 0.35);
+}
+
+.priority-medium {
+  background-color: rgba(251, 193, 36, 0.13);
+  color: #fcd34d;
+  border-color: rgba(251, 193, 36, 0.35);
+}
+
+.priority-high {
+  background-color: rgba(251, 146, 60, 0.13);
+  color: #fdba74;
+  border-color: rgba(251, 146, 60, 0.35);
+}
+
+.priority-critical {
+  background-color: rgba(239, 68, 68, 0.13);
+  color: #fca5a5;
+  border-color: rgba(239, 68, 68, 0.35);
 }
 
 /* ── Checkboxes ── */
