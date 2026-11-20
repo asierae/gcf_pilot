@@ -1183,6 +1183,93 @@ async function deleteDraft(
   return empty();
 }
 
+/* Stage 2 drafts are keyed by organization AND application year. */
+
+function assertDraftYear(raw: string): number {
+  if (!/^(19|20)\d{2}$/.test(raw)) {
+    throw new HttpError(400, '"year" is not valid.');
+  }
+  const year = Number(raw);
+  if (year < 2000 || year > new Date().getFullYear() + 1) {
+    throw new HttpError(400, '"year" is out of range.');
+  }
+  return year;
+}
+
+async function listStage2Drafts(env: Env, orgId: string): Promise<Response> {
+  assertEntityId(orgId);
+  const rows = await env.DB.prepare(
+    `SELECT year, updated_at FROM stage2_drafts
+      WHERE organization_id = ? ORDER BY year DESC`,
+  )
+    .bind(orgId)
+    .all<{ year: number; updated_at: string }>();
+  return json({
+    drafts: (rows.results ?? []).map((row) => ({
+      year: row.year,
+      updatedAt: row.updated_at,
+    })),
+  });
+}
+
+async function getStage2Draft(
+  env: Env,
+  orgId: string,
+  year: number,
+): Promise<Response> {
+  assertEntityId(orgId);
+  const row = await env.DB.prepare(
+    `SELECT data, updated_at FROM stage2_drafts
+      WHERE organization_id = ? AND year = ?`,
+  )
+    .bind(orgId, year)
+    .first<{ data: string; updated_at: string }>();
+  return json({
+    draft: row
+      ? {
+          year,
+          data: parseJson<JsonObject>(row.data, {}),
+          updatedAt: row.updated_at,
+        }
+      : null,
+  });
+}
+
+async function putStage2Draft(
+  request: Request,
+  env: Env,
+  orgId: string,
+  year: number,
+): Promise<Response> {
+  assertEntityId(orgId);
+  const body = await readJson<{ data?: unknown }>(request);
+  const data = asObject(body.data, 'data');
+  const now = new Date().toISOString();
+  await env.DB.prepare(
+    `INSERT INTO stage2_drafts (organization_id, year, data, updated_at)
+     VALUES (?, ?, ?, ?)
+     ON CONFLICT(organization_id, year)
+     DO UPDATE SET data = excluded.data, updated_at = excluded.updated_at`,
+  )
+    .bind(orgId, year, JSON.stringify(data), now)
+    .run();
+  return json({ year, updatedAt: now });
+}
+
+async function deleteStage2Draft(
+  env: Env,
+  orgId: string,
+  year: number,
+): Promise<Response> {
+  assertEntityId(orgId);
+  await env.DB.prepare(
+    `DELETE FROM stage2_drafts WHERE organization_id = ? AND year = ?`,
+  )
+    .bind(orgId, year)
+    .run();
+  return empty();
+}
+
 /* ------------------------------------------------------------------ *
  * Readiness submissions
  * ------------------------------------------------------------------ */
@@ -3697,6 +3784,7 @@ async function createStage2(request: Request, env: Env): Promise<Response> {
       .run();
 
     await notifySubmission(env, applicantSubmissionNotice('stage 2', data, now));
+    await notifyStage2UnderReview(env, id, data);
 
     const account = await ensureSubmissionUser(env, {
       email: readText(data, 'primaryContactEmail'),
@@ -3751,6 +3839,7 @@ async function createStage2(request: Request, env: Env): Promise<Response> {
     .run();
 
   await notifySubmission(env, applicantSubmissionNotice('stage 2', data, now));
+  await notifyStage2UnderReview(env, id, data);
 
   const account = await ensureSubmissionUser(env, {
     email: readText(data, 'primaryContactEmail'),
@@ -3893,6 +3982,50 @@ async function notifyPreScreeningStatus(
     html: renderEmailHtml(content, { site: siteUrl(env), inbox: contactEmail(env) }),
     text: renderEmailText(content, { site: siteUrl(env), inbox: contactEmail(env) }),
   });
+}
+
+/** "Under review" notice after an accreditation application. Never fails the POST. */
+async function notifyStage2UnderReview(
+  env: Env,
+  id: string,
+  data: JsonObject,
+): Promise<void> {
+  if (!env.RESEND_API_KEY) return;
+
+  const email = readText(data, 'primaryContactEmail');
+  const name = readText(data, 'primaryContactName');
+  if (!EMAIL_PATTERN.test(email)) return;
+
+  const organization = readText(data, 'applicantName') || 'your organization';
+  const brand = { site: siteUrl(env), inbox: contactEmail(env) };
+  const content: EmailContent = {
+    kicker: 'Application under review',
+    title: `Thank you, ${name || 'there'} — your application is under review`,
+    intro: `We received the accreditation application for ${organization}. It is now under review by our advisory team.`,
+    paragraphs: [
+      'We will contact you shortly if we need any additional information or to discuss the next steps.',
+      'You can follow the progress of your submission in the portal at any time.',
+    ],
+    rows: [
+      { label: 'Organization', value: readText(data, 'applicantName') },
+      { label: 'Acronym', value: readText(data, 'applicantAcronym') },
+      { label: 'Reference', value: id },
+    ],
+    cta: { label: 'View your forms', href: `${siteUrl(env)}/my-forms` },
+    footnote: 'Replies go directly to the Avera advisory team.',
+    audience: 'applicant',
+  };
+
+  try {
+    await sendEmail(env, {
+      to: email,
+      subject: `Your accreditation application for ${organization} is under review`,
+      html: renderEmailHtml(content, brand),
+      text: renderEmailText(content, brand),
+    });
+  } catch (error) {
+    console.error('Could not send the stage 2 under-review email', error);
+  }
 }
 
 async function updateApplicantStatus(
@@ -5339,6 +5472,23 @@ async function handleApi(request: Request, env: Env, path: string): Promise<Resp
       return withAdmin(env, request, () => listOrganizationFiles(env, orgId));
     }
     return methodNotAllowed('GET');
+  }
+
+  // Stage 2 drafts: list years, or read/write/delete one year's draft.
+  const stage2DraftListMatch = /^\/api\/drafts\/stage2\/([^/]+)$/.exec(path);
+  if (stage2DraftListMatch) {
+    if (method !== 'GET') return methodNotAllowed('GET');
+    return listStage2Drafts(env, decodeURIComponent(stage2DraftListMatch[1]));
+  }
+
+  const stage2DraftMatch = /^\/api\/drafts\/stage2\/([^/]+)\/([^/]+)$/.exec(path);
+  if (stage2DraftMatch) {
+    const orgId = decodeURIComponent(stage2DraftMatch[1]);
+    const year = assertDraftYear(decodeURIComponent(stage2DraftMatch[2]));
+    if (method === 'GET') return getStage2Draft(env, orgId, year);
+    if (method === 'PUT' || method === 'POST') return putStage2Draft(request, env, orgId, year);
+    if (method === 'DELETE') return deleteStage2Draft(env, orgId, year);
+    return methodNotAllowed('GET, PUT, DELETE');
   }
 
   const draftMatch = /^\/api\/drafts\/(stage1|readiness)\/([^/]+)$/.exec(path);

@@ -124,6 +124,18 @@ CREATE TABLE IF NOT EXISTS readiness_drafts (
   updated_at      TEXT NOT NULL
 );
 
+-- Stage 2 drafts: one autosaved draft per organization AND application year.
+CREATE TABLE IF NOT EXISTS stage2_drafts (
+  organization_id TEXT NOT NULL,
+  year            INTEGER NOT NULL,
+  data            TEXT NOT NULL,
+  updated_at      TEXT NOT NULL,
+  PRIMARY KEY (organization_id, year)
+);
+
+CREATE INDEX IF NOT EXISTS idx_stage2_drafts_updated_at
+  ON stage2_drafts (organization_id, updated_at DESC);
+
 CREATE TABLE IF NOT EXISTS readiness_applications (
   organization_id TEXT PRIMARY KEY,
   submitted_at    TEXT NOT NULL,

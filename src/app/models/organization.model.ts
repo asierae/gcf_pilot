@@ -61,6 +61,12 @@ export interface OrganizationForms {
 export interface OrganizationDraft {
   data: Record<string, unknown>;
   updatedAt: string;
+  year?: number;
+}
+
+export interface Stage2DraftSummary {
+  year: number;
+  updatedAt: string;
 }
 
 export interface OrganizationFile {

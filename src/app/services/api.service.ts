@@ -12,6 +12,7 @@ import {
   OrganizationFilesBySection,
   OrganizationForms,
   OrganizationRecord,
+  Stage2DraftSummary,
 } from "../models/organization.model";
 import { AdminStats } from "../models/admin-stats.model";
 import { ApplicantDashboard } from "../models/applicant-dashboard.model";
@@ -579,6 +580,48 @@ export class ApiService {
   async deleteDraft(form: DraftForm, organizationId: string): Promise<void> {
     await this.request<void>(
       `/api/drafts/${form}/${encodeURIComponent(organizationId)}`,
+      { method: "DELETE" },
+      false,
+    );
+  }
+
+  async listStage2Drafts(organizationId: string): Promise<Stage2DraftSummary[]> {
+    const payload = await this.request<{ drafts?: Stage2DraftSummary[] }>(
+      `/api/drafts/stage2/${encodeURIComponent(organizationId)}`,
+      { method: "GET" },
+      false,
+    );
+    return payload.drafts ?? [];
+  }
+
+  async getStage2Draft(
+    organizationId: string,
+    year: number,
+  ): Promise<OrganizationDraft | null> {
+    const payload = await this.request<{ draft?: OrganizationDraft | null }>(
+      `/api/drafts/stage2/${encodeURIComponent(organizationId)}/${year}`,
+      { method: "GET" },
+      false,
+    );
+    return payload.draft ?? null;
+  }
+
+  async saveStage2Draft(
+    organizationId: string,
+    year: number,
+    data: Record<string, unknown>,
+  ): Promise<string> {
+    const payload = await this.request<{ updatedAt: string }>(
+      `/api/drafts/stage2/${encodeURIComponent(organizationId)}/${year}`,
+      { method: "PUT", body: JSON.stringify({ data }) },
+      false,
+    );
+    return payload.updatedAt;
+  }
+
+  async deleteStage2Draft(organizationId: string, year: number): Promise<void> {
+    await this.request<void>(
+      `/api/drafts/stage2/${encodeURIComponent(organizationId)}/${year}`,
       { method: "DELETE" },
       false,
     );

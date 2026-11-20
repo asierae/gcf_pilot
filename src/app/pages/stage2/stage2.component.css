@@ -121,6 +121,27 @@
   box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.16);
 }
 
+.save-state.is-saving .save-dot {
+  background: #e8c06a;
+  box-shadow: 0 0 0 3px rgba(232, 192, 106, 0.16);
+}
+
+.year-select {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.72rem;
+  color: var(--app-muted);
+}
+.year-select select {
+  padding: 0.3rem 0.5rem;
+  border: 1px solid var(--app-line-strong, var(--app-line));
+  border-radius: 7px;
+  background: var(--app-surface);
+  color: var(--app-text);
+  font: inherit;
+}
+
 .btn {
   display: inline-flex;
   align-items: center;

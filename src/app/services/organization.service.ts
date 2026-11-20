@@ -4,6 +4,7 @@ import {
   OrganizationDraft,
   OrganizationForms,
   OrganizationRecord,
+  Stage2DraftSummary,
 } from '../models/organization.model';
 import { ApiService } from './api.service';
 
@@ -69,6 +70,41 @@ export class OrganizationService {
   async clearDraft(form: DraftForm, organizationId: string): Promise<void> {
     try {
       await this.api.deleteDraft(form, organizationId);
+    } catch {
+      // A missing draft is not an error here.
+    }
+  }
+
+  async stage2DraftYears(organizationId: string): Promise<Stage2DraftSummary[]> {
+    try {
+      return await this.api.listStage2Drafts(organizationId);
+    } catch {
+      return [];
+    }
+  }
+
+  async loadStage2Draft(
+    organizationId: string,
+    year: number,
+  ): Promise<OrganizationDraft | null> {
+    try {
+      return await this.api.getStage2Draft(organizationId, year);
+    } catch {
+      return null;
+    }
+  }
+
+  async saveStage2Draft(
+    organizationId: string,
+    year: number,
+    data: Record<string, unknown>,
+  ): Promise<string> {
+    return this.api.saveStage2Draft(organizationId, year, data);
+  }
+
+  async clearStage2Draft(organizationId: string, year: number): Promise<void> {
+    try {
+      await this.api.deleteStage2Draft(organizationId, year);
     } catch {
       // A missing draft is not an error here.
     }

@@ -1,8 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule, Location } from '@angular/common';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { StorageService } from '../../services/storage.service';
 import { NotificationService } from '../../services/notification.service';
 import { AuthService } from '../../services/auth.service';
@@ -34,7 +34,7 @@ import { StepIconComponent } from '../../shared/components/step-icon/step-icon.c
   templateUrl: './stage2.component.html',
   styleUrl: './stage2.component.css'
 })
-export class Stage2Component implements OnInit {
+export class Stage2Component implements OnInit, OnDestroy {
   readonly totalSteps = TOTAL_WIZARD_STEPS;
   readonly stage2EntryStep = STAGE2_ENTRY_STEP;
   readonly screeningSteps = STAGE2_SCREENING_STEPS;
@@ -51,6 +51,16 @@ export class Stage2Component implements OnInit {
 
   isAdmin = false;
   viewMode: 'grid' | 'form' = 'form';
+
+  /** Application year selected in the topbar; key of the stage2 draft. */
+  draftYear = new Date().getFullYear();
+  draftYears: number[] = [];
+  draftSaving = false;
+  draftSavedAt: string | null = null;
+
+  private draftTimer: ReturnType<typeof setTimeout> | null = null;
+  private draftLoaded = false;
+  private pendingSave = false;
 
   constructor(
     private fb: FormBuilder,
@@ -113,6 +123,7 @@ export class Stage2Component implements OnInit {
 
     this.applicantId = this.resolveOrganizationId();
     syncOrganizationId(this.location, this.applicantId);
+    this.form.valueChanges.subscribe(() => this.scheduleDraftSave());
 
     void this.loadSavedData();
   }
@@ -128,9 +139,10 @@ export class Stage2Component implements OnInit {
 
   private async loadSavedData(): Promise<void> {
     try {
-      const [organization, forms] = await Promise.all([
+      const [organization, forms, yearList] = await Promise.all([
         this.organizationService.load(this.applicantId),
         this.organizationService.forms(this.applicantId),
+        this.organizationService.stage2DraftYears(this.applicantId),
       ]);
 
       this.identityLocked = Boolean(organization);
@@ -139,13 +151,128 @@ export class Stage2Component implements OnInit {
       // the identity fields with the canonical organization profile.
       const data = forms.stage2?.data ?? forms.stage1?.data ?? null;
       if (data) {
-        this.form.patchValue(data);
+        this.applyDraftValues(data);
       }
       if (organization) {
         this.form.patchValue(this.profileForForm(organization));
       }
+
+      // Offer the current year plus the previous three, and any year with a
+      // saved draft (which may be older).
+      const currentYear = new Date().getFullYear();
+      const recentYears = Array.from({ length: 4 }, (_, i) => currentYear - i);
+      this.draftYears = Array.from(
+        new Set([...recentYears, ...yearList.map((draft) => draft.year)]),
+      )
+        .filter((year) => Number.isInteger(year) && year >= 2000 && year <= currentYear + 1)
+        .sort((a, b) => b - a);
+      await this.loadDraftForSelectedYear();
     } catch {
       this.notificationService.error('Could not load saved data from the server.');
+    } finally {
+      this.draftLoaded = true;
+      if (this.pendingSave) {
+        this.pendingSave = false;
+        this.scheduleDraftSave();
+      }
+    }
+  }
+
+  private applyDraftValues(values: Record<string, unknown>): void {
+    this.form.patchValue(values as never);
+    const records = values['climateTrackRecord'];
+    if (!Array.isArray(records)) return;
+    const array = this.form.get('climateTrackRecord') as FormArray;
+    array.clear();
+    for (const record of records) {
+      if (!record || typeof record !== 'object') continue;
+      const fields = Object.fromEntries(
+        Object.keys(record as Record<string, unknown>).map((key) => [key, ['']]),
+      );
+      const group = this.fb.group(fields);
+      group.patchValue(record as never);
+      array.push(group);
+    }
+  }
+
+  private async loadDraftForSelectedYear(): Promise<void> {
+    const draft = await this.organizationService.loadStage2Draft(
+      this.applicantId,
+      this.draftYear,
+    );
+    if (draft?.data) {
+      this.applyDraftValues(draft.data);
+      this.draftSavedAt = draft.updatedAt;
+    } else {
+      this.draftSavedAt = null;
+    }
+  }
+
+  async onYearChange(year: number): Promise<void> {
+    const parsed = Number(year);
+    if (
+      !Number.isInteger(parsed) ||
+      parsed < 2000 ||
+      parsed > new Date().getFullYear() + 1 ||
+      parsed === this.draftYear
+    ) {
+      return;
+    }
+    year = parsed;
+    // Flush the pending timer while the old year is still selected.
+    if (this.draftTimer) {
+      clearTimeout(this.draftTimer);
+      this.draftTimer = null;
+      await this.saveDraft();
+    }
+    this.draftYear = year;
+    this.draftLoaded = false;
+    this.draftSavedAt = null;
+    try {
+      await this.loadDraftForSelectedYear();
+    } finally {
+      this.draftLoaded = true;
+      if (this.pendingSave) {
+        this.pendingSave = false;
+        this.scheduleDraftSave();
+      }
+    }
+  }
+
+  private scheduleDraftSave(): void {
+    if (!this.draftLoaded) {
+      this.pendingSave = true;
+      return;
+    }
+    if (this.draftTimer) clearTimeout(this.draftTimer);
+    this.draftSaving = true;
+    this.draftTimer = setTimeout(() => void this.saveDraft(), 800);
+  }
+
+  private async saveDraft(): Promise<void> {
+    this.draftTimer = null;
+    if (!this.draftLoaded) return;
+    try {
+      const updatedAt = await this.organizationService.saveStage2Draft(
+        this.applicantId,
+        this.draftYear,
+        this.form.getRawValue(),
+      );
+      if (!this.draftYears.includes(this.draftYear)) {
+        this.draftYears = [this.draftYear, ...this.draftYears].sort((a, b) => b - a);
+      }
+      this.draftSavedAt = updatedAt;
+    } catch {
+      // Drafts are best-effort; the form itself stays usable.
+    } finally {
+      this.draftSaving = false;
+    }
+  }
+
+  ngOnDestroy(): void {
+    if (this.draftTimer) {
+      clearTimeout(this.draftTimer);
+      void this.saveDraft();
     }
   }
 
@@ -224,11 +351,18 @@ export class Stage2Component implements OnInit {
   }
 
   private async submitForm(): Promise<void> {
+    if (this.draftTimer) {
+      clearTimeout(this.draftTimer);
+      this.draftTimer = null;
+    }
     try {
       await this.storageService.saveStage2Submission(
         this.form.value,
         this.applicantId,
       );
+      await this.organizationService.clearStage2Draft(this.applicantId, this.draftYear);
+      this.draftYears = this.draftYears.filter((year) => year !== this.draftYear);
+      this.draftSavedAt = null;
       this.submitSuccess = true;
       this.notificationService.success(this.translate.instant('STAGE2.SAVED'));
     } catch (error) {
