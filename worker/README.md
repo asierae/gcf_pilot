@@ -184,6 +184,13 @@ Public (no token):
   reputation section, branded as issued by Avera Capital Access. Generated in
   the Worker (`worker/risk-report-pdf.ts`) with standard PDF fonts, no new
   dependency and no cryptographic signature.
+- `PATCH /api/organizations/:id/profile` — applicant-facing profile update. Only
+  `legalAddress`, `operationalAddress`, `website`, `country`, `entityType`,
+  `contactName` and `contactPhone` are accepted; any other key (`name`,
+  `acronym`, `contactEmail`, admin or audit fields, metadata) returns 400. The
+  organization must already exist (404 otherwise) so this endpoint cannot
+  create rows. Note: applicant routes are unauthenticated, so this restriction
+  is about fields, not about ownership of the organization id.
 - `GET /api/organizations/acronym-available?acronym=&exclude=` — uniqueness check
 - `GET | PUT | DELETE /api/drafts/(stage1|readiness)/:organizationId` — draft
   autosave, keyed by the organization id
