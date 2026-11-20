@@ -186,6 +186,8 @@ interface LeadRecord {
   readinessScore: number;
   suggestedRoute: string;
   source: string;
+  /** Starred in the admin leads table; starred rows are listed first. */
+  favorite?: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -220,6 +222,8 @@ interface LeadRow {
   readiness_score: number | null;
   suggested_route: string | null;
   source: string | null;
+  /** 1 when the lead is starred in the admin table, 0 otherwise. */
+  favorite: number | null;
   created_at: string;
   updated_at: string;
 }
@@ -538,6 +542,7 @@ function rowToLead(row: LeadRow): LeadRecord {
     readinessScore: row.readiness_score ?? 0,
     suggestedRoute: row.suggested_route ?? '',
     source: row.source ?? 'manual',
+    favorite: row.favorite === 1,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
@@ -3762,6 +3767,7 @@ function normalizeLeadInput(raw: unknown): Omit<LeadRecord, 'id' | 'createdAt' |
     source: ['manual', 'import', 'profile'].includes(read('source'))
       ? read('source')
       : 'manual',
+    favorite: lead.favorite === true || lead.favorite === 1,
   };
 }
 
@@ -3806,8 +3812,9 @@ async function createLeads(request: Request, env: Env): Promise<Response> {
             contact_name, contact_role, objective, financing, timeline,
             operating_history, available_documents, project_stage, project_country,
             project_sector, access_type, compliance_issues, challenge, engagement,
-            consent, readiness_score, suggested_route, source, created_at, updated_at)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            consent, readiness_score, suggested_route, source, favorite,
+            created_at, updated_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       ).bind(
         lead.id,
         lead.region,
@@ -3838,6 +3845,7 @@ async function createLeads(request: Request, env: Env): Promise<Response> {
         lead.readinessScore,
         lead.suggestedRoute,
         lead.source,
+        lead.favorite ? 1 : 0,
         lead.createdAt,
         lead.updatedAt,
       ),
@@ -3865,7 +3873,7 @@ async function updateLead(
             available_documents = ?, project_stage = ?, project_country = ?,
             project_sector = ?, access_type = ?, compliance_issues = ?,
             challenge = ?, engagement = ?, consent = ?, readiness_score = ?,
-            suggested_route = ?, source = ?, updated_at = ?
+            suggested_route = ?, source = ?, favorite = ?, updated_at = ?
       WHERE id = ?`,
   )
     .bind(
@@ -3897,6 +3905,7 @@ async function updateLead(
       lead.readinessScore,
       lead.suggestedRoute,
       lead.source,
+      lead.favorite ? 1 : 0,
       now,
       id,
     )
@@ -4488,8 +4497,8 @@ async function createProfileAssessment(
         contact_name, contact_role, objective, financing, timeline,
         operating_history, available_documents, project_stage, project_country,
         project_sector, access_type, compliance_issues, challenge, engagement,
-        consent, readiness_score, suggested_route, source, created_at, updated_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        consent, readiness_score, suggested_route, source, favorite, created_at, updated_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
   )
     .bind(
       created.id,
@@ -4521,6 +4530,7 @@ async function createProfileAssessment(
       created.readinessScore,
       created.suggestedRoute,
       created.source,
+      created.favorite ? 1 : 0,
       created.createdAt,
       created.updatedAt,
     )

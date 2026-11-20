@@ -52,6 +52,8 @@ CREATE TABLE IF NOT EXISTS leads (
   suggested_route   TEXT NOT NULL DEFAULT '',
   -- manual | import | profile
   source            TEXT NOT NULL DEFAULT 'manual',
+  -- 1 when starred in the admin leads table (shown first).
+  favorite          INTEGER NOT NULL DEFAULT 0,
   created_at        TEXT NOT NULL,
   updated_at        TEXT NOT NULL
 );
