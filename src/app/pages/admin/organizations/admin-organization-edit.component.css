@@ -62,6 +62,12 @@
   font-size: 0.8rem; font-weight: 600; color: #94a3b8;
 }
 .ao-full-width { grid-column: 1 / -1; }
+.ao-check-row {
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  color: #f1f5f9; cursor: pointer;
+}
+.ao-check-row input { width: 1rem; height: 1rem; accent-color: #e8c06a; }
+.ao-section-audit .field-note { margin-bottom: 0.85rem; }
 
 .form-field input,
 .form-field textarea,

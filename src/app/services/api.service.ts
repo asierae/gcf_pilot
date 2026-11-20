@@ -414,7 +414,24 @@ export class ApiService {
     updates: Partial<
       Pick<
         OrganizationRecord,
-        'riskScore' | 'riskNotes' | 'adminNotes' | 'accreditationStatus' | 'priorityLevel'
+        | 'riskScore'
+        | 'riskNotes'
+        | 'adminNotes'
+        | 'accreditationStatus'
+        | 'priorityLevel'
+        | 'auditEnabled'
+        | 'auditGovernance'
+        | 'auditFinancial'
+        | 'auditDelivery'
+        | 'auditClimate'
+        | 'auditTransparency'
+        | 'auditBenchmark'
+        | 'auditConfidence'
+        | 'auditRiskBand'
+        | 'auditFirm'
+        | 'auditDate'
+        | 'auditReportUrl'
+        | 'auditNotes'
       >
     >,
   ): Promise<OrganizationRecord> {

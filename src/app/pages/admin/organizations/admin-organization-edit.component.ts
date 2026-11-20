@@ -30,7 +30,39 @@ interface OrgForm {
   adminNotes: string;
   accreditationStatus: string;
   priorityLevel: string;
+  auditEnabled: boolean;
+  auditGovernance: number | null;
+  auditFinancial: number | null;
+  auditDelivery: number | null;
+  auditClimate: number | null;
+  auditTransparency: number | null;
+  auditBenchmark: number | null;
+  auditConfidence: number | null;
+  auditRiskBand: string;
+  auditFirm: string;
+  auditDate: string;
+  auditReportUrl: string;
+  auditNotes: string;
 }
+
+type AuditFormFields = Pick<
+  OrgForm,
+  | 'auditEnabled'
+  | 'auditGovernance'
+  | 'auditFinancial'
+  | 'auditDelivery'
+  | 'auditClimate'
+  | 'auditTransparency'
+  | 'auditBenchmark'
+  | 'auditConfidence'
+  | 'auditRiskBand'
+  | 'auditFirm'
+  | 'auditDate'
+  | 'auditReportUrl'
+  | 'auditNotes'
+>;
+
+const AUDIT_BANDS = ['low', 'moderate', 'elevated', 'high'];
 
 const ENTITY_TYPES = [
   "Bank / Financial institution",
@@ -94,6 +126,7 @@ export class AdminOrganizationEditComponent implements OnInit {
     value: p,
     label: this.priorityLabel(p),
   }));
+  auditBands = AUDIT_BANDS;
 
   constructor() {
     this.breadcrumb.setContext("ADMIN_ORGANIZATIONS.TITLE");
@@ -147,6 +180,7 @@ export class AdminOrganizationEditComponent implements OnInit {
           adminNotes: org.adminNotes || "",
           accreditationStatus: org.accreditationStatus || "",
           priorityLevel: org.priorityLevel || "",
+          ...this.auditFormFromOrg(org),
         };
         // Set breadcrumb context for edit page
         this.breadcrumb.setContext(
@@ -227,6 +261,37 @@ export class AdminOrganizationEditComponent implements OnInit {
       adminNotes: "",
       accreditationStatus: "",
       priorityLevel: "",
+      auditEnabled: false,
+      auditGovernance: null,
+      auditFinancial: null,
+      auditDelivery: null,
+      auditClimate: null,
+      auditTransparency: null,
+      auditBenchmark: null,
+      auditConfidence: null,
+      auditRiskBand: "",
+      auditFirm: "",
+      auditDate: "",
+      auditReportUrl: "",
+      auditNotes: "",
+    };
+  }
+
+  private auditFormFromOrg(org: OrganizationRecord): AuditFormFields {
+    return {
+      auditEnabled: org.auditEnabled ?? false,
+      auditGovernance: org.auditGovernance ?? null,
+      auditFinancial: org.auditFinancial ?? null,
+      auditDelivery: org.auditDelivery ?? null,
+      auditClimate: org.auditClimate ?? null,
+      auditTransparency: org.auditTransparency ?? null,
+      auditBenchmark: org.auditBenchmark ?? null,
+      auditConfidence: org.auditConfidence ?? null,
+      auditRiskBand: org.auditRiskBand ?? "",
+      auditFirm: org.auditFirm ?? "",
+      auditDate: org.auditDate ? org.auditDate.slice(0, 10) : "",
+      auditReportUrl: org.auditReportUrl ?? "",
+      auditNotes: org.auditNotes ?? "",
     };
   }
 
@@ -260,6 +325,19 @@ export class AdminOrganizationEditComponent implements OnInit {
         adminNotes: this.form.adminNotes.trim(),
         accreditationStatus: this.form.accreditationStatus,
         priorityLevel: this.form.priorityLevel,
+        auditEnabled: this.form.auditEnabled,
+        auditGovernance: this.form.auditGovernance,
+        auditFinancial: this.form.auditFinancial,
+        auditDelivery: this.form.auditDelivery,
+        auditClimate: this.form.auditClimate,
+        auditTransparency: this.form.auditTransparency,
+        auditBenchmark: this.form.auditBenchmark,
+        auditConfidence: this.form.auditConfidence,
+        auditRiskBand: (this.form.auditRiskBand || null) as OrganizationRecord["auditRiskBand"],
+        auditFirm: this.form.auditFirm.trim(),
+        auditDate: this.form.auditDate || null,
+        auditReportUrl: this.form.auditReportUrl.trim(),
+        auditNotes: this.form.auditNotes.trim(),
       };
 
       await this.api.updateOrganizationAdmin(this.orgId, adminUpdates);

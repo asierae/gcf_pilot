@@ -16,6 +16,14 @@ export interface ApplicantRiskFactor {
   weight: number;
 }
 
+export interface ApplicantAuditSummary {
+  firm: string;
+  date: string | null;
+  reportUrl: string;
+  notes: string;
+  updatedAt: string | null;
+}
+
 export interface ApplicantRisk {
   overall: number;
   benchmark: number;
@@ -23,6 +31,10 @@ export interface ApplicantRisk {
   riskBand: RiskBand;
   confidence: number;
   factors: ApplicantRiskFactor[];
+  /** 'computed' from submitted data, or 'avera-audit' when Avera published scores. */
+  source: 'computed' | 'avera-audit';
+  auditedFactors: string[];
+  audit: ApplicantAuditSummary | null;
 }
 
 export interface ApplicantAction {

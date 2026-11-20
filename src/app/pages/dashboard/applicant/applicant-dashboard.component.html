@@ -97,7 +97,11 @@
               <p>{{ "APPLICANT_DASHBOARD.RISK.SUB" | translate }}</p>
             </div>
           </div>
-          <span class="panel-pill">{{ "APPLICANT_DASHBOARD.RISK.BENCHMARK_SHORT" | translate }}</span>
+          @if (dashboard.risk.source === 'avera-audit') {
+            <span class="panel-pill audit-pill">{{ "APPLICANT_DASHBOARD.RISK.AUDITED" | translate }}</span>
+          } @else {
+            <span class="panel-pill">{{ "APPLICANT_DASHBOARD.RISK.BENCHMARK_SHORT" | translate }}</span>
+          }
         </div>
 
         <div class="risk-body">
@@ -190,7 +194,29 @@
           }
         </div>
 
-        <p class="risk-source">{{ "APPLICANT_DASHBOARD.RISK.SOURCE" | translate }}</p>
+        @if (dashboard.risk.audit; as audit) {
+          <div class="audit-source-card">
+            <p class="audit-source-title">{{ "APPLICANT_DASHBOARD.RISK.AUDIT_SOURCE" | translate }}</p>
+            <p class="audit-source-row">
+              <strong>{{ "APPLICANT_DASHBOARD.RISK.AUDIT_FIRM" | translate }}:</strong> {{ audit.firm || '—' }}
+            </p>
+            @if (audit.date) {
+              <p class="audit-source-row">
+                <strong>{{ "APPLICANT_DASHBOARD.RISK.AUDIT_DATE" | translate }}:</strong> {{ audit.date | date: 'mediumDate' }}
+              </p>
+            }
+            @if (audit.notes) {
+              <p class="audit-source-notes">{{ audit.notes }}</p>
+            }
+            @if (audit.reportUrl) {
+              <a class="audit-report-link" [href]="audit.reportUrl" target="_blank" rel="noopener noreferrer">
+                {{ "APPLICANT_DASHBOARD.RISK.AUDIT_REPORT" | translate }}
+              </a>
+            }
+          </div>
+        } @else {
+          <p class="risk-source">{{ "APPLICANT_DASHBOARD.RISK.SOURCE" | translate }}</p>
+        }
       </article>
 
       <!-- Next actions -->

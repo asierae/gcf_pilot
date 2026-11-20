@@ -183,6 +183,75 @@
           </div>
         </div>
 
+        <!-- Avera risk & reputation audit -->
+        <div class="ao-section ao-section-audit">
+          <h3>{{ "ADMIN_ORGANIZATION_EDIT.AUDIT_TITLE" | translate }}</h3>
+          <p class="field-note">{{ "ADMIN_ORGANIZATION_EDIT.AUDIT_HELP" | translate }}</p>
+
+          <label class="form-field ao-full-width">
+            <span class="ao-check-row">
+              <input type="checkbox" [(ngModel)]="form.auditEnabled" />
+              {{ "ADMIN_ORGANIZATION_EDIT.AUDIT_ENABLED" | translate }}
+            </span>
+          </label>
+
+          <div class="ao-form-grid">
+            <label class="form-field">
+              <span>{{ "ADMIN_ORGANIZATION_EDIT.AUDIT_GOVERNANCE" | translate }}</span>
+              <input type="number" min="0" max="100" [(ngModel)]="form.auditGovernance" />
+            </label>
+            <label class="form-field">
+              <span>{{ "ADMIN_ORGANIZATION_EDIT.AUDIT_FINANCIAL" | translate }}</span>
+              <input type="number" min="0" max="100" [(ngModel)]="form.auditFinancial" />
+            </label>
+            <label class="form-field">
+              <span>{{ "ADMIN_ORGANIZATION_EDIT.AUDIT_DELIVERY" | translate }}</span>
+              <input type="number" min="0" max="100" [(ngModel)]="form.auditDelivery" />
+            </label>
+            <label class="form-field">
+              <span>{{ "ADMIN_ORGANIZATION_EDIT.AUDIT_CLIMATE" | translate }}</span>
+              <input type="number" min="0" max="100" [(ngModel)]="form.auditClimate" />
+            </label>
+            <label class="form-field">
+              <span>{{ "ADMIN_ORGANIZATION_EDIT.AUDIT_TRANSPARENCY" | translate }}</span>
+              <input type="number" min="0" max="100" [(ngModel)]="form.auditTransparency" />
+            </label>
+            <label class="form-field">
+              <span>{{ "ADMIN_ORGANIZATION_EDIT.AUDIT_BENCHMARK" | translate }}</span>
+              <input type="number" min="0" max="100" [(ngModel)]="form.auditBenchmark" />
+            </label>
+            <label class="form-field">
+              <span>{{ "ADMIN_ORGANIZATION_EDIT.AUDIT_CONFIDENCE" | translate }}</span>
+              <input type="number" min="0" max="100" [(ngModel)]="form.auditConfidence" />
+            </label>
+            <label class="form-field">
+              <span>{{ "ADMIN_ORGANIZATION_EDIT.AUDIT_BAND" | translate }}</span>
+              <select [(ngModel)]="form.auditRiskBand">
+                <option value="">-- {{ "ADMIN_ORGANIZATION_EDIT.SELECT_PLACEHOLDER" | translate }} --</option>
+                @for (band of auditBands; track band) {
+                  <option [value]="band">{{ band }}</option>
+                }
+              </select>
+            </label>
+            <label class="form-field">
+              <span>{{ "ADMIN_ORGANIZATION_EDIT.AUDIT_FIRM_LABEL" | translate }}</span>
+              <input type="text" [(ngModel)]="form.auditFirm" />
+            </label>
+            <label class="form-field">
+              <span>{{ "ADMIN_ORGANIZATION_EDIT.AUDIT_DATE_LABEL" | translate }}</span>
+              <input type="date" [(ngModel)]="form.auditDate" />
+            </label>
+            <label class="form-field ao-full-width">
+              <span>{{ "ADMIN_ORGANIZATION_EDIT.AUDIT_REPORT_URL_LABEL" | translate }}</span>
+              <input type="url" [(ngModel)]="form.auditReportUrl" />
+            </label>
+            <label class="form-field ao-full-width">
+              <span>{{ "ADMIN_ORGANIZATION_EDIT.AUDIT_NOTES_LABEL" | translate }}</span>
+              <textarea [(ngModel)]="form.auditNotes" rows="3"></textarea>
+            </label>
+          </div>
+        </div>
+
         <!-- Metadata -->
         <div class="ao-section ao-section-meta">
           <p class="ao-meta-note">

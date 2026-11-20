@@ -23,6 +23,21 @@ export interface OrganizationRecord {
   adminNotes: string;
   accreditationStatus: string;
   priorityLevel: string;
+  // Avera risk & reputation audit
+  auditEnabled: boolean;
+  auditGovernance: number | null;
+  auditFinancial: number | null;
+  auditDelivery: number | null;
+  auditClimate: number | null;
+  auditTransparency: number | null;
+  auditBenchmark: number | null;
+  auditConfidence: number | null;
+  auditRiskBand: 'low' | 'moderate' | 'elevated' | 'high' | null;
+  auditFirm: string;
+  auditDate: string | null;
+  auditReportUrl: string;
+  auditNotes: string;
+  auditUpdatedAt: string | null;
   createdAt: string;
   updatedAt: string;
 }

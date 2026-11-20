@@ -247,6 +247,20 @@ interface OrganizationRow {
   admin_notes: string | null;
   accreditation_status: string | null;
   priority_level: string | null;
+  audit_enabled: number | null;
+  audit_governance: number | null;
+  audit_financial: number | null;
+  audit_delivery: number | null;
+  audit_climate: number | null;
+  audit_transparency: number | null;
+  audit_benchmark: number | null;
+  audit_confidence: number | null;
+  audit_risk_band: string | null;
+  audit_firm: string | null;
+  audit_date: string | null;
+  audit_report_url: string | null;
+  audit_notes: string | null;
+  audit_updated_at: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -269,8 +283,57 @@ interface OrganizationRecord {
   adminNotes: string;
   accreditationStatus: string;
   priorityLevel: string;
+  auditEnabled: boolean;
+  auditGovernance: number | null;
+  auditFinancial: number | null;
+  auditDelivery: number | null;
+  auditClimate: number | null;
+  auditTransparency: number | null;
+  auditBenchmark: number | null;
+  auditConfidence: number | null;
+  auditRiskBand: string | null;
+  auditFirm: string;
+  auditDate: string | null;
+  auditReportUrl: string;
+  auditNotes: string;
+  auditUpdatedAt: string | null;
   createdAt: string;
   updatedAt: string;
+}
+
+function emptyAuditFields(): Pick<
+  OrganizationRecord,
+  | 'auditEnabled'
+  | 'auditGovernance'
+  | 'auditFinancial'
+  | 'auditDelivery'
+  | 'auditClimate'
+  | 'auditTransparency'
+  | 'auditBenchmark'
+  | 'auditConfidence'
+  | 'auditRiskBand'
+  | 'auditFirm'
+  | 'auditDate'
+  | 'auditReportUrl'
+  | 'auditNotes'
+  | 'auditUpdatedAt'
+> {
+  return {
+    auditEnabled: false,
+    auditGovernance: null,
+    auditFinancial: null,
+    auditDelivery: null,
+    auditClimate: null,
+    auditTransparency: null,
+    auditBenchmark: null,
+    auditConfidence: null,
+    auditRiskBand: null,
+    auditFirm: '',
+    auditDate: null,
+    auditReportUrl: '',
+    auditNotes: '',
+    auditUpdatedAt: null,
+  };
 }
 
 type DraftForm = 'stage1' | 'readiness';
@@ -571,6 +634,20 @@ function rowToOrganization(row: OrganizationRow): OrganizationRecord {
     adminNotes: row.admin_notes ?? '',
     accreditationStatus: row.accreditation_status ?? 'not_started',
     priorityLevel: row.priority_level ?? 'normal',
+    auditEnabled: row.audit_enabled === 1,
+    auditGovernance: row.audit_governance ?? null,
+    auditFinancial: row.audit_financial ?? null,
+    auditDelivery: row.audit_delivery ?? null,
+    auditClimate: row.audit_climate ?? null,
+    auditTransparency: row.audit_transparency ?? null,
+    auditBenchmark: row.audit_benchmark ?? null,
+    auditConfidence: row.audit_confidence ?? null,
+    auditRiskBand: row.audit_risk_band ?? null,
+    auditFirm: row.audit_firm ?? '',
+    auditDate: row.audit_date ?? null,
+    auditReportUrl: row.audit_report_url ?? '',
+    auditNotes: row.audit_notes ?? '',
+    auditUpdatedAt: row.audit_updated_at ?? null,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
@@ -610,6 +687,20 @@ function readOrgFields(body: JsonObject): OrganizationRecord {
     adminNotes: pick('adminNotes'),
     accreditationStatus: pick('accreditationStatus') || 'not_started',
     priorityLevel: pick('priorityLevel') || 'normal',
+    auditEnabled: body.auditEnabled === true || body.auditEnabled === 1,
+    auditGovernance: pickNumber('auditGovernance'),
+    auditFinancial: pickNumber('auditFinancial'),
+    auditDelivery: pickNumber('auditDelivery'),
+    auditClimate: pickNumber('auditClimate'),
+    auditTransparency: pickNumber('auditTransparency'),
+    auditBenchmark: pickNumber('auditBenchmark'),
+    auditConfidence: pickNumber('auditConfidence'),
+    auditRiskBand: pick('auditRiskBand') || null,
+    auditFirm: pick('auditFirm'),
+    auditDate: pick('auditDate') || null,
+    auditReportUrl: pick('auditReportUrl'),
+    auditNotes: pick('auditNotes'),
+    auditUpdatedAt: pick('auditUpdatedAt') || null,
     createdAt: '',
     updatedAt: '',
   };
@@ -744,6 +835,7 @@ function organizationFromStage1(data: JsonObject): OrganizationRecord {
     adminNotes: '',
     accreditationStatus: 'not_started',
     priorityLevel: 'normal',
+    ...emptyAuditFields(),
     createdAt: '',
     updatedAt: '',
   };
@@ -777,6 +869,7 @@ function organizationFromReadiness(data: JsonObject): OrganizationRecord {
     adminNotes: '',
     accreditationStatus: 'not_started',
     priorityLevel: 'normal',
+    ...emptyAuditFields(),
     createdAt: '',
     updatedAt: '',
   };
@@ -817,18 +910,46 @@ async function updateOrganizationAdmin(
     'adminNotes',
     'accreditationStatus',
     'priorityLevel',
+    'auditEnabled',
+    'auditGovernance',
+    'auditFinancial',
+    'auditDelivery',
+    'auditClimate',
+    'auditTransparency',
+    'auditBenchmark',
+    'auditConfidence',
+    'auditRiskBand',
+    'auditFirm',
+    'auditDate',
+    'auditReportUrl',
+    'auditNotes',
   ];
+  const numericFields = new Set([
+    'riskScore',
+    'auditGovernance',
+    'auditFinancial',
+    'auditDelivery',
+    'auditClimate',
+    'auditTransparency',
+    'auditBenchmark',
+    'auditConfidence',
+  ]);
+  const auditFields = new Set(allowedFields.filter((f) => f.startsWith('audit')));
 
   const updates: string[] = [];
   const values: unknown[] = [];
+  let auditChanged = false;
 
   for (const field of allowedFields) {
     if (body[field] !== undefined) {
       const col = field.replace(/([A-Z])/g, '_$1').toLowerCase();
       updates.push(`${col} = ?`);
-      if (field === 'riskScore') {
+      if (auditFields.has(field)) auditChanged = true;
+      if (numericFields.has(field)) {
         const num = body[field];
         values.push(num === null || num === '' ? null : Number(num));
+      } else if (field === 'auditEnabled') {
+        values.push(body[field] === true || body[field] === 1 || body[field] === 'true' ? 1 : 0);
       } else {
         values.push(typeof body[field] === 'string' ? body[field].trim() : String(body[field]));
       }
@@ -837,6 +958,11 @@ async function updateOrganizationAdmin(
 
   if (updates.length === 0) {
     return json({ error: 'No valid fields provided.' }, 400);
+  }
+
+  if (auditChanged) {
+    updates.push('audit_updated_at = ?');
+    values.push(new Date().toISOString());
   }
 
   updates.push('updated_at = ?');
@@ -1520,13 +1646,16 @@ const REVIEW_SECTION_LABELS: Record<string, string> = {
 };
 const REVIEW_SECTION_ORDER = Object.keys(REVIEW_SECTION_LABELS);
 
-async function organizationDashboard(env: Env, orgId: string): Promise<Response> {
+async function buildOrganizationDashboard(
+  env: Env,
+  orgId: string,
+): Promise<JsonObject | null> {
   // Applicant accounts may reference an organization id saved before the
   // strict id format existed (e.g. an admin typing "avera"). This endpoint is
   // read-only, so accept any single path segment and simply return an empty
   // dashboard when nothing matches instead of failing the whole page.
   if (!orgId || orgId.length > 80 || orgId.includes('..')) {
-    return json({ error: 'Organization not found.' }, 404);
+    return null;
   }
 
   const orgRow = await env.DB.prepare('SELECT * FROM organizations WHERE id = ?')
@@ -1753,17 +1882,49 @@ async function organizationDashboard(env: Env, orgId: string): Promise<Response>
     },
   ];
 
-  const overall = dashboardClamp(
+  const auditedFactors: string[] = [];
+  if (orgRow?.audit_enabled === 1) {
+    const auditScores: Record<string, number | null> = {
+      governance: orgRow.audit_governance,
+      financial: orgRow.audit_financial,
+      delivery: orgRow.audit_delivery,
+      climate: orgRow.audit_climate,
+      transparency: orgRow.audit_transparency,
+    };
+    for (const factor of factors) {
+      const audited = auditScores[factor.key];
+      if (audited !== null && audited !== undefined) {
+        factor.value = dashboardClamp(audited);
+        auditedFactors.push(factor.key);
+      }
+    }
+  }
+
+  let overall = dashboardClamp(
     factors.reduce((sum, factor) => sum + factor.value * factor.weight, 0),
   );
 
-  const confidence = dashboardClamp(
+  let confidence = dashboardClamp(
     (stage1 ? 25 : 0) +
       (stage2 ? 25 : 0) +
       (readiness ? 25 : 0) +
       (docsAttached / docsRequired) * 15 +
       orgComplete * 0.1,
   );
+
+  const auditActive = orgRow?.audit_enabled === 1;
+  let benchmark = DJSI_REFERENCE;
+  let benchmarkSource = 'DJSI';
+  if (auditActive && orgRow) {
+    if (orgRow.audit_benchmark !== null) benchmark = dashboardClamp(orgRow.audit_benchmark);
+    if (orgRow.audit_confidence !== null) confidence = dashboardClamp(orgRow.audit_confidence);
+    benchmarkSource = 'AVERA_AUDIT';
+  }
+  const riskBand =
+    auditActive && orgRow?.audit_risk_band
+      ? orgRow.audit_risk_band
+      : dashboardRiskBand(overall);
+  const riskSource = auditActive ? 'avera-audit' : 'computed';
 
   /* ── Timeline ──────────────────────────────────────── */
 
@@ -1915,7 +2076,7 @@ async function organizationDashboard(env: Env, orgId: string): Promise<Response>
       return position(a.sectionId) - position(b.sectionId);
     });
 
-  return json({
+  return {
     organization,
     generatedAt: new Date().toISOString(),
     preScreeningStatus,
@@ -1930,11 +2091,22 @@ async function organizationDashboard(env: Env, orgId: string): Promise<Response>
     progress,
     risk: {
       overall,
-      benchmark: DJSI_REFERENCE,
-      benchmarkSource: 'DJSI',
-      riskBand: dashboardRiskBand(overall),
+      benchmark,
+      benchmarkSource,
+      riskBand,
       confidence,
       factors,
+      source: riskSource,
+      auditedFactors,
+      audit: auditActive && orgRow
+        ? {
+            firm: orgRow.audit_firm ?? '',
+            date: orgRow.audit_date ?? null,
+            reportUrl: orgRow.audit_report_url ?? '',
+            notes: orgRow.audit_notes ?? '',
+            updatedAt: orgRow.audit_updated_at ?? null,
+          }
+        : null,
     },
     readinessScore: readiness
       ? dashboardClamp(
@@ -1982,7 +2154,15 @@ async function organizationDashboard(env: Env, orgId: string): Promise<Response>
           rows: budgetRows,
         }
       : null,
-  });
+  };
+}
+
+async function organizationDashboard(env: Env, orgId: string): Promise<Response> {
+  const payload = await buildOrganizationDashboard(env, orgId);
+  if (!payload) {
+    return json({ error: 'Organization not found.' }, 404);
+  }
+  return json(payload);
 }
 
 /* ------------------------------------------------------------------ *

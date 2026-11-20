@@ -88,6 +88,21 @@ CREATE TABLE IF NOT EXISTS organizations (
   admin_notes         TEXT NOT NULL DEFAULT '',
   accreditation_status TEXT NOT NULL DEFAULT 'not_started',
   priority_level      TEXT NOT NULL DEFAULT 'normal',
+  -- Avera audit scores (NULL factor = use the value computed from submissions)
+  audit_enabled       INTEGER NOT NULL DEFAULT 0,
+  audit_governance    INTEGER DEFAULT NULL,
+  audit_financial     INTEGER DEFAULT NULL,
+  audit_delivery      INTEGER DEFAULT NULL,
+  audit_climate       INTEGER DEFAULT NULL,
+  audit_transparency  INTEGER DEFAULT NULL,
+  audit_benchmark     INTEGER DEFAULT NULL,
+  audit_confidence    INTEGER DEFAULT NULL,
+  audit_risk_band     TEXT DEFAULT NULL,
+  audit_firm          TEXT NOT NULL DEFAULT '',
+  audit_date          TEXT DEFAULT NULL,
+  audit_report_url    TEXT NOT NULL DEFAULT '',
+  audit_notes         TEXT NOT NULL DEFAULT '',
+  audit_updated_at    TEXT DEFAULT NULL,
   created_at          TEXT NOT NULL,
   updated_at          TEXT NOT NULL
 );
