@@ -6,6 +6,8 @@ import {
   FormBuilder,
   FormGroup,
   Validators,
+  FormArray,
+  AbstractControl,
 } from '@angular/forms';
 import { StorageService } from '../../services/storage.service';
 import { NotificationService } from '../../services/notification.service';
@@ -60,6 +62,8 @@ export class Stage1Component implements OnInit, OnDestroy {
   private draftTimer: ReturnType<typeof setTimeout> | null = null;
   private draftLoaded = false;
   private pendingSave = false;
+  /** Functions that re-apply "required when visible" validators after a patch. */
+  private conditionalSyncs: Array<() => void> = [];
 
   steps = [
     { id: 'access', title: 'Access Modality', icon: '🌐' },
@@ -117,9 +121,12 @@ export class Stage1Component implements OnInit, OnDestroy {
     private location: Location,
   ) {
     this.form = this.fb.group({
+      // Step 0: Access Modality
       organizationType: ['', Validators.required],
       nominationLetterAttached: [''],
+      nominationLetterFiles: [[]],
       ndaEngagementDescription: [''],
+      consultationMethod: ['online'],
       consultationCountry: [''],
       consultationContactPerson: [''],
       consultationMode: [''],
@@ -128,15 +135,24 @@ export class Stage1Component implements OnInit, OnDestroy {
       ndaContactPerson: [''],
       ndaContactInfo: [''],
       consultationSummary: [''],
+      consultationSummaryFiles: [[]],
+      noConsultation: [false],
+
+      // Step 1: General Information
       applicantName: ['', Validators.required],
       applicantAcronym: ['', Validators.required],
       legalAddress: ['', Validators.required],
+      registeredAddress: ['', Validators.required],
       operationalAddress: [''],
       website: ['', Validators.required],
+      primarySalutation: [''],
       primaryContactName: ['', Validators.required],
+      primaryContactTitle: [''],
       primaryContactEmail: ['', [Validators.required, Validators.email]],
       primaryContactPhone: ['', Validators.required],
+      secondarySalutation: [''],
       secondaryContactName: [''],
+      secondaryContactTitle: [''],
       secondaryContactEmail: ['', Validators.email],
       secondaryContactPhone: [''],
       scopeOfOperations: ['', Validators.required],
@@ -149,10 +165,21 @@ export class Stage1Component implements OnInit, OnDestroy {
         smallIslandDevelopingStates: [false],
         developedCountries: [false],
       }),
-      headquartersCountry: ['', Validators.required],
-      incorporationCountry: ['', Validators.required],
+      countryOfOperation: ['', Validators.required],
+      hqLocation: ['', Validators.required],
+      incorporationCountry: [''],
+      contactEvidenceFiles: [[]],
+
+      // 1.2 Applicant type — wider group
+      groupedOrganization: ['', Validators.required],
+      groupDetails: [''],
+
+      // Step 2: Legal Status & Eligibility
       hasLegalPersonality: ['', Validators.required],
       hasLegalCapacity: ['', Validators.required],
+      legalSupportingDocumentsFiles: [[]],
+      legalOpinionFiles: [[]],
+      ownershipFiles: [[]],
       canReceiveFundsDirectly: ['', Validators.required],
       canHandleGCFCurrencies: ['', Validators.required],
       canMaintainInterestBearingAccount: ['', Validators.required],
@@ -162,11 +189,47 @@ export class Stage1Component implements OnInit, OnDestroy {
       hasESSCapacity: ['', Validators.required],
       hasGenderCapacity: ['', Validators.required],
       hasMonitoringCapacity: ['', Validators.required],
+      hasInvestmentCriteria: ['', Validators.required],
+      investmentCriteria: this.fb.group({
+        impactPotential: [false],
+        paradigmShift: [false],
+        sustainableDevelopment: [false],
+        needsOfRecipient: [false],
+        countryOwnership: [false],
+        efficiencyEffectiveness: [false],
+      }),
+
+      // Step 3: Additional Information
       businessMandate: ['', Validators.required],
-      hasClimateFinanceExperience: [''],
+      hasClimateFinanceExperience: ['', Validators.required],
       climateFinanceOverview: [''],
-      hasTrackRecordInRegion: [''],
+      trackRecordEvidenceFiles: [[]],
+      hasTrackRecordInRegion: ['', Validators.required],
       trackRecordOverview: [''],
+      financingInstruments: ['', Validators.required],
+      instrumentExperience: [''],
+      climatePriorities: ['', Validators.required],
+      strategicAreas: this.fb.group({
+        energyAccess: [false],
+        lowEmissionTransport: [false],
+        buildingsCitiesIndustries: [false],
+        forestsLandUse: [false],
+        healthFoodWater: [false],
+        livelihoods: [false],
+        ecosystems: [false],
+        infrastructure: [false],
+      }),
+      crossCutting: this.fb.group({
+        privateSector: [false],
+        naturePositive: [false],
+        justTransition: [false],
+        climateResilient: [false],
+        genderResponsive: [false],
+        supportLdcsSids: [false],
+        capacityBuilding: [false],
+        other: [false],
+      }),
+      otherCrossCutting: [''],
       fiduciaryLevel: ['', Validators.required],
       projectManagementLevel: ['', Validators.required],
       essLevel: ['', Validators.required],
@@ -176,32 +239,41 @@ export class Stage1Component implements OnInit, OnDestroy {
       monitoringLevel: ['', Validators.required],
       canEnsureDownstreamCompliance: ['', Validators.required],
       canMonitorCompliance: ['', Validators.required],
-      accreditedByGEF: [false],
-      accreditedByAF: [false],
-      accreditedByEUDGINTPA: [false],
-      fastTrackComplianceDetails: [''],
+      riskCategory: ['', Validators.required],
+      highRiskExperience: [''],
+      hasESMS: ['', Validators.required],
+      esmsDescription: [''],
+
+      // Step 4: Fast-Track & Engagement
+      fastTrack: ['', Validators.required],
+      fastTrackInstitutions: this.fb.group({
+        gef: [false],
+        af: [false],
+        euDgIntpa: [false],
+        afdb: [false],
+      }),
+      fastTrackCredentials: [''],
+      fastTrackDocumentsFiles: [[]],
+      afdbCurrent: [''],
+      afdbOperations: this.fb.array([]),
       hasReceivedReadinessSupport: ['', Validators.required],
       hasServedAsExecutingEntity: ['', Validators.required],
       executingEntityDetails: [''],
       hasServedAsDeliveryPartner: ['', Validators.required],
       hasEngagedInPSAA: ['', Validators.required],
       preparedForPartnerships: ['', Validators.required],
-      nominationLetterFiles: [[]],
-      consultationSummaryFiles: [[]],
-      legalSupportingDocumentsFiles: [[]],
-      fastTrackAccreditationFiles: [[]],
     });
   }
 
   async ngOnInit(): Promise<void> {
-    // Subscribe before the initial state arrives so edits made while the
-    // organization/draft is still loading are not lost.
     this.form.valueChanges.subscribe(() => this.scheduleDraftSave());
+    this.watchConditionalRequirements();
 
     this.applicantId = this.resolveOrganizationId();
     syncOrganizationId(this.location, this.applicantId);
 
     await this.loadOrganizationAndDraft();
+    this.syncConditionalValidators();
 
     this.draftLoaded = true;
     if (this.pendingSave) {
@@ -238,8 +310,6 @@ export class Stage1Component implements OnInit, OnDestroy {
     this.organization = await this.organizationService.load(this.applicantId);
 
     if (!this.organization && user?.organizationId === this.applicantId && user.organizationName) {
-      // First visit for a signed-in applicant: register the organization with
-      // the details we already know.
       try {
         this.organization = await this.organizationService.save(this.applicantId, {
           name: user.organizationName,
@@ -264,7 +334,7 @@ export class Stage1Component implements OnInit, OnDestroy {
     const draft = await this.organizationService.loadDraft('stage1', this.applicantId);
     if (draft?.data) {
       this.applyServerValues(draft.data);
-      this.restoreTrackRecord(draft.data);
+      this.restoreAfdbOperations(draft.data);
       this.draftSavedAt = draft.updatedAt;
     }
 
@@ -302,6 +372,92 @@ export class Stage1Component implements OnInit, OnDestroy {
     control.updateValueAndValidity({ emitEvent: false });
   }
 
+  /**
+   * Mirrors the questionnaire's "required when this branch is shown" rules:
+   * a field only becomes required while the answer that reveals it is active.
+   */
+  private watchConditionalRequirements(): void {
+    const bind = (
+      sourceNames: string | string[],
+      targetNames: string[],
+      isActive: (values: Record<string, unknown>) => boolean,
+    ): void => {
+      const names = Array.isArray(sourceNames) ? sourceNames : [sourceNames];
+      const sources = names
+        .map((name) => this.form.get(name))
+        .filter((control): control is AbstractControl => control !== null);
+
+      if (sources.length === 0) return;
+
+      const sync = (): void => {
+        const values = Object.fromEntries(
+          names.map((name) => [name, this.form.get(name)?.value]),
+        );
+        const active = isActive(values);
+
+        for (const targetName of targetNames) {
+          const target = this.form.get(targetName);
+          if (!target) continue;
+
+          const hasRequirements = target.hasValidator(Validators.required);
+          if (active && !hasRequirements) {
+            target.addValidators(Validators.required);
+          } else if (!active && hasRequirements) {
+            target.removeValidators(Validators.required);
+          }
+          target.updateValueAndValidity({ emitEvent: false });
+        }
+      };
+
+      for (const source of sources) {
+        source.valueChanges.subscribe(sync);
+      }
+
+      this.conditionalSyncs.push(sync);
+      sync();
+    };
+
+    const consultationTargets = [
+      'consultationCountry',
+      'consultationContactPerson',
+      'consultationMode',
+      'consultationDates',
+      'ndaInstitution',
+      'ndaContactPerson',
+      'ndaContactInfo',
+      'consultationSummary',
+    ];
+
+    bind('groupedOrganization', ['groupDetails'], (v) => v['groupedOrganization'] === 'yes');
+    bind('canUndertakeFullCycle', ['fullCycleDescription'], (v) => v['canUndertakeFullCycle'] === 'yes');
+    bind('hasClimateFinanceExperience', ['climateFinanceOverview'], (v) => v['hasClimateFinanceExperience'] === 'yes');
+    bind('hasTrackRecordInRegion', ['trackRecordOverview'], (v) => v['hasTrackRecordInRegion'] === 'yes');
+    bind('hasServedAsExecutingEntity', ['executingEntityDetails'], (v) => v['hasServedAsExecutingEntity'] === 'yes');
+    bind(
+      ['organizationType', 'consultationMethod'],
+      consultationTargets,
+      (v) =>
+        (v['organizationType'] === 'self-nominating-direct' ||
+          v['organizationType'] === 'self-nominating-international') &&
+        v['consultationMethod'] === 'online',
+    );
+    bind(
+      'fastTrackInstitutions',
+      ['fastTrackCredentials'],
+      (v) => {
+        const institutions = (v['fastTrackInstitutions'] || {}) as Record<string, boolean>;
+        return Boolean(institutions['gef'] || institutions['af'] || institutions['euDgIntpa']);
+      },
+    );
+  }
+
+  /** Re-applies conditional validators after values were patched without events. */
+  private syncConditionalValidators(): void {
+    for (const sync of this.conditionalSyncs) {
+      sync();
+    }
+  }
+
   private profileForForm(org: OrganizationRecord): Record<string, string> {
     const pairs: Record<string, string> = {
       applicantName: org.name,
@@ -309,7 +465,7 @@ export class Stage1Component implements OnInit, OnDestroy {
       legalAddress: org.legalAddress,
       operationalAddress: org.operationalAddress,
       website: org.website,
-      headquartersCountry: org.country,
+      countryOfOperation: org.country,
       typeOfEntity: org.entityType,
       primaryContactName: org.contactName,
       primaryContactEmail: org.contactEmail,
@@ -321,14 +477,11 @@ export class Stage1Component implements OnInit, OnDestroy {
     );
   }
 
-  private restoreTrackRecord(data: Record<string, unknown>): void {
-    const rows = data['climateTrackRecord'];
+  private restoreAfdbOperations(data: Record<string, unknown>): void {
+    const rows = data['afdbOperations'];
     if (!Array.isArray(rows)) return;
 
-    const array = this.form.get('climateTrackRecord') as unknown as {
-      clear: () => void;
-      push: (control: unknown) => void;
-    };
+    const array = this.form.get('afdbOperations') as FormArray;
     array.clear();
     for (const row of rows) {
       array.push(this.fb.group(row as Record<string, unknown>));
@@ -336,7 +489,6 @@ export class Stage1Component implements OnInit, OnDestroy {
   }
 
   private scheduleDraftSave(): void {
-    // Queue edits made before the organization/draft finished loading.
     if (!this.draftLoaded) {
       this.pendingSave = true;
       return;
@@ -368,6 +520,107 @@ export class Stage1Component implements OnInit, OnDestroy {
 
   get identityFieldsLocked(): boolean {
     return this.identityLocked;
+  }
+
+  get isGovernment(): boolean {
+    return this.form.get('organizationType')?.value === 'government';
+  }
+
+  get isSelfNominatingDirect(): boolean {
+    return this.form.get('organizationType')?.value === 'self-nominating-direct';
+  }
+
+  get isSelfNominatingInternational(): boolean {
+    return this.form.get('organizationType')?.value === 'self-nominating-international';
+  }
+
+  get isSelfNominating(): boolean {
+    return this.isSelfNominatingDirect || this.isSelfNominatingInternational;
+  }
+
+  get consultationMethod(): string {
+    return this.form.get('consultationMethod')?.value || 'online';
+  }
+
+  get showConsultationOnline(): boolean {
+    return this.consultationMethod === 'online';
+  }
+
+  get showConsultationUpload(): boolean {
+    return this.consultationMethod === 'upload';
+  }
+
+  get showConsultationNone(): boolean {
+    return this.consultationMethod === 'none';
+  }
+
+  get showFullCycleDescription(): boolean {
+    return this.form.get('canUndertakeFullCycle')?.value === 'yes';
+  }
+
+  get showClimateFinanceOverview(): boolean {
+    return this.form.get('hasClimateFinanceExperience')?.value === 'yes';
+  }
+
+  get showTrackRecordOverview(): boolean {
+    return this.form.get('hasTrackRecordInRegion')?.value === 'yes';
+  }
+
+  get showGrievanceLevel(): boolean {
+    return this.form.get('hasGrievanceMechanism')?.value === 'yes';
+  }
+
+  get showHighRiskExperience(): boolean {
+    const risk = this.form.get('riskCategory')?.value;
+    return risk === 'Category A / Intermediation 1 (I-1)' || risk === 'Category B / Intermediation 2 (I-2)';
+  }
+
+  get showEsmsDescription(): boolean {
+    return this.form.get('hasESMS')?.value === 'yes';
+  }
+
+  get showFastTrackCredentials(): boolean {
+    const institutions = this.form.get('fastTrackInstitutions')?.value || {};
+    return institutions.gef || institutions.af || institutions.euDgIntpa;
+  }
+
+  get showAfdbOperations(): boolean {
+    const institutions = this.form.get('fastTrackInstitutions')?.value || {};
+    return institutions.afdb && this.form.get('afdbCurrent')?.value === 'yes';
+  }
+
+  get showOtherCrossCutting(): boolean {
+    return this.form.get('crossCutting.other')?.value === true;
+  }
+
+  get afdbOperations(): FormArray {
+    return this.form.get('afdbOperations') as FormArray;
+  }
+
+  /** Rows of the AfDB operations table, typed as form groups for [formGroup]. */
+  get afdbRows(): FormGroup[] {
+    return this.afdbOperations.controls as FormGroup[];
+  }
+
+  /** Live word count for a free-text control, used by the word-limit hints. */
+  wordCount(controlName: string): number {
+    const value = this.form.get(controlName)?.value;
+    if (!value || typeof value !== 'string') return 0;
+    return value.trim().split(/\s+/).filter(Boolean).length;
+  }
+
+  addAfdbOperation(): void {
+    this.afdbOperations.push(this.fb.group({
+      projectName: [''],
+      projectId: [''],
+      status: [''],
+      idev: [''],
+      budgetSupport: [''],
+    }));
+  }
+
+  removeAfdbOperation(index: number): void {
+    this.afdbOperations.removeAt(index);
   }
 
   goToStep(step: number): void {

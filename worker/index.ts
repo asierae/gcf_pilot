@@ -723,7 +723,10 @@ function organizationFromStage1(data: JsonObject): OrganizationRecord {
     legalAddress: read('legalAddress'),
     operationalAddress: read('operationalAddress'),
     website: read('website'),
-    country: read('headquartersCountry'),
+    country:
+      read('hqLocation') ||
+      read('countryOfOperation') ||
+      read('headquartersCountry'),
     entityType: read('typeOfEntity'),
     contactName: read('primaryContactName'),
     contactEmail: read('primaryContactEmail'),
@@ -1294,6 +1297,7 @@ const STAGE1_CAPACITY_KEYS = [
   'hasESSCapacity',
   'hasGenderCapacity',
   'hasMonitoringCapacity',
+  'hasInvestmentCriteria',
   'hasGrievanceMechanism',
   'canEnsureDownstreamCompliance',
   'canMonitorCompliance',
