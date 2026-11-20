@@ -30,7 +30,10 @@
     "CONTACT_CTA": "Contact the team",
     "NOTE": "Already working with Avera?",
     "NOTE_LINK": "Sign in to your portal",
-    "FOOTER": "Avera Capital Access · Climate finance advisory"
+    "FOOTER": "Avera Capital Access · Climate finance advisory",
+    "USER": {
+      "EMAIL_EXISTS": "An account with that email already exists. Please log in to continue."
+    }
   },
   "LANDING": {
     "META_TITLE": "Avera Capital Access — Climate Finance Advisory",

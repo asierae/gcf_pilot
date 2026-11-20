@@ -134,6 +134,11 @@ export class UserService {
     );
   }
 
+  /** Check whether an email already belongs to an active user. */
+  findByEmail(email: string): AppUser | undefined {
+    return this.users.find((u) => u.email === email && u.status === 'active');
+  }
+
   // ── Write ───────────────────────────────────────────────────────────────
 
   createUser(

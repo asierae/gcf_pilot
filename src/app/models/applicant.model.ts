@@ -47,7 +47,6 @@ export const LEAD_STATUS_OPTIONS: LeadStatus[] = ['Pending', 'Contacted', 'Quali
 
 export interface LeadRecord {
   id?: string;
-  region: string;
   country: string;
   organization: string;
   acronym: string;
@@ -76,6 +75,8 @@ export interface LeadRecord {
   readinessScore?: number;
   suggestedRoute?: string;
   source?: string;
+  favorite?: boolean;
+  region?: string;
   createdAt?: string;
   updatedAt?: string;
 }
