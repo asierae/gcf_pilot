@@ -386,6 +386,42 @@ export class LeadsImportComponent implements OnInit, OnDestroy {
     }
   }
 
+  togglePendingFavorite(index: number, favorite: boolean): void {
+    const lead = this.pendingLeads[index];
+    if (!lead) {
+      return;
+    }
+    this.pendingLeads[index] = { ...lead, favorite };
+  }
+
+  async toggleSavedFavorite(
+    lead: LeadRecord,
+    favorite: boolean,
+  ): Promise<void> {
+    if (!lead.id) {
+      return;
+    }
+    const index = this.savedLeads.findIndex((item) => item.id === lead.id);
+    if (index === -1) {
+      return;
+    }
+
+    const previous = lead.favorite;
+    const updatedLead: LeadRecord = { ...lead, favorite };
+    this.savedLeads[index] = updatedLead;
+    this.savingFieldId = lead.id;
+
+    try {
+      const { id, createdAt, updatedAt, ...payload } = updatedLead;
+      await this.storageService.updateLead(lead.id, payload);
+    } catch {
+      this.savedLeads[index] = { ...lead, favorite: previous };
+      this.parseError = "Could not update the row on the server.";
+    } finally {
+      this.savingFieldId = null;
+    }
+  }
+
   async updateSavedField(
     lead: LeadRecord,
     field: LeadField,
@@ -446,32 +482,18 @@ export class LeadsImportComponent implements OnInit, OnDestroy {
 
   get filteredLeads(): LeadRecord[] {
     const query = this.searchQuery.trim().toLowerCase();
-    const leads = !query ? this.savedLeads : this.savedLeads.filter(
-      (lead) =>
-        lead.organization.toLowerCase().includes(query) ||
-        lead.acronym.toLowerCase().includes(query) ||
-        lead.country.toLowerCase().includes(query) ||
-        (lead.contactName?.toLowerCase() || '').includes(query) ||
-        (lead.contactEmail?.toLowerCase() || '').includes(query) ||
-        (lead.objective?.toLowerCase() || '').includes(query) ||
-        (lead.financing?.toLowerCase() || '').includes(query) ||
-        (lead.complianceIssues?.toLowerCase() || '').includes(query) ||
-        (lead.challenge?.toLowerCase() || '').includes(query) ||
-        (lead.objective?.toLowerCase() || '').includes(query)
-    );
-    return leads.sort((a, b) => {
-      // Favorited leads appear first
+    const leads = query
+      ? this.savedLeads.filter((lead) =>
+          this.getSearchableText(lead).includes(query),
+        )
+      : this.savedLeads;
+
+    // Favorited leads appear first, the rest keep their current order.
+    return [...leads].sort((a, b) => {
       const aFavorite = a.favorite ? 1 : 0;
       const bFavorite = b.favorite ? 1 : 0;
-      if (aFavorite !== bFavorite) {
-        return bFavorite - aFavorite; // favorite first
-      }
-      return 0;
+      return bFavorite - aFavorite;
     });
-
-    return this.savedLeads.filter((lead) =>
-      this.getSearchableText(lead).includes(query),
-    );
   }
 
   get paginatedLeads(): LeadRecord[] {

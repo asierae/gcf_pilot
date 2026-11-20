@@ -91,10 +91,7 @@
                 class="cell-input"
                 type="checkbox"
                 [checked]="lead.favorite"
-                (change)="
-                  lead.favorite = $event.target.checked;
-                  updatePendingField(i, 'favorite', lead.favorite)
-                "
+                (change)="togglePendingFavorite(i, $any($event.target).checked)"
               />
             </td>
             <td>
@@ -349,10 +346,7 @@
                 class="cell-input"
                 type="checkbox"
                 [checked]="lead.favorite"
-                (change)="
-                  lead.favorite = $event.target.checked;
-                  updateSavedField(lead, 'favorite')
-                "
+                (change)="toggleSavedFavorite(lead, $any($event.target).checked)"
               />
             </td>
             <td class="col-check">
