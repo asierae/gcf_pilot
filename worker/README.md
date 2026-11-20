@@ -176,7 +176,14 @@ Public (no token):
   (governance, financial, delivery, climate, transparency) computed from the
   submitted profile, Stage 1/2 answers and readiness package, shown against a
   labelled Dow Jones Sustainability Index reference band (a static benchmark,
-  not a live DJSI feed).
+  not a live DJSI feed). When an admin publishes an Avera audit, factor scores
+  are overridden with the assigned values, `overall` is recomputed with the same
+  weights and `risk.source` becomes `avera-audit`; `risk.audit` carries the
+  issuing team, date, notes and report link.
+- `GET /api/organizations/:id/risk-report.pdf` — PDF version of that risk &
+  reputation section, branded as issued by Avera Capital Access. Generated in
+  the Worker (`worker/risk-report-pdf.ts`) with standard PDF fonts, no new
+  dependency and no cryptographic signature.
 - `GET /api/organizations/acronym-available?acronym=&exclude=` — uniqueness check
 - `GET | PUT | DELETE /api/drafts/(stage1|readiness)/:organizationId` — draft
   autosave, keyed by the organization id
