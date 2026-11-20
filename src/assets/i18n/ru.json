@@ -1042,5 +1042,8 @@
     "LOG_EMPTY_TITLE": "Отправленные письма",
     "ALIAS_CONTACT": "Контакт (contact@averacapitalaccess.com)",
     "ALIAS_NOREPLY": "Не отвечать (noreply@averacapitalaccess.com)"
+  },
+  "USER": {
+    "EMAIL_EXISTS": "Учётная запись с этим адресом электронной почты уже существует. Войдите, чтобы продолжить."
   }
 }

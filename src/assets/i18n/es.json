@@ -1042,5 +1042,8 @@
     "LOG_EMPTY_TITLE": "Correos enviados",
     "ALIAS_CONTACT": "Contacto (contact@averacapitalaccess.com)",
     "ALIAS_NOREPLY": "No responder (noreply@averacapitalaccess.com)"
+  },
+  "USER": {
+    "EMAIL_EXISTS": "Ya existe una cuenta con ese correo electrónico. Inicia sesión para continuar."
   }
 }

@@ -30,10 +30,7 @@
     "CONTACT_CTA": "Contact the team",
     "NOTE": "Already working with Avera?",
     "NOTE_LINK": "Sign in to your portal",
-    "FOOTER": "Avera Capital Access · Climate finance advisory",
-    "USER": {
-      "EMAIL_EXISTS": "An account with that email already exists. Please log in to continue."
-    }
+    "FOOTER": "Avera Capital Access · Climate finance advisory"
   },
   "LANDING": {
     "META_TITLE": "Avera Capital Access — Climate Finance Advisory",
@@ -1046,5 +1043,8 @@
     "LOG_EMPTY_TITLE": "Sent emails",
     "ALIAS_CONTACT": "Contact (contact@averacapitalaccess.com)",
     "ALIAS_NOREPLY": "No-reply (noreply@averacapitalaccess.com)"
+  },
+  "USER": {
+    "EMAIL_EXISTS": "An account with that email already exists. Please log in to continue."
   }
 }

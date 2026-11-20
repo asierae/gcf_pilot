@@ -1042,5 +1042,8 @@
     "LOG_EMPTY_TITLE": "已发送邮件",
     "ALIAS_CONTACT": "联系人 (contact@averacapitalaccess.com)",
     "ALIAS_NOREPLY": "不回复 (noreply@averacapitalaccess.com)"
+  },
+  "USER": {
+    "EMAIL_EXISTS": "该邮箱已有账户，请先登录后再继续。"
   }
 }

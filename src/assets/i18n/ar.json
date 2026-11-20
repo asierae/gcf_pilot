@@ -1042,5 +1042,8 @@
     "LOG_EMPTY_TITLE": "الرسائل المرسلة",
     "ALIAS_CONTACT": "الاتصال (contact@averacapitalaccess.com)",
     "ALIAS_NOREPLY": "عدم الرد (noreply@averacapitalaccess.com)"
+  },
+  "USER": {
+    "EMAIL_EXISTS": "يوجد حساب بهذا البريد الإلكتروني بالفعل. سجّل الدخول للمتابعة."
   }
 }
