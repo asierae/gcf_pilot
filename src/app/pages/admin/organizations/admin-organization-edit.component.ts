@@ -128,6 +128,26 @@ export class AdminOrganizationEditComponent implements OnInit {
   }));
   auditBands = AUDIT_BANDS;
 
+  async downloadReport(): Promise<void> {
+    if (!this.orgId) return;
+    try {
+      const blob = await this.api.downloadRiskReport(this.orgId);
+      const url = URL.createObjectURL(blob);
+      const anchor = document.createElement("a");
+      anchor.href = url;
+      anchor.download = `avera-risk-report-${this.orgId}.pdf`;
+      anchor.click();
+      URL.revokeObjectURL(url);
+      this.notification.success(
+        this.translate.instant("ADMIN_ORGANIZATION_EDIT.DOWNLOAD_PDF"),
+      );
+    } catch (error) {
+      this.notification.error(
+        error instanceof Error ? error.message : "Could not generate the report.",
+      );
+    }
+  }
+
   constructor() {
     this.breadcrumb.setContext("ADMIN_ORGANIZATIONS.TITLE");
   }

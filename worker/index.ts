@@ -23,6 +23,10 @@ import {
   renderEmailText,
   type EmailContent,
 } from './email';
+import {
+  buildRiskReportPdf,
+  type RiskReportInput,
+} from './risk-report-pdf';
 
 interface Env {
   ASSETS: AssetsFetcher;
@@ -2163,6 +2167,71 @@ async function organizationDashboard(env: Env, orgId: string): Promise<Response>
     return json({ error: 'Organization not found.' }, 404);
   }
   return json(payload);
+}
+
+const RISK_FACTOR_LABELS: Record<string, string> = {
+  governance: 'Governance & compliance',
+  financial: 'Financial management',
+  delivery: 'Delivery track record',
+  climate: 'Climate mandate alignment',
+  transparency: 'Transparency & evidence',
+};
+
+/** Signed-by-brand PDF report: same data as the applicant dashboard. */
+async function organizationRiskReport(
+  env: Env,
+  orgId: string,
+): Promise<Response> {
+  const payload = await buildOrganizationDashboard(env, orgId);
+  if (!payload) {
+    return json({ error: 'Organization not found.' }, 404);
+  }
+
+  const risk = payload.risk as JsonObject;
+  const organization = payload.organization as JsonObject | null;
+  const audit = risk.audit as JsonObject | null;
+  const rawFactors = Array.isArray(risk.factors)
+    ? (risk.factors as JsonObject[])
+    : [];
+
+  const input: RiskReportInput = {
+    organization: String(organization?.name ?? ''),
+    acronym: String(organization?.acronym ?? ''),
+    country: String(organization?.country ?? ''),
+    overall: Number(risk.overall) || 0,
+    benchmark: Number(risk.benchmark) || 0,
+    benchmarkSource: String(risk.benchmarkSource ?? 'DJSI'),
+    riskBand: String(risk.riskBand ?? ''),
+    confidence: Number(risk.confidence) || 0,
+    source: String(risk.source ?? 'computed'),
+    factors: rawFactors.map((factor) => ({
+      label: RISK_FACTOR_LABELS[String(factor.key)] ?? String(factor.key),
+      value: Number(factor.value) || 0,
+      weight: Number(factor.weight) || 0,
+    })),
+    auditFirm: String(audit?.firm ?? ''),
+    auditDate: audit?.date ? String(audit.date) : null,
+    auditNotes: String(audit?.notes ?? ''),
+    generatedAt: String(payload.generatedAt ?? new Date().toISOString()),
+  };
+
+  const bytes = buildRiskReportPdf(input);
+  const slug =
+    input.organization
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-|-$/g, '')
+      .slice(0, 60) || 'organization';
+
+  return new Response(bytes, {
+    headers: {
+      'Content-Type': 'application/pdf',
+      'Content-Disposition': `attachment; filename="avera-risk-report-${slug}.pdf"`,
+      'Content-Length': String(bytes.byteLength),
+      'Cache-Control': 'no-store',
+      'X-Content-Type-Options': 'nosniff',
+    },
+  });
 }
 
 /* ------------------------------------------------------------------ *
@@ -5149,6 +5218,12 @@ async function handleApi(request: Request, env: Env, path: string): Promise<Resp
   if (orgDashboardMatch) {
     if (method !== 'GET') return methodNotAllowed('GET');
     return organizationDashboard(env, decodeURIComponent(orgDashboardMatch[1]));
+  }
+
+  const riskReportMatch = /^\/api\/organizations\/([^/]+)\/risk-report\.pdf$/.exec(path);
+  if (riskReportMatch) {
+    if (method !== 'GET') return methodNotAllowed('GET');
+    return organizationRiskReport(env, decodeURIComponent(riskReportMatch[1]));
   }
 
   const orgFormsMatch = /^\/api\/organizations\/([^/]+)\/forms$/.exec(path);

@@ -5,6 +5,7 @@ import { TranslatePipe, TranslateService } from "@ngx-translate/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { ApiService } from "../../../services/api.service";
 import { AuthService } from "../../../services/auth.service";
+import { NotificationService } from "../../../services/notification.service";
 import { BreadcrumbService } from "../../../services/breadcrumb.service";
 import {
   ApplicantAction,
@@ -157,6 +158,7 @@ export class ApplicantDashboardComponent implements OnInit {
     private authService: AuthService,
     private breadcrumbService: BreadcrumbService,
     private translate: TranslateService,
+    private notification: NotificationService,
   ) {}
 
   ngOnInit(): void {
@@ -202,6 +204,28 @@ export class ApplicantDashboardComponent implements OnInit {
       this.error = this.translate.instant("APPLICANT_DASHBOARD.LOAD_ERROR");
     } finally {
       this.loading = false;
+    }
+  }
+
+  async downloadReport(): Promise<void> {
+    if (!this.organizationId) return;
+    try {
+      const blob = await this.api.downloadRiskReport(this.organizationId);
+      const url = URL.createObjectURL(blob);
+      const anchor = document.createElement("a");
+      anchor.href = url;
+      anchor.download = `avera-risk-report-${this.organizationId}.pdf`;
+      anchor.click();
+      URL.revokeObjectURL(url);
+      this.notification.success(
+        this.translate.instant("APPLICANT_DASHBOARD.RISK.DOWNLOAD_PDF"),
+      );
+    } catch (error) {
+      this.notification.error(
+        error instanceof Error
+          ? error.message
+          : this.translate.instant("APPLICANT_DASHBOARD.LOAD_ERROR"),
+      );
     }
   }
 

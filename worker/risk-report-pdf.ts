@@ -1,0 +1,243 @@
+/**
+ * Minimal, dependency-free PDF writer for the Avera Risk & Reputation report.
+ *
+ * Uses only PDF standard fonts (Helvetica / Helvetica-Bold), so all text must
+ * be Latin-1/ASCII. Byte offsets are computed with TextEncoder: using string
+ * lengths would corrupt the xref table for non-ASCII content.
+ */
+
+interface PdfFactor {
+  label: string;
+  value: number;
+  weight: number;
+}
+
+export interface RiskReportInput {
+  organization: string;
+  acronym: string;
+  country: string;
+  overall: number;
+  benchmark: number;
+  benchmarkSource: string;
+  riskBand: string;
+  confidence: number;
+  source: string;
+  factors: PdfFactor[];
+  auditFirm: string;
+  auditDate: string | null;
+  auditNotes: string;
+  generatedAt: string;
+}
+
+const encoder = new TextEncoder();
+const NAVY = '0.039 0.094 0.141';
+const GOLD = '0.910 0.753 0.416';
+const INK = '0.118 0.153 0.208';
+const MUTED = '0.396 0.455 0.549';
+const LINE = '0.878 0.902 0.929';
+
+function escapeText(value: string): string {
+  return value
+    .replace(/[^\x20-\x7E]/g, '?')
+    .replace(/\\/g, '\\\\')
+    .replace(/\(/g, '\\(')
+    .replace(/\)/g, '\\)');
+}
+
+function hexColor(value: number): string {
+  if (value >= 75) return '0.204 0.831 0.600';
+  if (value >= 60) return '0.910 0.753 0.416';
+  if (value >= 40) return '0.984 0.749 0.235';
+  return '0.984 0.443 0.522';
+}
+
+export function buildRiskReportPdf(input: RiskReportInput): Uint8Array {
+  const width = 595;
+  const height = 842;
+  const commands: string[] = [];
+
+  const rect = (
+    x: number,
+    y: number,
+    w: number,
+    h: number,
+    color: string,
+  ): void => {
+    commands.push(
+      `${color} rg ${x.toFixed(2)} ${y.toFixed(2)} ${w.toFixed(2)} ${h.toFixed(2)} re f`,
+    );
+  };
+
+  const text = (
+    x: number,
+    y: number,
+    value: string,
+    size = 10,
+    font: 'F1' | 'F2' = 'F1',
+    color = INK,
+  ): void => {
+    commands.push(
+      `BT ${color} rg /${font} ${size} Tf 1 0 0 1 ${x.toFixed(2)} ${y.toFixed(2)} Tm (${escapeText(value)}) Tj ET`,
+    );
+  };
+
+  const line = (x1: number, y1: number, x2: number, y2: number): void => {
+    commands.push(
+      `${LINE} RG 0.7 w ${x1.toFixed(2)} ${y1.toFixed(2)} m ${x2.toFixed(2)} ${y2.toFixed(2)} l S`,
+    );
+  };
+
+  // ── Header ────────────────────────────────────────────
+  rect(0, height - 96, width, 96, NAVY);
+  rect(0, height - 99, width, 3, GOLD);
+  text(48, height - 46, 'AVERA', 22, 'F2', '1 1 1');
+  text(48, height - 66, 'CAPITAL ACCESS', 10, 'F1', GOLD);
+  text(
+    width - 48,
+    height - 48,
+    'RISK & REPUTATION REPORT',
+    11,
+    'F2',
+    '1 1 1',
+  );
+  text(
+    width - 48,
+    height - 66,
+    'Issued by Avera Capital Access',
+    8,
+    'F1',
+    GOLD,
+  );
+
+  // ── Organization block ────────────────────────────────
+  let y = height - 132;
+  text(48, y, input.organization || 'Organization', 16, 'F2');
+  y -= 18;
+  const meta = [
+    input.acronym ? `Acronym: ${input.acronym}` : '',
+    input.country ? `Country: ${input.country}` : '',
+    `Source: ${input.source === 'avera-audit' ? 'Avera Capital Access audit' : 'Avera research (computed from submitted data)'}`,
+  ]
+    .filter(Boolean)
+    .join('    |    ');
+  text(48, y, meta, 8, 'F1', MUTED);
+
+  y -= 26;
+  line(48, y, width - 48, y);
+
+  // ── Overall score ─────────────────────────────────────
+  y -= 34;
+  text(48, y, 'OVERALL RISK & REPUTATION INDEX', 9, 'F2', MUTED);
+  text(48, y - 36, String(input.overall), 40, 'F2', hexColor(input.overall));
+  text(110, y - 32, '/ 100', 12, 'F1', MUTED);
+  text(
+    width - 48,
+    y - 4,
+    `Risk band: ${input.riskBand}`,
+    10,
+    'F2',
+    hexColor(input.overall),
+  );
+  text(
+    width - 48,
+    y - 22,
+    `Benchmark (${input.benchmarkSource}): ${input.benchmark}`,
+    9,
+  );
+  text(width - 48, y - 38, `Evidence confidence: ${input.confidence}`, 9);
+
+  // ── Factor bars ───────────────────────────────────────
+  y -= 86;
+  text(48, y, 'SCORE DRIVERS', 9, 'F2', MUTED);
+  y -= 24;
+  const barX = 230;
+  const barW = 250;
+  for (const factor of input.factors) {
+    text(48, y, factor.label, 9, 'F1');
+    rect(barX, y - 8, barW, 10, '0.933 0.949 0.965');
+    rect(
+      barX,
+      y - 8,
+      Math.max(0, Math.min(barW, (barW * factor.value) / 100)),
+      10,
+      GOLD,
+    );
+    text(barX + barW + 12, y, String(factor.value), 9, 'F2');
+    text(width - 48, y, `${Math.round(factor.weight * 100)}%`, 8, 'F1', MUTED);
+    y -= 24;
+  }
+
+  // ── Audit findings ────────────────────────────────────
+  if (input.auditFirm || input.auditDate || input.auditNotes) {
+    y -= 12;
+    line(48, y, width - 48, y);
+    y -= 22;
+    text(48, y, 'AVERA AUDIT FINDINGS', 9, 'F2', MUTED);
+    if (input.auditFirm) {
+      y -= 16;
+      text(48, y, `Issued by: ${input.auditFirm}`, 9);
+    }
+    if (input.auditDate) {
+      y -= 16;
+      text(48, y, `Audit date: ${input.auditDate.slice(0, 10)}`, 9);
+    }
+    if (input.auditNotes) {
+      y -= 16;
+      const chunks = input.auditNotes.match(/.{1,92}(\s|$)/g) ?? [
+        input.auditNotes,
+      ];
+      for (const chunk of chunks.slice(0, 6)) {
+        text(48, y, chunk.trim(), 8, 'F1', MUTED);
+        y -= 12;
+      }
+    }
+  }
+
+  // ── Signature + footer ────────────────────────────────
+  const footerY = 96;
+  line(48, footerY + 34, width - 48, footerY + 34);
+  text(48, footerY + 16, 'Authorised signature', 8, 'F1', MUTED);
+  text(48, footerY - 4, 'Avera Capital Access', 12, 'F2', NAVY);
+  text(
+    width - 48,
+    footerY + 16,
+    `Generated ${input.generatedAt.slice(0, 10)}`,
+    8,
+    'F1',
+    MUTED,
+  );
+  text(
+    width - 48,
+    footerY - 4,
+    'This report is computed from submitted data and Avera research.',
+    7,
+    'F1',
+    MUTED,
+  );
+
+  const content = commands.join('\n');
+  const objects: string[] = [
+    '<< /Type /Catalog /Pages 2 0 R >>',
+    '<< /Type /Pages /Kids [3 0 R] /Count 1 >>',
+    `<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${width} ${height}] /Resources << /Font << /F1 5 0 R /F2 6 0 R >> >> /Contents 4 0 R >>`,
+    `<< /Length ${encoder.encode(content).length} >>\nstream\n${content}\nendstream`,
+    '<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>',
+    '<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>',
+  ];
+
+  let pdf = '%PDF-1.4\n';
+  const offsets: number[] = [];
+  objects.forEach((body, index) => {
+    offsets.push(encoder.encode(pdf).length);
+    pdf += `${index + 1} 0 obj\n${body}\nendobj\n`;
+  });
+
+  const xrefOffset = encoder.encode(pdf).length;
+  pdf += `xref\n0 ${objects.length + 1}\n0000000000 65535 f \n`;
+  for (const offset of offsets) {
+    pdf += `${offset.toString().padStart(10, '0')} 00000 n \n`;
+  }
+  pdf += `trailer\n<< /Size ${objects.length + 1} /Root 1 0 R >>\nstartxref\n${xrefOffset}\n%%EOF\n`;
+
+  return encoder.encode(pdf);
+}

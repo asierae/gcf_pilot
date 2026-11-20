@@ -398,6 +398,32 @@ export class ApiService {
     );
   }
 
+  /** Signed Avera risk & reputation PDF for one organization. */
+  async downloadRiskReport(id: string): Promise<Blob> {
+    let response: Response;
+    try {
+      response = await fetch(
+        `${API_BASE_URL}/api/organizations/${encodeURIComponent(id)}/risk-report.pdf`,
+        { method: "GET" },
+      );
+    } catch {
+      throw new Error(
+        "Could not reach the server. Check your connection and try again.",
+      );
+    }
+
+    if (!response.ok) {
+      const payload = (await response
+        .json()
+        .catch(() => ({}))) as ApiErrorPayload;
+      throw new Error(
+        payload.error || `Request failed (HTTP ${response.status}).`,
+      );
+    }
+
+    return response.blob();
+  }
+
   // Admin: list all organizations with editable fields
   async getOrganizationsAdmin(): Promise<OrganizationRecord[]> {
     const payload = await this.request<{ organizations?: OrganizationRecord[] }>(

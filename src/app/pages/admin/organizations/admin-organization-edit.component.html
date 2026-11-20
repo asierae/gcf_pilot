@@ -26,6 +26,13 @@
           </svg>
           {{ "ADMIN_ORGANIZATION_EDIT.BACK" | translate }}
         </a>
+        <button type="button" class="btn-secondary" (click)="downloadReport()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 3v12M7 10l5 5 5-5" />
+            <path d="M4 19h16" />
+          </svg>
+          {{ "ADMIN_ORGANIZATION_EDIT.DOWNLOAD_PDF" | translate }}
+        </button>
         <button type="button" class="btn-danger" (click)="openDeleteDialog()">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
             <path d="M3 6h18" />
@@ -78,37 +85,37 @@
           <div class="ao-form-grid">
             <label class="form-field">
               <span>{{ "ADMIN_ORGANIZATION_EDIT.NAME_LABEL" | translate }} <span class="req">*</span></span>
-              <input type="text" [(ngModel)]="form.name" placeholder="{{ 'ADMIN_ORGANIZATION_EDIT.NAME_PLACEHOLDER' | translate }}" />
+              <input name="name" type="text" [(ngModel)]="form.name" placeholder="{{ 'ADMIN_ORGANIZATION_EDIT.NAME_PLACEHOLDER' | translate }}" />
             </label>
 
             <label class="form-field">
               <span>{{ "ADMIN_ORGANIZATION_EDIT.ACRONYM_LABEL" | translate }}</span>
-              <input type="text" [(ngModel)]="form.acronym" placeholder="{{ 'ADMIN_ORGANIZATION_EDIT.ACRONYM_PLACEHOLDER' | translate }}" />
+              <input name="acronym" type="text" [(ngModel)]="form.acronym" placeholder="{{ 'ADMIN_ORGANIZATION_EDIT.ACRONYM_PLACEHOLDER' | translate }}" />
             </label>
 
             <label class="form-field ao-full-width">
               <span>{{ "ADMIN_ORGANIZATION_EDIT.LEGAL_ADDRESS_LABEL" | translate }}</span>
-              <textarea [(ngModel)]="form.legalAddress" placeholder="{{ 'ADMIN_ORGANIZATION_EDIT.LEGAL_ADDRESS_PLACEHOLDER' | translate }}" rows="2"></textarea>
+              <textarea name="legalAddress" [(ngModel)]="form.legalAddress" placeholder="{{ 'ADMIN_ORGANIZATION_EDIT.LEGAL_ADDRESS_PLACEHOLDER' | translate }}" rows="2"></textarea>
             </label>
 
             <label class="form-field ao-full-width">
               <span>{{ "ADMIN_ORGANIZATION_EDIT.OPERATIONAL_ADDRESS_LABEL" | translate }}</span>
-              <textarea [(ngModel)]="form.operationalAddress" placeholder="{{ 'ADMIN_ORGANIZATION_EDIT.OPERATIONAL_ADDRESS_PLACEHOLDER' | translate }}" rows="2"></textarea>
+              <textarea name="operationalAddress" [(ngModel)]="form.operationalAddress" placeholder="{{ 'ADMIN_ORGANIZATION_EDIT.OPERATIONAL_ADDRESS_PLACEHOLDER' | translate }}" rows="2"></textarea>
             </label>
 
             <label class="form-field">
               <span>{{ "ADMIN_ORGANIZATION_EDIT.WEBSITE_LABEL" | translate }}</span>
-              <input type="url" [(ngModel)]="form.website" placeholder="{{ 'ADMIN_ORGANIZATION_EDIT.WEBSITE_PLACEHOLDER' | translate }}" />
+              <input name="website" type="url" [(ngModel)]="form.website" placeholder="{{ 'ADMIN_ORGANIZATION_EDIT.WEBSITE_PLACEHOLDER' | translate }}" />
             </label>
 
             <label class="form-field">
               <span>{{ "ADMIN_ORGANIZATION_EDIT.COUNTRY_LABEL" | translate }}</span>
-              <input type="text" [(ngModel)]="form.country" placeholder="{{ 'ADMIN_ORGANIZATION_EDIT.COUNTRY_PLACEHOLDER' | translate }}" />
+              <input name="country" type="text" [(ngModel)]="form.country" placeholder="{{ 'ADMIN_ORGANIZATION_EDIT.COUNTRY_PLACEHOLDER' | translate }}" />
             </label>
 
             <label class="form-field">
               <span>{{ "ADMIN_ORGANIZATION_EDIT.ENTITY_TYPE_LABEL" | translate }}</span>
-              <select [(ngModel)]="form.entityType">
+              <select name="entityType" [(ngModel)]="form.entityType">
                 <option value="">-- {{ "ADMIN_ORGANIZATION_EDIT.SELECT_PLACEHOLDER" | translate }} --</option>
                 @for (option of entityTypes; track option) {
                   <option [value]="option">{{ option }}</option>
@@ -118,17 +125,17 @@
 
             <label class="form-field">
               <span>{{ "ADMIN_ORGANIZATION_EDIT.CONTACT_NAME_LABEL" | translate }}</span>
-              <input type="text" [(ngModel)]="form.contactName" placeholder="" />
+              <input name="contactName" type="text" [(ngModel)]="form.contactName" placeholder="" />
             </label>
 
             <label class="form-field">
               <span>{{ "ADMIN_ORGANIZATION_EDIT.CONTACT_EMAIL_LABEL" | translate }}</span>
-              <input type="email" [(ngModel)]="form.contactEmail" placeholder="" />
+              <input name="contactEmail" type="email" [(ngModel)]="form.contactEmail" placeholder="" />
             </label>
 
             <label class="form-field">
               <span>{{ "ADMIN_ORGANIZATION_EDIT.CONTACT_PHONE_LABEL" | translate }}</span>
-              <input type="tel" [(ngModel)]="form.contactPhone" placeholder="" />
+              <input name="contactPhone" type="tel" [(ngModel)]="form.contactPhone" placeholder="" />
             </label>
           </div>
         </div>
@@ -140,7 +147,7 @@
           <div class="ao-form-grid">
             <label class="form-field">
               <span>{{ "ADMIN_ORGANIZATION_EDIT.RISK_SCORE_LABEL" | translate }}</span>
-              <input
+              <input name="riskScore"
                 type="number"
                 min="0"
                 max="100"
@@ -153,17 +160,17 @@
 
             <label class="form-field ao-full-width">
               <span>{{ "ADMIN_ORGANIZATION_EDIT.RISK_NOTES_LABEL" | translate }}</span>
-              <textarea [(ngModel)]="form.riskNotes" placeholder="{{ 'ADMIN_ORGANIZATION_EDIT.RISK_NOTES_PLACEHOLDER' | translate }}" rows="2"></textarea>
+              <textarea name="riskNotes" [(ngModel)]="form.riskNotes" placeholder="{{ 'ADMIN_ORGANIZATION_EDIT.RISK_NOTES_PLACEHOLDER' | translate }}" rows="2"></textarea>
             </label>
 
             <label class="form-field ao-full-width">
               <span>{{ "ADMIN_ORGANIZATION_EDIT.ADMIN_NOTES_LABEL" | translate }}</span>
-              <textarea [(ngModel)]="form.adminNotes" placeholder="{{ 'ADMIN_ORGANIZATION_EDIT.ADMIN_NOTES_PLACEHOLDER' | translate }}" rows="3"></textarea>
+              <textarea name="adminNotes" [(ngModel)]="form.adminNotes" placeholder="{{ 'ADMIN_ORGANIZATION_EDIT.ADMIN_NOTES_PLACEHOLDER' | translate }}" rows="3"></textarea>
             </label>
 
             <label class="form-field">
               <span>{{ "ADMIN_ORGANIZATION_EDIT.ACCREDITATION_STATUS_LABEL" | translate }}</span>
-              <select [(ngModel)]="form.accreditationStatus">
+              <select name="accreditationStatus" [(ngModel)]="form.accreditationStatus">
                 <option value="">-- {{ "ADMIN_ORGANIZATION_EDIT.SELECT_PLACEHOLDER" | translate }} --</option>
                 @for (option of accreditationStatuses; track option.value) {
                   <option [value]="option.value">{{ option.label }}</option>
@@ -173,7 +180,7 @@
 
             <label class="form-field">
               <span>{{ "ADMIN_ORGANIZATION_EDIT.PRIORITY_LABEL" | translate }}</span>
-              <select [(ngModel)]="form.priorityLevel">
+              <select name="priorityLevel" [(ngModel)]="form.priorityLevel">
                 <option value="">-- {{ "ADMIN_ORGANIZATION_EDIT.SELECT_PLACEHOLDER" | translate }} --</option>
                 @for (option of priorityLevels; track option.value) {
                   <option [value]="option.value">{{ option.label }}</option>
@@ -190,7 +197,7 @@
 
           <label class="form-field ao-full-width">
             <span class="ao-check-row">
-              <input type="checkbox" [(ngModel)]="form.auditEnabled" />
+              <input name="auditEnabled" type="checkbox" [(ngModel)]="form.auditEnabled" />
               {{ "ADMIN_ORGANIZATION_EDIT.AUDIT_ENABLED" | translate }}
             </span>
           </label>
@@ -198,35 +205,35 @@
           <div class="ao-form-grid">
             <label class="form-field">
               <span>{{ "ADMIN_ORGANIZATION_EDIT.AUDIT_GOVERNANCE" | translate }}</span>
-              <input type="number" min="0" max="100" [(ngModel)]="form.auditGovernance" />
+              <input name="auditGovernance" type="number" min="0" max="100" [(ngModel)]="form.auditGovernance" />
             </label>
             <label class="form-field">
               <span>{{ "ADMIN_ORGANIZATION_EDIT.AUDIT_FINANCIAL" | translate }}</span>
-              <input type="number" min="0" max="100" [(ngModel)]="form.auditFinancial" />
+              <input name="auditFinancial" type="number" min="0" max="100" [(ngModel)]="form.auditFinancial" />
             </label>
             <label class="form-field">
               <span>{{ "ADMIN_ORGANIZATION_EDIT.AUDIT_DELIVERY" | translate }}</span>
-              <input type="number" min="0" max="100" [(ngModel)]="form.auditDelivery" />
+              <input name="auditDelivery" type="number" min="0" max="100" [(ngModel)]="form.auditDelivery" />
             </label>
             <label class="form-field">
               <span>{{ "ADMIN_ORGANIZATION_EDIT.AUDIT_CLIMATE" | translate }}</span>
-              <input type="number" min="0" max="100" [(ngModel)]="form.auditClimate" />
+              <input name="auditClimate" type="number" min="0" max="100" [(ngModel)]="form.auditClimate" />
             </label>
             <label class="form-field">
               <span>{{ "ADMIN_ORGANIZATION_EDIT.AUDIT_TRANSPARENCY" | translate }}</span>
-              <input type="number" min="0" max="100" [(ngModel)]="form.auditTransparency" />
+              <input name="auditTransparency" type="number" min="0" max="100" [(ngModel)]="form.auditTransparency" />
             </label>
             <label class="form-field">
               <span>{{ "ADMIN_ORGANIZATION_EDIT.AUDIT_BENCHMARK" | translate }}</span>
-              <input type="number" min="0" max="100" [(ngModel)]="form.auditBenchmark" />
+              <input name="auditBenchmark" type="number" min="0" max="100" [(ngModel)]="form.auditBenchmark" />
             </label>
             <label class="form-field">
               <span>{{ "ADMIN_ORGANIZATION_EDIT.AUDIT_CONFIDENCE" | translate }}</span>
-              <input type="number" min="0" max="100" [(ngModel)]="form.auditConfidence" />
+              <input name="auditConfidence" type="number" min="0" max="100" [(ngModel)]="form.auditConfidence" />
             </label>
             <label class="form-field">
               <span>{{ "ADMIN_ORGANIZATION_EDIT.AUDIT_BAND" | translate }}</span>
-              <select [(ngModel)]="form.auditRiskBand">
+              <select name="auditRiskBand" [(ngModel)]="form.auditRiskBand">
                 <option value="">-- {{ "ADMIN_ORGANIZATION_EDIT.SELECT_PLACEHOLDER" | translate }} --</option>
                 @for (band of auditBands; track band) {
                   <option [value]="band">{{ band }}</option>
@@ -235,19 +242,19 @@
             </label>
             <label class="form-field">
               <span>{{ "ADMIN_ORGANIZATION_EDIT.AUDIT_FIRM_LABEL" | translate }}</span>
-              <input type="text" [(ngModel)]="form.auditFirm" />
+              <input name="auditFirm" type="text" [(ngModel)]="form.auditFirm" />
             </label>
             <label class="form-field">
               <span>{{ "ADMIN_ORGANIZATION_EDIT.AUDIT_DATE_LABEL" | translate }}</span>
-              <input type="date" [(ngModel)]="form.auditDate" />
+              <input name="auditDate" type="date" [(ngModel)]="form.auditDate" />
             </label>
             <label class="form-field ao-full-width">
               <span>{{ "ADMIN_ORGANIZATION_EDIT.AUDIT_REPORT_URL_LABEL" | translate }}</span>
-              <input type="url" [(ngModel)]="form.auditReportUrl" />
+              <input name="auditReportUrl" type="url" [(ngModel)]="form.auditReportUrl" />
             </label>
             <label class="form-field ao-full-width">
               <span>{{ "ADMIN_ORGANIZATION_EDIT.AUDIT_NOTES_LABEL" | translate }}</span>
-              <textarea [(ngModel)]="form.auditNotes" rows="3"></textarea>
+              <textarea name="auditNotes" [(ngModel)]="form.auditNotes" rows="3"></textarea>
             </label>
           </div>
         </div>
@@ -359,15 +366,15 @@
             
             <div class="delete-options">
               <label class="delete-option">
-                <input type="checkbox" [(ngModel)]="deleteOptions.deleteFiles" />
+                <input name="ctrl28" type="checkbox" [(ngModel)]="deleteOptions.deleteFiles" />
                 <span>{{ "ADMIN_ORGANIZATION_EDIT.DELETE_FILES" | translate }}</span>
               </label>
               <label class="delete-option">
-                <input type="checkbox" [(ngModel)]="deleteOptions.deleteAccreditation" />
+                <input name="ctrl29" type="checkbox" [(ngModel)]="deleteOptions.deleteAccreditation" />
                 <span>{{ "ADMIN_ORGANIZATION_EDIT.DELETE_ACCREDITATION" | translate }}</span>
               </label>
               <label class="delete-option">
-                <input type="checkbox" [(ngModel)]="deleteOptions.deleteReadiness" />
+                <input name="ctrl30" type="checkbox" [(ngModel)]="deleteOptions.deleteReadiness" />
                 <span>{{ "ADMIN_ORGANIZATION_EDIT.DELETE_READINESS" | translate }}</span>
               </label>
             </div>
