@@ -65,6 +65,27 @@ export class Stage2Component implements OnInit {
     const group: Record<string, unknown> = {
       ...addStage1FormControls(this.fb),
       maxRiskCategory: ['', Validators.required],
+      // Application-only questions from the GCF guidance. They are added here
+      // (not in the shared Stage 1 builder) so pre-accreditation is untouched.
+      governmentLegalStatus: [''],
+      hasBeneficialOwnershipDocumentation: ['', Validators.required],
+      beneficialOwnershipDetails: [''],
+      intendedESSRiskCategory: ['', Validators.required],
+      intendedFinancialInstruments: ['', Validators.required],
+      resultAreas: this.fb.group({
+        healthFoodWater: [false],
+        livelihoods: [false],
+        infrastructure: [false],
+        ecosystems: [false],
+        energy: [false],
+        transport: [false],
+        buildingsCities: [false],
+        forestsLandUse: [false],
+      }),
+      accreditedByAfDB: [false],
+      fastTrackFullCompliance: [''],
+      afDBAgreementSigned: [''],
+      afDBAgreementDetails: [''],
     };
 
     for (const step of STAGE2_SCREENING_STEPS) {

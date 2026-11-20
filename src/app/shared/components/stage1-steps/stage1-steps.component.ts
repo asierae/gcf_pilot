@@ -41,26 +41,35 @@ export class Stage1StepsComponent {
   }
 
   addTrackRecord() {
-    this.climateTrackRecord.push(
-      this.fb.group({
-        title: [''],
-        applicantRole: [''],
-        sourceOfFunding: [''],
-        location: [''],
-        climateContribution: [''],
-        theme: [''],
-        size: [''],
-        financingAmountManaged: [''],
-        financialInstruments: [''],
-        startAndEndDates: [''],
-        status: [''],
-        durationYears: [''],
-        esgRiskCategory: [''],
-        esgPerformanceStandards: [''],
-        outcomesResultsAreas: [''],
-        projectWebpage: ['']
-      })
-    );
+    // Pre-accreditation keeps its original five columns; the full application
+    // uses the 16-column table required by the GCF guidance.
+    const fields = this.applicationMode
+      ? {
+          title: [''],
+          applicantRole: [''],
+          sourceOfFunding: [''],
+          location: [''],
+          climateContribution: [''],
+          theme: [''],
+          size: [''],
+          financingAmountManaged: [''],
+          financialInstruments: [''],
+          startAndEndDates: [''],
+          status: [''],
+          durationYears: [''],
+          esgRiskCategory: [''],
+          esgPerformanceStandards: [''],
+          outcomesResultsAreas: [''],
+          projectWebpage: [''],
+        }
+      : {
+          title: [''],
+          location: [''],
+          theme: [''],
+          size: [''],
+          status: [''],
+        };
+    this.climateTrackRecord.push(this.fb.group(fields));
   }
 
   removeTrackRecord(index: number) {
