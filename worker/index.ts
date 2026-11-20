@@ -899,6 +899,78 @@ async function putOrganization(
   return json({ organization });
 }
 
+/** Profile fields an organization may change from its own portal page. */
+const ORGANIZATION_PROFILE_FIELDS = [
+  'legalAddress',
+  'operationalAddress',
+  'website',
+  'country',
+  'entityType',
+  'contactName',
+  'contactPhone',
+];
+
+/**
+ * Applicant-facing profile update. Strict allow-list: identity fields
+ * (name, acronym, contactEmail), metadata and all admin/audit fields are
+ * rejected instead of silently ignored.
+ */
+async function updateOrganizationProfile(
+  request: Request,
+  env: Env,
+  id: string,
+): Promise<Response> {
+  assertEntityId(id);
+  const body = await readJson<JsonObject>(request);
+
+  const forbidden = Object.keys(body).filter(
+    (key) => !ORGANIZATION_PROFILE_FIELDS.includes(key),
+  );
+  if (forbidden.length > 0) {
+    throw new HttpError(
+      400,
+      `Fields cannot be changed from the organization profile: ${forbidden.join(', ')}.`,
+    );
+  }
+
+  const updates: string[] = [];
+  const values: unknown[] = [];
+  for (const field of ORGANIZATION_PROFILE_FIELDS) {
+    if (body[field] !== undefined) {
+      const col = field.replace(/([A-Z])/g, '_$1').toLowerCase();
+      updates.push(`${col} = ?`);
+      values.push(typeof body[field] === 'string' ? body[field].trim() : String(body[field]));
+    }
+  }
+
+  if (updates.length === 0) {
+    throw new HttpError(400, 'No valid fields provided.');
+  }
+
+  const existing = await env.DB.prepare('SELECT id FROM organizations WHERE id = ?')
+    .bind(id)
+    .first<{ id: string }>();
+  if (!existing) {
+    throw new HttpError(404, 'Organization not found.');
+  }
+
+  updates.push('updated_at = ?');
+  values.push(new Date().toISOString());
+  values.push(id);
+
+  await env.DB.prepare(
+    `UPDATE organizations SET ${updates.join(', ')} WHERE id = ?`,
+  )
+    .bind(...values)
+    .run();
+
+  const row = await env.DB.prepare('SELECT * FROM organizations WHERE id = ?')
+    .bind(id)
+    .first<OrganizationRow>();
+
+  return json({ organization: row ? rowToOrganization(row) : null });
+}
+
 /** Admin: update editable fields for an organization. */
 async function updateOrganizationAdmin(
   request: Request,
@@ -5230,6 +5302,12 @@ async function handleApi(request: Request, env: Env, path: string): Promise<Resp
   if (orgFormsMatch) {
     if (method !== 'GET') return methodNotAllowed('GET');
     return organizationForms(env, decodeURIComponent(orgFormsMatch[1]));
+  }
+
+  const orgProfileMatch = /^\/api\/organizations\/([^/]+)\/profile$/.exec(path);
+  if (orgProfileMatch) {
+    if (method !== 'PATCH') return methodNotAllowed('PATCH');
+    return updateOrganizationProfile(request, env, decodeURIComponent(orgProfileMatch[1]));
   }
 
   const organizationMatch = /^\/api\/organizations\/([^/]+)$/.exec(path);

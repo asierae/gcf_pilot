@@ -424,6 +424,30 @@ export class ApiService {
     return response.blob();
   }
 
+  /** Applicant-facing update: only the organization's profile fields. */
+  async updateOrganizationProfile(
+    id: string,
+    updates: Partial<
+      Pick<
+        OrganizationRecord,
+        | 'legalAddress'
+        | 'operationalAddress'
+        | 'website'
+        | 'country'
+        | 'entityType'
+        | 'contactName'
+        | 'contactPhone'
+      >
+    >,
+  ): Promise<OrganizationRecord> {
+    const payload = await this.request<{ organization: OrganizationRecord }>(
+      `/api/organizations/${encodeURIComponent(id)}/profile`,
+      { method: 'PATCH', body: JSON.stringify(updates) },
+      false,
+    );
+    return payload.organization;
+  }
+
   // Admin: list all organizations with editable fields
   async getOrganizationsAdmin(): Promise<OrganizationRecord[]> {
     const payload = await this.request<{ organizations?: OrganizationRecord[] }>(
