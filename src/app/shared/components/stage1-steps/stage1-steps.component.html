@@ -380,6 +380,31 @@
             </div>
           </div>
 
+          @if (applicationMode) {
+            <div class="form-group">
+              <label>2.1.3. For government or state-owned entities: specify whether your organization forms part of the government or has separate legal personality and legal capacity to enter into agreements with international financial institutions such as GCF in its own name.</label>
+              <textarea formControlName="governmentLegalStatus" rows="3" placeholder="Specify the legal status and, if applicable, cite the relevant law or statutory instrument..."></textarea>
+            </div>
+
+            <div class="form-group">
+              <label>2.2.1. Can your organization provide documentation on ownership structure and beneficial ownership details? <span class="required">*</span></label>
+              <div class="yes-no-group">
+                <label class="radio-option compact">
+                  <input type="radio" formControlName="hasBeneficialOwnershipDocumentation" value="yes">
+                  <span class="radio-custom"></span>
+                  <span>Yes</span>
+                </label>
+                <label class="radio-option compact">
+                  <input type="radio" formControlName="hasBeneficialOwnershipDocumentation" value="no">
+                  <span class="radio-custom"></span>
+                  <span>No</span>
+                </label>
+              </div>
+              <p class="field-help">Identify natural persons who directly or indirectly own or control 10% or more of the shares or voting rights, or who exercise control through other means. Wholly government-owned entities are not required to identify beneficial owners.</p>
+              <textarea formControlName="beneficialOwnershipDetails" rows="3" placeholder="Ownership structure and beneficial ownership details..."></textarea>
+            </div>
+          }
+
           <app-file-upload
             formControlName="legalSupportingDocumentsFiles"
             [entityId]="entityId"
@@ -606,6 +631,16 @@
                     <input type="text" formControlName="title" placeholder="Project title">
                   </div>
                   <div class="form-group">
+                    <label>Applicant's role / function / responsibility</label>
+                    <input type="text" formControlName="applicantRole" placeholder="Executing entity, funder...">
+                  </div>
+                </div>
+                <div class="form-row">
+                  <div class="form-group">
+                    <label>Source of funding</label>
+                    <input type="text" formControlName="sourceOfFunding" placeholder="GCF, GEF, national budget...">
+                  </div>
+                  <div class="form-group">
                     <label>Location</label>
                     <app-country-select
                       formControlName="location"
@@ -614,18 +649,60 @@
                     ></app-country-select>
                   </div>
                 </div>
+                <div class="form-group">
+                  <label>How the project/programme addressed climate change</label>
+                  <textarea formControlName="climateContribution" rows="2" placeholder="Mitigation and/or adaptation contribution..."></textarea>
+                </div>
                 <div class="form-row">
                   <div class="form-group">
                     <label>Theme(s)</label>
                     <input type="text" formControlName="theme" placeholder="Mitigation, Adaptation, Cross-cutting...">
                   </div>
                   <div class="form-group">
-                    <label>Size(s) (USD)</label>
+                    <label>Size (total financing amount or cost in USD)</label>
                     <input type="number" formControlName="size" placeholder="Total financing amount">
+                  </div>
+                  <div class="form-group">
+                    <label>Financing amount managed by the applicant</label>
+                    <input type="number" formControlName="financingAmountManaged" placeholder="Amount managed">
+                  </div>
+                </div>
+                <div class="form-row">
+                  <div class="form-group">
+                    <label>Type(s) of financial instrument(s)</label>
+                    <input type="text" formControlName="financialInstruments" placeholder="Grant, loan, equity, guarantee...">
+                  </div>
+                  <div class="form-group">
+                    <label>Start and end dates</label>
+                    <input type="text" formControlName="startAndEndDates" placeholder="e.g. 2021–2024">
                   </div>
                   <div class="form-group">
                     <label>Status</label>
                     <input type="text" formControlName="status" placeholder="Completed, Ongoing...">
+                  </div>
+                  <div class="form-group">
+                    <label>Duration (years)</label>
+                    <input type="number" formControlName="durationYears" placeholder="3">
+                  </div>
+                </div>
+                <div class="form-row">
+                  <div class="form-group">
+                    <label>E&S risk category</label>
+                    <input type="text" formControlName="esgRiskCategory" placeholder="A / B / C or I-1 / I-2 / I-3">
+                  </div>
+                  <div class="form-group">
+                    <label>E&S Performance Standards triggered</label>
+                    <input type="text" formControlName="esgPerformanceStandards" placeholder="PS 1–8">
+                  </div>
+                </div>
+                <div class="form-row">
+                  <div class="form-group">
+                    <label>Outcomes / Results areas</label>
+                    <input type="text" formControlName="outcomesResultsAreas" placeholder="GCF result areas">
+                  </div>
+                  <div class="form-group">
+                    <label>Link to a webpage describing the project (if available)</label>
+                    <input type="url" formControlName="projectWebpage" placeholder="https://...">
                   </div>
                 </div>
               </div>
@@ -671,6 +748,22 @@
               </label>
             </div>
           </div>
+
+          @if (applicationMode) {
+            <div class="form-group" formGroupName="resultAreas" style="margin-top: 2rem;">
+              <label>3.1.7. The applicant intends to programme in the following GCF result areas based on its track record:</label>
+              <div class="checkbox-group">
+                <label class="checkbox-option"><input type="checkbox" formControlName="healthFoodWater"><span>Health, food, and water security</span></label>
+                <label class="checkbox-option"><input type="checkbox" formControlName="livelihoods"><span>Livelihoods of people and communities</span></label>
+                <label class="checkbox-option"><input type="checkbox" formControlName="infrastructure"><span>Infrastructure and built environment</span></label>
+                <label class="checkbox-option"><input type="checkbox" formControlName="ecosystems"><span>Ecosystems and ecosystem services</span></label>
+                <label class="checkbox-option"><input type="checkbox" formControlName="energy"><span>Energy generation and access</span></label>
+                <label class="checkbox-option"><input type="checkbox" formControlName="transport"><span>Transport</span></label>
+                <label class="checkbox-option"><input type="checkbox" formControlName="buildingsCities"><span>Buildings, cities, industries, and appliances</span></label>
+                <label class="checkbox-option"><input type="checkbox" formControlName="forestsLandUse"><span>Forests and land use</span></label>
+              </div>
+            </div>
+          }
         </div>
 
         <!-- 3.2.1 Self-Assessment -->
@@ -885,12 +978,57 @@
               <span class="checkbox-custom"></span>
               <span>European Union's Directorate-General for International Partnerships (EU DG INTPA)</span>
             </label>
+            <label class="checkbox-option" *ngIf="applicationMode">
+              <input type="checkbox" formControlName="accreditedByAfDB">
+              <span class="checkbox-custom"></span>
+              <span>African Development Bank (AfDB)</span>
+            </label>
           </div>
 
-          <div class="form-group" *ngIf="form.get('accreditedByGEF')?.value || form.get('accreditedByAF')?.value || form.get('accreditedByEUDGINTPA')?.value">
+          <div class="form-group" *ngIf="form.get('accreditedByGEF')?.value || form.get('accreditedByAF')?.value || form.get('accreditedByEUDGINTPA')?.value || form.get('accreditedByAfDB')?.value">
             <label>Please indicate whether your organization remains in full compliance with relevant accreditation requirements (100 words max):</label>
             <textarea formControlName="fastTrackComplianceDetails" rows="3" placeholder="Describe compliance status..."></textarea>
           </div>
+
+          @if (applicationMode) {
+            <div class="form-group">
+              <label>Is your organization in full compliance with the relevant accreditation requirements of the above institutions? <span class="required">*</span></label>
+              <div class="yes-no-group">
+                <label class="radio-option compact">
+                  <input type="radio" formControlName="fastTrackFullCompliance" value="yes">
+                  <span class="radio-custom"></span>
+                  <span>Yes</span>
+                </label>
+                <label class="radio-option compact">
+                  <input type="radio" formControlName="fastTrackFullCompliance" value="no">
+                  <span class="radio-custom"></span>
+                  <span>No</span>
+                </label>
+              </div>
+            </div>
+
+            <h4 class="subsection-title">3.3.2 African Development Bank agreement</h4>
+            <div class="form-group">
+              <label>Has your organization signed an agreement in relation to a project approved by the African Development Bank (AfDB) in the 5 years prior to submission?</label>
+              <div class="yes-no-group">
+                <label class="radio-option compact">
+                  <input type="radio" formControlName="afDBAgreementSigned" value="yes">
+                  <span class="radio-custom"></span>
+                  <span>Yes</span>
+                </label>
+                <label class="radio-option compact">
+                  <input type="radio" formControlName="afDBAgreementSigned" value="no">
+                  <span class="radio-custom"></span>
+                  <span>No</span>
+                </label>
+              </div>
+              <textarea
+                formControlName="afDBAgreementDetails"
+                rows="4"
+                placeholder="If yes: project name, AfDB project ID, country, approval and signing dates, financing instrument/window, exact legal entity assessed, status, and any breaches/events of default..."
+              ></textarea>
+            </div>
+          }
 
           <app-file-upload
             formControlName="fastTrackAccreditationFiles"

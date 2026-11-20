@@ -21,6 +21,8 @@ export class Stage1StepsComponent {
   @Input() entityId = '';
   /** True once the organization exists: name and acronym are read-only. */
   @Input() identityLocked = false;
+  /** Stage 2 shows the full application; Stage 1 pre-screening hides extra questions. */
+  @Input() applicationMode = false;
 
   countries = COUNTRIES;
   private fb = inject(FormBuilder);
@@ -42,10 +44,21 @@ export class Stage1StepsComponent {
     this.climateTrackRecord.push(
       this.fb.group({
         title: [''],
+        applicantRole: [''],
+        sourceOfFunding: [''],
         location: [''],
+        climateContribution: [''],
         theme: [''],
         size: [''],
-        status: ['']
+        financingAmountManaged: [''],
+        financialInstruments: [''],
+        startAndEndDates: [''],
+        status: [''],
+        durationYears: [''],
+        esgRiskCategory: [''],
+        esgPerformanceStandards: [''],
+        outcomesResultsAreas: [''],
+        projectWebpage: ['']
       })
     );
   }
