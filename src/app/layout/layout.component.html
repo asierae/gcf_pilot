@@ -293,6 +293,21 @@
                 <span class="nav-label">{{ "NAV.MY_FORMS" | translate }}</span>
               </a>
             </li>
+            <li>
+              <a
+                routerLink="/my-organization"
+                routerLinkActive="active"
+                class="nav-link"
+                [title]="sidebarCollapsed ? ('NAV.MY_ORGANIZATION' | translate) : ''"
+              >
+                <span class="nav-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 21h18M5 21V7l7-4 7 4v14M9 9h1M14 9h1M9 13h1M14 13h1M9 17h1M14 17h1" />
+                  </svg>
+                </span>
+                <span class="nav-label">{{ "NAV.MY_ORGANIZATION" | translate }}</span>
+              </a>
+            </li>
           }
           @if (authService.currentUserValue?.role === "admin") {
             <li>

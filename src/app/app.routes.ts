@@ -20,6 +20,7 @@ import { ReadinessWizardComponent } from "./pages/readiness/readiness-wizard.com
 import { GetAssessedComponent } from "./pages/get-assessed/get-assessed.component";
 import { ProfileAssessmentComponent } from "./pages/profile-assessment/profile-assessment.component";
 import { MyFormsComponent } from "./pages/my-forms/my-forms.component";
+import { MyOrganizationComponent } from "./pages/my-organization/my-organization.component";
 import { adminGuard, authGuard, preScreeningGuard } from "./guards/auth.guard";
 
 export const routes: Routes = [
@@ -103,6 +104,11 @@ export const routes: Routes = [
       },
       { path: "readiness", component: ReadinessWizardComponent },
       { path: "my-forms", component: MyFormsComponent, canActivate: [authGuard] },
+      {
+        path: "my-organization",
+        component: MyOrganizationComponent,
+        canActivate: [authGuard],
+      },
     ],
   },
   { path: "**", redirectTo: "stage1" },

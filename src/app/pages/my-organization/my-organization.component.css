@@ -1,0 +1,168 @@
+.mo-page {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 1.5rem;
+}
+
+.mo-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.mo-eyebrow {
+  margin: 0 0 0.35rem;
+  color: var(--app-accent);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+.mo-head h1 {
+  margin: 0;
+  color: var(--app-text-strong, #f8fafc);
+  font-size: 1.6rem;
+}
+
+.mo-sub {
+  margin: 0.4rem 0 0;
+  color: var(--app-subtle);
+  font-size: 0.85rem;
+}
+
+.mo-chip {
+  padding: 0.35rem 0.7rem;
+  border: 1px solid var(--app-accent-line);
+  border-radius: 999px;
+  background: var(--app-accent-soft);
+  color: var(--app-accent);
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.mo-notice {
+  padding: 1rem 1.1rem;
+  border: 1px solid var(--app-line);
+  border-radius: var(--app-radius);
+  background: var(--app-surface);
+  color: var(--app-subtle);
+  font-size: 0.85rem;
+}
+
+.mo-notice-error {
+  border-color: rgba(248, 113, 113, 0.4);
+  background: rgba(248, 113, 113, 0.08);
+  color: #fca5a5;
+}
+
+.mo-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+
+.mo-section {
+  padding: 1.25rem 1.35rem;
+  border: 1px solid var(--app-line);
+  border-radius: var(--app-radius);
+  background: var(--app-surface);
+}
+
+.mo-section h2 {
+  margin: 0 0 0.9rem;
+  color: var(--app-text-strong, #f8fafc);
+  font-size: 1rem;
+}
+
+.mo-note {
+  margin: -0.4rem 0 1rem;
+  color: var(--app-subtle);
+  font-size: 0.76rem;
+  line-height: 1.5;
+}
+
+.mo-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.mo-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  color: var(--app-muted);
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.mo-field-wide {
+  grid-column: 1 / -1;
+}
+
+.mo-field input,
+.mo-field textarea,
+.mo-field select {
+  width: 100%;
+  padding: 0.6rem 0.7rem;
+  border: 1px solid var(--app-line-strong, var(--app-line));
+  border-radius: 8px;
+  background: var(--app-bg, #0f172a);
+  color: var(--app-text, #e2e8f0);
+  font-family: inherit;
+  font-size: 0.86rem;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.mo-field input:focus,
+.mo-field textarea:focus,
+.mo-field select:focus {
+  border-color: var(--app-accent-line);
+}
+
+.mo-field textarea {
+  resize: vertical;
+  min-height: 56px;
+}
+
+.mo-field input[readonly] {
+  background: rgba(148, 163, 184, 0.06);
+  color: var(--app-subtle);
+  cursor: default;
+}
+
+.mo-field select option {
+  background: #1e293b;
+  color: #e2e8f0;
+}
+
+.mo-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.mo-save {
+  padding: 0.65rem 1.4rem;
+  border: 1px solid var(--app-accent-line);
+  border-radius: 9px;
+  background: var(--app-accent);
+  color: var(--app-on-accent, #1a1205);
+  font-family: inherit;
+  font-size: 0.86rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.mo-save:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+@media (max-width: 700px) {
+  .mo-grid { grid-template-columns: 1fr; }
+  .mo-field-wide { grid-column: auto; }
+}

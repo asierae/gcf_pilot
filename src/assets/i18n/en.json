@@ -1,4 +1,28 @@
 {
+  "MY_ORGANIZATION": {
+    "TITLE": "My organization",
+    "LEDE": "Review the details of your organization and keep them up to date.",
+    "DETAILS": "Organization details",
+    "CONTACT": "Contact",
+    "LOCKED_TITLE": "Managed by Avera",
+    "LOCKED_NOTE": "Name, acronym and contact email are managed by Avera Capital Access. Contact us if they need to change.",
+    "NAME": "Organization name",
+    "ACRONYM": "Acronym",
+    "EMAIL": "Contact email",
+    "LEGAL_ADDRESS": "Legal address",
+    "OPERATIONAL_ADDRESS": "Operational address",
+    "WEBSITE": "Website",
+    "COUNTRY": "Country",
+    "ENTITY_TYPE": "Entity type",
+    "CONTACT_NAME": "Contact name",
+    "CONTACT_PHONE": "Contact phone",
+    "SAVE": "Save changes",
+    "SAVING": "Saving…",
+    "SAVED": "Organization updated.",
+    "LOAD_ERROR": "Could not load your organization.",
+    "SAVE_ERROR": "Could not save changes. Please try again.",
+    "NO_ORGANIZATION": "Your account is not linked to an organization."
+  },
   "HEADER": {
     "LANGUAGE": "Language",
     "LOGOUT": "Logout",
@@ -675,6 +699,8 @@
     "ACCREDITATION": "Accreditation",
     "READINESS": "Readiness Intake",
     "MY_FORMS": "My forms",
+    "MY_ORGANIZATION": "My organization"
+,
     "ACCREDITATION_SUBM": "Accreditation Subm.",
     "READINESS_SUBM": "Readiness Subm.",
     "LEADS": "Leads",

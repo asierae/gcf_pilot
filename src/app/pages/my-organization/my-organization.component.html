@@ -1,0 +1,88 @@
+<div class="mo-page">
+  <header class="mo-head">
+    <div>
+      <p class="mo-eyebrow">{{ "NAV.WORKSPACE" | translate }}</p>
+      <h1>{{ "MY_ORGANIZATION.TITLE" | translate }}</h1>
+      <p class="mo-sub">{{ "MY_ORGANIZATION.LEDE" | translate }}</p>
+    </div>
+    <span class="mo-chip" *ngIf="organization?.acronym">
+      {{ organization?.acronym }}
+    </span>
+  </header>
+
+  @if (loading) {
+    <div class="mo-notice">⏳ …</div>
+  } @else if (error) {
+    <div class="mo-notice mo-notice-error">{{ error }}</div>
+  } @else if (organization) {
+    <form class="mo-form" (ngSubmit)="save()">
+      <section class="mo-section">
+        <h2>{{ "MY_ORGANIZATION.LOCKED_TITLE" | translate }}</h2>
+        <p class="mo-note">{{ "MY_ORGANIZATION.LOCKED_NOTE" | translate }}</p>
+        <div class="mo-grid">
+          <label class="mo-field">
+            <span>{{ "MY_ORGANIZATION.NAME" | translate }}</span>
+            <input type="text" [value]="organization.name" readonly />
+          </label>
+          <label class="mo-field">
+            <span>{{ "MY_ORGANIZATION.ACRONYM" | translate }}</span>
+            <input type="text" [value]="organization.acronym" readonly />
+          </label>
+          <label class="mo-field mo-field-wide">
+            <span>{{ "MY_ORGANIZATION.EMAIL" | translate }}</span>
+            <input type="email" [value]="organization.contactEmail" readonly />
+          </label>
+        </div>
+      </section>
+
+      <section class="mo-section">
+        <h2>{{ "MY_ORGANIZATION.DETAILS" | translate }}</h2>
+        <div class="mo-grid">
+          <label class="mo-field mo-field-wide">
+            <span>{{ "MY_ORGANIZATION.LEGAL_ADDRESS" | translate }}</span>
+            <textarea name="legalAddress" rows="2" [(ngModel)]="form.legalAddress"></textarea>
+          </label>
+          <label class="mo-field mo-field-wide">
+            <span>{{ "MY_ORGANIZATION.OPERATIONAL_ADDRESS" | translate }}</span>
+            <textarea name="operationalAddress" rows="2" [(ngModel)]="form.operationalAddress"></textarea>
+          </label>
+          <label class="mo-field">
+            <span>{{ "MY_ORGANIZATION.WEBSITE" | translate }}</span>
+            <input name="website" type="url" [(ngModel)]="form.website" />
+          </label>
+          <label class="mo-field">
+            <span>{{ "MY_ORGANIZATION.COUNTRY" | translate }}</span>
+            <input name="country" type="text" [(ngModel)]="form.country" />
+          </label>
+          <label class="mo-field">
+            <span>{{ "MY_ORGANIZATION.ENTITY_TYPE" | translate }}</span>
+            <select name="entityType" [(ngModel)]="form.entityType">
+              <option value="">--</option>
+              <option *ngFor="let type of entityTypes" [value]="type">{{ type }}</option>
+            </select>
+          </label>
+        </div>
+      </section>
+
+      <section class="mo-section">
+        <h2>{{ "MY_ORGANIZATION.CONTACT" | translate }}</h2>
+        <div class="mo-grid">
+          <label class="mo-field">
+            <span>{{ "MY_ORGANIZATION.CONTACT_NAME" | translate }}</span>
+            <input name="contactName" type="text" [(ngModel)]="form.contactName" />
+          </label>
+          <label class="mo-field">
+            <span>{{ "MY_ORGANIZATION.CONTACT_PHONE" | translate }}</span>
+            <input name="contactPhone" type="tel" [(ngModel)]="form.contactPhone" />
+          </label>
+        </div>
+      </section>
+
+      <div class="mo-actions">
+        <button type="submit" class="mo-save" [disabled]="saving">
+          {{ (saving ? "MY_ORGANIZATION.SAVING" : "MY_ORGANIZATION.SAVE") | translate }}
+        </button>
+      </div>
+    </form>
+  }
+</div>

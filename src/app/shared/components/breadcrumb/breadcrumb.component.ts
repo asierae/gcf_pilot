@@ -20,6 +20,7 @@ const ROUTE_MAP: Record<string, CrumbDef[]> = {
   "/pricing": [{ key: "NAV.PRICING" }],
   "/stage1": [{ key: "NAV.PRESCREENING" }],
   "/stage2": [{ key: "NAV.ACCREDITATION" }],
+  "/my-organization": [{ key: "NAV.MY_ORGANIZATION" }],
   "/dashboard/overview": [{ key: "DASHBOARD.TITLE" }],
   "/dashboard/applicant": [{ key: "APPLICANT_DASHBOARD.TITLE" }],
   "/dashboard": [{ key: "NAV.ACCREDITATION_SUBM" }],
