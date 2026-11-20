@@ -194,6 +194,11 @@ Public (no token):
 - `GET /api/organizations/acronym-available?acronym=&exclude=` — uniqueness check
 - `GET | PUT | DELETE /api/drafts/(stage1|readiness)/:organizationId` — draft
   autosave, keyed by the organization id
+- Stage 2 drafts are keyed by organization **and year** (`stage2_drafts`):
+  - `GET /api/drafts/stage2/:organizationId` → `{ drafts: [{ year, updatedAt }] }`
+  - `GET /api/drafts/stage2/:organizationId/:year` → `{ draft }` or `{ draft: null }`
+  - `PUT | DELETE /api/drafts/stage2/:organizationId/:year` — save/remove that
+    year's autosave. Years must be four digits in `2000..current+1`.
 - `GET | PUT /api/readiness/:organizationId` — submitted readiness application.
   On PUT, the `metadata.ndaEmail` contact is checked against D1 `users`; an
   unknown email gets a passwordless `applicant` account with status `pending`,
@@ -306,6 +311,11 @@ Resend messages, both best-effort — a provider failure never fails the request
    `NOREPLY_EMAIL`, `reply_to: CONTACT_EMAIL`.
 2. **Internal notice** → `CONTACT_EMAIL`, listing the organization, acronym,
    country, submitted timestamp and the form-specific details.
+3. **Accreditation under review** → sent after a `POST /api/applicants/stage2`
+   to `data.primaryContactEmail`, confirming that the application is being
+   reviewed and that Avera will get in touch shortly. It is best-effort like
+   the other two: no `RESEND_API_KEY` or an invalid contact email means no send
+   and no change to the response.
 
 Review-notes emails from the admin dashboard use the same transport, but if
 `RESEND_API_KEY` is not configured the UI opens Gmail compose instead.
