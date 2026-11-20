@@ -408,6 +408,12 @@
   text-align: center !important;
 }
 
+/* Keep the country cell wide enough that its floating dropdown does not
+   stretch over the neighbouring inputs. */
+.leads-table td.cell-country {
+  min-width: 220px;
+}
+
 /* Sticky status column keeps the key field visible while scrolling */
 .leads-table th:last-child,
 .leads-table td:last-child {

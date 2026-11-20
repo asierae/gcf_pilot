@@ -109,9 +109,12 @@ export class CountrySelectComponent implements ControlValueAccessor {
 
     if (this.overlay && control) {
       const rect = control.getBoundingClientRect();
+      const margin = 8;
+      const available = Math.max(window.innerWidth - rect.left - margin, 160);
+      const width = Math.min(Math.max(rect.width, 200), available);
       this.panelStyle = {
         left: `${rect.left}px`,
-        width: `${Math.max(rect.width, 200)}px`,
+        width: `${width}px`,
         top: `${rect.bottom + 4}px`,
         maxHeight: `${maxHeight}px`,
       };
