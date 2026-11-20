@@ -45,6 +45,16 @@ npx wrangler d1 execute averacapital-db --local --file=worker/migrations/2026-11
 npx wrangler d1 execute averacapital-db --remote --file=worker/migrations/2026-11-18_leads_profile_fields.sql
 ```
 
+Databases that still have the retired `leads.favorite` flag need the priority
+migration. It backfills `favorite = 1` as `priority = 'high'` and drops the old
+column, so run it once per database (local, remote, and any custom
+`--persist-to` directory):
+
+```powershell
+npx wrangler d1 execute averacapital-db --local --file=worker/migrations/2026-11-20_leads_priority.sql
+npx wrangler d1 execute averacapital-db --remote --file=worker/migrations/2026-11-20_leads_priority.sql
+```
+
 ## 3. Configure secrets
 
 ```powershell
