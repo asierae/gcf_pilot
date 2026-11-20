@@ -471,6 +471,45 @@
   min-width: 9rem;
 }
 
+/* Editable cell with a separate icon that opens the link. */
+.cell-with-action {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.cell-with-action .cell-input {
+  flex: 1;
+  min-width: 0;
+}
+
+.cell-link-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 26px;
+  height: 26px;
+  border: 1px solid rgba(232, 192, 106, 0.28);
+  border-radius: 7px;
+  background: rgba(232, 192, 106, 0.08);
+  color: #f5dfa8;
+  text-decoration: none;
+  transition:
+    background 0.15s,
+    border-color 0.15s;
+}
+
+.cell-link-action:hover {
+  background: rgba(232, 192, 106, 0.18);
+  border-color: rgba(232, 192, 106, 0.5);
+}
+
+.cell-link-action svg {
+  width: 14px;
+  height: 14px;
+}
+
 .status-select,
 .priority-select {
   width: 100%;

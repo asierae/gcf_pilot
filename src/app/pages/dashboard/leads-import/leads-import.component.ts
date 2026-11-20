@@ -504,6 +504,15 @@ export class LeadsImportComponent implements OnInit, OnDestroy {
     return `priority-select priority-${priority.toLowerCase()}`;
   }
 
+  /** Adds a scheme only when missing so the link stays a safe http(s) URL. */
+  websiteHref(value: string): string {
+    const raw = (value ?? "").trim();
+    if (!raw) {
+      return "";
+    }
+    return /^https?:\/\//i.test(raw) ? raw : `https://${raw}`;
+  }
+
   get visibleIds(): string[] {
     return this.paginatedLeads.flatMap((lead) => (lead.id ? [lead.id] : []));
   }
