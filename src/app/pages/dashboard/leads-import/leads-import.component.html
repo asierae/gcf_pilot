@@ -88,10 +88,12 @@
           <tr *ngFor="let lead of pendingLeads; index as i">
             <td>
               <input
-                class="cell-input"
+                class="favorite-check"
                 type="checkbox"
                 [checked]="lead.favorite"
                 (change)="togglePendingFavorite(i, $any($event.target).checked)"
+                aria-label="Favorite"
+                title="Toggle favorite"
               />
             </td>
              <td class="cell-country">
@@ -341,14 +343,6 @@
             *ngFor="let lead of paginatedLeads"
             [class.saving]="savingFieldId === lead.id"
           >
-            <td>
-              <input
-                class="cell-input"
-                type="checkbox"
-                [checked]="lead.favorite"
-                (change)="toggleSavedFavorite(lead, $any($event.target).checked)"
-              />
-            </td>
             <td class="col-check">
               <label
                 class="checkbox-wrap"
@@ -362,6 +356,16 @@
                 />
                 <span class="checkbox-box"></span>
               </label>
+            </td>
+            <td>
+              <input
+                class="favorite-check"
+                type="checkbox"
+                [checked]="lead.favorite"
+                (change)="toggleSavedFavorite(lead, $any($event.target).checked)"
+                [attr.aria-label]="'Favorite ' + lead.organization"
+                title="Toggle favorite"
+              />
             </td>
             <td>
               <input

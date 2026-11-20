@@ -408,6 +408,16 @@
   text-align: center !important;
 }
 
+/* The favorite toggle is a plain checkbox rather than a bulk-selection box.
+   Keep it visually distinct so it is not mistaken for the delete selector. */
+.favorite-check {
+  width: 1.05rem;
+  height: 1.05rem;
+  margin: 0;
+  cursor: pointer;
+  accent-color: #e8c06a;
+}
+
 /* Keep the country cell wide enough that its floating dropdown does not
    stretch over the neighbouring inputs. */
 .leads-table td.cell-country {
