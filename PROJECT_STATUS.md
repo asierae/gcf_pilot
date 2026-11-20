@@ -23,13 +23,16 @@ Portal Avera/GCF: SPA Angular 18 + un Cloudflare Worker con D1/R2. Cubre leads, 
 | Corrección del checkbox de favoritos en la tabla de leads: columnas `thead`/`tbody` alineadas y estilo propio para el toggle | `495b056` | `pages/dashboard/leads-import/leads-import.component.html`, `.css` |
 | Migración `favorite` aplicada a la BD local por defecto y a D1 remota | `e94d19f` (docs) | `worker/migrations/2026-11-22_leads_favorite.sql` |
 | Breadcrumb visible siempre arriba a la izquierda y menú público oculto en la vista anónima de Stage 1 | `97361e0` | `layout/layout.component.*`, `shared/components/breadcrumb/*` |
-| Leads: reemplazar favoritos por un dropdown de prioridad (`low/medium/high/critical`) y ordenar por prioridad | sin commitear | `models/applicant.model.ts`, `pages/dashboard/leads-import/*`, `worker/index.ts`, `worker/schema.sql`, `worker/migrations/2026-11-20_leads_priority.sql` |
+| Leads: reemplazar favoritos por un dropdown de prioridad (`low/medium/high/critical`) y ordenar por prioridad | `6d91f84` | `models/applicant.model.ts`, `pages/dashboard/leads-import/*`, `worker/index.ts`, `worker/schema.sql`, `worker/migrations/2026-11-20_leads_priority.sql` |
+| Tabla de leads reordenada: Organization primero, sin Region, Priority antes de Comments; Website y Email con icono para abrir manteniendo la edición | `36cbee0` | `pages/dashboard/leads-import/*` |
+| Auditoría Avera de riesgo/reputación: scores por factor publicables en el dashboard del solicitante y editable en el admin | `243fd8c` | `models/organization.model.ts`, `models/applicant-dashboard.model.ts`, `pages/admin/organizations/admin-organization-edit.*`, `pages/dashboard/applicant/*`, `worker/index.ts`, `worker/migrations/2026-11-20_organizations_audit_scores.sql`, `src/assets/i18n/*.json` |
+| PDF de riesgo/reputación con firma corporativa de Avera, descargable por admin y solicitante | `8fce205` | `worker/risk-report-pdf.ts`, `worker/index.ts`, `services/api.service.ts`, `pages/admin/organizations/*`, `pages/dashboard/applicant/*` |
 
-Verificación de la última tarea: `tsc --noEmit`, `worker:typecheck` y `ng build` en verde. Breadcrumb comprobado en navegador en `/stage1` anónimo (visible arriba a la izquierda, sin menú público) y en rutas logueadas con y sin entrada en `ROUTE_MAP`. Prioridad comprobada en navegador: dropdown en la columna "Priority", cambio persistente tras recargar (clase `priority-critical` y `PATCH /api/leads/:id`); migración aplicada en local (por defecto y `gcf-verify`) y en D1 remota, con 6 leads antiguamente favoritos convertidos a `high` y la columna `favorite` eliminada.
+Verificación de la última tarea: `tsc --noEmit`, `worker:typecheck` y `ng build` en verde. Comprobado en navegador: tabla de leads con 12 cabeceras/12 celdas alineadas (Organization tras la selección, sin Region, Priority antes de Comments) y enlaces en Website/Email; edición del admin con la sección de auditoría visible (se corrigió un error `NG01352` previo por `ngModel` sin `name` en el formulario); dashboard del solicitante con chip "Avera audited", notas de auditoría y botón de descarga. El `PATCH` de auditoría aplica los overrides (governance 90 / financial 80) y `risk.source` pasa a `avera-audit`. El endpoint `GET /api/organizations/:id/risk-report.pdf` devuelve 200, `application/pdf`, cabecera `%PDF-1.4`, xref con offsets válidos y 6 objetos; se previsualizó el PDF generado. Migraciones `2026-11-20_leads_priority.sql` y `2026-11-20_organizations_audit_scores.sql` aplicadas en local (por defecto y `gcf-verify`) y en D1 remota.
 
 ## En desarrollo
 
-Ninguna tarea activa. El breadcrumb unificado y el menú anónimo de Stage 1 están cerrados y commiteados (`97361e0`). La sustitución de favoritos por prioridad está implementada y verificada, pendiente de commit; la migración `2026-11-20_leads_priority.sql` ya está aplicada en local (por defecto y `gcf-verify`) y en D1 remota.
+Ninguna tarea activa. Las tres entregas de esta ronda (reordenación de leads, scores de auditoría Avera y PDF firmado) están cerradas, verificadas y commiteadas. Árbol de trabajo limpio.
 
 ## Pendientes
 
@@ -45,6 +48,7 @@ Ninguna tarea activa. El breadcrumb unificado y el menú anónimo de Stage 1 est
 - Resuelto (`495b056`): en la tabla de leads guardados, el checkbox de favorito estaba debajo de la cabecera "Select all" y el checkbox de selección para borrar debajo de "Favorite". Al hacer clic en "Favorite" se seleccionaba la fila para borrar. Ahora `thead` y `tbody` tienen el mismo orden y el favorito usa un estilo propio (`.favorite-check`).
 - Resuelto (2026-11-20): marcar favorito devolvía "Could not update the row on the server" porque la columna `favorite` faltaba en la BD local por defecto y en D1 remota. La migración `2026-11-22_leads_favorite.sql` ya está aplicada en local (por defecto y `gcf-verify`) y en remoto. Los favoritos se han eliminado del todo en favor de `priority` (`2026-11-20_leads_priority.sql`).
 - Resuelto (`97361e0`): el breadcrumb solo se mostraba con sesión iniciada y en 11 rutas mapeadas; ahora se renderiza siempre en el layout, se ancla a la izquierda también en RTL y usa el contexto de la página o un fallback para rutas sin mapear. El menú público (`public-nav`) ya no aparece en la vista anónima de `/stage1`.
+- Resuelto (`8fce205`): el formulario de edición del admin lanzaba `NG01352` (`ngModel` dentro de `<form>` sin `name`), lo que impedía renderizar los campos. Se añadió `name` a los 31 controles.
 - Sin `RESEND_API_KEY`, `/api/send-review-email`, reset y ambientes devuelven 501 y la UI cae a Gmail compose: es comportamiento previsto, no un fallo.
 - `wrangler dev` con `--persist-to %TEMP%\gcf-verify` usa una BD distinta de la local por defecto: las migraciones aplicadas en un persist dir no afectan al otro.
 
@@ -58,18 +62,21 @@ Ninguna tarea activa. El breadcrumb unificado y el menú anónimo de Stage 1 est
 
 ## Últimos cambios realizados
 
-1. 2026-11-20 — leads: favoritos sustituidos por prioridad (`low/medium/high/critical`) en dropdown, orden por prioridad en servidor y cliente, y migración D1 con backfill (`favorite=1` → `high`) más borrado de la columna antigua, aplicada en local y remota.
-2. `97361e0` — breadcrumb siempre visible arriba a la izquierda (incluido RTL y rutas sin mapear) y menú público oculto en `/stage1` anónimo.
-3. `e94d19f` — migración `favorite` aplicada a BD local por defecto y D1 remota (fix de "Could not update the row" al marcar favoritos).
-4. `495b056` — tabla de leads: `thead`/`tbody` alineados (selección → favorito) y `.favorite-check` para el toggle de favorito.
-5. `336e495` — aviso de email duplicado al hacer blur en readiness, Stage 1 y perfil.
-6. `17f26dd` — `USER.EMAIL_EXISTS` movido a nivel superior en los 7 idiomas.
-7. `38f5c55` — columna Country más ancha y panel del dropdown limitado al ancho disponible.
-8. `bc9007a` — perfil sin `region`; `country` dentro de "About your organisation".
-9. `588f372` — renombrado a Pre-Accreditation en UI/i18n/correos.
-10. `cb1c220` — persistencia de `favorite` en D1 (schema + migración + insert/update/read).
-11. `632895a` — handlers de favoritos corregidos (`$any($event.target).checked`).
-12. `029fa28` — CTA "Get assessed" oculto con sesión iniciada.
+1. `8fce205` — PDF de riesgo/reputación firmado por Avera (Worker + `worker/risk-report-pdf.ts`), botones en admin y dashboard del solicitante, y corrección del `ngModel` sin `name` en el formulario del admin.
+2. `243fd8c` — scores de auditoría Avera por factor con override opcional en `organizationDashboard`, edición en el admin y visualización pública (migración aplicada en local y remota).
+3. `36cbee0` — columnas de leads reordenadas (Organization, sin Region, Priority antes de Comments) y acciones para abrir Website/Email.
+4. `6d91f84` — leads: prioridad en dropdown, orden en servidor y cliente y migración con backfill de favoritos, aplicada en local y remota.
+5. `97361e0` — breadcrumb siempre visible arriba a la izquierda (incluido RTL y rutas sin mapear) y menú público oculto en `/stage1` anónimo.
+6. `e94d19f` — migración `favorite` aplicada a BD local por defecto y D1 remota (fix de "Could not update the row" al marcar favoritos).
+7. `495b056` — tabla de leads: `thead`/`tbody` alineados (selección → favorito) y `.favorite-check` para el toggle de favorito.
+8. `336e495` — aviso de email duplicado al hacer blur en readiness, Stage 1 y perfil.
+9. `17f26dd` — `USER.EMAIL_EXISTS` movido a nivel superior en los 7 idiomas.
+10. `38f5c55` — columna Country más ancha y panel del dropdown limitado al ancho disponible.
+11. `bc9007a` — perfil sin `region`; `country` dentro de "About your organisation".
+12. `588f372` — renombrado a Pre-Accreditation en UI/i18n/correos.
+13. `cb1c220` — persistencia de `favorite` en D1 (schema + migración + insert/update/read).
+14. `632895a` — handlers de favoritos corregidos (`$any($event.target).checked`).
+15. `029fa28` — CTA "Get assessed" oculto con sesión iniciada.
 
 ## Decisiones recientes
 
@@ -79,12 +86,14 @@ Ninguna tarea activa. El breadcrumb unificado y el menú anónimo de Stage 1 est
 - Email duplicado: comprobación de UX con cuentas activas en memoria, se limpia al volver a escribir; la validación real sigue siendo del servidor.
 - Archivos del admin: agrupación por origen con `DOCUMENT_GROUP_ORDER` en `worker/index.ts`; cabeceras traducidas con `FILES_GROUP_*`.
 - Country: solo este campo en los formularios; sección huérfana fusionada con la tarjeta siguiente.
+- Auditoría Avera: `auditEnabled=0` deja el índice 100 % calculado; con `=1`, cada factor con score no nulo sustituye al calculado, se recalcula `overall` con los mismos pesos y `risk.source` pasa a `avera-audit`. Los factores sin score siguen calculados. `riskScore`/`riskNotes` siguen siendo internos del listado admin.
+- PDF: se genera en el Worker con `worker/risk-report-pdf.ts` (PDF mínimo sin dependencias, fuentes Helvetica estándar y texto ASCII) y se descarga desde admin y solicitante. "Firmado" significa identidad corporativa (wordmark, línea de firma, copyright), no firma digital PKI.
 
 ## Próximas tareas recomendadas
 
 1. Hacer push y confirmar que el repositorio remoto queda sincronizado.
 2. Mover la comprobación de email a un endpoint `/api/users/check-email` (o similar), reutilizando la restricción `users.email` única.
-3. Añadir tests de regresión para: prioridad de leads (cambio + persistencia + orden), aviso de email en blur y panel de notas del solicitante.
+3. Añadir tests de regresión para: prioridad de leads (cambio + persistencia + orden), override de auditoría en `risk.source`/scores y panel de notas del solicitante.
 4. Configurar `RESEND_API_KEY` en un entorno de prueba y revisar el correo de estado "Passed" (debe indicar que Stage 2 está accesible).
 
 ## Archivos y módulos importantes por tarea
@@ -96,7 +105,8 @@ Ninguna tarea activa. El breadcrumb unificado y el menú anónimo de Stage 1 est
 | Readiness | `pages/readiness/readiness-wizard.component.*`, `readiness-application.model.ts`, `api/drafts` + `api/readiness` |
 | Leads y prioridad | `models/applicant.model.ts`, `pages/dashboard/leads-import/*`, `worker/index.ts` (`listLeads`, `updateLead`), `worker/schema.sql`, `worker/migrations/2026-11-20_leads_priority.sql` |
 | Breadcrumb y layout | `layout/layout.component.*`, `shared/components/breadcrumb/*`, `services/breadcrumb.service.ts` |
-| Review notes y dashboard solicitante | `pages/dashboard/submission-detail/submission-detail.component.ts`, `services/storage.service.ts`, `models/applicant-dashboard.model.ts`, `pages/dashboard/applicant/*`, `worker/index.ts` (`markApplicantReviewSent`, `organizationDashboard`) |
+| Review notes y dashboard solicitante | `pages/dashboard/submission-detail/submission-detail.component.ts`, `services/storage.service.ts`, `models/applicant-dashboard.model.ts`, `pages/dashboard/applicant/*`, `worker/index.ts` (`markApplicantReviewSent`, `buildOrganizationDashboard`) |
+| Auditoría Avera y PDF | `worker/index.ts` (`updateOrganizationAdmin`, `organizationRiskReport`), `worker/risk-report-pdf.ts`, `worker/migrations/2026-11-20_organizations_audit_scores.sql`, `pages/admin/organizations/admin-organization-edit.*`, `pages/dashboard/applicant/*`, `services/api.service.ts` (`downloadRiskReport`) |
 | Organizaciones y Files | `pages/admin/organizations/admin-organization-edit.*`, `models/organization.model.ts`, `worker/index.ts` (`DOCUMENT_SECTIONS`, `listOrganizationFiles`) |
 | Cuentas y sesión | `services/auth.service.ts`, `services/user.service.ts`, `guards/auth.guard.ts`, `pages/settings/user-management/*`, `worker/index.ts` (`users`, `user_tokens`) |
 | Correo e i18n | `worker/email.ts`, `services/email.service.ts`, `src/assets/i18n/*.json`, `config/email.config.ts` |
