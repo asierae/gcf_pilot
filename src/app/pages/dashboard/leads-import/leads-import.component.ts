@@ -652,7 +652,7 @@ export class LeadsImportComponent implements OnInit, OnDestroy {
       return `email:${email}`;
     }
 
-    return [lead.organization, lead.country, lead.acronym, lead.region]
+    return [lead.organization, lead.country, lead.acronym, lead.region!]
       .map((value) => value.trim().toLowerCase())
       .join("|");
   }
