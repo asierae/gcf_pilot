@@ -39,7 +39,7 @@
           {{ ("APPLICANT_DASHBOARD.STATUS." + data.preScreeningStatus.toUpperCase()) | translate }}
         </span>
       }
-      <button type="button" class="btn-refresh" (click)="downloadReport()">
+      <button type="button" class="btn-download-pdf" (click)="downloadReport()">
         {{ "APPLICANT_DASHBOARD.RISK.DOWNLOAD_PDF" | translate }}
       </button>
       <button type="button" class="btn-refresh" (click)="load()" [disabled]="loading">

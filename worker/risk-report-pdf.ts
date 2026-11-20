@@ -29,6 +29,36 @@ export interface RiskReportInput {
   generatedAt: string;
 }
 
+const CHAR_WIDTHS: Record<string, number> = {
+  ' ': 0.278, ',': 0.278, '.': 0.278, ':': 0.278, ';': 0.278, '!': 0.278,
+  'i': 0.278, 'j': 0.278, 'l': 0.278, 't': 0.278, 'f': 0.278, 'I': 0.278,
+  "'": 0.191, '"': 0.333, '(': 0.333, ')': 0.333, '-': 0.333, '/': 0.278,
+  'a': 0.556, 'b': 0.556, 'c': 0.5, 'd': 0.556, 'e': 0.556, 'g': 0.556,
+  'h': 0.556, 'k': 0.5, 'm': 0.833, 'n': 0.556, 'o': 0.556, 'p': 0.556,
+  'q': 0.556, 'r': 0.333, 's': 0.5, 'u': 0.556, 'v': 0.5, 'w': 0.722,
+  'x': 0.5, 'y': 0.5, 'z': 0.5,
+  'A': 0.667, 'B': 0.667, 'C': 0.722, 'D': 0.722, 'E': 0.667, 'F': 0.611,
+  'G': 0.778, 'H': 0.722, 'J': 0.5, 'K': 0.667, 'L': 0.556, 'M': 0.833,
+  'N': 0.722, 'O': 0.778, 'P': 0.667, 'Q': 0.778, 'R': 0.722, 'S': 0.667,
+  'T': 0.611, 'U': 0.722, 'V': 0.667, 'W': 0.944, 'X': 0.667, 'Y': 0.667,
+  'Z': 0.611,
+  '0': 0.556, '1': 0.556, '2': 0.556, '3': 0.556, '4': 0.556, '5': 0.556,
+  '6': 0.556, '7': 0.556, '8': 0.556, '9': 0.556,
+  '&': 0.667, '%': 0.889, '#': 0.556, '+': 0.584, '=': 0.584, '?': 0.556,
+};
+
+function textWidth(value: string, size: number, bold: boolean): number {
+  const factor = bold ? 1.06 : 1;
+  return (
+    Array.from(value).reduce(
+      (sum, char) => sum + (CHAR_WIDTHS[char] ?? 0.556),
+      0,
+    ) *
+    size *
+    factor
+  );
+}
+
 const encoder = new TextEncoder();
 const NAVY = '0.039 0.094 0.141';
 const GOLD = '0.910 0.753 0.416';
@@ -81,6 +111,25 @@ export function buildRiskReportPdf(input: RiskReportInput): Uint8Array {
     );
   };
 
+  /** Right-align to the page margin instead of letting text overflow. */
+  const textRight = (
+    xRight: number,
+    y: number,
+    value: string,
+    size = 10,
+    font: 'F1' | 'F2' = 'F1',
+    color = INK,
+  ): void => {
+    text(
+      xRight - textWidth(value, size, font === 'F2'),
+      y,
+      value,
+      size,
+      font,
+      color,
+    );
+  };
+
   const line = (x1: number, y1: number, x2: number, y2: number): void => {
     commands.push(
       `${LINE} RG 0.7 w ${x1.toFixed(2)} ${y1.toFixed(2)} m ${x2.toFixed(2)} ${y2.toFixed(2)} l S`,
@@ -92,7 +141,7 @@ export function buildRiskReportPdf(input: RiskReportInput): Uint8Array {
   rect(0, height - 99, width, 3, GOLD);
   text(48, height - 46, 'AVERA', 22, 'F2', '1 1 1');
   text(48, height - 66, 'CAPITAL ACCESS', 10, 'F1', GOLD);
-  text(
+  textRight(
     width - 48,
     height - 48,
     'RISK & REPUTATION REPORT',
@@ -100,7 +149,7 @@ export function buildRiskReportPdf(input: RiskReportInput): Uint8Array {
     'F2',
     '1 1 1',
   );
-  text(
+  textRight(
     width - 48,
     height - 66,
     'Issued by Avera Capital Access',
@@ -130,7 +179,7 @@ export function buildRiskReportPdf(input: RiskReportInput): Uint8Array {
   text(48, y, 'OVERALL RISK & REPUTATION INDEX', 9, 'F2', MUTED);
   text(48, y - 36, String(input.overall), 40, 'F2', hexColor(input.overall));
   text(110, y - 32, '/ 100', 12, 'F1', MUTED);
-  text(
+  textRight(
     width - 48,
     y - 4,
     `Risk band: ${input.riskBand}`,
@@ -138,13 +187,13 @@ export function buildRiskReportPdf(input: RiskReportInput): Uint8Array {
     'F2',
     hexColor(input.overall),
   );
-  text(
+  textRight(
     width - 48,
     y - 22,
     `Benchmark (${input.benchmarkSource}): ${input.benchmark}`,
     9,
   );
-  text(width - 48, y - 38, `Evidence confidence: ${input.confidence}`, 9);
+  textRight(width - 48, y - 38, `Evidence confidence: ${input.confidence}`, 9);
 
   // ── Factor bars ───────────────────────────────────────
   y -= 86;
@@ -163,7 +212,7 @@ export function buildRiskReportPdf(input: RiskReportInput): Uint8Array {
       GOLD,
     );
     text(barX + barW + 12, y, String(factor.value), 9, 'F2');
-    text(width - 48, y, `${Math.round(factor.weight * 100)}%`, 8, 'F1', MUTED);
+    textRight(width - 48, y, `${Math.round(factor.weight * 100)}%`, 8, 'F1', MUTED);
     y -= 24;
   }
 
@@ -198,7 +247,7 @@ export function buildRiskReportPdf(input: RiskReportInput): Uint8Array {
   line(48, footerY + 34, width - 48, footerY + 34);
   text(48, footerY + 16, 'Authorised signature', 8, 'F1', MUTED);
   text(48, footerY - 4, 'Avera Capital Access', 12, 'F2', NAVY);
-  text(
+  textRight(
     width - 48,
     footerY + 16,
     `Generated ${input.generatedAt.slice(0, 10)}`,
@@ -206,7 +255,7 @@ export function buildRiskReportPdf(input: RiskReportInput): Uint8Array {
     'F1',
     MUTED,
   );
-  text(
+  textRight(
     width - 48,
     footerY - 4,
     'This report is computed from submitted data and Avera research.',
