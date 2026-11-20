@@ -400,6 +400,12 @@
   max-width: 1280px;
 }
 
+/* The breadcrumb always sits at the left edge, even on public pages. */
+.main-public > app-breadcrumb {
+  max-width: none;
+  align-self: flex-start;
+}
+
 .layout-footer {
   padding: 1.25rem 2rem;
   text-align: center;

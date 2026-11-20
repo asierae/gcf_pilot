@@ -1,6 +1,6 @@
 <div class="layout">
   <!-- ══ HEADER ══ -->
-  <header class="layout-header" [class.header-public]="!authService.isLoggedIn">
+  <header class="layout-header" [class.header-public]="publicNavVisible">
     <!-- Left: toggle (logged-in only) + logo -->
     <div class="header-left">
       @if (authService.isLoggedIn) {
@@ -35,8 +35,8 @@
       </a>
     </div>
 
-    <!-- Center: public navigation (logged-out only) -->
-    @if (!authService.isLoggedIn) {
+    <!-- Center: public navigation (logged-out, non-wizard pages only) -->
+    @if (publicNavVisible) {
       <nav class="public-nav" aria-label="Main navigation">
         <a
           routerLink="/stage1"
@@ -370,10 +370,8 @@
       </nav>
     }
 
-    <main class="main-content" [class.main-public]="!authService.isLoggedIn">
-      @if (authService.isLoggedIn) {
-        <app-breadcrumb />
-      }
+    <main class="main-content" [class.main-public]="publicNavVisible">
+      <app-breadcrumb />
       <router-outlet></router-outlet>
     </main>
   </div>

@@ -1,4 +1,4 @@
-import { Component, DestroyRef, inject } from "@angular/core";
+import { Component, DestroyRef, effect, inject } from "@angular/core";
 import { CommonModule } from "@angular/common";
 import { Router, RouterLink, NavigationEnd } from "@angular/router";
 import { TranslateService } from "@ngx-translate/core";
@@ -58,7 +58,11 @@ export class BreadcrumbComponent {
     this.translate.onLangChange
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(() => this.buildCrumbs());
-    this.buildCrumbs();
+    effect(() => {
+      // Pages publish a contextual title after navigation; reflect it here.
+      this.breadcrumbService.context();
+      this.buildCrumbs();
+    });
   }
 
   private buildCrumbs(): void {
@@ -89,10 +93,28 @@ export class BreadcrumbComponent {
       return;
     }
 
-    this.crumbs = (ROUTE_MAP[url] ?? []).map((def) => ({
+    const defs = ROUTE_MAP[url];
+    if (!defs?.length) {
+      this.crumbs = [{ label: this.fallbackLabel(url) }];
+      return;
+    }
+
+    this.crumbs = defs.map((def) => ({
       label: this.translate.instant(def.key),
       link: def.link,
     }));
+  }
+
+  /** Unmapped routes still get a breadcrumb instead of an empty gap. */
+  private fallbackLabel(url: string): string {
+    const context = this.breadcrumbService.context()?.trim();
+    if (context) {
+      return context;
+    }
+    const segment = url.split("/").filter(Boolean).pop() ?? "";
+    return segment
+      .replace(/[-_]/g, " ")
+      .replace(/\b\w/g, (char) => char.toUpperCase());
   }
 
   get visible(): boolean {

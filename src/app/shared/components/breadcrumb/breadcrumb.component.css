@@ -1,4 +1,9 @@
+:host,
 .breadcrumb {
+  /* Keep the trail anchored to the left, also when the UI language is RTL. */
+  direction: ltr;
+  text-align: left;
+  display: block;
   padding: 0 0 1rem;
 }
 
@@ -9,6 +14,7 @@
   display: flex;
   align-items: center;
   flex-wrap: wrap;
+  justify-content: flex-start;
   gap: 0.15rem;
 }
 

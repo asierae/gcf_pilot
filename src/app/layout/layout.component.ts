@@ -97,6 +97,11 @@ export class LayoutComponent implements OnInit {
     return !this.router.url.startsWith("/readiness");
   }
 
+  /** Intake wizards keep the portal header but drop the marketing navigation. */
+  get publicNavVisible(): boolean {
+    return !this.authService.isLoggedIn && !this.router.url.startsWith("/stage1");
+  }
+
   toggleGearMenu(): void {
     this.gearMenuOpen = !this.gearMenuOpen;
   }
