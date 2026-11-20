@@ -28,7 +28,7 @@ export const COUNTRIES = [
 ];
 
 export const STAGE1_STEPS = [
-  { id: 'access', title: 'Access Modality', icon: '🌐', subtitle: 'Pre-screening' },
+  { id: 'access', title: 'Access Modality', icon: '🌐', subtitle: 'Pre-Accreditation' },
   { id: 'general', title: 'General Information', icon: '📋', subtitle: 'Section 1' },
   { id: 'legal', title: 'Legal Status & Eligibility', icon: '⚖️', subtitle: 'Section 2' },
   { id: 'additional', title: 'Additional Information', icon: '📊', subtitle: 'Section 3' },

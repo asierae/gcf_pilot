@@ -83,7 +83,7 @@ export class MyFormsComponent implements OnInit {
     return [
       this.card(
         "stage1",
-        "Pre-screening",
+        "Pre-Accreditation",
         "Stage 1 general information, legal status and fast-track eligibility.",
         "/stage1",
         forms.stage1?.submittedAt ?? null,

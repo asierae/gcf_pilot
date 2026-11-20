@@ -12,7 +12,7 @@
         </span>
         <span class="brand-text">
           <span class="brand-name">Pre-accreditation</span>
-          <span class="brand-sub">GCF pre-screening · Stage 1</span>
+          <span class="brand-sub">GCF pre-accreditation · Stage 1</span>
         </span>
       </a>
 
@@ -33,7 +33,7 @@
   </header>
 
   <div class="wizard-body">
-    <nav class="stepper" aria-label="Pre-screening progress">
+    <nav class="stepper" aria-label="Pre-Accreditation progress">
       <div class="stepper-meta">
         <p class="stepper-kicker">GCF pre-accreditation · 2024–2027</p>
         <p class="stepper-count">Step {{ currentStep + 1 }} of {{ steps.length }}</p>
@@ -45,7 +45,7 @@
         [attr.aria-valuenow]="getStepProgress()"
         aria-valuemin="0"
         aria-valuemax="100"
-        aria-label="Pre-screening progress"
+        aria-label="Pre-Accreditation progress"
       >
         <span class="progress-fill" [style.width.%]="getStepProgress()"></span>
       </div>
@@ -77,7 +77,7 @@
     <main class="main-content">
       @if (!submitSuccess) {
         <header class="step-heading">
-          <p class="step-eyebrow">Stage 1 · Pre-screening</p>
+          <p class="step-eyebrow">Stage 1 · Pre-Accreditation</p>
           <h1>{{ steps[currentStep].title }}</h1>
           <p class="step-subtitle">{{ stepDescriptions[currentStep] }}</p>
         </header>
@@ -92,7 +92,7 @@
           </svg>
         </span>
         <h2>Questionnaire Submitted Successfully</h2>
-        <p>Your Stage 1 pre-screening responses have been saved.</p>
+        <p>Your Stage 1 pre-accreditation responses have been saved.</p>
       </div>
     } @else {
     <form [formGroup]="form" (ngSubmit)="onSubmit()">
@@ -159,7 +159,7 @@
           @if (isGovernment) {
             <div class="form-card nested-card">
               <h4 class="subsection-title">NDA Nomination Letter</h4>
-              <p class="field-help">Upload NDA Nomination Letter (optional at pre-screening).</p>
+              <p class="field-help">Upload NDA Nomination Letter (optional at pre-accreditation).</p>
               <app-file-upload
                 formControlName="nominationLetterFiles"
                 [entityId]="applicantId"
@@ -938,7 +938,7 @@
               </label>
             </div>
           </div>
-          <p class="help-box">A track record is helpful but not mandatory at GCF pre-screening. Share
+          <p class="help-box">A track record is helpful but not mandatory at GCF pre-accreditation. Share
             relevant experience and project scale so AVERA can assess readiness.</p>
 
           <div class="conditional-block" *ngIf="showClimateFinanceOverview">

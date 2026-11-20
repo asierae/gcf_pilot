@@ -383,7 +383,7 @@ export class SubmissionDetailComponent implements OnInit {
     const lines = [
       `Dear ${contactName},`,
       "",
-      "Please find below our review notes regarding your Stage 1 pre-screening submission:",
+      "Please find below our review notes regarding your Stage 1 pre-accreditation submission:",
       "",
     ];
     for (const section of this.visibleSectionsWithNotes()) {

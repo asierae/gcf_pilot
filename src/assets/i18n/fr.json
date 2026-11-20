@@ -606,7 +606,7 @@
       "EMPTY": "Aucun type d'organisation enregistré pour l'instant."
     },
     "SCREENING": {
-      "TITLE": "Présélection",
+      "TITLE": "Préaccréditation",
       "SUB": "Statut des soumissions d'accréditation"
     },
     "LEADS": {
@@ -629,7 +629,7 @@
       "REVIEW": "Examiner les demandes →",
       "EMPTY": "Rien n'a encore été soumis.",
       "SUB_ACCREDITATION": "Soumission d'accréditation",
-      "SUB_PRESCREENING": "Présélection",
+      "SUB_PRESCREENING": "Préaccréditation",
       "SUB_READINESS": "Soumission de préparation",
       "SUB_ENQUIRY": "Demande",
       "SUB_PROFILE": "Évaluation de profil",
@@ -662,7 +662,7 @@
     "FUNNEL": {
       "ENQUIRIES": "Demandes",
       "ACCREDITATION": "Accréditation",
-      "PASSED": "Présélection réussie",
+      "PASSED": "Préaccréditation réussie",
       "STAGE2": "Candidatures étape 2",
       "PROFILE": "Évaluations de profil"
     }
@@ -671,7 +671,7 @@
     "WORKSPACE": "Espace de travail",
     "DASHBOARD": "Tableau de bord",
     "PRICING": "Offres et tarifs",
-    "PRESCREENING": "Présélection",
+    "PRESCREENING": "Préaccréditation",
     "ACCREDITATION": "Accréditation",
     "READINESS": "Demande de préparation",
     "MY_FORMS": "Mes formulaires",
@@ -681,8 +681,8 @@
     "USERS": "Utilisateurs",
     "SETTINGS": "Paramètres",
     "USER_MANAGEMENT": "Gestion des utilisateurs",
-    "UNLOCK_ACCREDITATION": "Réussissez la présélection pour débloquer l'accréditation (actuellement : {{status}})",
-    "PRESCREENING_STATUS": "Présélection : {{status}}",
+    "UNLOCK_ACCREDITATION": "Réussissez la préaccréditation pour débloquer l'accréditation (actuellement : {{status}})",
+    "PRESCREENING_STATUS": "Préaccréditation : {{status}}",
     "SUBMISSION": "Soumission",
     "MANAGE_ACCOUNTS": "Gérer les comptes et les rôles",
     "SEND_EMAIL": "Envoyer un email",
@@ -764,12 +764,12 @@
           "DESC": "Identité juridique et contacts enregistrés."
         },
         "PRESCREENING": {
-          "TITLE": "Présélection soumise",
+          "TITLE": "Préaccréditation soumise",
           "DESC": "Réponses d'éligibilité et de capacité de l'étape 1."
         },
         "REVIEW": {
-          "TITLE": "Examen de la présélection",
-          "DESC": "Décision d'Avera sur votre présélection."
+          "TITLE": "Examen de la préaccréditation",
+          "DESC": "Décision d'Avera sur votre préaccréditation."
         },
         "ACCREDITATION": {
           "TITLE": "Accréditation soumise",
@@ -806,23 +806,23 @@
         "CTA": "Compléter le profil"
       },
       "COMPLETE_PRESCREENING": {
-        "TITLE": "Commencer la présélection",
+        "TITLE": "Commencer la préaccréditation",
         "DESC": "Soumettez l'étape 1 pour démarrer votre parcours d'accréditation.",
-        "CTA": "Ouvrir la présélection"
+        "CTA": "Ouvrir la préaccréditation"
       },
       "AWAITING_PRESCREENING": {
-        "TITLE": "Présélection en cours d'examen",
+        "TITLE": "Préaccréditation en cours d'examen",
         "DESC": "Votre soumission de l'étape 1 est auprès de l'équipe Avera.",
         "CTA": "Voir la soumission"
       },
       "REVISE_PRESCREENING": {
-        "TITLE": "Révisez votre présélection",
+        "TITLE": "Révisez votre préaccréditation",
         "DESC": "Consultez les retours et soumettez à nouveau l'étape 1.",
-        "CTA": "Ouvrir la présélection"
+        "CTA": "Ouvrir la préaccréditation"
       },
       "START_ACCREDITATION": {
         "TITLE": "Démarrer l'accréditation (étape 2)",
-        "DESC": "Votre présélection est réussie. Complétez les normes d'accréditation.",
+        "DESC": "Votre préaccréditation est réussie. Complétez les normes d'accréditation.",
         "CTA": "Ouvrir l'accréditation"
       },
       "UPLOAD_DOCUMENTS": {
@@ -848,9 +848,9 @@
       "SUB": "Jalons enregistrés pour votre organisation.",
       "EMPTY": "Aucune activité enregistrée.",
       "PROFILE": "Profil de l'organisation créé",
-      "STAGE1": "Présélection soumise",
-      "PRESCREENING_PASSED": "Présélection réussie",
-      "PRESCREENING_FAILED": "La présélection doit être révisée",
+      "STAGE1": "Préaccréditation soumise",
+      "PRESCREENING_PASSED": "Préaccréditation réussie",
+      "PRESCREENING_FAILED": "La préaccréditation doit être révisée",
       "STAGE2": "Accréditation soumise",
       "READINESS_DRAFT": "Brouillon de préparation enregistré",
       "READINESS": "Préparation soumise"
@@ -878,12 +878,12 @@
       "NO_READINESS_HINT": "Créez une demande de préparation pour voir ici votre budget, vos preuves et votre cadre logique.",
       "START_READINESS": "Démarrer la préparation",
       "ACCREDITATION_TITLE": "Aperçu de l'accréditation",
-      "ACCREDITATION_SUB": "Statut de la présélection et couverture des preuves de l'étape 2.",
+      "ACCREDITATION_SUB": "Statut de la préaccréditation et couverture des preuves de l'étape 2.",
       "QUESTIONS": "Questions répondues",
       "QUESTIONS_VALUE": "{{answered}} sur {{total}}",
       "SECTIONS": "Sections terminées",
       "SECTIONS_VALUE": "{{complete}} sur {{total}}",
-      "PRESCREENING": "Présélection",
+      "PRESCREENING": "Préaccréditation",
       "STAGE2_SUBMITTED": "Étape 2 soumise",
       "NOT_STARTED": "Non commencé",
       "STAFF": "Effectifs",
@@ -957,9 +957,9 @@
     "RISK_BAND_MODERATE": "Risque modéré",
     "RISK_BAND_ELEVATED": "Risque élevé",
     "RISK_BAND_HIGH": "Risque critique",
-    "ACCR_STATUS_PENDING": "Presélection en attente",
-    "ACCR_STATUS_PASSED": "Presélection réussie",
-    "ACCR_STATUS_FAILED": "Presélection échouée",
+    "ACCR_STATUS_PENDING": "Préaccréditation en attente",
+    "ACCR_STATUS_PASSED": "Préaccréditation réussie",
+    "ACCR_STATUS_FAILED": "Préaccréditation échouée",
     "ACCR_STATUS_IN_REVIEW": "En examen",
     "ACCR_STATUS_ACCREDITATED": "Accréditée",
     "ACCR_STATUS_NOT_ACCREDITED": "Non accréditée",
@@ -975,7 +975,7 @@
     "FILES_LOADING": "Chargement des fichiers...",
     "FILES_EMPTY": "Aucun fichier téléchargé pour cette organisation.",
     "FILES_GROUP_READINESS": "Readiness",
-    "FILES_GROUP_PRESCREENING": "Pré-accreditation",
+    "FILES_GROUP_PRESCREENING": "Préaccréditation",
     "FILES_GROUP_ACCREDITATION": "Accréditation",
     "FILES_GROUP_OTHER": "Autres documents",
     "DOWNLOAD": "Télécharger",
@@ -983,7 +983,7 @@
     "DELETE_CONFIRM_MESSAGE": "Êtes-vous sûr de vouloir supprimer",
     "DELETE_WARNING": "Cette action est irréversible. Toutes les données sélectionnées seront définitivement supprimées.",
     "DELETE_FILES": "Supprimer tous les fichiers (documents téléchargés dans le stockage R2)",
-    "DELETE_ACCREDITATION": "Supprimer les données d'accréditation (résultats de présélection, applications readiness)",
+    "DELETE_ACCREDITATION": "Supprimer les données d'accréditation (résultats de préaccréditation, applications readiness)",
     "DELETE_READINESS": "Supprimer les brouillons et soumissions readiness",
     "CANCEL": "Annuler",
     "DELETING": "Suppression..."

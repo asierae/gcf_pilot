@@ -12,15 +12,15 @@ interface ChatMessage {
 const STUB_RESPONSES: { keywords: string[]; response: string }[] = [
   {
     keywords: ['requirement', 'requirements', 'eligibility', 'eligible', 'apply', 'application'],
-    response: `To apply through Avera, your organization must complete two stages:\n\n**Stage 1** — Pre-screening questionnaire covering legal status, governance, fiduciary capacity and climate finance experience.\n\n**Stage 2** — Full accreditation application with detailed documentation.\n\nWould you like more detail on any specific requirement?`,
+    response: `To apply through Avera, your organization must complete two stages:\n\n**Stage 1** — Pre-Accreditation questionnaire covering legal status, governance, fiduciary capacity and climate finance experience.\n\n**Stage 2** — Full accreditation application with detailed documentation.\n\nWould you like more detail on any specific requirement?`,
   },
   {
     keywords: ['price', 'pricing', 'cost', 'fee', 'fees', 'service', 'package', 'plan'],
     response: `We offer three service tiers:\n\n• **Advisory** — Document review & feedback\n• **Full Support** — End-to-end application management\n• **Premium** — Dedicated consultant + Stage 2 preparation\n\nContact us at contact@averacapitalaccess.com for a tailored quote.`,
   },
   {
-    keywords: ['stage 1', 'stage1', 'pre-screening', 'prescreening', 'questionnaire'],
-    response: `Stage 1 is the pre-screening questionnaire. It covers:\n• Organizational structure & legal status\n• Governance & fiduciary capacity\n• Climate finance experience\n• NDA/consultation records (if applicable)\n\nReview typically takes 5–10 business days.`,
+    keywords: ['stage 1', 'stage1', 'pre-accreditation', 'prescreening', 'questionnaire'],
+    response: `Stage 1 is the pre-accreditation questionnaire. It covers:\n• Organizational structure & legal status\n• Governance & fiduciary capacity\n• Climate finance experience\n• NDA/consultation records (if applicable)\n\nReview typically takes 5–10 business days.`,
   },
   {
     keywords: ['stage 2', 'stage2', 'full accreditation', 'full form', 'accreditation form'],

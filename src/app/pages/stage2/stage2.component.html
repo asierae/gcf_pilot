@@ -46,7 +46,7 @@
     } @else {
       <nav class="stepper" aria-label="Application progress">
         <div class="stepper-meta">
-          <p class="stepper-kicker">GCF accreditation · Pre-screening + full application</p>
+          <p class="stepper-kicker">GCF accreditation · Pre-Accreditation + full application</p>
           <p class="stepper-count">{{ stepProgress | number: '1.0-0' }}% complete</p>
         </div>
 
@@ -128,14 +128,14 @@
 
           <header class="step-heading">
             <p class="step-eyebrow">
-              {{ isStage1Step ? 'Stage 1 · Pre-screening' : 'Stage 2 · Accreditation requirements' }}
+              {{ isStage1Step ? 'Stage 1 · Pre-Accreditation' : 'Stage 2 · Accreditation requirements' }}
             </p>
             <h1>{{ currentStepLabel }}</h1>
             <p class="step-subtitle">
               @if (currentScreeningStep) {
                 {{ currentScreeningStep.description }}
               } @else {
-                Complete the pre-screening sections and accreditation requirements. Use the section map above to jump to any part.
+                Complete the pre-accreditation sections and accreditation requirements. Use the section map above to jump to any part.
               }
             </p>
           </header>

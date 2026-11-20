@@ -17,7 +17,7 @@
     "READINESS_META": "About 8 minutes · No account needed",
     "READINESS_CTA": "Start readiness check",
     "STAGE1_TITLE": "Accreditation",
-    "STAGE1_BODY": "For entities pursuing GCF accreditation: a structured pre-screening of mandate, fiduciary standards, safeguards and track record.",
+    "STAGE1_BODY": "For entities pursuing GCF accreditation: a structured pre-accreditation review of mandate, fiduciary standards, safeguards and track record.",
     "STAGE1_META": "About 12 minutes · Draft saved automatically",
     "STAGE1_CTA": "Start accreditation",
     "PROFILE_TITLE": "Profile assessment",
@@ -609,7 +609,7 @@
       "EMPTY": "No organization types recorded yet."
     },
     "SCREENING": {
-      "TITLE": "Pre-screening",
+      "TITLE": "Pre-Accreditation",
       "SUB": "Accreditation submission status"
     },
     "LEADS": {
@@ -632,7 +632,7 @@
       "REVIEW": "Review enquiries →",
       "EMPTY": "Nothing submitted yet.",
       "SUB_ACCREDITATION": "Accreditation submission",
-      "SUB_PRESCREENING": "Pre-screening",
+      "SUB_PRESCREENING": "Pre-Accreditation",
       "SUB_READINESS": "Readiness submission",
       "SUB_ENQUIRY": "Enquiry",
       "SUB_PROFILE": "Profile assessment",
@@ -665,7 +665,7 @@
     "FUNNEL": {
       "ENQUIRIES": "Enquiries",
       "ACCREDITATION": "Accreditation",
-      "PASSED": "Passed pre-screening",
+      "PASSED": "Pre-accreditation passed",
       "STAGE2": "Stage 2 applications",
       "PROFILE": "Profile assessments"
     }
@@ -674,7 +674,7 @@
     "WORKSPACE": "Workspace",
     "DASHBOARD": "Dashboard",
     "PRICING": "Plans & Pricing",
-    "PRESCREENING": "Pre-screening",
+    "PRESCREENING": "Pre-Accreditation",
     "ACCREDITATION": "Accreditation",
     "READINESS": "Readiness Intake",
     "MY_FORMS": "My forms",
@@ -685,8 +685,8 @@
     "ORGANIZATIONS": "Organizations",
     "SETTINGS": "Settings",
     "USER_MANAGEMENT": "User Management",
-    "UNLOCK_ACCREDITATION": "Pass pre-screening to unlock Accreditation (currently {{status}})",
-    "PRESCREENING_STATUS": "Pre-screening: {{status}}",
+    "UNLOCK_ACCREDITATION": "Pass pre-accreditation to unlock Accreditation (currently {{status}})",
+    "PRESCREENING_STATUS": "Pre-Accreditation: {{status}}",
     "SUBMISSION": "Submission",
     "MANAGE_ACCOUNTS": "Manage accounts and roles",
     "SEND_EMAIL": "Send email",
@@ -768,12 +768,12 @@
           "DESC": "Legal identity and contacts registered."
         },
         "PRESCREENING": {
-          "TITLE": "Pre-screening submitted",
+          "TITLE": "Pre-Accreditation submitted",
           "DESC": "Stage 1 eligibility and capacity answers."
         },
         "REVIEW": {
-          "TITLE": "Pre-screening review",
-          "DESC": "Avera decision on your pre-screening."
+          "TITLE": "Pre-Accreditation review",
+          "DESC": "Avera decision on your pre-accreditation."
         },
         "ACCREDITATION": {
           "TITLE": "Accreditation submitted",
@@ -810,23 +810,23 @@
         "CTA": "Complete profile"
       },
       "COMPLETE_PRESCREENING": {
-        "TITLE": "Start pre-screening",
+        "TITLE": "Start pre-accreditation",
         "DESC": "Submit Stage 1 to begin your accreditation pathway.",
-        "CTA": "Open pre-screening"
+        "CTA": "Open pre-accreditation"
       },
       "AWAITING_PRESCREENING": {
-        "TITLE": "Pre-screening under review",
+        "TITLE": "Pre-Accreditation under review",
         "DESC": "Your Stage 1 submission is with the Avera team.",
         "CTA": "View submission"
       },
       "REVISE_PRESCREENING": {
-        "TITLE": "Revise your pre-screening",
+        "TITLE": "Revise your pre-accreditation",
         "DESC": "Review the feedback and resubmit Stage 1.",
-        "CTA": "Open pre-screening"
+        "CTA": "Open pre-accreditation"
       },
       "START_ACCREDITATION": {
         "TITLE": "Start Stage 2 accreditation",
-        "DESC": "Your pre-screening passed. Complete the accreditation standards.",
+        "DESC": "Your pre-accreditation passed. Complete the accreditation standards.",
         "CTA": "Open accreditation"
       },
       "UPLOAD_DOCUMENTS": {
@@ -852,16 +852,16 @@
       "SUB": "Milestones recorded for your organization.",
       "EMPTY": "No activity recorded yet.",
       "PROFILE": "Organization profile created",
-      "STAGE1": "Pre-screening submitted",
-      "PRESCREENING_PASSED": "Pre-screening passed",
-      "PRESCREENING_FAILED": "Pre-screening needs revision",
+      "STAGE1": "Pre-Accreditation submitted",
+      "PRESCREENING_PASSED": "Pre-accreditation passed",
+      "PRESCREENING_FAILED": "Pre-Accreditation needs revision",
       "STAGE2": "Accreditation submitted",
       "READINESS_DRAFT": "Readiness draft saved",
       "READINESS": "Readiness submitted"
     },
     "REVIEW": {
       "TITLE": "Review feedback",
-      "SUB": "Notes the Avera team sent on your pre-screening sections.",
+      "SUB": "Notes the Avera team sent on your pre-accreditation sections.",
       "SENT": "Sent {{date}}"
     },
     "SNAPSHOT": {
@@ -882,12 +882,12 @@
       "NO_READINESS_HINT": "Create a readiness application to see your budget, evidence and logframe here.",
       "START_READINESS": "Start readiness",
       "ACCREDITATION_TITLE": "Accreditation snapshot",
-      "ACCREDITATION_SUB": "Pre-screening status and Stage 2 evidence coverage.",
+      "ACCREDITATION_SUB": "Pre-Accreditation status and Stage 2 evidence coverage.",
       "QUESTIONS": "Questions answered",
       "QUESTIONS_VALUE": "{{answered}} of {{total}}",
       "SECTIONS": "Sections complete",
       "SECTIONS_VALUE": "{{complete}} of {{total}}",
-      "PRESCREENING": "Pre-screening",
+      "PRESCREENING": "Pre-Accreditation",
       "STAGE2_SUBMITTED": "Stage 2 submitted",
       "NOT_STARTED": "Not started",
       "STAFF": "Staff",
@@ -961,9 +961,9 @@
     "RISK_BAND_MODERATE": "Moderate risk",
     "RISK_BAND_ELEVATED": "Elevated risk",
     "RISK_BAND_HIGH": "High risk",
-    "ACCR_STATUS_PENDING": "Pending pre-screening",
-    "ACCR_STATUS_PASSED": "Passed pre-screening",
-    "ACCR_STATUS_FAILED": "Failed pre-screening",
+    "ACCR_STATUS_PENDING": "Pending pre-accreditation",
+    "ACCR_STATUS_PASSED": "Pre-accreditation passed",
+    "ACCR_STATUS_FAILED": "Failed pre-accreditation",
     "ACCR_STATUS_IN_REVIEW": "In review",
     "ACCR_STATUS_ACCREDITATED": "Accredited",
     "ACCR_STATUS_NOT_ACCREDITED": "Not accredited",
@@ -987,7 +987,7 @@
     "DELETE_CONFIRM_MESSAGE": "Are you sure you want to delete",
     "DELETE_WARNING": "This action cannot be undone. All selected data will be permanently removed.",
     "DELETE_FILES": "Delete all files (documents uploaded to R2 storage)",
-    "DELETE_ACCREDITATION": "Delete accreditation data (pre-screening results, readiness applications)",
+    "DELETE_ACCREDITATION": "Delete accreditation data (pre-accreditation results, readiness applications)",
     "DELETE_READINESS": "Delete readiness drafts and submissions",
     "CANCEL": "Cancel",
     "DELETING": "Deleting..."

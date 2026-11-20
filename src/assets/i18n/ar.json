@@ -606,7 +606,7 @@
       "EMPTY": "لم تُسجل أنواع مؤسسات بعد."
     },
     "SCREENING": {
-      "TITLE": "الفحص الأولي",
+      "TITLE": "ما قبل الاعتماد",
       "SUB": "حالة طلبات الاعتماد"
     },
     "LEADS": {
@@ -629,7 +629,7 @@
       "REVIEW": "مراجعة الاستفسارات →",
       "EMPTY": "لم يُرسل أي شيء بعد.",
       "SUB_ACCREDITATION": "طلب الاعتماد",
-      "SUB_PRESCREENING": "الفحص الأولي",
+      "SUB_PRESCREENING": "ما قبل الاعتماد",
       "SUB_READINESS": "طلب الجاهزية",
       "SUB_ENQUIRY": "استفسار",
       "SUB_PROFILE": "تقييم الملف المؤسسي",
@@ -662,7 +662,7 @@
     "FUNNEL": {
       "ENQUIRIES": "الاستفسارات",
       "ACCREDITATION": "الاعتماد",
-      "PASSED": "اجتازوا الفحص الأولي",
+      "PASSED": "اجتازوا ما قبل الاعتماد",
       "STAGE2": "طلبات المرحلة 2",
       "PROFILE": "تقييمات الملف المؤسسي"
     }
@@ -671,7 +671,7 @@
     "WORKSPACE": "مساحة العمل",
     "DASHBOARD": "لوحة المعلومات",
     "PRICING": "الخطط والأسعار",
-    "PRESCREENING": "الفحص الأولي",
+    "PRESCREENING": "ما قبل الاعتماد",
     "ACCREDITATION": "الاعتماد",
     "READINESS": "طلب الجاهزية",
     "MY_FORMS": "نماذجي",
@@ -681,8 +681,8 @@
     "USERS": "المستخدمون",
     "SETTINGS": "الإعدادات",
     "USER_MANAGEMENT": "إدارة المستخدمين",
-    "UNLOCK_ACCREDITATION": "اجتز الفحص الأولي لفتح الاعتماد (الحالي: {{status}})",
-    "PRESCREENING_STATUS": "الفحص الأولي: {{status}}",
+    "UNLOCK_ACCREDITATION": "اجتز ما قبل الاعتماد لفتح الاعتماد (الحالي: {{status}})",
+    "PRESCREENING_STATUS": "ما قبل الاعتماد: {{status}}",
     "SUBMISSION": "طلب",
     "MANAGE_ACCOUNTS": "إدارة الحسابات والأدوار",
     "SEND_EMAIL": "إرسال بريد إلكتروني",
@@ -764,12 +764,12 @@
           "DESC": "الهوية القانونية وجهات الاتصال مسجلة."
         },
         "PRESCREENING": {
-          "TITLE": "تم إرسال الفحص الأولي",
+          "TITLE": "تم إرسال ما قبل الاعتماد",
           "DESC": "إجابات الأهلية والقدرات للمرحلة 1."
         },
         "REVIEW": {
-          "TITLE": "مراجعة الفحص الأولي",
-          "DESC": "قرار Avera بشأن الفحص الأولي."
+          "TITLE": "مراجعة ما قبل الاعتماد",
+          "DESC": "قرار Avera بشأن ما قبل الاعتماد."
         },
         "ACCREDITATION": {
           "TITLE": "تم إرسال الاعتماد",
@@ -806,23 +806,23 @@
         "CTA": "إكمال الملف"
       },
       "COMPLETE_PRESCREENING": {
-        "TITLE": "ابدأ الفحص الأولي",
+        "TITLE": "ابدأ ما قبل الاعتماد",
         "DESC": "أرسل المرحلة 1 لبدء مسار الاعتماد.",
-        "CTA": "فتح الفحص الأولي"
+        "CTA": "فتح ما قبل الاعتماد"
       },
       "AWAITING_PRESCREENING": {
-        "TITLE": "الفحص الأولي قيد المراجعة",
+        "TITLE": "ما قبل الاعتماد قيد المراجعة",
         "DESC": "طلب المرحلة 1 لدى فريق Avera.",
         "CTA": "عرض الطلب"
       },
       "REVISE_PRESCREENING": {
-        "TITLE": "راجع الفحص الأولي",
+        "TITLE": "راجع ما قبل الاعتماد",
         "DESC": "اطلع على الملاحظات وأعد إرسال المرحلة 1.",
-        "CTA": "فتح الفحص الأولي"
+        "CTA": "فتح ما قبل الاعتماد"
       },
       "START_ACCREDITATION": {
         "TITLE": "ابدأ اعتماد المرحلة 2",
-        "DESC": "تم اجتياز الفحص الأولي. أكمل معايير الاعتماد.",
+        "DESC": "تم اجتياز ما قبل الاعتماد. أكمل معايير الاعتماد.",
         "CTA": "فتح الاعتماد"
       },
       "UPLOAD_DOCUMENTS": {
@@ -848,16 +848,16 @@
       "SUB": "المعالم المسجلة لمؤسستك.",
       "EMPTY": "لا يوجد نشاط مسجل بعد.",
       "PROFILE": "تم إنشاء ملف المؤسسة",
-      "STAGE1": "تم إرسال الفحص الأولي",
-      "PRESCREENING_PASSED": "تم اجتياز الفحص الأولي",
-      "PRESCREENING_FAILED": "الفحص الأولي يحتاج إلى مراجعة",
+      "STAGE1": "تم إرسال ما قبل الاعتماد",
+      "PRESCREENING_PASSED": "تم اجتياز ما قبل الاعتماد",
+      "PRESCREENING_FAILED": "ما قبل الاعتماد يحتاج إلى مراجعة",
       "STAGE2": "تم إرسال الاعتماد",
       "READINESS_DRAFT": "تم حفظ مسودة الجاهزية",
       "READINESS": "تم إرسال الجاهزية"
     },
     "REVIEW": {
       "TITLE": "ملاحظات المراجعة",
-      "SUB": "ملاحظات أرسلها فريق Avera حول أقسام الفحص الأولي.",
+      "SUB": "ملاحظات أرسلها فريق Avera حول أقسام ما قبل الاعتماد.",
       "SENT": "أُرسل في {{date}}"
     },
     "SNAPSHOT": {
@@ -878,12 +878,12 @@
       "NO_READINESS_HINT": "أنشئ طلب جاهزية لعرض الميزانية والأدلة والإطار المنطقي هنا.",
       "START_READINESS": "ابدأ الجاهزية",
       "ACCREDITATION_TITLE": "لمحة عن الاعتماد",
-      "ACCREDITATION_SUB": "حالة الفحص الأولي وتغطية أدلة المرحلة 2.",
+      "ACCREDITATION_SUB": "حالة ما قبل الاعتماد وتغطية أدلة المرحلة 2.",
       "QUESTIONS": "الأسئلة المجابة",
       "QUESTIONS_VALUE": "{{answered}} من {{total}}",
       "SECTIONS": "الأقسام المكتملة",
       "SECTIONS_VALUE": "{{complete}} من {{total}}",
-      "PRESCREENING": "الفحص الأولي",
+      "PRESCREENING": "ما قبل الاعتماد",
       "STAGE2_SUBMITTED": "تم إرسال المرحلة 2",
       "NOT_STARTED": "لم يبدأ",
       "STAFF": "الموظفون",
@@ -957,9 +957,9 @@
     "RISK_BAND_MODERATE": "مخاطر متوسطة",
     "RISK_BAND_ELEVATED": "مخاطر مرتفعة",
     "RISK_BAND_HIGH": "مخاطر عالية",
-    "ACCR_STATUS_PENDING": "الفحص الأولي قيد الانتظار",
-    "ACCR_STATUS_PASSED": "تم اجتياز الفحص الأولي",
-    "ACCR_STATUS_FAILED": "فشل الفحص الأولي",
+    "ACCR_STATUS_PENDING": "ما قبل الاعتماد قيد الانتظار",
+    "ACCR_STATUS_PASSED": "تم اجتياز ما قبل الاعتماد",
+    "ACCR_STATUS_FAILED": "فشل ما قبل الاعتماد",
     "ACCR_STATUS_IN_REVIEW": "قيد المراجعة",
     "ACCR_STATUS_ACCREDITATED": "معتمدة",
     "ACCR_STATUS_NOT_ACCREDITED": "غير معتمدة",
@@ -983,7 +983,7 @@
     "DELETE_CONFIRM_MESSAGE": "هل أنت متأكد من أنك تريد حذف",
     "DELETE_WARNING": "هذا الإجراء لا يمكن التراجع عنه. سيتم حذف جميع البيانات المحددة نهائيًا.",
     "DELETE_FILES": "حذف جميع الملفات (الوثائق التي تم رفعها إلى سحابة R2)",
-    "DELETE_ACCREDITATION": "حذف بيانات الاعتماد (نتائج الفحص الأولي، طلبات الامتحان readiness)",
+    "DELETE_ACCREDITATION": "حذف بيانات الاعتماد (نتائج ما قبل الاعتماد، طلبات الامتحان readiness)",
     "DELETE_READINESS": "حذف المسودات والإرسالات readiness",
     "CANCEL": "إلغاء",
     "DELETING": "جاري الحذف..."
