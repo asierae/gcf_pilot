@@ -323,12 +323,13 @@ export class ApiService {
   async markApplicantReviewSent(
     id: string,
     recipient: string,
+    notes: Record<string, string>,
   ): Promise<void> {
     await this.request<unknown>(
       `/api/applicants/${encodeURIComponent(id)}/review-sent`,
       {
         method: "PATCH",
-        body: JSON.stringify({ recipient }),
+        body: JSON.stringify({ recipient, notes }),
       },
       true,
     );

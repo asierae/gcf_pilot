@@ -855,6 +855,11 @@
       "READINESS_DRAFT": "Borrador de preparación guardado",
       "READINESS": "Preparación enviada"
     },
+    "REVIEW": {
+      "TITLE": "Comentarios de revisión",
+      "SUB": "Notas que el equipo de Avera envió sobre las secciones de tu preevaluación.",
+      "SENT": "Enviado el {{date}}"
+    },
     "SNAPSHOT": {
       "READINESS_TITLE": "Resumen de preparación",
       "READINESS_SUB": "Presupuesto y evidencia de tu solicitud de preparación.",
@@ -969,6 +974,10 @@
     "TAB_FILES": "Archivos",
     "FILES_LOADING": "Cargando archivos...",
     "FILES_EMPTY": "No hay archivos subidos para esta organización.",
+    "FILES_GROUP_READINESS": "Readiness",
+    "FILES_GROUP_PRESCREENING": "Pre-acreditación",
+    "FILES_GROUP_ACCREDITATION": "Acreditación",
+    "FILES_GROUP_OTHER": "Otros documentos",
     "DOWNLOAD": "Descargar",
     "DELETE_CONFIRM_TITLE": "Eliminar organización",
     "DELETE_CONFIRM_MESSAGE": "¿Estás seguro de que quieres eliminar",

@@ -204,6 +204,21 @@
 .ao-files-tab {
   max-width: 900px;
 }
+.ao-file-group {
+  margin-bottom: 1.75rem;
+}
+
+.ao-file-group-title {
+  margin: 0 0 0.85rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid rgba(212, 169, 78, 0.35);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #d4a94e;
+}
+
 .ao-file-section {
   background: rgba(255,255,255,0.03);
   border: 1px solid rgba(212,169,78,0.2);

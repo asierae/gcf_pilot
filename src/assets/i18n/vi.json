@@ -855,6 +855,11 @@
       "READINESS_DRAFT": "Đã lưu nháp sẵn sàng",
       "READINESS": "Đã gửi hồ sơ sẵn sàng"
     },
+    "REVIEW": {
+      "TITLE": "Phản hồi đánh giá",
+      "SUB": "Ghi chú do nhóm Avera gửi về các phần sơ tuyển của bạn.",
+      "SENT": "Đã gửi {{date}}"
+    },
     "SNAPSHOT": {
       "READINESS_TITLE": "Tổng quan sẵn sàng",
       "READINESS_SUB": "Ngân sách và bằng chứng cho hồ sơ sẵn sàng.",
@@ -969,6 +974,10 @@
     "TAB_FILES": "Tệp tin",
     "FILES_LOADING": "Đang tải tệp tin...",
     "FILES_EMPTY": "Không có tệp tin nào đã được tải lên cho tổ chức này.",
+    "FILES_GROUP_READINESS": "Readiness",
+    "FILES_GROUP_PRESCREENING": "Tiền công nhận",
+    "FILES_GROUP_ACCREDITATION": "Công nhận",
+    "FILES_GROUP_OTHER": "Tài liệu khác",
     "DOWNLOAD": "Tải xuống",
     "DELETE_CONFIRM_TITLE": "Xóa tổ chức",
     "DELETE_CONFIRM_MESSAGE": "Bạn có chắc chắn muốn xóa",

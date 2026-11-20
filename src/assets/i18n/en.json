@@ -856,6 +856,11 @@
       "READINESS_DRAFT": "Readiness draft saved",
       "READINESS": "Readiness submitted"
     },
+    "REVIEW": {
+      "TITLE": "Review feedback",
+      "SUB": "Notes the Avera team sent on your pre-screening sections.",
+      "SENT": "Sent {{date}}"
+    },
     "SNAPSHOT": {
       "READINESS_TITLE": "Readiness snapshot",
       "READINESS_SUB": "Budget and evidence for your readiness application.",
@@ -970,6 +975,10 @@
     "TAB_FILES": "Files",
     "FILES_LOADING": "Loading files...",
     "FILES_EMPTY": "No files uploaded for this organization.",
+    "FILES_GROUP_READINESS": "Readiness",
+    "FILES_GROUP_PRESCREENING": "Pre-accreditation",
+    "FILES_GROUP_ACCREDITATION": "Accreditation",
+    "FILES_GROUP_OTHER": "Other documents",
     "DOWNLOAD": "Download",
     "DELETE_CONFIRM_TITLE": "Delete organization",
     "DELETE_CONFIRM_MESSAGE": "Are you sure you want to delete",

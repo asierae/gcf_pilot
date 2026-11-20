@@ -252,8 +252,12 @@ export class StorageService {
     return applicant?.admin.lastReviewSent?.sentAt ?? null;
   }
 
-  async markReviewSent(submissionId: string, recipient: string): Promise<void> {
-    await this.apiService.markApplicantReviewSent(submissionId, recipient);
+  async markReviewSent(
+    submissionId: string,
+    recipient: string,
+    notes: Record<string, string>,
+  ): Promise<void> {
+    await this.apiService.markApplicantReviewSent(submissionId, recipient, notes);
   }
 
   async getApplicantRecord(id: string): Promise<ApplicantRecord | null> {

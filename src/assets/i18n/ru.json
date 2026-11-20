@@ -855,6 +855,11 @@
       "READINESS_DRAFT": "Черновик готовности сохранён",
       "READINESS": "Готовность отправлена"
     },
+    "REVIEW": {
+      "TITLE": "Замечания по проверке",
+      "SUB": "Комментарии команды Avera по разделам предварительной оценки.",
+      "SENT": "Отправлено {{date}}"
+    },
     "SNAPSHOT": {
       "READINESS_TITLE": "Сводка готовности",
       "READINESS_SUB": "Бюджет и доказательства по заявке на готовность.",
@@ -969,6 +974,10 @@
     "TAB_FILES": "Файлы",
     "FILES_LOADING": "Загрузка файлов...",
     "FILES_EMPTY": "Нет файлов, загруженных для этой организации.",
+    "FILES_GROUP_READINESS": "Readiness",
+    "FILES_GROUP_PRESCREENING": "Предварительная аккредитация",
+    "FILES_GROUP_ACCREDITATION": "Аккредитация",
+    "FILES_GROUP_OTHER": "Прочие документы",
     "DOWNLOAD": "Скачать",
     "DELETE_CONFIRM_TITLE": "Удалить организацию",
     "DELETE_CONFIRM_MESSAGE": "Вы уверены, что хотите удалить",

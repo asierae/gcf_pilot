@@ -7,7 +7,11 @@ import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { ApiService } from "../../../services/api.service";
 import { NotificationService } from "../../../services/notification.service";
 import { BreadcrumbService } from "../../../services/breadcrumb.service";
-import { OrganizationRecord, OrganizationFilesBySection } from "../../../models/organization.model";
+import {
+  OrganizationFileGroup,
+  OrganizationFilesBySection,
+  OrganizationRecord,
+} from "../../../models/organization.model";
 import { map } from "rxjs/operators";
 
 interface OrgForm {
@@ -170,6 +174,40 @@ export class AdminOrganizationEditComponent implements OnInit {
     } finally {
       this.filesLoading = false;
     }
+  }
+
+  /** Files grouped by origin (readiness → pre-accreditation → accreditation). */
+  get fileGroups(): {
+    group: OrganizationFileGroup;
+    labelKey: string;
+    sections: OrganizationFilesBySection[];
+  }[] {
+    const order: OrganizationFileGroup[] = [
+      "readiness",
+      "prescreening",
+      "accreditation",
+      "other",
+    ];
+    const labelKeys: Record<OrganizationFileGroup, string> = {
+      readiness: "ADMIN_ORGANIZATION_EDIT.FILES_GROUP_READINESS",
+      prescreening: "ADMIN_ORGANIZATION_EDIT.FILES_GROUP_PRESCREENING",
+      accreditation: "ADMIN_ORGANIZATION_EDIT.FILES_GROUP_ACCREDITATION",
+      other: "ADMIN_ORGANIZATION_EDIT.FILES_GROUP_OTHER",
+    };
+
+    return order
+      .map((group) => ({
+        group,
+        labelKey: labelKeys[group],
+        sections: this.orgFiles
+          .filter((section) => (section.group ?? "other") === group)
+          .sort(
+            (a, b) =>
+              (a.order ?? 900) - (b.order ?? 900) ||
+              a.label.localeCompare(b.label),
+          ),
+      }))
+      .filter((entry) => entry.sections.length > 0);
   }
 
   emptyForm(): OrgForm {

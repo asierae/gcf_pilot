@@ -855,6 +855,11 @@
       "READINESS_DRAFT": "تم حفظ مسودة الجاهزية",
       "READINESS": "تم إرسال الجاهزية"
     },
+    "REVIEW": {
+      "TITLE": "ملاحظات المراجعة",
+      "SUB": "ملاحظات أرسلها فريق Avera حول أقسام الفحص الأولي.",
+      "SENT": "أُرسل في {{date}}"
+    },
     "SNAPSHOT": {
       "READINESS_TITLE": "لمحة عن الجاهزية",
       "READINESS_SUB": "الميزانية والأدلة لطلب الجاهزية.",
@@ -969,6 +974,10 @@
     "TAB_FILES": "الملفات",
     "FILES_LOADING": "جاري تحميل الملفات...",
     "FILES_EMPTY": "لا يوجد ملفات تم رفعها لهذه المنظمة.",
+    "FILES_GROUP_READINESS": "Readiness",
+    "FILES_GROUP_PRESCREENING": "ما قبل الاعتماد",
+    "FILES_GROUP_ACCREDITATION": "الاعتماد",
+    "FILES_GROUP_OTHER": "مستندات أخرى",
     "DOWNLOAD": "تنزيل",
     "DELETE_CONFIRM_TITLE": "حذف المنظمة",
     "DELETE_CONFIRM_MESSAGE": "هل أنت متأكد من أنك تريد حذف",

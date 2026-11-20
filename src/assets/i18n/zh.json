@@ -855,6 +855,11 @@
       "READINESS_DRAFT": "准备度草稿已保存",
       "READINESS": "准备度已提交"
     },
+    "REVIEW": {
+      "TITLE": "审核反馈",
+      "SUB": "Avera 团队就您的预审部分发送的备注。",
+      "SENT": "发送于 {{date}}"
+    },
     "SNAPSHOT": {
       "READINESS_TITLE": "准备度概览",
       "READINESS_SUB": "准备度申请的预算与证据。",
@@ -969,6 +974,10 @@
     "TAB_FILES": "文件",
     "FILES_LOADING": "正在加载文件...",
     "FILES_EMPTY": "没有为此组织上传文件。",
+    "FILES_GROUP_READINESS": "Readiness",
+    "FILES_GROUP_PRESCREENING": "预认证",
+    "FILES_GROUP_ACCREDITATION": "认证",
+    "FILES_GROUP_OTHER": "其他文件",
     "DOWNLOAD": "下载",
     "DELETE_CONFIRM_TITLE": "删除组织",
     "DELETE_CONFIRM_MESSAGE": "确定要删除",

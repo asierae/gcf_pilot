@@ -459,6 +459,37 @@
         }
       </article>
 
+      <!-- Review feedback from the Avera team -->
+      @if (data.review; as review) {
+        @if (review.notes.length) {
+          <article class="panel span-12 review-panel">
+            <div class="panel-head">
+              <div class="panel-title">
+                <span class="panel-icon" aria-hidden="true">📝</span>
+                <div>
+                  <h2>{{ "APPLICANT_DASHBOARD.REVIEW.TITLE" | translate }}</h2>
+                  <p>{{ "APPLICANT_DASHBOARD.REVIEW.SUB" | translate }}</p>
+                </div>
+              </div>
+              @if (review.sentAt) {
+                <span class="panel-pill">
+                  {{ "APPLICANT_DASHBOARD.REVIEW.SENT" | translate: { date: formatDate(review.sentAt) } }}
+                </span>
+              }
+            </div>
+
+            <ul class="review-notes">
+              @for (note of review.notes; track note.sectionId) {
+                <li class="review-note">
+                  <h3>{{ note.sectionLabel }}</h3>
+                  <p>{{ note.note }}</p>
+                </li>
+              }
+            </ul>
+          </article>
+        }
+      }
+
       <!-- Recent activity -->
       <article class="panel span-12 activity-panel">
         <div class="panel-head">

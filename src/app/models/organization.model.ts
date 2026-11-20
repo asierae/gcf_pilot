@@ -57,9 +57,17 @@ export interface OrganizationFile {
   uploadedAt: string;
 }
 
+export type OrganizationFileGroup =
+  | "readiness"
+  | "prescreening"
+  | "accreditation"
+  | "other";
+
 export interface OrganizationFilesBySection {
   section: string;
   label: string;
+  group: OrganizationFileGroup;
+  order: number;
   files: OrganizationFile[];
 }
 

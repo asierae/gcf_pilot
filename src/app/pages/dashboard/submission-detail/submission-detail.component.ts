@@ -357,7 +357,11 @@ export class SubmissionDetailComponent implements OnInit {
         subject,
         body,
       });
-      await this.storageService.markReviewSent(this.submission.id, recipient);
+      await this.storageService.markReviewSent(
+        this.submission.id,
+        recipient,
+        this.notesPayload(),
+      );
       this.lastSentAt = new Date().toISOString();
 
       if (mode === "automatic") {
@@ -402,9 +406,18 @@ export class SubmissionDetailComponent implements OnInit {
   }
 
   private visibleSectionsWithNotes(): DisplaySection[] {
-    return this.sections.filter((s) =>
-      this.sectionHasValues(this.sections.indexOf(s)),
+    return this.sections.filter(
+      (section) => (this.sectionNotes[section.id] ?? "").trim().length > 0,
     );
+  }
+
+  /** Non-empty notes keyed by section, stored with the send event. */
+  private notesPayload(): Record<string, string> {
+    const notes: Record<string, string> = {};
+    for (const section of this.visibleSectionsWithNotes()) {
+      notes[section.id] = (this.sectionNotes[section.id] ?? "").trim();
+    }
+    return notes;
   }
 
   fileUrl(attachment: StoredAttachment | string): string {

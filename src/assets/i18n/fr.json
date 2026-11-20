@@ -855,6 +855,11 @@
       "READINESS_DRAFT": "Brouillon de préparation enregistré",
       "READINESS": "Préparation soumise"
     },
+    "REVIEW": {
+      "TITLE": "Retours de révision",
+      "SUB": "Notes envoyées par l'équipe Avera sur vos sections de pré-évaluation.",
+      "SENT": "Envoyé le {{date}}"
+    },
     "SNAPSHOT": {
       "READINESS_TITLE": "Aperçu de la préparation",
       "READINESS_SUB": "Budget et preuves de votre demande de préparation.",
@@ -969,6 +974,10 @@
     "TAB_FILES": "Fichiers",
     "FILES_LOADING": "Chargement des fichiers...",
     "FILES_EMPTY": "Aucun fichier téléchargé pour cette organisation.",
+    "FILES_GROUP_READINESS": "Readiness",
+    "FILES_GROUP_PRESCREENING": "Pré-accreditation",
+    "FILES_GROUP_ACCREDITATION": "Accréditation",
+    "FILES_GROUP_OTHER": "Autres documents",
     "DOWNLOAD": "Télécharger",
     "DELETE_CONFIRM_TITLE": "Supprimer l'organisation",
     "DELETE_CONFIRM_MESSAGE": "Êtes-vous sûr de vouloir supprimer",

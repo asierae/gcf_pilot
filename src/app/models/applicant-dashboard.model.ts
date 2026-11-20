@@ -69,10 +69,22 @@ export interface ApplicantAccreditationSnapshot {
   draftAt: string | null;
 }
 
+export interface ApplicantReviewNote {
+  sectionId: string;
+  sectionLabel: string;
+  note: string;
+}
+
+export interface ApplicantReview {
+  sentAt: string | null;
+  notes: ApplicantReviewNote[];
+}
+
 export interface ApplicantDashboard {
   organization: OrganizationRecord | null;
   generatedAt: string;
   preScreeningStatus: SubmissionStatus;
+  review?: ApplicantReview;
   timeline: {
     accreditation: ApplicantTimelineStep[];
     readiness: ApplicantTimelineStep[];

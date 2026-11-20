@@ -10,6 +10,8 @@ export interface StagePayload {
 export interface ReviewSentLog {
   sentAt: string;
   recipient: string;
+  /** Snapshot of the notes at send time, shown on the applicant dashboard. */
+  notes?: Record<string, string>;
 }
 
 export interface ApplicantAdmin {

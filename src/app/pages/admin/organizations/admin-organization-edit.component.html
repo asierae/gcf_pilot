@@ -229,37 +229,42 @@
             <p>{{ "ADMIN_ORGANIZATION_EDIT.FILES_EMPTY" | translate }}</p>
           </div>
         } @else {
-          @for (section of orgFiles; track section.section) {
-            <div class="ao-file-section">
-              <h4 class="ao-file-section-title">
-                {{ section.label }}
-                <span class="file-count">({{ section.files.length }})</span>
-              </h4>
-              <div class="ao-file-list">
-                @for (file of section.files; track file.publicId) {
-                  <div class="ao-file-item">
-                    <div class="ao-file-info">
-                      <svg class="file-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                        <polyline points="14 2 14 8 20 8" />
-                      </svg>
-                      <div class="file-details">
-                        <span class="file-name">{{ file.name }}</span>
-                        <span class="file-meta">{{ formatFileSize(file.size) }} • {{ formatDate(file.uploadedAt) }}</span>
+          @for (group of fileGroups; track group.group) {
+            <div class="ao-file-group">
+              <h3 class="ao-file-group-title">{{ group.labelKey | translate }}</h3>
+              @for (section of group.sections; track section.section) {
+                <div class="ao-file-section">
+                  <h4 class="ao-file-section-title">
+                    {{ section.label }}
+                    <span class="file-count">({{ section.files.length }})</span>
+                  </h4>
+                  <div class="ao-file-list">
+                    @for (file of section.files; track file.publicId) {
+                      <div class="ao-file-item">
+                        <div class="ao-file-info">
+                          <svg class="file-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                            <polyline points="14 2 14 8 20 8" />
+                          </svg>
+                          <div class="file-details">
+                            <span class="file-name">{{ file.name }}</span>
+                            <span class="file-meta">{{ formatFileSize(file.size) }} • {{ formatDate(file.uploadedAt) }}</span>
+                          </div>
+                        </div>
+                        <div class="ao-file-actions">
+                          <a [href]="file.url" target="_blank" class="btn-file-download" title="{{ 'ADMIN_ORGANIZATION_EDIT.DOWNLOAD' | translate }}">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+                              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                              <polyline points="7 10 12 15 17 10" />
+                              <line x1="12" y1="15" x2="12" y2="3" />
+                            </svg>
+                          </a>
+                        </div>
                       </div>
-                    </div>
-                    <div class="ao-file-actions">
-                      <a [href]="file.url" target="_blank" class="btn-file-download" title="{{ 'ADMIN_ORGANIZATION_EDIT.DOWNLOAD' | translate }}">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
-                          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                          <polyline points="7 10 12 15 17 10" />
-                          <line x1="12" y1="15" x2="12" y2="3" />
-                        </svg>
-                      </a>
-                    </div>
+                    }
                   </div>
-                }
-              </div>
+                </div>
+              }
             </div>
           }
         }

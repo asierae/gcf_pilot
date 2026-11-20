@@ -126,6 +126,8 @@ interface StagePayload {
 interface ReviewSentLog {
   sentAt: string;
   recipient: string;
+  /** Snapshot of the notes at send time, so later admin edits stay private. */
+  notes?: Record<string, string>;
 }
 
 interface ApplicantAdmin {
@@ -1502,6 +1504,16 @@ function dashboardProgress(
   };
 }
 
+/** Stage 1 review-note sections, in questionnaire order. */
+const REVIEW_SECTION_LABELS: Record<string, string> = {
+  'access-modality': 'Access Modality',
+  'general-information': 'General Information',
+  'legal-status': 'Legal Status & Eligibility',
+  'additional-information': 'Additional Information',
+  'fast-track': 'Fast-Track & Engagement',
+};
+const REVIEW_SECTION_ORDER = Object.keys(REVIEW_SECTION_LABELS);
+
 async function organizationDashboard(env: Env, orgId: string): Promise<Response> {
   // Applicant accounts may reference an organization id saved before the
   // strict id format existed (e.g. an admin typing "avera"). This endpoint is
@@ -1877,10 +1889,34 @@ async function organizationDashboard(env: Env, orgId: string): Promise<Response>
     .map(([key, amount]) => ({ key, amount }))
     .sort((a, b) => b.amount - a.amount);
 
+  // Only what was actually sent is visible to the applicant. Older records
+  // without a snapshot fall back to the current notes.
+  const reviewSource = admin.lastReviewSent
+    ? (admin.lastReviewSent.notes ?? admin.reviewNotes)
+    : {};
+  const reviewNotes = Object.entries(reviewSource)
+    .filter(([, note]) => typeof note === 'string' && note.trim())
+    .map(([sectionId, note]) => ({
+      sectionId,
+      sectionLabel: REVIEW_SECTION_LABELS[sectionId] ?? sectionId,
+      note: (note as string).trim(),
+    }))
+    .sort((a, b) => {
+      const position = (id: string): number => {
+        const index = REVIEW_SECTION_ORDER.indexOf(id);
+        return index === -1 ? REVIEW_SECTION_ORDER.length : index;
+      };
+      return position(a.sectionId) - position(b.sectionId);
+    });
+
   return json({
     organization,
     generatedAt: new Date().toISOString(),
     preScreeningStatus,
+    review: {
+      sentAt: admin.lastReviewSent?.sentAt ?? null,
+      notes: reviewNotes,
+    },
     timeline: {
       accreditation: accreditationTimeline,
       readiness: readinessTimeline,
@@ -3614,8 +3650,9 @@ async function markApplicantReviewSent(
   env: Env,
   id: string,
 ): Promise<Response> {
-  const body = await readJson<{ recipient?: unknown }>(request);
+  const body = await readJson<{ recipient?: unknown; notes?: unknown }>(request);
   const recipient = asString(body.recipient, 'recipient');
+  const notes = readNoteMap(body.notes);
   const now = new Date().toISOString();
 
   return patchApplicant(env, id, (applicant) => ({
@@ -3623,9 +3660,22 @@ async function markApplicantReviewSent(
     updatedAt: now,
     admin: {
       ...applicant.admin,
-      lastReviewSent: { sentAt: now, recipient },
+      lastReviewSent: { sentAt: now, recipient, notes },
     },
   }));
+}
+
+/** Keeps only non-empty string notes; anything else is ignored. */
+function readNoteMap(value: unknown): Record<string, string> {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return {};
+
+  const notes: Record<string, string> = {};
+  for (const [sectionId, note] of Object.entries(value as Record<string, unknown>)) {
+    if (typeof note === 'string' && note.trim()) {
+      notes[sectionId] = note.trim();
+    }
+  }
+  return notes;
 }
 
 /**
@@ -4628,57 +4678,120 @@ async function serveFile(env: Env, key: string, method: string): Promise<Respons
   return new Response(method === 'HEAD' ? null : object.body, { headers });
 }
 
+/** Where a document was uploaded from, used to order the admin Files tab. */
+type DocumentGroup = 'readiness' | 'prescreening' | 'accreditation' | 'other';
+
+interface DocumentSectionMeta {
+  group: DocumentGroup;
+  order: number;
+  label: string;
+}
+
+const DOCUMENT_GROUP_ORDER: Record<DocumentGroup, number> = {
+  readiness: 0,
+  prescreening: 1,
+  accreditation: 2,
+  other: 3,
+};
+
+/**
+ * R2 folder → human label and position. Folders come from the wizards:
+ * `readiness`, the Stage 1 form (`access`/`general`/`legal`/`fasttrack`) and
+ * the Stage 2 sections (`s4`…`s13`).
+ */
+const DOCUMENT_SECTIONS: Record<string, DocumentSectionMeta> = {
+  readiness: { group: 'readiness', order: 10, label: 'Readiness Documents' },
+  access: { group: 'prescreening', order: 10, label: 'Access Documents' },
+  general: { group: 'prescreening', order: 20, label: 'General Documents' },
+  legal: { group: 'prescreening', order: 30, label: 'Legal Supporting Documents' },
+  fasttrack: { group: 'prescreening', order: 40, label: 'Fast-track Accreditation' },
+  s4: { group: 'accreditation', order: 40, label: 'Section 4: Contribution to GCF' },
+  s5: { group: 'accreditation', order: 50, label: 'Section 5: Corporate Governance' },
+  s6: { group: 'accreditation', order: 60, label: 'Section 6: Financial Management' },
+  s7: { group: 'accreditation', order: 70, label: 'Section 7: Procurement' },
+  s8: { group: 'accreditation', order: 80, label: 'Section 8: Integrity' },
+  s9: { group: 'accreditation', order: 90, label: 'Section 9: Project Design' },
+  s10: { group: 'accreditation', order: 100, label: 'Section 10: ESS Management' },
+  s11: { group: 'accreditation', order: 110, label: 'Section 11: Grievance Redress' },
+  s12: { group: 'accreditation', order: 120, label: 'Section 12: Indigenous People' },
+  s13: { group: 'accreditation', order: 130, label: 'Section 13: Gender' },
+};
+
+function documentSectionMeta(section: string): DocumentSectionMeta {
+  return (
+    DOCUMENT_SECTIONS[section] ?? { group: 'other', order: 900, label: section }
+  );
+}
+
+/** Upload keys are `<uuid>-<sanitised name>`; hide the identifier in the UI. */
+const FILE_NAME_UUID_PREFIX =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}-/i;
+
 /** List all files in an organization's folder in R2. */
 async function listOrganizationFiles(env: Env, orgId: string): Promise<Response> {
   const prefix = `organizations/${orgId}/`;
 
   const objects = await env.DOCUMENTS.list({ prefix, limit: 1000 });
 
-  // Group files by section (second path segment)
-  const sectionsMap = new Map<string, { section: string; label: string; files: any[] }>();
+  // Key layout is `<scope>/<orgId>/<section>/<file>`, so the remainder after
+  // the prefix is `<section>/<file>`.
+  const sectionsMap = new Map<
+    string,
+    {
+      section: string;
+      label: string;
+      group: DocumentGroup;
+      order: number;
+      files: any[];
+    }
+  >();
 
   for (const obj of objects.objects) {
     const key = obj.key;
     const parts = key.slice(prefix.length).split('/');
+    if (parts.length < 2) continue;
 
-    if (parts.length >= 2) {
-      const section = parts[1];
-      const fileName = parts.slice(2).join('/');
+    const section = parts[0];
+    const fileName = parts.slice(1).join('/');
+    if (!section || !fileName) continue;
 
-      if (!sectionsMap.has(section)) {
-        sectionsMap.set(section, {
-          section,
-          label: sectionLabels[section] ?? section,
-          files: []
-        });
-      }
-
-      sectionsMap.get(section)!.files.push({
-        url: `/api/files/${key}`,
-        publicId: key,
-        name: fileName,
-        resourceType: obj.httpMetadata?.contentType?.startsWith('image/') ? 'image' : 'raw',
-        size: obj.size ?? 0,
-        uploadedAt: obj.uploaded ? new Date(obj.uploaded).toISOString() : '',
+    if (!sectionsMap.has(section)) {
+      const meta = documentSectionMeta(section);
+      sectionsMap.set(section, {
+        section,
+        label: meta.label,
+        group: meta.group,
+        order: meta.order,
+        files: [],
       });
     }
+
+    sectionsMap.get(section)!.files.push({
+      url: `/api/files/${key}`,
+      publicId: key,
+      name: fileName.replace(FILE_NAME_UUID_PREFIX, ''),
+      resourceType: obj.httpMetadata?.contentType?.startsWith('image/') ? 'image' : 'raw',
+      size: obj.size ?? 0,
+      uploadedAt: obj.uploaded ? new Date(obj.uploaded).toISOString() : '',
+    });
   }
 
-  const sections = Array.from(sectionsMap.values()).sort((a, b) =>
-    a.label.localeCompare(b.label)
+  const sections = Array.from(sectionsMap.values()).sort(
+    (a, b) =>
+      DOCUMENT_GROUP_ORDER[a.group] - DOCUMENT_GROUP_ORDER[b.group] ||
+      a.order - b.order ||
+      a.label.localeCompare(b.label),
   );
+
+  // Newest uploads first inside each section.
+  for (const section of sections) {
+    section.files.sort((a, b) =>
+      a.uploadedAt === b.uploadedAt ? 0 : a.uploadedAt < b.uploadedAt ? 1 : -1,
+    );
+  }
 
   return json({ sections });
 }
-
-/** Section labels for organization files tabs. */
-const sectionLabels: Record<string, string> = {
-  access: 'Access Documents',
-  legal: 'Legal Supporting Documents',
-  fasttrack: 'Fast-track Accreditation',
-  general: 'Other Documents',
-  readiness: 'Readiness Documents',
-};
 
 /** Delete all files belonging to an organization from R2. */
 async function deleteOrganizationFiles(env: Env, orgId: string): Promise<void> {
