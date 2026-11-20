@@ -28,8 +28,9 @@ Portal Avera/GCF: SPA Angular 18 + un Cloudflare Worker con D1/R2. Cubre leads, 
 | Auditoría Avera de riesgo/reputación: scores por factor publicables en el dashboard del solicitante y editable en el admin | `243fd8c` | `models/organization.model.ts`, `models/applicant-dashboard.model.ts`, `pages/admin/organizations/admin-organization-edit.*`, `pages/dashboard/applicant/*`, `worker/index.ts`, `worker/migrations/2026-11-20_organizations_audit_scores.sql`, `src/assets/i18n/*.json` |
 | PDF de riesgo/reputación con firma corporativa de Avera, descargable por admin y solicitante | `8fce205` | `worker/risk-report-pdf.ts`, `worker/index.ts`, `services/api.service.ts`, `pages/admin/organizations/*`, `pages/dashboard/applicant/*` |
 | Página "My organization" para applicants: ver y editar el perfil, con nombre/acrónimo/email de contacto bloqueados | `33455ba`, `0622f69` | `pages/my-organization/*`, `layout/layout.component.html`, `app.routes.ts`, `shared/components/breadcrumb/*`, `worker/index.ts` (`updateOrganizationProfile`), `src/assets/i18n/*.json` |
+| Stage 2 alineado con la guía oficial de GCF (2026-07): preguntas 8.3.4/8.4.1/9.2.2, beneficial ownership, result areas, AfDB, tabla 3.1.4 completa y enlaces a documentos oficiales | `a5e7988`, `0fe0828` | `shared/data/stage2-form.config.ts`, `shared/forms/stage1-form.builder.ts`, `shared/components/stage1-steps/*`, `pages/stage2/*` |
 
-Verificación de la última tarea: `tsc --noEmit`, `worker:typecheck` y `ng build` en verde. El campo Country de "My organization" usa `app-country-select` (`34dd3ed`) en lugar de un input de texto. Página "My organization" comprobada en navegador: enlace en la sidebar del applicant, breadcrumb "My organization", tres campos de identidad en `readonly` (nombre, acrónimo, email) y siete campos editables. El `PATCH /api/organizations/:id/profile` devuelve 400 si el body incluye `name`/`contactEmail`/cualquier campo admin o de auditoría, y 200 con los siete permitidos; tras guardar desde la UI, el GET confirma el cambio sin que se modifiquen nombre ni email. Comprobado en navegador: tabla de leads con 12 cabeceras/12 celdas alineadas (Organization tras la selección, sin Region, Priority antes de Comments) y enlaces en Website/Email; edición del admin con la sección de auditoría visible (se corrigió un error `NG01352` previo por `ngModel` sin `name` en el formulario); dashboard del solicitante con chip "Avera audited", notas de auditoría y botón de descarga. El `PATCH` de auditoría aplica los overrides (governance 90 / financial 80) y `risk.source` pasa a `avera-audit`. El endpoint `GET /api/organizations/:id/risk-report.pdf` devuelve 200, `application/pdf`, cabecera `%PDF-1.4`, xref con offsets válidos y 6 objetos; se previsualizó el PDF generado. Migraciones `2026-11-20_leads_priority.sql` y `2026-11-20_organizations_audit_scores.sql` aplicadas en local (por defecto y `gcf-verify`) y en D1 remota.
+Verificación de la última tarea: `tsc --noEmit`, `worker:typecheck` y `ng build` en verde. Se analizó el PDF oficial `gcf-accreditation-application-form-guidance.pdf` (74 páginas, 25 enlaces únicos) y su anexo `screening-requirements-and-supplementary-tables.pdf`: se extrajeron todos los ítems 1.1–13.4 y se contrastaron con el wizard. Comprobado en navegador que Stage 2 muestra 8.3.4, 8.4.1 y 9.2.2, los 4 enlaces oficiales de Integrity, y que los campos nuevos de las secciones 1–3 solo aparecen en Stage 2 (`applicationMode`), no en el pre-screening. El campo Country de "My organization" usa `app-country-select` (`34dd3ed`) en lugar de un input de texto. Página "My organization" comprobada en navegador: enlace en la sidebar del applicant, breadcrumb "My organization", tres campos de identidad en `readonly` (nombre, acrónimo, email) y siete campos editables. El `PATCH /api/organizations/:id/profile` devuelve 400 si el body incluye `name`/`contactEmail`/cualquier campo admin o de auditoría, y 200 con los siete permitidos; tras guardar desde la UI, el GET confirma el cambio sin que se modifiquen nombre ni email. Comprobado en navegador: tabla de leads con 12 cabeceras/12 celdas alineadas (Organization tras la selección, sin Region, Priority antes de Comments) y enlaces en Website/Email; edición del admin con la sección de auditoría visible (se corrigió un error `NG01352` previo por `ngModel` sin `name` en el formulario); dashboard del solicitante con chip "Avera audited", notas de auditoría y botón de descarga. El `PATCH` de auditoría aplica los overrides (governance 90 / financial 80) y `risk.source` pasa a `avera-audit`. El endpoint `GET /api/organizations/:id/risk-report.pdf` devuelve 200, `application/pdf`, cabecera `%PDF-1.4`, xref con offsets válidos y 6 objetos; se previsualizó el PDF generado. Migraciones `2026-11-20_leads_priority.sql` y `2026-11-20_organizations_audit_scores.sql` aplicadas en local (por defecto y `gcf-verify`) y en D1 remota.
 
 ## En desarrollo
 
@@ -64,24 +65,25 @@ Ninguna tarea activa. La página "My organization" del solicitante está cerrada
 
 ## Últimos cambios realizados
 
-1. `34dd3ed` — Country de "My organization" pasa de input de texto al dropdown de países compartido.
-2. `33455ba`, `0622f69` — página "My organization" del applicant, con endpoint propio que rechaza servidor-side cualquier campo ajeno a los siete editables del perfil.
-3. `fdc91fb` — estilo de los botones de descarga del PDF y arreglo del desbordamiento de texto en el PDF.
-4. `8fce205` — PDF de riesgo/reputación firmado por Avera (Worker + `worker/risk-report-pdf.ts`), botones en admin y dashboard del solicitante, y corrección del `ngModel` sin `name` en el formulario del admin.
-5. `243fd8c` — scores de auditoría Avera por factor con override opcional en `organizationDashboard`, edición en el admin y visualización pública (migración aplicada en local y remota).
-6. `36cbee0` — columnas de leads reordenadas (Organization, sin Region, Priority antes de Comments) y acciones para abrir Website/Email.
-7. `6d91f84` — leads: prioridad en dropdown, orden en servidor y cliente y migración con backfill de favoritos, aplicada en local y remota.
-8. `97361e0` — breadcrumb siempre visible arriba a la izquierda (incluido RTL y rutas sin mapear) y menú público oculto en `/stage1` anónimo.
-9. `e94d19f` — migración `favorite` aplicada a BD local por defecto y D1 remota (fix de "Could not update the row" al marcar favoritos).
-10. `495b056` — tabla de leads: `thead`/`tbody` alineados (selección → favorito) y `.favorite-check` para el toggle de favorito.
-11. `336e495` — aviso de email duplicado al hacer blur en readiness, Stage 1 y perfil.
-12. `17f26dd` — `USER.EMAIL_EXISTS` movido a nivel superior en los 7 idiomas.
-13. `38f5c55` — columna Country más ancha y panel del dropdown limitado al ancho disponible.
-14. `bc9007a` — perfil sin `region`; `country` dentro de "About your organisation".
-15. `588f372` — renombrado a Pre-Accreditation en UI/i18n/correos.
-16. `cb1c220` — persistencia de `favorite` en D1 (schema + migración + insert/update/read).
-17. `632895a` — handlers de favoritos corregidos (`$any($event.target).checked`).
-18. `029fa28` — CTA "Get assessed" oculto con sesión iniciada.
+1. `a5e7988`, `0fe0828` — Stage 2 alineado con la guía oficial de GCF: preguntas y campos que faltaban, enlaces a políticas y corrección de textos truncados.
+2. `34dd3ed` — Country de "My organization" pasa de input de texto al dropdown de países compartido.
+3. `33455ba`, `0622f69` — página "My organization" del applicant, con endpoint propio que rechaza servidor-side cualquier campo ajeno a los siete editables del perfil.
+4. `fdc91fb` — estilo de los botones de descarga del PDF y arreglo del desbordamiento de texto en el PDF.
+5. `8fce205` — PDF de riesgo/reputación firmado por Avera (Worker + `worker/risk-report-pdf.ts`), botones en admin y dashboard del solicitante, y corrección del `ngModel` sin `name` en el formulario del admin.
+6. `243fd8c` — scores de auditoría Avera por factor con override opcional en `organizationDashboard`, edición en el admin y visualización pública (migración aplicada en local y remota).
+7. `36cbee0` — columnas de leads reordenadas (Organization, sin Region, Priority antes de Comments) y acciones para abrir Website/Email.
+8. `6d91f84` — leads: prioridad en dropdown, orden en servidor y cliente y migración con backfill de favoritos, aplicada en local y remota.
+9. `97361e0` — breadcrumb siempre visible arriba a la izquierda (incluido RTL y rutas sin mapear) y menú público oculto en `/stage1` anónimo.
+10. `e94d19f` — migración `favorite` aplicada a BD local por defecto y D1 remota (fix de "Could not update the row" al marcar favoritos).
+11. `495b056` — tabla de leads: `thead`/`tbody` alineados (selección → favorito) y `.favorite-check` para el toggle de favorito.
+12. `336e495` — aviso de email duplicado al hacer blur en readiness, Stage 1 y perfil.
+13. `17f26dd` — `USER.EMAIL_EXISTS` movido a nivel superior en los 7 idiomas.
+14. `38f5c55` — columna Country más ancha y panel del dropdown limitado al ancho disponible.
+15. `bc9007a` — perfil sin `region`; `country` dentro de "About your organisation".
+16. `588f372` — renombrado a Pre-Accreditation en UI/i18n/correos.
+17. `cb1c220` — persistencia de `favorite` en D1 (schema + migración + insert/update/read).
+18. `632895a` — handlers de favoritos corregidos (`$any($event.target).checked`).
+19. `029fa28` — CTA "Get assessed" oculto con sesión iniciada.
 
 ## Decisiones recientes
 
@@ -94,6 +96,7 @@ Ninguna tarea activa. La página "My organization" del solicitante está cerrada
 - Auditoría Avera: `auditEnabled=0` deja el índice 100 % calculado; con `=1`, cada factor con score no nulo sustituye al calculado, se recalcula `overall` con los mismos pesos y `risk.source` pasa a `avera-audit`. Los factores sin score siguen calculados. `riskScore`/`riskNotes` siguen siendo internos del listado admin.
 - PDF: se genera en el Worker con `worker/risk-report-pdf.ts` (PDF mínimo sin dependencias, fuentes Helvetica estándar y texto ASCII) y se descarga desde admin y solicitante. "Firmado" significa identidad corporativa (wordmark, línea de firma, copyright), no firma digital PKI.
 - "My organization": el applicant usa `PATCH /api/organizations/:id/profile`, con allow-list de siete campos. El endpoint rechaza con 400 cualquier clave ajena (incluidos `name`, `acronym`, `contactEmail` y todos los campos admin/auditoría) y comprueba que la organización exista para no crear filas nuevas. ⚠️ No hay autenticación de solicitante en el servidor: las rutas de applicant son públicas, por lo que este endpoint sigue siendo vulnerable a IDOR si se conoce el id; la restricción actual es de campos, no de propiedad. Para exigir propiedad real haría falta un token firmado con `organizationId`.
+- Alineación con la guía GCF 2026-07: el wizard de Stage 2 incluye las 70 preguntas del formulario oficial (ítems 1.1–13.4). Los campos que la guía marca como "additional questions (not pre-populated)" solo se muestran en Stage 2 mediante el input `applicationMode` del componente compartido `stage1-steps`; el pre-screening (Stage 1) sigue con sus campos originales. Cada sección muestra enlaces a los documentos oficiales (políticas, decisiones del Board, ESMS handbook, areas of work). No se eliminó nada del formulario: los campos `s12_status`/`s13_status` y sus comentarios son seguimiento interno de Avera, no parte del formulario GCF.
 
 ## Próximas tareas recomendadas
 
@@ -107,7 +110,7 @@ Ninguna tarea activa. La página "My organization" del solicitante está cerrada
 | Tarea | Archivos |
 | --- | --- |
 | Stage 1 / pre-acreditación | `pages/stage1/stage1.component.*`, `shared/components/stage1-steps/*`, `shared/data/form-steps.config.ts`, `prescreening_Stage1.pdf` |
-| Stage 2 / acreditación | `pages/stage2/stage2.component.*`, `shared/data/stage2-form.config.ts`, `fullform_AA_Stage2.pdf` |
+| Stage 2 / acreditación | `pages/stage2/stage2.component.*`, `shared/data/stage2-form.config.ts`, `shared/forms/stage1-form.builder.ts`, `shared/components/stage1-steps/*`, `fullform_AA_Stage2.pdf`, guía oficial GCF 2026-07 |
 | Readiness | `pages/readiness/readiness-wizard.component.*`, `readiness-application.model.ts`, `api/drafts` + `api/readiness` |
 | Leads y prioridad | `models/applicant.model.ts`, `pages/dashboard/leads-import/*`, `worker/index.ts` (`listLeads`, `updateLead`), `worker/schema.sql`, `worker/migrations/2026-11-20_leads_priority.sql` |
 | Breadcrumb y layout | `layout/layout.component.*`, `shared/components/breadcrumb/*`, `services/breadcrumb.service.ts` |
