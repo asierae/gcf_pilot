@@ -6,6 +6,7 @@ import { ApiService } from "../../services/api.service";
 import { AuthService } from "../../services/auth.service";
 import { NotificationService } from "../../services/notification.service";
 import { BreadcrumbService } from "../../services/breadcrumb.service";
+import { CountrySelectComponent } from "../../shared/components/country-select/country-select.component";
 import { OrganizationRecord } from "../../models/organization.model";
 
 interface OrgProfileForm {
@@ -31,7 +32,7 @@ const ENTITY_TYPES = [
 @Component({
   selector: "app-my-organization",
   standalone: true,
-  imports: [CommonModule, FormsModule, TranslatePipe],
+  imports: [CommonModule, FormsModule, TranslatePipe, CountrySelectComponent],
   templateUrl: "./my-organization.component.html",
   styleUrl: "./my-organization.component.css",
 })

@@ -129,6 +129,11 @@
   min-height: 56px;
 }
 
+.mo-field app-country-select {
+  display: block;
+  width: 100%;
+}
+
 .mo-field input[readonly] {
   background: rgba(148, 163, 184, 0.06);
   color: var(--app-subtle);

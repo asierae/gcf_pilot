@@ -52,7 +52,7 @@
           </label>
           <label class="mo-field">
             <span>{{ "MY_ORGANIZATION.COUNTRY" | translate }}</span>
-            <input name="country" type="text" [(ngModel)]="form.country" />
+            <app-country-select name="country" [(ngModel)]="form.country"></app-country-select>
           </label>
           <label class="mo-field">
             <span>{{ "MY_ORGANIZATION.ENTITY_TYPE" | translate }}</span>
