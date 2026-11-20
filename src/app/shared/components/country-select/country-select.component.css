@@ -1,3 +1,8 @@
+:host,
+:host * {
+  box-sizing: border-box;
+}
+
 :host {
   display: block;
   width: 100%;
@@ -108,16 +113,20 @@
 
 .cs-panel {
   overflow: hidden;
+  max-width: 100%;
   border: 1px solid var(--app-line-strong, rgba(255, 255, 255, 0.14));
   border-radius: 10px;
   background: #101d31;
-  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.55);
+  box-shadow: 0 12px 26px rgba(0, 0, 0, 0.35);
 }
 
-/* Inline in forms: pushes following fields down instead of covering them. */
+/* Inline in forms: pushes following fields down instead of covering them.
+   Stay strictly inside the control's column so the neighbouring field is
+   never overlapped horizontally by the panel or its shadow. */
 .cs-panel-inline {
   position: relative;
   width: 100%;
+  max-width: 100%;
   margin-top: 6px;
   z-index: 1;
 }
