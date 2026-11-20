@@ -113,7 +113,7 @@ export class AuthService {
     sessionStorage.removeItem(SESSION_USER_KEY);
     this.apiService.clearToken();
     this.currentUserSubject.next(null);
-    this.router.navigate(["/login"]);
+    void this.router.navigate(["/home"]);
   }
 
   get currentUserValue(): User | null {
