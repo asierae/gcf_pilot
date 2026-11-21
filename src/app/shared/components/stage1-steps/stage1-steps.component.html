@@ -1659,32 +1659,6 @@
       </div>
     </div>
   }
-  @if (applicationMode && $any(stepIndex) === 4) {
-    <div class="form-card">
-      <h4 class="subsection-title">Fast-track (full application)</h4>
-      <label class="checkbox-option"><input type="checkbox" formControlName="accreditedByAfDB"><span>Accredited by the African Development Bank</span></label>
-      <div class="form-group">
-        <label>Full compliance with all fast-track criteria</label>
-        <div class="yes-no-group">
-          <label class="radio-option compact"><input type="radio" formControlName="fastTrackFullCompliance" value="yes"><span>Yes</span></label>
-          <label class="radio-option compact"><input type="radio" formControlName="fastTrackFullCompliance" value="no"><span>No</span></label>
-        </div>
-      </div>
-      <div class="form-group">
-        <label>AfDB agreement signed</label>
-        <div class="yes-no-group">
-          <label class="radio-option compact"><input type="radio" formControlName="afDBAgreementSigned" value="yes"><span>Yes</span></label>
-          <label class="radio-option compact"><input type="radio" formControlName="afDBAgreementSigned" value="no"><span>No</span></label>
-        </div>
-      </div>
-      @if (form.get('afDBAgreementSigned')?.value === 'yes') {
-        <div class="form-group">
-          <label>AfDB agreement details</label>
-          <textarea formControlName="afDBAgreementDetails" rows="3"></textarea>
-        </div>
-      }
-    </div>
-  }
-
 
 </div>
+
