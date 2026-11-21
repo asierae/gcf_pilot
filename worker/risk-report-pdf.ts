@@ -181,7 +181,7 @@ export function buildRiskReportPdf(input: RiskReportInput): Uint8Array {
   // ── Header ────────────────────────────────────────────
   rect(0, height - 96, width, 96, NAVY);
   rect(0, height - 99, width, 3, GOLD);
-  logo(48, height - 74, 38);
+  logo(48, height - 56, 38);
   text(100, height - 46, 'AVERA', 22, 'F2', '1 1 1');
   text(100, height - 66, 'CAPITAL ACCESS', 10, 'F1', GOLD);
   textRight(
