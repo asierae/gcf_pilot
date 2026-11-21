@@ -136,11 +136,54 @@ export function buildRiskReportPdf(input: RiskReportInput): Uint8Array {
     );
   };
 
+  /**
+   * Avera mark (hexagon + "A") drawn as PDF vectors. Geometry and colour match
+   * `public/avera-logo.svg`, so no image decoder or extra PDF object is needed.
+   */
+  const logo = (x: number, yBottom: number, size: number): void => {
+    const scale = size / 40;
+    const px = (sx: number): number => x + sx * scale;
+    const py = (sy: number): number => yBottom + (40 - sy) * scale;
+    const stroke = (
+      points: [number, number][],
+      strokeWidth: number,
+      closed = false,
+      round = false,
+    ): void => {
+      const [first, ...rest] = points;
+      const cap = round ? 1 : 0;
+      commands.push(
+        `${GOLD} RG ${cap} J ${cap} j ${(strokeWidth * scale).toFixed(2)} w ${px(first[0]).toFixed(2)} ${py(first[1]).toFixed(2)} m`,
+      );
+      for (const [sx, sy] of rest) {
+        commands.push(`${px(sx).toFixed(2)} ${py(sy).toFixed(2)} l`);
+      }
+      commands.push(closed ? 'h S' : 'S');
+    };
+    commands.push('q');
+    stroke(
+      [
+        [20, 3.5],
+        [34.5, 12],
+        [34.5, 28],
+        [20, 36.5],
+        [5.5, 28],
+        [5.5, 12],
+      ],
+      1.4,
+      true,
+    );
+    stroke([[20, 11], [20, 29]], 1.5, false, true);
+    stroke([[12, 24], [20, 11], [28, 24]], 1.5, false, true);
+    commands.push('Q');
+  };
+
   // ── Header ────────────────────────────────────────────
   rect(0, height - 96, width, 96, NAVY);
   rect(0, height - 99, width, 3, GOLD);
-  text(48, height - 46, 'AVERA', 22, 'F2', '1 1 1');
-  text(48, height - 66, 'CAPITAL ACCESS', 10, 'F1', GOLD);
+  logo(48, height - 74, 38);
+  text(100, height - 46, 'AVERA', 22, 'F2', '1 1 1');
+  text(100, height - 66, 'CAPITAL ACCESS', 10, 'F1', GOLD);
   textRight(
     width - 48,
     height - 48,
