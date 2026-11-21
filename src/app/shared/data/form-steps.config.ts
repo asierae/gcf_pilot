@@ -27,13 +27,22 @@ export const COUNTRIES = [
   'Yemen', 'Zambia', 'Zimbabwe'
 ];
 
-/** Section shown in the stepper and page heading for every pre-screening step. */
+/**
+ * Section shown in the stepper and page heading for every pre-screening step.
+ * Section 3 groups both the additional information and the fast-track /
+ * engagement questions in a single step.
+ */
 export const STAGE1_STEPS = [
   { id: 'access', title: 'Access Modality', icon: '🌐', subtitle: 'Section 0', number: '0' },
   { id: 'general', title: 'General Information', icon: '📋', subtitle: 'Section 1', number: '1' },
   { id: 'legal', title: 'Legal Status & Eligibility', icon: '⚖️', subtitle: 'Section 2', number: '2' },
-  { id: 'additional', title: 'Additional Information', icon: '📊', subtitle: 'Section 3.1', number: '3.1' },
-  { id: 'fasttrack', title: 'Fast-Track & Engagement', icon: '🚀', subtitle: 'Section 3.2', number: '3.2' },
+  {
+    id: 'additional',
+    title: 'Additional Information & Engagement',
+    icon: '📊',
+    subtitle: 'Section 3',
+    number: '3',
+  },
 ];
 
 export const STAGE1_STEP_COUNT = STAGE1_STEPS.length;

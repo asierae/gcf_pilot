@@ -97,8 +97,7 @@ export class Stage1Component implements OnInit, OnDestroy {
     'Choose how your organization accesses GCF resources and share any nomination or NDA consultation details.',
     'Provide your legal contact details, entity type and the scope of your operations.',
     'Confirm your legal status, eligibility and the documents that evidence it.',
-    'Tell us about governance, track record and the institutional capacity you can demonstrate.',
-    'Describe fast-track options, partnerships and your engagement with the GCF so far.',
+    'Tell us about governance, track record, fast-track options, partnerships and your engagement with the GCF so far.',
   ];
 
   countries = [
