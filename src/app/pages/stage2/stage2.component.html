@@ -83,7 +83,15 @@
                   [class.is-complete]="currentStep > item.index"
                 >
                   <button type="button" class="step-button" (click)="goToStep(item.index)">
-                    <span class="step-index">{{ item.number }}</span>
+                    <span class="step-index">
+                      @if (item.number === '0') {
+                        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                          <path d="M8 5.5v13l10.5-6.5L8 5.5Z" />
+                        </svg>
+                      } @else {
+                        {{ item.number }}
+                      }
+                    </span>
                     <span class="step-label">{{ item.title }}</span>
                   </button>
                 </li>

@@ -33,7 +33,7 @@ export const COUNTRIES = [
  * engagement questions in a single step.
  */
 export const STAGE1_STEPS = [
-  { id: 'access', title: 'Access Modality', icon: '🌐', subtitle: 'Section 0', number: '0' },
+  { id: 'access', title: 'Access Modality', icon: '🌐', subtitle: '', number: '0' },
   { id: 'general', title: 'General Information', icon: '📋', subtitle: 'Section 1', number: '1' },
   { id: 'legal', title: 'Legal Status & Eligibility', icon: '⚖️', subtitle: 'Section 2', number: '2' },
   {
