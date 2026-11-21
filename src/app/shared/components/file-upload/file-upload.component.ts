@@ -11,7 +11,10 @@ import {
   ControlValueAccessor,
   NG_VALUE_ACCESSOR
 } from '@angular/forms';
-import { MAX_FILES_PER_ATTACHMENT } from '../../../config/attachments.config';
+import {
+  MAX_FILES_PER_ATTACHMENT,
+  MAX_FILE_BYTES,
+} from '../../../config/attachments.config';
 import {
   StoredAttachment,
   UploadScope,
@@ -213,8 +216,21 @@ export class FileUploadComponent implements ControlValueAccessor {
       return;
     }
 
-    const batch = selected.slice(0, available);
-    if (selected.length > available) {
+    const accepted = selected.filter((file) => {
+      if (file.size > MAX_FILE_BYTES) {
+        this.notificationService.error(
+          `"${file.name}" is larger than 100 MB and was skipped.`,
+        );
+        return false;
+      }
+      return true;
+    });
+    if (!accepted.length) {
+      return;
+    }
+
+    const batch = accepted.slice(0, available);
+    if (accepted.length > available) {
       this.notificationService.warning(`Only ${available} more file(s) can be added.`);
     }
 

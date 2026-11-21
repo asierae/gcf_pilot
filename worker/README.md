@@ -205,7 +205,8 @@ Public (no token):
   unknown email gets a passwordless `applicant` account with status `pending`,
   linked to the organization id. Returns `{ submission, organization, created,
   userCreated, username }`. Existing accounts are never modified.
-- `POST /api/upload` — multipart `file`, `scope`, `entityId`, `section` (max 15 MB)
+- `POST /api/upload` — multipart `file`, `scope`, `entityId`, `section`
+  (max 100 MB per file; the forms also cap uploads at 7 files per field)
 - `DELETE /api/upload` — `{ publicId }`
 - `GET /api/files/<key>` — streams an R2 object
 - `POST /api/send-review-email` — `{ to, subject, body }`; sends from

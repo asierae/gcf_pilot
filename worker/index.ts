@@ -357,7 +357,7 @@ const DEFAULT_ADMIN: ApplicantAdmin = {
   lastReviewSent: null,
 };
 
-const MAX_UPLOAD_BYTES = 15 * 1024 * 1024;
+const MAX_UPLOAD_BYTES = 100 * 1024 * 1024;
 const MAX_JSON_BYTES = 4 * 1024 * 1024;
 const MAX_BATCH_IDS = 500;
 
@@ -5351,7 +5351,7 @@ async function uploadFile(request: Request, env: Env): Promise<Response> {
     throw new HttpError(400, 'The uploaded file is empty.');
   }
   if (file.size > MAX_UPLOAD_BYTES) {
-    throw new HttpError(413, `Files must be 15 MB or smaller.`);
+    throw new HttpError(413, `Files must be 100 MB or smaller.`);
   }
 
   const scope = readScope(form);

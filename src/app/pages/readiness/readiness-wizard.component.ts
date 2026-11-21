@@ -24,6 +24,7 @@ import {
   createEmptyApplication,
   createEmptyFmca,
 } from './readiness-application.model';
+import { MAX_FILE_BYTES } from '../../config/attachments.config';
 import { AttachmentService } from '../../services/attachment.service';
 import { AuthService } from '../../services/auth.service';
 import { OrganizationService } from '../../services/organization.service';
@@ -1150,8 +1151,8 @@ export class ReadinessWizardComponent implements OnInit, OnDestroy {
       this.docErrors[key] = 'Only PDF files are accepted.';
       return;
     }
-    if (file.size > 25 * 1024 * 1024) {
-      this.docErrors[key] = 'File is larger than 25 MB.';
+    if (file.size > MAX_FILE_BYTES) {
+      this.docErrors[key] = 'File is larger than 100 MB.';
       return;
     }
     if (this.docUploading[key]) return;

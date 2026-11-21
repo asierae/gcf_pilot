@@ -1,7 +1,8 @@
 import { StoredAttachment } from '../models/attachment.model';
 import { attachmentFromLegacyUrl } from '../shared/utils/attachment-url.util';
 
-export const MAX_FILES_PER_ATTACHMENT = 3;
+export const MAX_FILES_PER_ATTACHMENT = 7;
+export const MAX_FILE_BYTES = 100 * 1024 * 1024;
 
 export const STAGE1_ATTACHMENT_FIELDS: Record<string, string> = {
   nominationLetterFiles: 'NDA nomination letter',
