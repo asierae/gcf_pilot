@@ -290,11 +290,9 @@ export class Stage2Component implements OnInit, OnDestroy {
   }
 
   get currentStepLabel(): string {
-    if (this.isStage1Step) {
-      return this.navGroups[0].steps[this.currentStep]?.title ?? '';
-    }
-    const step = this.currentScreeningStep;
-    return step ? `Section ${step.sectionNumber}: ${step.title}` : '';
+    const item = this.navGroups.flatMap((group) => group.steps)
+      .find((step) => step.index === this.currentStep);
+    return item ? `Section ${item.number}: ${item.title}` : '';
   }
 
   goToStep(step: number): void {

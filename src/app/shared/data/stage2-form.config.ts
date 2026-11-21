@@ -253,6 +253,8 @@ export interface WizardNavItem {
   title: string;
   icon: string;
   subtitle?: string;
+  /** Section number shown in the stepper (0, 1, 2, 3.1, 3.2, 4 … 13). */
+  number: string;
   group: 'stage1' | 'stage2';
 }
 
@@ -263,6 +265,7 @@ export function buildWizardNav(): WizardNavGroup[] {
     title: step.title,
     icon: step.icon,
     subtitle: step.subtitle,
+    number: step.number,
     group: 'stage1'
   }));
 
@@ -272,6 +275,7 @@ export function buildWizardNav(): WizardNavGroup[] {
     title: step.title,
     icon: step.icon,
     subtitle: `Section ${step.sectionNumber}`,
+    number: String(step.sectionNumber),
     group: 'stage2'
   }));
 

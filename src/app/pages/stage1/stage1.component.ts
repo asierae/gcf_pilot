@@ -20,6 +20,7 @@ import {
   addStage1FormControls,
   watchStage1ConditionalRequirements,
 } from '../../shared/forms/stage1-form.builder';
+import { STAGE1_STEPS } from '../../shared/data/form-steps.config';
 import { FileUploadComponent } from '../../shared/components/file-upload/file-upload.component';
 import { CountrySelectComponent } from '../../shared/components/country-select/country-select.component';
 import { Stage1StepsComponent } from '../../shared/components/stage1-steps/stage1-steps.component';
@@ -88,13 +89,8 @@ export class Stage1Component implements OnInit, OnDestroy {
   /** Functions that re-apply "required when visible" validators after a patch. */
   private conditionalSyncs: Array<() => void> = [];
 
-  steps = [
-    { id: 'access', title: 'Access Modality', icon: '🌐' },
-    { id: 'general', title: 'General Information', icon: '📋' },
-    { id: 'legal', title: 'Legal Status & Eligibility', icon: '⚖️' },
-    { id: 'additional', title: 'Additional Information', icon: '📊' },
-    { id: 'fasttrack', title: 'Fast-Track & Engagement', icon: '🚀' },
-  ];
+  /** Same step/section numbering as the full form (0, 1, 2, 3.1, 3.2). */
+  steps = STAGE1_STEPS;
 
   /** One-line guidance rendered under the active step title. */
   stepDescriptions = [
