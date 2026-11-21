@@ -151,7 +151,9 @@ CREATE TABLE IF NOT EXISTS accreditation_submissions (
   data            TEXT NOT NULL,
   stage1_data     TEXT,
   created_at      TEXT NOT NULL,
-  archived        INTEGER NOT NULL DEFAULT 0
+  archived        INTEGER NOT NULL DEFAULT 0,
+  -- Pending | Passed | Failed, same set as the pre-screening status
+  status          TEXT NOT NULL DEFAULT 'Pending'
 );
 
 CREATE INDEX IF NOT EXISTS idx_accreditation_submissions_org

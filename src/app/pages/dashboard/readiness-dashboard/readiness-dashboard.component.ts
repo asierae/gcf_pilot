@@ -23,6 +23,7 @@ export class ReadinessDashboardComponent implements OnInit, OnDestroy {
   loadError = '';
   search = '';
   showArchived = false;
+  selectedIds = new Set<string>();
 
   constructor(
     private readonly api: ApiService,
@@ -58,15 +59,41 @@ export class ReadinessDashboardComponent implements OnInit, OnDestroy {
     return this.submissions.filter((submission) => submission.archived).length;
   }
 
-  toggleArchivedView(): void {
-    this.showArchived = !this.showArchived;
+  get visibleIds(): string[] {
+    return this.filteredSubmissions.map((submission) => submission.organizationId);
   }
 
-  async setArchive(archived: boolean, id?: string): Promise<void> {
-    const ids = id ? [id] : [];
+  get allSelected(): boolean {
+    return this.visibleIds.length > 0 && this.visibleIds.every((id) => this.selectedIds.has(id));
+  }
+
+  get someSelected(): boolean {
+    return this.visibleIds.some((id) => this.selectedIds.has(id));
+  }
+
+  toggleSelection(id: string, checked: boolean): void {
+    if (checked) this.selectedIds.add(id);
+    else this.selectedIds.delete(id);
+  }
+
+  toggleSelectAll(checked: boolean): void {
+    for (const id of this.visibleIds) {
+      if (checked) this.selectedIds.add(id);
+      else this.selectedIds.delete(id);
+    }
+  }
+
+  toggleArchivedView(): void {
+    this.showArchived = !this.showArchived;
+    this.selectedIds.clear();
+  }
+
+  async setArchive(archived: boolean): Promise<void> {
+    const ids = [...this.selectedIds];
     if (!ids.length) return;
     try {
       await this.api.setArchived('readiness', ids, archived);
+      this.selectedIds.clear();
       await this.load();
     } catch (error) {
       this.notification.error(

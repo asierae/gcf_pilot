@@ -77,6 +77,8 @@ export interface AccreditationSubmissionSummary {
   contactEmail: string;
   preScreeningStatus: string;
   accreditationStatus: string;
+  /** Pending | Passed | Failed, editable from the admin table. */
+  status: string;
   archived?: boolean;
 }
 

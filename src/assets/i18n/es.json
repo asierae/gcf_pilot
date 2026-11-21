@@ -1184,7 +1184,9 @@
     "RETRY": "Reintentar",
     "OF": "de",
     "PREV": "← Anterior",
-    "NEXT": "Siguiente →"
+    "NEXT": "Siguiente →",
+    "COL_STATUS": "Estado",
+    "EDIT": "Editar envío"
   },
   "ARCHIVE": {
     "SHOW_ARCHIVED": "Archivados ({{count}})",
@@ -1193,7 +1195,11 @@
     "RESTORE": "Restaurar",
     "DELETE_SELECTED": "Borrar seleccionados ({{count}})",
     "CONFIRM_DELETE": "¿Borrar las filas seleccionadas? Esta acción no se puede deshacer.",
-    "EMAIL_CONTACT": "Enviar email al contacto"
+    "EMAIL_CONTACT": "Enviar email al contacto",
+    "ARCHIVE_SELECTED": "Archivar seleccionados ({{count}})",
+    "RESTORE_SELECTED": "Restaurar seleccionados ({{count}})",
+    "COL_STATUS": "Estado",
+    "EDIT": "Editar envío"
   },
   "BREADCRUMB": {
     "STAGE2_REVIEW": "Revisar envío",

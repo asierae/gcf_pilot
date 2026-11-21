@@ -20,6 +20,11 @@
           {{ "ARCHIVE.SHOW_ARCHIVED" | translate: { count: archivedCount } }}
         }
       </button>
+      @if (selectedIds.size > 0) {
+        <button type="button" class="btn-retry" (click)="setArchive(!showArchived)">
+          {{ (showArchived ? "ARCHIVE.RESTORE_SELECTED" : "ARCHIVE.ARCHIVE_SELECTED") | translate: { count: selectedIds.size } }}
+        </button>
+      }
     </div>
   </header>
 
@@ -70,6 +75,14 @@
         <table class="submissions-table">
           <thead>
             <tr>
+              <th class="col-check">
+                <input
+                  type="checkbox"
+                  [checked]="allSelected"
+                  [indeterminate]="someSelected && !allSelected"
+                  (change)="toggleSelectAll($any($event.target).checked)"
+                />
+              </th>
               <th>Organization</th>
               <th>Proposal</th>
               <th>Country</th>
@@ -77,12 +90,18 @@
               <th>Submitted</th>
               <th>Updated</th>
               <th class="col-action">{{ "ACCREDITATION_SUBMISSIONS.COL_ACTIONS" | translate }}</th>
-              <th>{{ "ARCHIVE.ARCHIVE" | translate }}</th>
             </tr>
           </thead>
           <tbody>
             @for (submission of filteredSubmissions; track submission.organizationId) {
               <tr>
+                <td class="col-check">
+                  <input
+                    type="checkbox"
+                    [checked]="selectedIds.has(submission.organizationId)"
+                    (change)="toggleSelection(submission.organizationId, $any($event.target).checked)"
+                  />
+                </td>
                 <td class="col-name">
                   {{ submission.organization.name || 'Untitled organization' }}
                   @if (submission.organization.acronym) {
@@ -103,11 +122,7 @@
                     Open &amp; edit <span aria-hidden="true">→</span>
                   </a>
                 </td>
-                <td class="col-action">
-                  <button type="button" class="btn-edit" (click)="setArchive(!showArchived, submission.organizationId)">
-                    {{ (showArchived ? "ARCHIVE.RESTORE" : "ARCHIVE.ARCHIVE") | translate }}
-                  </button>
-                </td>
+
               </tr>
             }
           </tbody>

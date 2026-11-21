@@ -249,6 +249,15 @@
       </button>
       <button
         type="button"
+        class="btn-retry"
+        *ngIf="selectedCount > 0"
+        (click)="setArchive(!showArchived)"
+        [disabled]="loading"
+      >
+        {{ (showArchived ? "ARCHIVE.RESTORE_SELECTED" : "ARCHIVE.ARCHIVE_SELECTED") | translate: { count: selectedCount } }}
+      </button>
+      <button
+        type="button"
         class="btn-delete"
         *ngIf="selectedCount > 0"
         (click)="openDeleteConfirm()"
@@ -373,7 +382,6 @@
             <th>Comments</th>
             <th>Status</th>
             <th>Actions</th>
-            <th>{{ "ARCHIVE.ARCHIVE" | translate }}</th>
           </tr>
         </thead>
         <tbody>
@@ -558,16 +566,7 @@
                 <span>Open</span>
               </button>
             </td>
-            <td>
-              <button
-                type="button"
-                class="btn-open-lead"
-                (click)="setArchive(!showArchived, lead.id)"
-                [attr.aria-label]="(showArchived ? 'ARCHIVE.RESTORE' : 'ARCHIVE.ARCHIVE') | translate"
-              >
-                {{ (showArchived ? "ARCHIVE.RESTORE" : "ARCHIVE.ARCHIVE") | translate }}
-              </button>
-            </td>
+
           </tr>
         </tbody>
       </table>

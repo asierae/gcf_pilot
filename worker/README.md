@@ -239,6 +239,11 @@ Admin (`Authorization: Bearer <API_TOKEN>`):
   a `type` (`accreditation` | `prescreening`).
 - `DELETE /api/accreditation/submissions` — `{ ids }`; removes the selected
   history rows and, for `prescreening:<organizationId>` ids, the applicant row.
+- `PATCH /api/accreditation/submissions/:id/status` — `{ status }` with
+  `Pending | Passed | Failed` (same set as the pre-screening status). For
+  `prescreening:<organizationId>` ids it delegates to the applicant status update.
+  The table has a single editable **Status** column; the pre-screening column was
+  removed.
 - `GET /api/accreditation/submissions/:id` — full payload of one submission. A
   `prescreening:<organizationId>` id returns that organization's Stage 1 payload.
 - `PATCH /api/admin/archive` — `{ kind, ids, archived }` with `kind` one of

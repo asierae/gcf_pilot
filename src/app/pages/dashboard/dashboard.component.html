@@ -22,6 +22,9 @@
         }
       </button>
       @if (selectedCount > 0) {
+        <button type="button" class="btn-clear-filter" (click)="setArchive(!showArchived)">
+          {{ (showArchived ? "ARCHIVE.RESTORE_SELECTED" : "ARCHIVE.ARCHIVE_SELECTED") | translate: { count: selectedCount } }}
+        </button>
         <button type="button" class="btn-delete" (click)="deleteSelected()">
           {{ "ARCHIVE.DELETE_SELECTED" | translate: { count: selectedCount } }}
         </button>
@@ -310,7 +313,6 @@
                 </button>
               </th>
               <th>{{ "ACCREDITATION_SUBMISSIONS.COL_ACTIONS" | translate }}</th>
-              <th>{{ "ARCHIVE.ARCHIVE" | translate }}</th>
             </tr>
           </thead>
           <tbody>
@@ -373,11 +375,7 @@
                     >View</a
                   >
                 </td>
-                <td class="col-action">
-                  <button type="button" class="btn-view" (click)="setArchive(!showArchived, submission.id)">
-                    {{ (showArchived ? "ARCHIVE.RESTORE" : "ARCHIVE.ARCHIVE") | translate }}
-                  </button>
-                </td>
+
               </tr>
             }
           </tbody>

@@ -3732,7 +3732,7 @@ async function createStage1(request: Request, env: Env): Promise<Response> {
 async function listAccreditationSubmissions(env: Env): Promise<Response> {
   const [submissionRows, applicantRows, orgRows] = await Promise.all([
     env.DB.prepare(
-      `SELECT id, organization_id, submitted_at, data, created_at, archived
+      `SELECT id, organization_id, submitted_at, data, created_at, archived, status
          FROM accreditation_submissions ORDER BY submitted_at DESC`,
     ).all<{
       id: string;
@@ -3741,6 +3741,7 @@ async function listAccreditationSubmissions(env: Env): Promise<Response> {
       data: string;
       created_at: string;
       archived: number | null;
+      status: string | null;
     }>(),
     env.DB.prepare(
       'SELECT id, stage1, stage2, admin, updated_at, archived FROM applicants',
@@ -3783,6 +3784,7 @@ async function listAccreditationSubmissions(env: Env): Promise<Response> {
       contactEmail: readText(data, 'primaryContactEmail'),
       preScreeningStatus: admin.status ?? 'Pending',
       accreditationStatus: org?.accreditation_status ?? 'not_started',
+      status: row.status ?? 'Pending',
       archived: row.archived === 1,
     });
   }
@@ -3808,6 +3810,7 @@ async function listAccreditationSubmissions(env: Env): Promise<Response> {
       contactEmail: readText(data, 'primaryContactEmail'),
       preScreeningStatus: 'Passed',
       accreditationStatus: org?.accreditation_status ?? 'not_started',
+      status: admin.status ?? 'Pending',
       archived: row.archived === 1,
     });
   }
@@ -3864,6 +3867,35 @@ async function getAccreditationSubmission(env: Env, id: string): Promise<Respons
         : {},
     },
   });
+}
+
+/** Update the accreditation status of one submission (Pending/Passed/Failed). */
+async function updateAccreditationSubmissionStatus(
+  request: Request,
+  env: Env,
+  id: string,
+): Promise<Response> {
+  // Clone before reading the body: the pre-screening branch delegates to
+  // updateApplicantStatus, which reads the JSON body itself.
+  const applicantRequest = request.clone();
+  const body = await readJson<{ status?: unknown }>(request);
+  const status = asString(body.status, 'status') as SubmissionStatus;
+  if (!SUBMISSION_STATUSES.includes(status)) {
+    throw new HttpError(400, `"status" must be one of ${SUBMISSION_STATUSES.join(', ')}.`);
+  }
+
+  if (id.startsWith('prescreening:')) {
+    const orgId = id.slice('prescreening:'.length);
+    assertEntityId(orgId);
+    return updateApplicantStatus(applicantRequest, env, orgId);
+  }
+
+  await env.DB.prepare(
+    'UPDATE accreditation_submissions SET status = ? WHERE id = ?',
+  )
+    .bind(status, id)
+    .run();
+  return json({ status });
 }
 
 /** Keep every full accreditation application, not just the latest one. */
@@ -5642,6 +5674,19 @@ async function handleApi(request: Request, env: Env, path: string): Promise<Resp
       );
     }
     return methodNotAllowed('GET, DELETE');
+  }
+
+  const accreditationStatusMatch =
+    /^\/api\/accreditation\/submissions\/([^/]+)\/status$/.exec(path);
+  if (accreditationStatusMatch) {
+    if (method !== 'PATCH') return methodNotAllowed('PATCH');
+    return withAdmin(env, request, () =>
+      updateAccreditationSubmissionStatus(
+        request,
+        env,
+        decodeURIComponent(accreditationStatusMatch[1]),
+      ),
+    );
   }
 
   const accreditationSubmissionMatch =

@@ -5,6 +5,7 @@ import { TranslatePipe, TranslateService } from "@ngx-translate/core";
 import { ApiService } from "../../../services/api.service";
 import { NotificationService } from "../../../services/notification.service";
 import { AccreditationSubmissionSummary } from "../../../models/organization.model";
+import { SUBMISSION_STATUSES } from "../../../models/applicant.model";
 
 type TypeFilter = "all" | "accreditation" | "prescreening";
 
@@ -21,6 +22,7 @@ export class AccreditationSubmissionsComponent implements OnInit {
   private translate = inject(TranslateService);
 
   submissions: AccreditationSubmissionSummary[] = [];
+  readonly statusOptions = SUBMISSION_STATUSES;
   loading = true;
   loadError = "";
   searchQuery = "";
@@ -149,6 +151,20 @@ export class AccreditationSubmissionsComponent implements OnInit {
       this.notification.error(
         error instanceof Error ? error.message : "Could not update the archive state.",
       );
+    }
+  }
+
+  async onStatusChange(id: string, event: Event): Promise<void> {
+    const status = (event.target as HTMLSelectElement).value;
+    try {
+      await this.api.setAccreditationSubmissionStatus(id, status);
+      const row = this.submissions.find((submission) => submission.id === id);
+      if (row) row.status = status;
+    } catch (error) {
+      this.notification.error(
+        error instanceof Error ? error.message : "Could not update the status.",
+      );
+      await this.loadSubmissions();
     }
   }
 

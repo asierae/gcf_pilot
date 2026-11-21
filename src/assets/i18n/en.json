@@ -1185,7 +1185,9 @@
     "RETRY": "Retry",
     "OF": "of",
     "PREV": "← Previous",
-    "NEXT": "Next →"
+    "NEXT": "Next →",
+    "COL_STATUS": "Status",
+    "EDIT": "Edit submission"
   },
   "ARCHIVE": {
     "SHOW_ARCHIVED": "Archived ({{count}})",
@@ -1194,7 +1196,11 @@
     "RESTORE": "Restore",
     "DELETE_SELECTED": "Delete selected ({{count}})",
     "CONFIRM_DELETE": "Delete the selected rows? This cannot be undone.",
-    "EMAIL_CONTACT": "Send email to contact"
+    "EMAIL_CONTACT": "Send email to contact",
+    "ARCHIVE_SELECTED": "Archive selected ({{count}})",
+    "RESTORE_SELECTED": "Restore selected ({{count}})",
+    "COL_STATUS": "Status",
+    "EDIT": "Edit submission"
   },
   "BREADCRUMB": {
     "STAGE2_REVIEW": "Review submission",

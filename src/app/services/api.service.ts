@@ -640,6 +640,17 @@ export class ApiService {
     );
   }
 
+  async setAccreditationSubmissionStatus(
+    id: string,
+    status: string,
+  ): Promise<void> {
+    await this.request<void>(
+      `/api/accreditation/submissions/${encodeURIComponent(id)}/status`,
+      { method: "PATCH", body: JSON.stringify({ status }) },
+      true,
+    );
+  }
+
   async deleteAccreditationSubmissions(ids: string[]): Promise<void> {
     await this.request<void>(
       "/api/accreditation/submissions",

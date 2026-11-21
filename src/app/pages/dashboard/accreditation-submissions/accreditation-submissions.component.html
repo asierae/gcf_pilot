@@ -55,6 +55,9 @@
         }
       </button>
       @if (selectedIds.size > 0) {
+        <button type="button" class="as-btn" (click)="setArchive(!showArchived)">
+          {{ (showArchived ? "ARCHIVE.RESTORE_SELECTED" : "ARCHIVE.ARCHIVE_SELECTED") | translate: { count: selectedIds.size } }}
+        </button>
         <button type="button" class="as-btn as-btn-danger" (click)="deleteSelected()">
           {{ "ARCHIVE.DELETE_SELECTED" | translate: { count: selectedIds.size } }}
         </button>
@@ -79,11 +82,9 @@
             </th>
             <th (click)="sortBy('country')">{{ "ACCREDITATION_SUBMISSIONS.COL_COUNTRY" | translate }}</th>
             <th (click)="sortBy('submittedAt')">{{ "ACCREDITATION_SUBMISSIONS.COL_SUBMITTED" | translate }}</th>
-            <th>{{ "ACCREDITATION_SUBMISSIONS.COL_PRE_STATUS" | translate }}</th>
-            <th>{{ "ACCREDITATION_SUBMISSIONS.COL_ACCR_STATUS" | translate }}</th>
+            <th>{{ "ACCREDITATION_SUBMISSIONS.COL_STATUS" | translate }}</th>
             <th>{{ "ACCREDITATION_SUBMISSIONS.COL_CONTACT" | translate }}</th>
             <th>{{ "ACCREDITATION_SUBMISSIONS.COL_ACTIONS" | translate }}</th>
-            <th>{{ "ARCHIVE.ARCHIVE" | translate }}</th>
           </tr>
         </thead>
         <tbody>
@@ -112,8 +113,18 @@
               </td>
               <td>{{ submission.country || "—" }}</td>
               <td>{{ formatDate(submission.submittedAt) }}</td>
-              <td>{{ statusLabel(submission.preScreeningStatus) }}</td>
-              <td>{{ statusLabel(submission.accreditationStatus) }}</td>
+              <td>
+                <select
+                  class="as-status"
+                  [value]="submission.status"
+                  (change)="onStatusChange(submission.id, $event)"
+                  [attr.aria-label]="'ACCREDITATION_SUBMISSIONS.COL_STATUS' | translate"
+                >
+                  @for (status of statusOptions; track status) {
+                    <option [value]="status">{{ status }}</option>
+                  }
+                </select>
+              </td>
               <td>
                 @if (submission.contactEmail) {
                   <a
@@ -132,19 +143,19 @@
                   —
                 }
               </td>
-              <td>
+              <td class="as-actions">
                 <a
-                  class="as-btn"
+                  class="as-icon-btn"
                   [routerLink]="['/stage2']"
                   [queryParams]="{ org: submission.organizationId, submission: submission.id }"
+                  [attr.aria-label]="'ACCREDITATION_SUBMISSIONS.EDIT' | translate"
+                  [title]="'ACCREDITATION_SUBMISSIONS.EDIT' | translate"
                 >
-                  {{ "ACCREDITATION_SUBMISSIONS.VIEW" | translate }}
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M12 20h9" />
+                    <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z" />
+                  </svg>
                 </a>
-              </td>
-              <td>
-                <button type="button" class="as-btn" (click)="setArchive(!showArchived, submission.id)">
-                  {{ (showArchived ? "ARCHIVE.RESTORE" : "ARCHIVE.ARCHIVE") | translate }}
-                </button>
               </td>
             </tr>
           }
