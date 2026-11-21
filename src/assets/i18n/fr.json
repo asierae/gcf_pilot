@@ -1204,5 +1204,17 @@
   "BREADCRUMB": {
     "STAGE2_REVIEW": "Examiner la soumission",
     "READINESS_EDIT": "Modifier la demande de préparation"
+  },
+  "DATE_FILTER": {
+    "LABEL": "Soumis entre",
+    "FROM": "Du",
+    "TO": "Au",
+    "START": "Date de début",
+    "END": "Date de fin",
+    "SEP": "au",
+    "CLEAR": "Effacer les dates",
+    "NO_MATCHES": "Aucune soumission ne correspond aux filtres actuels.",
+    "INVALID_RANGE": "La date de début doit être antérieure ou égale à la date de fin.",
+    "CLEAR_ALL": "Effacer les filtres"
   }
 }

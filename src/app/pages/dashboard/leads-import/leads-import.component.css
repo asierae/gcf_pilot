@@ -325,8 +325,8 @@
 
 .btn-delete {
   padding: 0.45rem 0.8rem;
-  background: rgba(239, 68, 68, 0.1);
-  border: 1px solid rgba(239, 68, 68, 0.32);
+  background: rgba(239, 68, 68, 0.12);
+  border: 1px solid rgba(239, 68, 68, 0.35);
   border-radius: 9px;
   color: #fca5a5;
   font-family: inherit;
@@ -337,7 +337,7 @@
 }
 
 .btn-delete:hover:not(:disabled) {
-  background: rgba(239, 68, 68, 0.2);
+  background: rgba(239, 68, 68, 0.22);
   color: #fecaca;
 }
 

@@ -20,9 +20,6 @@
       </a>
 
       <div class="topbar-actions">
-        @if (adminEdit) {
-          <a routerLink="/dashboard/readiness" class="btn btn-ghost">← Submissions</a>
-        }
         <span class="save-state" [class.is-error]="saveState === 'error'">
           <span class="save-dot" aria-hidden="true"></span>
           {{ saveText }}

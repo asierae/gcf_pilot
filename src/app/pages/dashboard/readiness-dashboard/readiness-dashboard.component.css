@@ -99,6 +99,74 @@
   color: #64748b;
 }
 
+.date-range-filter {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.55rem 0.8rem;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.05) 0%,
+    rgba(212, 169, 78, 0.04) 100%
+  );
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 14px;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s;
+}
+
+.date-range-filter:focus-within {
+  border-color: rgba(212, 169, 78, 0.45);
+  box-shadow: 0 0 0 3px rgba(212, 169, 78, 0.12);
+}
+
+.date-range-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #cbd5e1;
+  white-space: nowrap;
+}
+
+.date-range-label svg {
+  width: 1rem;
+  height: 1rem;
+  color: #f5dfa8;
+}
+
+.date-range-sep {
+  align-self: flex-end;
+  margin-bottom: 0.55rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #64748b;
+}
+
+.date-clear {
+  align-self: flex-end;
+  margin-bottom: 0.15rem;
+  padding: 0.45rem 0.75rem;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
+  color: #94a3b8;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.date-clear:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #e2e8f0;
+}
+
 .empty-state {
   text-align: center;
   padding: 3.25rem 2rem;

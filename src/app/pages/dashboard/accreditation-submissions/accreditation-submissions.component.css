@@ -59,6 +59,8 @@
 
 .as-toolbar {
   display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
   gap: 0.75rem;
   margin-bottom: 1rem;
 }
@@ -76,6 +78,74 @@
 
 .as-search {
   flex: 1;
+}
+
+.as-date-filter {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.55rem 0.8rem;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.05) 0%,
+    rgba(212, 169, 78, 0.04) 100%
+  );
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 14px;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s;
+}
+
+.as-date-filter:focus-within {
+  border-color: rgba(212, 169, 78, 0.45);
+  box-shadow: 0 0 0 3px rgba(212, 169, 78, 0.12);
+}
+
+.as-date-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #cbd5e1;
+  white-space: nowrap;
+}
+
+.as-date-label svg {
+  width: 1rem;
+  height: 1rem;
+  color: #f5dfa8;
+}
+
+.as-date-sep {
+  align-self: flex-end;
+  margin-bottom: 0.55rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #64748b;
+}
+
+.as-date-clear {
+  align-self: flex-end;
+  margin-bottom: 0.15rem;
+  padding: 0.45rem 0.75rem;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
+  color: #94a3b8;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.as-date-clear:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #e2e8f0;
 }
 
 .as-table-wrap {
@@ -132,13 +202,50 @@
 }
 
 .as-status {
-  padding: 0.3rem 0.5rem;
-  border: 1px solid rgba(148, 163, 184, 0.25);
-  border-radius: 7px;
-  background: rgba(255, 255, 255, 0.04);
-  color: #e2e8f0;
+  width: 100%;
+  min-width: 7.5rem;
+  appearance: none;
+  padding: 0.42rem 1.7rem 0.42rem 0.6rem;
+  border-radius: 8px;
+  border: 1px solid;
+  background-color: rgba(148, 163, 184, 0.13);
+  color: #cbd5e1;
   font: inherit;
-  font-size: 0.78rem;
+  font-size: 0.76rem;
+  font-weight: 600;
+  cursor: pointer;
+  background-repeat: no-repeat;
+  background-position: right 0.45rem center;
+  background-size: 0.62rem;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2394a3b8' d='M3 4.5L6 7.5L9 4.5'/%3E%3C/svg%3E");
+}
+
+.as-status:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.14);
+}
+
+.as-status.status-pending {
+  background-color: rgba(251, 146, 60, 0.13);
+  color: #fdba74;
+  border-color: rgba(251, 146, 60, 0.35);
+}
+
+.as-status.status-passed {
+  background-color: rgba(16, 185, 129, 0.13);
+  color: #6ee7b7;
+  border-color: rgba(16, 185, 129, 0.35);
+}
+
+.as-status.status-failed {
+  background-color: rgba(239, 68, 68, 0.13);
+  color: #fca5a5;
+  border-color: rgba(239, 68, 68, 0.35);
+}
+
+.as-status option {
+  background: #1e293b;
+  color: #e2e8f0;
 }
 
 .as-icon-btn {
@@ -162,13 +269,18 @@
   height: 1rem;
 }
 
-.as-btn-danger {
-  border-color: rgba(248, 113, 113, 0.5);
+.as-btn.as-btn-danger {
+  background: rgba(239, 68, 68, 0.12);
+  border-color: rgba(239, 68, 68, 0.35);
+  border-radius: 9px;
   color: #fca5a5;
+  font-size: 0.78rem;
+  font-weight: 600;
 }
 
-.as-btn-danger:hover:not(:disabled) {
-  background: rgba(248, 113, 113, 0.12);
+.as-btn.as-btn-danger:hover:not(:disabled) {
+  background: rgba(239, 68, 68, 0.22);
+  color: #fecaca;
 }
 
 .as-table tbody tr:hover {

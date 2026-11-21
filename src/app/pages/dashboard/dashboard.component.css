@@ -59,9 +59,9 @@
   padding: 0.4rem 0.875rem;
   background: rgba(239, 68, 68, 0.12);
   border: 1px solid rgba(239, 68, 68, 0.35);
-  border-radius: 8px;
+  border-radius: 9px;
   color: #fca5a5;
-  font-size: 0.8rem;
+  font-size: 0.78rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s;

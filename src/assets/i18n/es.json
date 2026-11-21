@@ -1204,5 +1204,17 @@
   "BREADCRUMB": {
     "STAGE2_REVIEW": "Revisar envío",
     "READINESS_EDIT": "Editar solicitud de readiness"
+  },
+  "DATE_FILTER": {
+    "LABEL": "Enviado entre",
+    "FROM": "Desde",
+    "TO": "Hasta",
+    "START": "Fecha inicial",
+    "END": "Fecha final",
+    "SEP": "a",
+    "CLEAR": "Borrar fechas",
+    "NO_MATCHES": "Ningún envío coincide con los filtros actuales.",
+    "INVALID_RANGE": "La fecha inicial debe ser anterior o igual a la fecha final.",
+    "CLEAR_ALL": "Borrar filtros"
   }
 }

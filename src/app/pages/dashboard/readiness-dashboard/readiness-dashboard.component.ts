@@ -9,11 +9,12 @@ import {
 import { BreadcrumbService } from '../../../services/breadcrumb.service';
 import { NotificationService } from '../../../services/notification.service';
 import { TranslatePipe } from '@ngx-translate/core';
+import { DatePickerComponent } from '../../../shared/components/date-picker/date-picker.component';
 
 @Component({
   selector: 'app-readiness-dashboard',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, TranslatePipe],
+  imports: [CommonModule, FormsModule, RouterLink, DatePickerComponent, TranslatePipe],
   templateUrl: './readiness-dashboard.component.html',
   styleUrl: './readiness-dashboard.component.css',
 })
@@ -23,6 +24,8 @@ export class ReadinessDashboardComponent implements OnInit, OnDestroy {
   loadError = '';
   search = '';
   showArchived = false;
+  dateFrom = '';
+  dateTo = '';
   selectedIds = new Set<string>();
 
   constructor(
@@ -105,12 +108,16 @@ export class ReadinessDashboardComponent implements OnInit, OnDestroy {
   }
 
   get filteredSubmissions(): ReadinessSubmissionSummary[] {
+    if (this.hasInvalidDateRange) return [];
     const query = this.search.trim().toLowerCase();
     const archived = this.submissions.filter(
       (submission) => Boolean(submission.archived) === this.showArchived,
     );
-    if (!query) return archived;
-    return archived.filter((submission) =>
+    const inRange = archived.filter((submission) =>
+      this.matchesDateRange(submission.submittedAt),
+    );
+    if (!query) return inRange;
+    return inRange.filter((submission) =>
       [
         submission.organization?.name,
         submission.organization?.acronym,
@@ -122,6 +129,55 @@ export class ReadinessDashboardComponent implements OnInit, OnDestroy {
         .filter(Boolean)
         .some((value) => String(value).toLowerCase().includes(query)),
     );
+  }
+
+  get hasInvalidDateRange(): boolean {
+    return Boolean(this.dateFrom && this.dateTo && this.dateFrom > this.dateTo);
+  }
+
+  get hasActiveFilters(): boolean {
+    return Boolean(this.search.trim() || this.dateFrom || this.dateTo);
+  }
+
+  onDateFromChange(value: string): void {
+    this.dateFrom = value;
+  }
+
+  onDateToChange(value: string): void {
+    this.dateTo = value;
+  }
+
+  clearDateFilter(): void {
+    this.dateFrom = '';
+    this.dateTo = '';
+  }
+
+  clearFilters(): void {
+    this.search = '';
+    this.clearDateFilter();
+  }
+
+  private matchesDateRange(iso: string): boolean {
+    if (!this.dateFrom && !this.dateTo) return true;
+    const submitted = new Date(iso);
+    if (Number.isNaN(submitted.getTime())) return false;
+    if (this.dateFrom && submitted < this.parseDateStart(this.dateFrom)) {
+      return false;
+    }
+    if (this.dateTo && submitted > this.parseDateEnd(this.dateTo)) {
+      return false;
+    }
+    return true;
+  }
+
+  private parseDateStart(dateStr: string): Date {
+    const [year, month, day] = dateStr.split('-').map(Number);
+    return new Date(year, month - 1, day, 0, 0, 0, 0);
+  }
+
+  private parseDateEnd(dateStr: string): Date {
+    const [year, month, day] = dateStr.split('-').map(Number);
+    return new Date(year, month - 1, day, 23, 59, 59, 999);
   }
 
   formatDate(iso: string): string {

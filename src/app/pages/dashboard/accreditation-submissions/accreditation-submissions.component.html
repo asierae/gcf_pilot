@@ -47,6 +47,37 @@
           {{ "ACCREDITATION_SUBMISSIONS.FILTER_PRESCREENING" | translate }}
         </option>
       </select>
+      <div class="as-date-filter">
+        <span class="as-date-label">
+          <svg viewBox="0 0 20 20" fill="none" aria-hidden="true">
+            <rect x="3" y="4.5" width="14" height="12" rx="2" stroke="currentColor" stroke-width="1.4" />
+            <path d="M3 8.5h14M7 2.5v3M13 2.5v3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" />
+          </svg>
+          {{ "DATE_FILTER.LABEL" | translate }}
+        </span>
+        <app-date-picker
+          [label]="'DATE_FILTER.FROM' | translate"
+          [placeholder]="'DATE_FILTER.START' | translate"
+          [ariaLabel]="'DATE_FILTER.START' | translate"
+          [value]="dateFrom"
+          [maxDate]="dateTo"
+          (valueChange)="onDateFromChange($event)"
+        />
+        <span class="as-date-sep">{{ "DATE_FILTER.SEP" | translate }}</span>
+        <app-date-picker
+          [label]="'DATE_FILTER.TO' | translate"
+          [placeholder]="'DATE_FILTER.END' | translate"
+          [ariaLabel]="'DATE_FILTER.END' | translate"
+          [value]="dateTo"
+          [minDate]="dateFrom"
+          (valueChange)="onDateToChange($event)"
+        />
+        @if (dateFrom || dateTo) {
+          <button type="button" class="as-date-clear" (click)="clearDateFilter()">
+            {{ "DATE_FILTER.CLEAR" | translate }}
+          </button>
+        }
+      </div>
       <button type="button" class="as-btn" (click)="toggleArchivedView()">
         @if (showArchived) {
           {{ "ARCHIVE.ACTIVE" | translate }}
@@ -64,6 +95,19 @@
       }
     </div>
 
+    @if (filteredSubmissions.length === 0) {
+      <div class="as-empty">
+        <span aria-hidden="true">🔎</span>
+        <p>
+          {{ (hasInvalidDateRange ? "DATE_FILTER.INVALID_RANGE" : "DATE_FILTER.NO_MATCHES") | translate }}
+        </p>
+        @if (dateFrom || dateTo) {
+          <button type="button" class="as-btn" (click)="clearDateFilter()">
+            {{ "DATE_FILTER.CLEAR" | translate }}
+          </button>
+        }
+      </div>
+    } @else {
     <div class="as-table-wrap">
       <table class="as-table">
         <thead>
@@ -81,9 +125,9 @@
               {{ "ACCREDITATION_SUBMISSIONS.COL_ORGANIZATION" | translate }}
             </th>
             <th (click)="sortBy('country')">{{ "ACCREDITATION_SUBMISSIONS.COL_COUNTRY" | translate }}</th>
-            <th (click)="sortBy('submittedAt')">{{ "ACCREDITATION_SUBMISSIONS.COL_SUBMITTED" | translate }}</th>
             <th>{{ "ACCREDITATION_SUBMISSIONS.COL_STATUS" | translate }}</th>
             <th>{{ "ACCREDITATION_SUBMISSIONS.COL_CONTACT" | translate }}</th>
+            <th (click)="sortBy('submittedAt')">{{ "ACCREDITATION_SUBMISSIONS.COL_SUBMITTED" | translate }}</th>
             <th>{{ "ACCREDITATION_SUBMISSIONS.COL_ACTIONS" | translate }}</th>
           </tr>
         </thead>
@@ -112,16 +156,16 @@
                 }
               </td>
               <td>{{ submission.country || "—" }}</td>
-              <td>{{ formatDate(submission.submittedAt) }}</td>
               <td>
                 <select
-                  class="as-status"
-                  [value]="submission.status"
+                  [class]="getStatusClass(submission.status)"
                   (change)="onStatusChange(submission.id, $event)"
                   [attr.aria-label]="'ACCREDITATION_SUBMISSIONS.COL_STATUS' | translate"
                 >
                   @for (status of statusOptions; track status) {
-                    <option [value]="status">{{ status }}</option>
+                    <option [value]="status" [selected]="status === submission.status">
+                      {{ status }}
+                    </option>
                   }
                 </select>
               </td>
@@ -143,6 +187,7 @@
                   —
                 }
               </td>
+              <td>{{ formatDate(submission.submittedAt) }}</td>
               <td class="as-actions">
                 <a
                   class="as-icon-btn"
@@ -178,5 +223,6 @@
         </button>
       </div>
     </footer>
+    }
   }
 </div>

@@ -1204,5 +1204,17 @@
   "BREADCRUMB": {
     "STAGE2_REVIEW": "Xem xét hồ sơ",
     "READINESS_EDIT": "Chỉnh sửa hồ sơ sẵn sàng"
+  },
+  "DATE_FILTER": {
+    "LABEL": "Đã gửi trong khoảng",
+    "FROM": "Từ",
+    "TO": "Đến",
+    "START": "Ngày bắt đầu",
+    "END": "Ngày kết thúc",
+    "SEP": "đến",
+    "CLEAR": "Xóa ngày",
+    "NO_MATCHES": "Không có hồ sơ nào khớp với bộ lọc hiện tại.",
+    "INVALID_RANGE": "Ngày bắt đầu phải trước hoặc bằng ngày kết thúc.",
+    "CLEAR_ALL": "Xóa bộ lọc"
   }
 }

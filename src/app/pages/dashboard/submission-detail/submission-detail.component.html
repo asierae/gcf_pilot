@@ -4,13 +4,10 @@
       <span class="empty-icon">🔍</span>
       <h2>Submission not found</h2>
       <p>The requested submission does not exist or was removed.</p>
-      <a routerLink="/dashboard" class="btn-back">← Back to Dashboard</a>
     </div>
   </div>
 } @else {
   <div class="detail-page" [class.edit-active]="editMode">
-    <a routerLink="/dashboard" class="btn-back">← Back to Dashboard</a>
-
     <header class="detail-header">
       <div class="detail-header-main">
         <div class="detail-header-top">

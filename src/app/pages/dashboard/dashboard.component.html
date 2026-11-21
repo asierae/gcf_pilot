@@ -187,22 +187,6 @@
               <th>
                 <button
                   class="sort-btn"
-                  [class.sort-active]="sortColumn === 'date'"
-                  (click)="sortBy('date')"
-                >
-                  Submitted
-                  <span class="sort-icon">{{
-                    sortColumn === "date"
-                      ? sortDir === "asc"
-                        ? "↑"
-                        : "↓"
-                      : "↕"
-                  }}</span>
-                </button>
-              </th>
-              <th>
-                <button
-                  class="sort-btn"
                   [class.sort-active]="sortColumn === 'applicantName'"
                   (click)="sortBy('applicantName')"
                 >
@@ -312,6 +296,22 @@
                   }}</span>
                 </button>
               </th>
+              <th>
+                <button
+                  class="sort-btn"
+                  [class.sort-active]="sortColumn === 'date'"
+                  (click)="sortBy('date')"
+                >
+                  Submitted
+                  <span class="sort-icon">{{
+                    sortColumn === "date"
+                      ? sortDir === "asc"
+                        ? "↑"
+                        : "↓"
+                      : "↕"
+                  }}</span>
+                </button>
+              </th>
               <th>{{ "ACCREDITATION_SUBMISSIONS.COL_ACTIONS" | translate }}</th>
             </tr>
           </thead>
@@ -335,7 +335,6 @@
                     <span class="checkbox-box"></span>
                   </label>
                 </td>
-                <td class="col-date">{{ formatDate(submission.date) }}</td>
                 <td class="col-name">
                   {{ getSummary(submission).applicantName }}
                 </td>
@@ -368,6 +367,7 @@
                     }
                   </select>
                 </td>
+                <td class="col-date">{{ formatDate(submission.date) }}</td>
                 <td class="col-action">
                   <a
                     [routerLink]="['/dashboard/submission', submission.id]"

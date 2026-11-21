@@ -1205,5 +1205,17 @@
   "BREADCRUMB": {
     "STAGE2_REVIEW": "Review submission",
     "READINESS_EDIT": "Edit readiness application"
+  },
+  "DATE_FILTER": {
+    "LABEL": "Submitted between",
+    "FROM": "From",
+    "TO": "To",
+    "START": "Start date",
+    "END": "End date",
+    "SEP": "to",
+    "CLEAR": "Clear dates",
+    "NO_MATCHES": "No submissions match the current filters.",
+    "INVALID_RANGE": "Start date must be before or equal to end date.",
+    "CLEAR_ALL": "Clear filters"
   }
 }

@@ -1204,5 +1204,17 @@
   "BREADCRUMB": {
     "STAGE2_REVIEW": "查看提交",
     "READINESS_EDIT": "编辑准备度申请"
+  },
+  "DATE_FILTER": {
+    "LABEL": "提交时间介于",
+    "FROM": "从",
+    "TO": "至",
+    "START": "开始日期",
+    "END": "结束日期",
+    "SEP": "至",
+    "CLEAR": "清除日期",
+    "NO_MATCHES": "没有符合当前筛选条件的提交。",
+    "INVALID_RANGE": "开始日期必须早于或等于结束日期。",
+    "CLEAR_ALL": "清除筛选"
   }
 }

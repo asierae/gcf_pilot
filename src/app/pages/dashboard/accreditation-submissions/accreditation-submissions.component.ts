@@ -6,13 +6,14 @@ import { ApiService } from "../../../services/api.service";
 import { NotificationService } from "../../../services/notification.service";
 import { AccreditationSubmissionSummary } from "../../../models/organization.model";
 import { SUBMISSION_STATUSES } from "../../../models/applicant.model";
+import { DatePickerComponent } from "../../../shared/components/date-picker/date-picker.component";
 
 type TypeFilter = "all" | "accreditation" | "prescreening";
 
 @Component({
   selector: "app-accreditation-submissions",
   standalone: true,
-  imports: [CommonModule, RouterLink, TranslatePipe],
+  imports: [CommonModule, RouterLink, DatePickerComponent, TranslatePipe],
   templateUrl: "./accreditation-submissions.component.html",
   styleUrl: "./accreditation-submissions.component.css",
 })
@@ -28,6 +29,8 @@ export class AccreditationSubmissionsComponent implements OnInit {
   searchQuery = "";
   typeFilter: TypeFilter = "all";
   showArchived = false;
+  dateFrom = "";
+  dateTo = "";
   selectedIds = new Set<string>();
   sortColumn: keyof AccreditationSubmissionSummary = "submittedAt";
   sortDir: "asc" | "desc" = "desc";
@@ -56,6 +59,8 @@ export class AccreditationSubmissionsComponent implements OnInit {
   }
 
   get filteredSubmissions(): AccreditationSubmissionSummary[] {
+    if (this.hasInvalidDateRange) return [];
+
     const query = this.searchQuery.trim().toLowerCase();
     const filtered = this.submissions.filter((submission) => {
       if (Boolean(submission.archived) !== this.showArchived) return false;
@@ -65,6 +70,7 @@ export class AccreditationSubmissionsComponent implements OnInit {
       ) {
         return false;
       }
+      if (!this.matchesDateRange(submission.submittedAt)) return false;
       if (!query) return true;
       return [
         submission.organizationName,
@@ -108,6 +114,30 @@ export class AccreditationSubmissionsComponent implements OnInit {
 
   get archivedCount(): number {
     return this.submissions.filter((submission) => submission.archived).length;
+  }
+
+  get hasInvalidDateRange(): boolean {
+    return Boolean(this.dateFrom && this.dateTo && this.dateFrom > this.dateTo);
+  }
+
+  onDateFromChange(value: string): void {
+    this.dateFrom = value;
+    this.currentPage = 1;
+  }
+
+  onDateToChange(value: string): void {
+    this.dateTo = value;
+    this.currentPage = 1;
+  }
+
+  clearDateFilter(): void {
+    this.dateFrom = "";
+    this.dateTo = "";
+    this.currentPage = 1;
+  }
+
+  getStatusClass(status: string): string {
+    return `as-status status-${(status || "pending").toLowerCase()}`;
   }
 
   get visibleIds(): string[] {
@@ -245,5 +275,28 @@ export class AccreditationSubmissionsComponent implements OnInit {
       hour: "2-digit",
       minute: "2-digit",
     });
+  }
+
+  private matchesDateRange(iso: string): boolean {
+    if (!this.dateFrom && !this.dateTo) return true;
+    const submitted = new Date(iso);
+    if (Number.isNaN(submitted.getTime())) return false;
+    if (this.dateFrom && submitted < this.parseDateStart(this.dateFrom)) {
+      return false;
+    }
+    if (this.dateTo && submitted > this.parseDateEnd(this.dateTo)) {
+      return false;
+    }
+    return true;
+  }
+
+  private parseDateStart(dateStr: string): Date {
+    const [year, month, day] = dateStr.split("-").map(Number);
+    return new Date(year, month - 1, day, 0, 0, 0, 0);
+  }
+
+  private parseDateEnd(dateStr: string): Date {
+    const [year, month, day] = dateStr.split("-").map(Number);
+    return new Date(year, month - 1, day, 23, 59, 59, 999);
   }
 }
