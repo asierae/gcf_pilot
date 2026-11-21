@@ -1,0 +1,127 @@
+<div class="as-page">
+  <header class="as-header">
+    <div>
+      <p class="as-eyebrow">{{ "ACCREDITATION_SUBMISSIONS.EYEBROW" | translate }}</p>
+      <h2>{{ "ACCREDITATION_SUBMISSIONS.TITLE" | translate }}</h2>
+      <p class="as-subtitle">{{ "ACCREDITATION_SUBMISSIONS.SUBTITLE" | translate }}</p>
+    </div>
+    <span class="as-count">
+      {{ filteredSubmissions.length }} / {{ submissions.length }}
+      {{ "ACCREDITATION_SUBMISSIONS.COUNT_SUFFIX" | translate }}
+    </span>
+  </header>
+
+  @if (loading) {
+    <div class="as-empty">
+      <span aria-hidden="true">⏳</span>
+      <p>{{ "ACCREDITATION_SUBMISSIONS.LOADING" | translate }}</p>
+    </div>
+  } @else if (loadError) {
+    <div class="as-empty">
+      <span aria-hidden="true">⚠️</span>
+      <p>{{ loadError }}</p>
+      <button type="button" class="as-btn" (click)="loadSubmissions()">
+        {{ "ACCREDITATION_SUBMISSIONS.RETRY" | translate }}
+      </button>
+    </div>
+  } @else if (submissions.length === 0) {
+    <div class="as-empty">
+      <span aria-hidden="true">📭</span>
+      <p>{{ "ACCREDITATION_SUBMISSIONS.EMPTY" | translate }}</p>
+    </div>
+  } @else {
+    <div class="as-toolbar">
+      <input
+        type="search"
+        class="as-search"
+        [placeholder]="'ACCREDITATION_SUBMISSIONS.SEARCH' | translate"
+        [value]="searchQuery"
+        (input)="onSearchInput($event)"
+      />
+      <select class="as-filter" [value]="typeFilter" (change)="onTypeFilterChange($event)">
+        <option value="all">{{ "ACCREDITATION_SUBMISSIONS.FILTER_ALL" | translate }}</option>
+        <option value="accreditation">
+          {{ "ACCREDITATION_SUBMISSIONS.FILTER_ACCREDITATION" | translate }}
+        </option>
+        <option value="prescreening">
+          {{ "ACCREDITATION_SUBMISSIONS.FILTER_PRESCREENING" | translate }}
+        </option>
+      </select>
+    </div>
+
+    <div class="as-table-wrap">
+      <table class="as-table">
+        <thead>
+          <tr>
+            <th (click)="sortBy('type')">{{ "ACCREDITATION_SUBMISSIONS.COL_TYPE" | translate }}</th>
+            <th (click)="sortBy('organizationName')">
+              {{ "ACCREDITATION_SUBMISSIONS.COL_ORGANIZATION" | translate }}
+            </th>
+            <th (click)="sortBy('country')">{{ "ACCREDITATION_SUBMISSIONS.COL_COUNTRY" | translate }}</th>
+            <th (click)="sortBy('submittedAt')">{{ "ACCREDITATION_SUBMISSIONS.COL_SUBMITTED" | translate }}</th>
+            <th>{{ "ACCREDITATION_SUBMISSIONS.COL_PRE_STATUS" | translate }}</th>
+            <th>{{ "ACCREDITATION_SUBMISSIONS.COL_ACCR_STATUS" | translate }}</th>
+            <th>{{ "ACCREDITATION_SUBMISSIONS.COL_CONTACT" | translate }}</th>
+            <th>{{ "ACCREDITATION_SUBMISSIONS.COL_ACTIONS" | translate }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (submission of paginatedSubmissions; track submission.id) {
+            <tr>
+              <td>
+                <span
+                  class="as-badge"
+                  [class.as-badge-accred]="submission.type === 'accreditation'"
+                >
+                  {{ typeLabel(submission.type) }}
+                </span>
+              </td>
+              <td>
+                <strong>{{ submission.organizationName }}</strong>
+                @if (submission.acronym) {
+                  <span class="as-muted">({{ submission.acronym }})</span>
+                }
+              </td>
+              <td>{{ submission.country || "—" }}</td>
+              <td>{{ formatDate(submission.submittedAt) }}</td>
+              <td>{{ statusLabel(submission.preScreeningStatus) }}</td>
+              <td>{{ statusLabel(submission.accreditationStatus) }}</td>
+              <td>
+                @if (submission.contactEmail) {
+                  <a [href]="'mailto:' + submission.contactEmail">{{ submission.contactEmail }}</a>
+                } @else {
+                  —
+                }
+              </td>
+              <td>
+                <a
+                  class="as-btn"
+                  [routerLink]="['/stage2']"
+                  [queryParams]="{ org: submission.organizationId, submission: submission.id }"
+                >
+                  {{ "ACCREDITATION_SUBMISSIONS.VIEW" | translate }}
+                </a>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <footer class="as-pagination">
+      <span>
+        {{ pageStart }}–{{ pageEnd }} {{ "ACCREDITATION_SUBMISSIONS.OF" | translate }}
+        {{ filteredSubmissions.length }}
+      </span>
+      <div class="as-pagination-actions">
+        <button type="button" class="as-btn" [disabled]="currentPage === 1" (click)="previousPage()">
+          {{ "ACCREDITATION_SUBMISSIONS.PREV" | translate }}
+        </button>
+        <span>{{ currentPage }} / {{ totalPages }}</span>
+        <button type="button" class="as-btn" [disabled]="currentPage === totalPages" (click)="nextPage()">
+          {{ "ACCREDITATION_SUBMISSIONS.NEXT" | translate }}
+        </button>
+      </div>
+    </footer>
+  }
+</div>

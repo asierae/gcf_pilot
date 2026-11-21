@@ -735,7 +735,7 @@
     "PRICING": "方案与价格",
     "PRESCREENING": "预筛选",
     "ACCREDITATION": "认证",
-    "READINESS": "准备度申请",
+    "READINESS": "Readiness",
     "MY_FORMS": "我的表单",
     "MY_ORGANIZATION": "我的组织",
     "ACCREDITATION_SUBM": "预筛选提交",
@@ -750,7 +750,8 @@
     "MANAGE_ACCOUNTS": "管理账户和角色",
     "SEND_EMAIL": "发送邮件",
     "SEND_EMAIL_DESC": "向门户用户发送邮件",
-    "SETTINGS_MENU": "设置菜单"
+    "SETTINGS_MENU": "设置菜单",
+    "ACCREDITATION_SUBMISSIONS": "认证提交"
   },
   "FOOTER": {
     "DISCLAIMER": "我们的应用程序提供工具和建议，以优化您的资助申请流程。请注意，我们不是资助机构，不保证资助获批或资金到账。我们的服务旨在提高您的申请质量和准备程度；但最终资助决定完全由资助机构作出。"
@@ -1150,5 +1151,39 @@
   },
   "USER": {
     "EMAIL_EXISTS": "该邮箱已有账户，请先登录后再继续。"
+  },
+  "ACCREDITATION_SUBMISSIONS": {
+    "EYEBROW": "认证",
+    "TITLE": "认证提交",
+    "SUBTITLE": "完整的认证申请和已通过的预筛选。",
+    "COUNT_SUFFIX": "份提交",
+    "SEARCH": "按组织、国家或联系人筛选…",
+    "FILTER_ALL": "全部",
+    "FILTER_ACCREDITATION": "认证",
+    "FILTER_PRESCREENING": "预筛选",
+    "COL_TYPE": "途径",
+    "COL_ORGANIZATION": "组织",
+    "COL_COUNTRY": "国家",
+    "COL_SUBMITTED": "提交时间",
+    "COL_PRE_STATUS": "预筛选",
+    "COL_ACCR_STATUS": "认证",
+    "COL_CONTACT": "联系人",
+    "COL_ACTIONS": "操作",
+    "VIEW": "打开完整表单",
+    "TYPE_ACCREDITATION": "认证",
+    "TYPE_PRESCREENING": "预筛选",
+    "STATUS_PENDING": "待处理",
+    "STATUS_PASSED": "已通过",
+    "STATUS_FAILED": "未通过",
+    "STATUS_IN_REVIEW": "审核中",
+    "STATUS_ACCREDITED": "已认证",
+    "STATUS_NOT_ACCREDITED": "未认证",
+    "STATUS_NOT_STARTED": "未开始",
+    "LOADING": "正在加载提交…",
+    "EMPTY": "暂无认证提交。",
+    "RETRY": "重试",
+    "OF": "/",
+    "PREV": "← 上一页",
+    "NEXT": "下一页 →"
   }
 }

@@ -1087,6 +1087,15 @@ async function deleteOrganizationAdmin(
     await env.DB.prepare('DELETE FROM applicants WHERE id = ?')
       .bind(id)
       .run();
+    await env.DB.prepare('DELETE FROM accreditation_submissions WHERE organization_id = ?')
+      .bind(id)
+      .run();
+    await env.DB.prepare('DELETE FROM stage1_drafts WHERE organization_id = ?')
+      .bind(id)
+      .run();
+    await env.DB.prepare('DELETE FROM stage2_drafts WHERE organization_id = ?')
+      .bind(id)
+      .run();
     await env.DB.prepare('DELETE FROM readiness_applications WHERE organization_id = ?')
       .bind(id)
       .run();
@@ -1183,51 +1192,20 @@ async function deleteDraft(
   return empty();
 }
 
-/* Stage 2 drafts are keyed by organization AND application year. */
+/* Stage 2 drafts: one autosaved draft per organization. The legacy `year`
+ * column is kept for schema compatibility and is always 0. */
 
-function assertDraftYear(raw: string): number {
-  if (!/^(19|20)\d{2}$/.test(raw)) {
-    throw new HttpError(400, '"year" is not valid.');
-  }
-  const year = Number(raw);
-  if (year < 2000 || year > new Date().getFullYear() + 1) {
-    throw new HttpError(400, '"year" is out of range.');
-  }
-  return year;
-}
-
-async function listStage2Drafts(env: Env, orgId: string): Promise<Response> {
-  assertEntityId(orgId);
-  const rows = await env.DB.prepare(
-    `SELECT year, updated_at FROM stage2_drafts
-      WHERE organization_id = ? ORDER BY year DESC`,
-  )
-    .bind(orgId)
-    .all<{ year: number; updated_at: string }>();
-  return json({
-    drafts: (rows.results ?? []).map((row) => ({
-      year: row.year,
-      updatedAt: row.updated_at,
-    })),
-  });
-}
-
-async function getStage2Draft(
-  env: Env,
-  orgId: string,
-  year: number,
-): Promise<Response> {
+async function getStage2Draft(env: Env, orgId: string): Promise<Response> {
   assertEntityId(orgId);
   const row = await env.DB.prepare(
     `SELECT data, updated_at FROM stage2_drafts
-      WHERE organization_id = ? AND year = ?`,
+      WHERE organization_id = ? ORDER BY updated_at DESC LIMIT 1`,
   )
-    .bind(orgId, year)
+    .bind(orgId)
     .first<{ data: string; updated_at: string }>();
   return json({
     draft: row
       ? {
-          year,
           data: parseJson<JsonObject>(row.data, {}),
           updatedAt: row.updated_at,
         }
@@ -1239,7 +1217,6 @@ async function putStage2Draft(
   request: Request,
   env: Env,
   orgId: string,
-  year: number,
 ): Promise<Response> {
   assertEntityId(orgId);
   const body = await readJson<{ data?: unknown }>(request);
@@ -1247,25 +1224,19 @@ async function putStage2Draft(
   const now = new Date().toISOString();
   await env.DB.prepare(
     `INSERT INTO stage2_drafts (organization_id, year, data, updated_at)
-     VALUES (?, ?, ?, ?)
+     VALUES (?, 0, ?, ?)
      ON CONFLICT(organization_id, year)
      DO UPDATE SET data = excluded.data, updated_at = excluded.updated_at`,
   )
-    .bind(orgId, year, JSON.stringify(data), now)
+    .bind(orgId, JSON.stringify(data), now)
     .run();
-  return json({ year, updatedAt: now });
+  return json({ updatedAt: now });
 }
 
-async function deleteStage2Draft(
-  env: Env,
-  orgId: string,
-  year: number,
-): Promise<Response> {
+async function deleteStage2Draft(env: Env, orgId: string): Promise<Response> {
   assertEntityId(orgId);
-  await env.DB.prepare(
-    `DELETE FROM stage2_drafts WHERE organization_id = ? AND year = ?`,
-  )
-    .bind(orgId, year)
+  await env.DB.prepare(`DELETE FROM stage2_drafts WHERE organization_id = ?`)
+    .bind(orgId)
     .run();
   return empty();
 }
@@ -3748,6 +3719,165 @@ async function createStage1(request: Request, env: Env): Promise<Response> {
   );
 }
 
+/** Rows shown in the admin "Accreditation Subm." table. */
+async function listAccreditationSubmissions(env: Env): Promise<Response> {
+  const [submissionRows, applicantRows, orgRows] = await Promise.all([
+    env.DB.prepare(
+      `SELECT id, organization_id, submitted_at, data, created_at
+         FROM accreditation_submissions ORDER BY submitted_at DESC`,
+    ).all<{
+      id: string;
+      organization_id: string;
+      submitted_at: string;
+      data: string;
+      created_at: string;
+    }>(),
+    env.DB.prepare(
+      'SELECT id, stage1, stage2, admin, updated_at FROM applicants',
+    ).all<ApplicantRow>(),
+    env.DB.prepare(
+      `SELECT id, name, acronym, country, accreditation_status
+         FROM organizations`,
+    ).all<{
+      id: string;
+      name: string;
+      acronym: string;
+      country: string;
+      accreditation_status: string;
+    }>(),
+  ]);
+
+  const orgById = new Map((orgRows.results ?? []).map((row) => [row.id, row]));
+  const applicantById = new Map(
+    (applicantRows.results ?? []).map((row) => [row.id, row]),
+  );
+  const adminOf = (row: ApplicantRow | undefined) =>
+    parseJson<Partial<ApplicantAdmin>>(row?.admin ?? '{}', {});
+
+  const submissions: JsonObject[] = [];
+
+  for (const row of submissionRows.results ?? []) {
+    const data = parseJson<JsonObject>(row.data, {});
+    const org = orgById.get(row.organization_id);
+    const admin = adminOf(applicantById.get(row.organization_id));
+    submissions.push({
+      id: row.id,
+      organizationId: row.organization_id,
+      submittedAt: row.submitted_at,
+      createdAt: row.created_at,
+      type: 'accreditation',
+      organizationName: readText(data, 'applicantName') || org?.name || row.organization_id,
+      acronym: readText(data, 'applicantAcronym') || org?.acronym || '',
+      country: readText(data, 'headquartersCountry') || org?.country || '',
+      contactName: readText(data, 'primaryContactName'),
+      contactEmail: readText(data, 'primaryContactEmail'),
+      preScreeningStatus: admin.status ?? 'Pending',
+      accreditationStatus: org?.accreditation_status ?? 'not_started',
+    });
+  }
+
+  // Approved pre-screenings belong to the accreditation journey too. They are
+  // listed here so the admin can open the full form from one place.
+  for (const row of applicantRows.results ?? []) {
+    const admin = adminOf(row);
+    if (admin.status !== 'Passed' || row.stage2) continue;
+    const stage1 = normalizeStage(parseJson<unknown>(row.stage1, null));
+    const data = stage1?.data ?? {};
+    const org = orgById.get(row.id);
+    submissions.push({
+      id: `prescreening:${row.id}`,
+      organizationId: row.id,
+      submittedAt: stage1?.submittedAt ?? row.updated_at,
+      createdAt: row.updated_at,
+      type: 'prescreening',
+      organizationName: readText(data, 'applicantName') || org?.name || row.id,
+      acronym: readText(data, 'applicantAcronym') || org?.acronym || '',
+      country: readText(data, 'headquartersCountry') || org?.country || '',
+      contactName: readText(data, 'primaryContactName'),
+      contactEmail: readText(data, 'primaryContactEmail'),
+      preScreeningStatus: 'Passed',
+      accreditationStatus: org?.accreditation_status ?? 'not_started',
+    });
+  }
+
+  submissions.sort(
+    (a, b) =>
+      dashboardText(b['submittedAt']).localeCompare(dashboardText(a['submittedAt'])),
+  );
+  return json({ submissions });
+}
+
+/** Full payload of one accreditation submission (or an approved pre-screening). */
+async function getAccreditationSubmission(env: Env, id: string): Promise<Response> {
+  if (id.startsWith('prescreening:')) {
+    const orgId = id.slice('prescreening:'.length);
+    assertEntityId(orgId);
+    const row = await env.DB.prepare('SELECT * FROM applicants WHERE id = ?')
+      .bind(orgId)
+      .first<ApplicantRow>();
+    const stage1 = row ? normalizeStage(parseJson<unknown>(row.stage1, null)) : null;
+    if (!stage1) return json({ error: 'Accreditation submission not found.' }, 404);
+    return json({
+      submission: {
+        id,
+        organizationId: orgId,
+        submittedAt: stage1.submittedAt,
+        data: stage1.data,
+        stage1Data: stage1.data,
+      },
+    });
+  }
+
+  const row = await env.DB.prepare(
+    `SELECT id, organization_id, submitted_at, data, stage1_data
+       FROM accreditation_submissions WHERE id = ?`,
+  )
+    .bind(id)
+    .first<{
+      id: string;
+      organization_id: string;
+      submitted_at: string;
+      data: string;
+      stage1_data: string | null;
+    }>();
+  if (!row) return json({ error: 'Accreditation submission not found.' }, 404);
+  return json({
+    submission: {
+      id: row.id,
+      organizationId: row.organization_id,
+      submittedAt: row.submitted_at,
+      data: parseJson<JsonObject>(row.data, {}),
+      stage1Data: row.stage1_data
+        ? parseJson<JsonObject>(row.stage1_data, {})
+        : {},
+    },
+  });
+}
+
+/** Keep every full accreditation application, not just the latest one. */
+async function recordAccreditationSubmission(
+  env: Env,
+  organizationId: string,
+  submittedAt: string,
+  data: JsonObject,
+  stage1Data: JsonObject,
+): Promise<void> {
+  await env.DB.prepare(
+    `INSERT INTO accreditation_submissions
+       (id, organization_id, submitted_at, data, stage1_data, created_at)
+     VALUES (?, ?, ?, ?, ?, ?)`,
+  )
+    .bind(
+      `sub-${organizationId}-${crypto.randomUUID()}`,
+      organizationId,
+      submittedAt,
+      JSON.stringify(data),
+      Object.keys(stage1Data).length ? JSON.stringify(stage1Data) : null,
+      submittedAt,
+    )
+    .run();
+}
+
 async function createStage2(request: Request, env: Env): Promise<Response> {
   const body = await readJson<{ data?: unknown; stage1Data?: unknown; id?: unknown }>(
     request,
@@ -3782,6 +3912,16 @@ async function createStage2(request: Request, env: Env): Promise<Response> {
         id,
       )
       .run();
+
+    await recordAccreditationSubmission(
+      env,
+      id,
+      now,
+      data,
+      Object.keys(stage1Data).length
+        ? stage1Data
+        : (applicant.stage1?.data ?? {}),
+    );
 
     await notifySubmission(env, applicantSubmissionNotice('stage 2', data, now));
     await notifyStage2UnderReview(env, id, data);
@@ -3837,6 +3977,8 @@ async function createStage2(request: Request, env: Env): Promise<Response> {
       JSON.stringify(applicant.extensions),
     )
     .run();
+
+  await recordAccreditationSubmission(env, id, now, data, stage1Data);
 
   await notifySubmission(env, applicantSubmissionNotice('stage 2', data, now));
   await notifyStage2UnderReview(env, id, data);
@@ -5388,6 +5530,23 @@ async function handleApi(request: Request, env: Env, path: string): Promise<Resp
     return methodNotAllowed('GET, DELETE');
   }
 
+  if (path === '/api/accreditation/submissions') {
+    if (method !== 'GET') return methodNotAllowed('GET');
+    return withAdmin(env, request, () => listAccreditationSubmissions(env));
+  }
+
+  const accreditationSubmissionMatch =
+    /^\/api\/accreditation\/submissions\/([^/]+)$/.exec(path);
+  if (accreditationSubmissionMatch) {
+    if (method !== 'GET') return methodNotAllowed('GET');
+    return withAdmin(env, request, () =>
+      getAccreditationSubmission(
+        env,
+        decodeURIComponent(accreditationSubmissionMatch[1]),
+      ),
+    );
+  }
+
   if (path === '/api/applicants/stage1') {
     if (method !== 'POST') return methodNotAllowed('POST');
     return createStage1(request, env);
@@ -5474,20 +5633,13 @@ async function handleApi(request: Request, env: Env, path: string): Promise<Resp
     return methodNotAllowed('GET');
   }
 
-  // Stage 2 drafts: list years, or read/write/delete one year's draft.
-  const stage2DraftListMatch = /^\/api\/drafts\/stage2\/([^/]+)$/.exec(path);
-  if (stage2DraftListMatch) {
-    if (method !== 'GET') return methodNotAllowed('GET');
-    return listStage2Drafts(env, decodeURIComponent(stage2DraftListMatch[1]));
-  }
-
-  const stage2DraftMatch = /^\/api\/drafts\/stage2\/([^/]+)\/([^/]+)$/.exec(path);
+  // Stage 2 drafts: one autosaved draft per organization.
+  const stage2DraftMatch = /^\/api\/drafts\/stage2\/([^/]+)$/.exec(path);
   if (stage2DraftMatch) {
     const orgId = decodeURIComponent(stage2DraftMatch[1]);
-    const year = assertDraftYear(decodeURIComponent(stage2DraftMatch[2]));
-    if (method === 'GET') return getStage2Draft(env, orgId, year);
-    if (method === 'PUT' || method === 'POST') return putStage2Draft(request, env, orgId, year);
-    if (method === 'DELETE') return deleteStage2Draft(env, orgId, year);
+    if (method === 'GET') return getStage2Draft(env, orgId);
+    if (method === 'PUT' || method === 'POST') return putStage2Draft(request, env, orgId);
+    if (method === 'DELETE') return deleteStage2Draft(env, orgId);
     return methodNotAllowed('GET, PUT, DELETE');
   }
 

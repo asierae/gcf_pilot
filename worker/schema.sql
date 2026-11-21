@@ -124,10 +124,12 @@ CREATE TABLE IF NOT EXISTS readiness_drafts (
   updated_at      TEXT NOT NULL
 );
 
--- Stage 2 drafts: one autosaved draft per organization AND application year.
+-- Stage 2 drafts: one autosaved draft per organization. `year` is a legacy
+-- column kept for schema compatibility and is always 0 (migration consolidates
+-- the old per-year drafts into a single row).
 CREATE TABLE IF NOT EXISTS stage2_drafts (
   organization_id TEXT NOT NULL,
-  year            INTEGER NOT NULL,
+  year            INTEGER NOT NULL DEFAULT 0,
   data            TEXT NOT NULL,
   updated_at      TEXT NOT NULL,
   PRIMARY KEY (organization_id, year)
@@ -135,6 +137,21 @@ CREATE TABLE IF NOT EXISTS stage2_drafts (
 
 CREATE INDEX IF NOT EXISTS idx_stage2_drafts_updated_at
   ON stage2_drafts (organization_id, updated_at DESC);
+
+-- Full accreditation applications. A new row is written on every Stage 2
+-- submission so the admin keeps the history; applicants.stage2 stays the
+-- latest submission used by the dashboards.
+CREATE TABLE IF NOT EXISTS accreditation_submissions (
+  id              TEXT PRIMARY KEY,
+  organization_id TEXT NOT NULL,
+  submitted_at    TEXT NOT NULL,
+  data            TEXT NOT NULL,
+  stage1_data     TEXT,
+  created_at      TEXT NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_accreditation_submissions_org
+  ON accreditation_submissions (organization_id, submitted_at DESC);
 
 CREATE TABLE IF NOT EXISTS readiness_applications (
   organization_id TEXT PRIMARY KEY,

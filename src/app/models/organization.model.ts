@@ -61,12 +61,30 @@ export interface OrganizationForms {
 export interface OrganizationDraft {
   data: Record<string, unknown>;
   updatedAt: string;
-  year?: number;
 }
 
-export interface Stage2DraftSummary {
-  year: number;
-  updatedAt: string;
+/** Summary row returned by the admin accreditation submissions table. */
+export interface AccreditationSubmissionSummary {
+  id: string;
+  organizationId: string;
+  submittedAt: string;
+  createdAt: string;
+  type: "accreditation" | "prescreening";
+  organizationName: string;
+  acronym: string;
+  country: string;
+  contactName: string;
+  contactEmail: string;
+  preScreeningStatus: string;
+  accreditationStatus: string;
+}
+
+export interface AccreditationSubmissionDetail {
+  id: string;
+  organizationId: string;
+  submittedAt: string;
+  data: Record<string, unknown>;
+  stage1Data: Record<string, unknown>;
 }
 
 export interface OrganizationFile {

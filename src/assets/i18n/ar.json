@@ -735,7 +735,7 @@
     "PRICING": "الخطط والأسعار",
     "PRESCREENING": "الفحص الأولي",
     "ACCREDITATION": "الاعتماد",
-    "READINESS": "طلب الجاهزية",
+    "READINESS": "Readiness",
     "MY_FORMS": "نماذجي",
     "MY_ORGANIZATION": "مؤسستي",
     "ACCREDITATION_SUBM": "طلبات الفحص الأولي",
@@ -750,7 +750,8 @@
     "MANAGE_ACCOUNTS": "إدارة الحسابات والأدوار",
     "SEND_EMAIL": "إرسال بريد إلكتروني",
     "SEND_EMAIL_DESC": "إرسال بريد إلى مستخدمي البوابة",
-    "SETTINGS_MENU": "قائمة الإعدادات"
+    "SETTINGS_MENU": "قائمة الإعدادات",
+    "ACCREDITATION_SUBMISSIONS": "طلبات الاعتماد"
   },
   "FOOTER": {
     "DISCLAIMER": "يقدم تطبيقنا أدوات وإرشادات لتحسين عملية التقدم بطلب المنح. يرجى ملاحظة أننا لسنا جهة تمويل ولا نضمن الموافقة على المنح أو استلام الأموال. تهدف خدماتنا إلى تحسين جودة طلبك وجاهزيته؛ ومع ذلك، تقع القرارات النهائية بشأن التمويل على عاتق الجهات المانحة للمنح وحدها."
@@ -1150,5 +1151,39 @@
   },
   "USER": {
     "EMAIL_EXISTS": "يوجد حساب بهذا البريد الإلكتروني بالفعل. سجّل الدخول للمتابعة."
+  },
+  "ACCREDITATION_SUBMISSIONS": {
+    "EYEBROW": "الاعتماد",
+    "TITLE": "طلبات الاعتماد",
+    "SUBTITLE": "طلبات الاعتماد الكاملة والفحوص الأولية المعتمدة.",
+    "COUNT_SUFFIX": "طلب",
+    "SEARCH": "تصفية حسب المؤسسة أو البلد أو جهة الاتصال…",
+    "FILTER_ALL": "الكل",
+    "FILTER_ACCREDITATION": "الاعتماد",
+    "FILTER_PRESCREENING": "الفحص الأولي",
+    "COL_TYPE": "المسار",
+    "COL_ORGANIZATION": "المؤسسة",
+    "COL_COUNTRY": "البلد",
+    "COL_SUBMITTED": "تاريخ التقديم",
+    "COL_PRE_STATUS": "الفحص الأولي",
+    "COL_ACCR_STATUS": "الاعتماد",
+    "COL_CONTACT": "جهة الاتصال",
+    "COL_ACTIONS": "الإجراءات",
+    "VIEW": "فتح النموذج الكامل",
+    "TYPE_ACCREDITATION": "الاعتماد",
+    "TYPE_PRESCREENING": "الفحص الأولي",
+    "STATUS_PENDING": "قيد الانتظار",
+    "STATUS_PASSED": "معتمد",
+    "STATUS_FAILED": "مرفوض",
+    "STATUS_IN_REVIEW": "قيد المراجعة",
+    "STATUS_ACCREDITED": "معتمدة",
+    "STATUS_NOT_ACCREDITED": "غير معتمدة",
+    "STATUS_NOT_STARTED": "لم يبدأ",
+    "LOADING": "جارٍ تحميل الطلبات…",
+    "EMPTY": "لا توجد طلبات اعتماد بعد.",
+    "RETRY": "إعادة المحاولة",
+    "OF": "من",
+    "PREV": "← السابق",
+    "NEXT": "التالي →"
   }
 }

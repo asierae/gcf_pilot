@@ -24,6 +24,7 @@ const ROUTE_MAP: Record<string, CrumbDef[]> = {
   "/dashboard/overview": [{ key: "DASHBOARD.TITLE" }],
   "/dashboard/applicant": [{ key: "APPLICANT_DASHBOARD.TITLE" }],
   "/dashboard": [{ key: "NAV.ACCREDITATION_SUBM" }],
+  "/dashboard/accreditation": [{ key: "NAV.ACCREDITATION_SUBMISSIONS" }],
   "/dashboard/readiness": [{ key: "NAV.READINESS_SUBM" }],
   "/dashboard/leads": [
     { key: "DASHBOARD.TITLE", link: "/dashboard/overview" },

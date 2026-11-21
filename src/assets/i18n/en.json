@@ -735,7 +735,7 @@
     "PRICING": "Plans & Pricing",
     "PRESCREENING": "Pre-screening",
     "ACCREDITATION": "Accreditation",
-    "READINESS": "Readiness Intake",
+    "READINESS": "Readiness",
     "MY_FORMS": "My forms",
     "MY_ORGANIZATION": "My organization",
     "ACCREDITATION_SUBM": "Pre-screening Subm.",
@@ -751,7 +751,8 @@
     "MANAGE_ACCOUNTS": "Manage accounts and roles",
     "SEND_EMAIL": "Send email",
     "SEND_EMAIL_DESC": "Email portal users",
-    "SETTINGS_MENU": "Settings menu"
+    "SETTINGS_MENU": "Settings menu",
+    "ACCREDITATION_SUBMISSIONS": "Accreditation Subm."
   },
   "FOOTER": {
     "DISCLAIMER": "Our app provides tools and guidance to optimize your grant application process. Please note that we are not a funding body and do not guarantee the approval of grants or the receipt of funds. Our services are intended to improve the quality and readiness of your application; however, final funding decisions rest solely with the grant-giving organizations."
@@ -1151,5 +1152,39 @@
   },
   "USER": {
     "EMAIL_EXISTS": "An account with that email already exists. Please log in to continue."
+  },
+  "ACCREDITATION_SUBMISSIONS": {
+    "EYEBROW": "ACCREDITATION",
+    "TITLE": "Accreditation Submissions",
+    "SUBTITLE": "Full accreditation applications and approved pre-screenings.",
+    "COUNT_SUFFIX": "submission(s)",
+    "SEARCH": "Filter by organization, country or contact…",
+    "FILTER_ALL": "All",
+    "FILTER_ACCREDITATION": "Accreditation",
+    "FILTER_PRESCREENING": "Pre-screening",
+    "COL_TYPE": "Pathway",
+    "COL_ORGANIZATION": "Organization",
+    "COL_COUNTRY": "Country",
+    "COL_SUBMITTED": "Submitted",
+    "COL_PRE_STATUS": "Pre-screening",
+    "COL_ACCR_STATUS": "Accreditation",
+    "COL_CONTACT": "Contact",
+    "COL_ACTIONS": "Actions",
+    "VIEW": "Open full form",
+    "TYPE_ACCREDITATION": "Accreditation",
+    "TYPE_PRESCREENING": "Pre-screening",
+    "STATUS_PENDING": "Pending",
+    "STATUS_PASSED": "Passed",
+    "STATUS_FAILED": "Failed",
+    "STATUS_IN_REVIEW": "In review",
+    "STATUS_ACCREDITED": "Accredited",
+    "STATUS_NOT_ACCREDITED": "Not accredited",
+    "STATUS_NOT_STARTED": "Not started",
+    "LOADING": "Loading submissions…",
+    "EMPTY": "No accreditation submissions yet.",
+    "RETRY": "Retry",
+    "OF": "of",
+    "PREV": "← Previous",
+    "NEXT": "Next →"
   }
 }

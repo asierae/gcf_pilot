@@ -17,24 +17,18 @@
       </a>
 
       <div class="topbar-actions">
-        <label class="year-select">
-          <span>{{ 'STAGE2.DRAFT_YEAR' | translate }}</span>
-          <select [value]="draftYear" (change)="onYearChange(+$any($event.target).value)">
-            @for (year of draftYears; track year) {
-              <option [value]="year">{{ year }}</option>
+        @if (!viewingSubmission) {
+          <span class="save-state" [class.is-saving]="draftSaving">
+            <span class="save-dot" aria-hidden="true"></span>
+            @if (draftSaving) {
+              {{ 'STAGE2.DRAFT_SAVING' | translate }}
+            } @else if (draftSavedAt) {
+              {{ 'STAGE2.DRAFT_SAVED' | translate }} {{ draftSavedAt | date: 'short' }}
+            } @else {
+              {{ 'STAGE2.DRAFT_SAVED' | translate }}
             }
-          </select>
-        </label>
-        <span class="save-state" [class.is-saving]="draftSaving">
-          <span class="save-dot" aria-hidden="true"></span>
-          @if (draftSaving) {
-            {{ 'STAGE2.DRAFT_SAVING' | translate }}
-          } @else if (draftSavedAt) {
-            {{ 'STAGE2.DRAFT_SAVED' | translate }} {{ draftSavedAt | date: 'short' }}
-          } @else {
-            {{ 'STAGE2.DRAFT_SAVED' | translate }}
-          }
-        </span>
+          </span>
+        }
         <span class="save-state">
           {{ 'STAGE2.STEP' | translate: { current: currentStep + 1, total: totalSteps } }}
         </span>

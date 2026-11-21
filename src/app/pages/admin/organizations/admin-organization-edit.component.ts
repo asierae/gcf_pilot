@@ -12,7 +12,6 @@ import {
   OrganizationFilesBySection,
   OrganizationForms,
   OrganizationRecord,
-  Stage2DraftSummary,
 } from "../../../models/organization.model";
 import { map } from "rxjs/operators";
 
@@ -140,7 +139,7 @@ export class AdminOrganizationEditComponent implements OnInit {
 
   // Submitted forms
   orgForms: OrganizationForms | null = null;
-  stage2Drafts: Stage2DraftSummary[] = [];
+  stage2DraftSavedAt: string | null = null;
   formsLoading = false;
   formsError = "";
 
@@ -269,12 +268,12 @@ export class AdminOrganizationEditComponent implements OnInit {
     this.formsLoading = true;
     this.formsError = "";
     try {
-      const [forms, stage2Drafts] = await Promise.all([
+      const [forms, stage2Draft] = await Promise.all([
         this.api.getOrganizationForms(organizationId),
-        this.api.listStage2Drafts(organizationId).catch(() => []),
+        this.api.getStage2Draft(organizationId).catch(() => null),
       ]);
       this.orgForms = forms;
-      this.stage2Drafts = stage2Drafts;
+      this.stage2DraftSavedAt = stage2Draft?.updatedAt ?? null;
     } catch (error) {
       this.formsError =
         error instanceof Error ? error.message : "Could not load submitted forms.";
@@ -306,7 +305,7 @@ export class AdminOrganizationEditComponent implements OnInit {
 
     const stage1Draft = forms?.drafts.stage1 ?? null;
     const readinessDraft = forms?.drafts.readiness ?? null;
-    const stage2Draft = this.stage2Drafts[0]?.updatedAt ?? null;
+    const stage2Draft = this.stage2DraftSavedAt;
     const preStatus = forms?.preScreeningStatus ?? "Pending";
     const accrStatus = org?.accreditationStatus ?? "";
     const accrStatusLabel =
@@ -395,8 +394,8 @@ export class AdminOrganizationEditComponent implements OnInit {
             value: this.riskLabel(s2["maxRiskCategory"]),
           },
           {
-            labelKey: "ADMIN_ORGANIZATION_EDIT.FORMS_DRAFT_YEARS",
-            value: this.stage2Drafts.map((draft) => draft.year).join(", ") || "—",
+            labelKey: "ADMIN_ORGANIZATION_EDIT.FORMS_DRAFT_SAVED",
+            value: this.formatDate(stage2Draft ?? undefined),
           },
         ],
         link: stage2 || stage2Draft ? ["/stage2"] : null,

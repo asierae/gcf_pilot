@@ -735,7 +735,7 @@
     "PRICING": "Planes y precios",
     "PRESCREENING": "Preselección",
     "ACCREDITATION": "Acreditación",
-    "READINESS": "Solicitud de preparación",
+    "READINESS": "Readiness",
     "MY_FORMS": "Mis formularios",
     "MY_ORGANIZATION": "Mi organización",
     "ACCREDITATION_SUBM": "Solicitudes de preselección",
@@ -750,7 +750,8 @@
     "MANAGE_ACCOUNTS": "Gestionar cuentas y roles",
     "SEND_EMAIL": "Enviar correo",
     "SEND_EMAIL_DESC": "Enviar correos a usuarios del portal",
-    "SETTINGS_MENU": "Menú de configuración"
+    "SETTINGS_MENU": "Menú de configuración",
+    "ACCREDITATION_SUBMISSIONS": "Envíos de acreditación"
   },
   "FOOTER": {
     "DISCLAIMER": "Nuestra aplicación ofrece herramientas y orientación para optimizar su proceso de solicitud de subvenciones. Tenga en cuenta que no somos un organismo financiador y no garantizamos la aprobación de subvenciones ni la recepción de fondos. Nuestros servicios están destinados a mejorar la calidad y la preparación de su solicitud; sin embargo, las decisiones finales de financiación corresponden exclusivamente a las organizaciones que conceden las subvenciones."
@@ -1150,5 +1151,39 @@
   },
   "USER": {
     "EMAIL_EXISTS": "Ya existe una cuenta con ese correo electrónico. Inicia sesión para continuar."
+  },
+  "ACCREDITATION_SUBMISSIONS": {
+    "EYEBROW": "ACREDITACIÓN",
+    "TITLE": "Envíos de acreditación",
+    "SUBTITLE": "Solicitudes completas de acreditación y preselecciones aprobadas.",
+    "COUNT_SUFFIX": "envíos",
+    "SEARCH": "Filtrar por organización, país o contacto…",
+    "FILTER_ALL": "Todos",
+    "FILTER_ACCREDITATION": "Acreditación",
+    "FILTER_PRESCREENING": "Preselección",
+    "COL_TYPE": "Vía",
+    "COL_ORGANIZATION": "Organización",
+    "COL_COUNTRY": "País",
+    "COL_SUBMITTED": "Enviado",
+    "COL_PRE_STATUS": "Preselección",
+    "COL_ACCR_STATUS": "Acreditación",
+    "COL_CONTACT": "Contacto",
+    "COL_ACTIONS": "Acciones",
+    "VIEW": "Abrir formulario completo",
+    "TYPE_ACCREDITATION": "Acreditación",
+    "TYPE_PRESCREENING": "Preselección",
+    "STATUS_PENDING": "Pendiente",
+    "STATUS_PASSED": "Aprobado",
+    "STATUS_FAILED": "Rechazado",
+    "STATUS_IN_REVIEW": "En revisión",
+    "STATUS_ACCREDITED": "Acreditada",
+    "STATUS_NOT_ACCREDITED": "No acreditada",
+    "STATUS_NOT_STARTED": "No iniciado",
+    "LOADING": "Cargando envíos…",
+    "EMPTY": "Aún no hay envíos de acreditación.",
+    "RETRY": "Reintentar",
+    "OF": "de",
+    "PREV": "← Anterior",
+    "NEXT": "Siguiente →"
   }
 }

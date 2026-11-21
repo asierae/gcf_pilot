@@ -310,7 +310,7 @@
               {{ "APPLICANT_DASHBOARD.RETRY" | translate }}
             </button>
           </div>
-        } @else if (orgForms && submittedFormCount === 0 && !orgForms.drafts.stage1 && !orgForms.drafts.readiness && stage2Drafts.length === 0) {
+        } @else if (orgForms && submittedFormCount === 0 && !orgForms.drafts.stage1 && !orgForms.drafts.readiness && !stage2DraftSavedAt) {
           <div class="ao-empty">
             <span class="ao-empty-icon">🗂️</span>
             <p>{{ "ADMIN_ORGANIZATION_EDIT.FORMS_EMPTY" | translate }}</p>

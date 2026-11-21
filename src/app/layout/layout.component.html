@@ -331,6 +331,23 @@
             </li>
             <li>
               <a
+                routerLink="/dashboard/accreditation"
+                routerLinkActive="active"
+                class="nav-link"
+                [title]="sidebarCollapsed ? ('NAV.ACCREDITATION_SUBMISSIONS' | translate) : ''"
+              >
+                <span class="nav-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9Z" />
+                    <path d="M14 3v6h6" />
+                    <path d="M8 13h8M8 17h5" />
+                  </svg>
+                </span>
+                <span class="nav-label">{{ "NAV.ACCREDITATION_SUBMISSIONS" | translate }}</span>
+              </a>
+            </li>
+            <li>
+              <a
                 routerLink="/dashboard/readiness"
                 routerLinkActive="active"
                 class="nav-link"

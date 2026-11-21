@@ -6,6 +6,7 @@ import { Stage2Component } from "./pages/stage2/stage2.component";
 import { LoginComponent } from "./pages/login/login.component";
 import { PasswordTokenComponent } from "./pages/auth/password-token/password-token.component";
 import { DashboardComponent } from "./pages/dashboard/dashboard.component";
+import { AccreditationSubmissionsComponent } from "./pages/dashboard/accreditation-submissions/accreditation-submissions.component";
 import { OverviewDashboardComponent } from "./pages/dashboard/overview/overview-dashboard.component";
 import { ApplicantDashboardComponent } from "./pages/dashboard/applicant/applicant-dashboard.component";
 import { SubmissionDetailComponent } from "./pages/dashboard/submission-detail/submission-detail.component";
@@ -54,6 +55,11 @@ export const routes: Routes = [
       {
         path: "dashboard",
         component: DashboardComponent,
+        canActivate: [adminGuard],
+      },
+      {
+        path: "dashboard/accreditation",
+        component: AccreditationSubmissionsComponent,
         canActivate: [adminGuard],
       },
       {

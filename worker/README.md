@@ -156,9 +156,11 @@ Public (no token):
   yet, a passwordless `applicant` user with status `pending` is created for
   manual approval (same behaviour as readiness / profile assessment); the
   response adds `userCreated` and `username`.
-- `POST /api/applicants/stage2` — `{ data, stage1Data, id? }` (upserts into the
-  existing applicant/organization row when `id` already exists). It provisions
-  a pending applicant account for an unknown `data.primaryContactEmail` too.
+- `POST /api/applicants/stage2` — `{ data, stage1Data, id? }` (upserts the latest
+  payload into the applicant/organization row when `id` already exists) and also
+  appends the full payload to `accreditation_submissions`, so every submission is
+  kept in history. It provisions a pending applicant account for an unknown
+  `data.primaryContactEmail` too.
 - `GET /api/applicants/latest?stage=1|2` — latest stage payload (wizard prefill)
 - `GET /api/organizations/:id` — organization profile (public by design: the
   applicant accounts live in the browser, so there is no token to send)
@@ -194,11 +196,10 @@ Public (no token):
 - `GET /api/organizations/acronym-available?acronym=&exclude=` — uniqueness check
 - `GET | PUT | DELETE /api/drafts/(stage1|readiness)/:organizationId` — draft
   autosave, keyed by the organization id
-- Stage 2 drafts are keyed by organization **and year** (`stage2_drafts`):
-  - `GET /api/drafts/stage2/:organizationId` → `{ drafts: [{ year, updatedAt }] }`
-  - `GET /api/drafts/stage2/:organizationId/:year` → `{ draft }` or `{ draft: null }`
-  - `PUT | DELETE /api/drafts/stage2/:organizationId/:year` — save/remove that
-    year's autosave. Years must be four digits in `2000..current+1`.
+- Stage 2 drafts are autosaved once per organization (`stage2_drafts`); there is
+  no application year selector, the submission date comes from `createdAt`:
+  - `GET /api/drafts/stage2/:organizationId` → `{ draft }` or `{ draft: null }`
+  - `PUT | DELETE /api/drafts/stage2/:organizationId` — save/remove the draft
 - `GET | PUT /api/readiness/:organizationId` — submitted readiness application.
   On PUT, the `metadata.ndaEmail` contact is checked against D1 `users`; an
   unknown email gets a passwordless `applicant` account with status `pending`,
@@ -232,6 +233,12 @@ Public (no token):
 
 Admin (`Authorization: Bearer <API_TOKEN>`):
 
+- `GET /api/accreditation/submissions` — every Stage 2 submission from
+  `accreditation_submissions`, plus approved (`Passed`) pre-screenings that never
+  reached Stage 2. Rows include the organization, dates, statuses and a `type`
+  (`accreditation` | `prescreening`).
+- `GET /api/accreditation/submissions/:id` — full payload of one submission. A
+  `prescreening:<organizationId>` id returns that organization's Stage 1 payload.
 - `GET /api/users` — portal accounts (never includes password hashes)
 - `POST /api/users` — `{ username, email, role, status?, organization*?, invite? }`
 - `PATCH | DELETE /api/users/:id`
@@ -331,8 +338,9 @@ The organization id is the single identifier across the whole stack:
 - `organizations.id`
 - the pre-screening row `applicants.id`
 - the R2 folder `organizations/<id>/...`
-- both draft tables (`stage1_drafts`, `readiness_drafts`)
+- the draft tables (`stage1_drafts`, `stage2_drafts`, `readiness_drafts`)
 - `readiness_applications.organization_id`
+- `accreditation_submissions.organization_id` (one row per submission)
 
 Anonymous visitors get a generated id in the URL (`?org=<id>`), so the same link
 restores their draft. Signed-in applicants always use their account's

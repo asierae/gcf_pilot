@@ -114,3 +114,4 @@ npx ng build
 - Eliminación del campo `region`: solo se conserva `country` en los formularios; la sección que quedaba vacía se fusionó con la tarjeta de organización.
 - La terminología visible es "Pre-screening"; los identificadores internos se mantienen por compatibilidad con datos guardados.
 - La pestaña Forms del admin muestra una tarjeta por vía (pre-screening, acreditación, readiness) con metadatos de la presentación y enlace al formulario; el admin abre Stage 1 ya enviado mediante `forms.stage1.data` (fallback en `stage1.component.ts`).
+- El menú "Accreditation Subm." (`/dashboard/accreditation`) mezcla el historial de `accreditation_submissions` con los pre-screenings `Passed`; cada fila abre el full form de Stage 2 con `?org=<id>&submission=<id>` y el autoguardado se desactiva en esa vista. Los borradores de Stage 2 son uno por organización (sin selector de año).

@@ -735,7 +735,7 @@
     "PRICING": "Gói và bảng giá",
     "PRESCREENING": "Sàng lọc sơ bộ",
     "ACCREDITATION": "Công nhận",
-    "READINESS": "Hồ sơ sẵn sàng",
+    "READINESS": "Readiness",
     "MY_FORMS": "Biểu mẫu của tôi",
     "MY_ORGANIZATION": "Tổ chức của tôi",
     "ACCREDITATION_SUBM": "Hồ sơ sàng lọc sơ bộ",
@@ -750,7 +750,8 @@
     "MANAGE_ACCOUNTS": "Quản lý tài khoản và vai trò",
     "SEND_EMAIL": "Gửi email",
     "SEND_EMAIL_DESC": "Gửi email cho người dùng cổng",
-    "SETTINGS_MENU": "Menu cài đặt"
+    "SETTINGS_MENU": "Menu cài đặt",
+    "ACCREDITATION_SUBMISSIONS": "Hồ sơ công nhận"
   },
   "FOOTER": {
     "DISCLAIMER": "Ứng dụng của chúng tôi cung cấp công cụ và hướng dẫn để tối ưu hóa quy trình nộp đơn xin tài trợ. Xin lưu ý rằng chúng tôi không phải là tổ chức tài trợ và không đảm bảo phê duyệt khoản tài trợ cũng như nhận được tiền. Dịch vụ của chúng tôi nhằm nâng cao chất lượng và mức độ sẵn sàng của hồ sơ; tuy nhiên, quyết định tài trợ cuối cùng hoàn toàn thuộc về các tổ chức cấp tài trợ."
@@ -1150,5 +1151,39 @@
   },
   "USER": {
     "EMAIL_EXISTS": "Đã tồn tại tài khoản với email này. Vui lòng đăng nhập để tiếp tục."
+  },
+  "ACCREDITATION_SUBMISSIONS": {
+    "EYEBROW": "CÔNG NHẬN",
+    "TITLE": "Hồ sơ công nhận",
+    "SUBTITLE": "Các đơn công nhận đầy đủ và sàng lọc sơ bộ đã được phê duyệt.",
+    "COUNT_SUFFIX": "hồ sơ",
+    "SEARCH": "Lọc theo tổ chức, quốc gia hoặc người liên hệ…",
+    "FILTER_ALL": "Tất cả",
+    "FILTER_ACCREDITATION": "Công nhận",
+    "FILTER_PRESCREENING": "Sàng lọc sơ bộ",
+    "COL_TYPE": "Lộ trình",
+    "COL_ORGANIZATION": "Tổ chức",
+    "COL_COUNTRY": "Quốc gia",
+    "COL_SUBMITTED": "Đã gửi",
+    "COL_PRE_STATUS": "Sàng lọc sơ bộ",
+    "COL_ACCR_STATUS": "Công nhận",
+    "COL_CONTACT": "Người liên hệ",
+    "COL_ACTIONS": "Thao tác",
+    "VIEW": "Mở biểu mẫu đầy đủ",
+    "TYPE_ACCREDITATION": "Công nhận",
+    "TYPE_PRESCREENING": "Sàng lọc sơ bộ",
+    "STATUS_PENDING": "Chờ xử lý",
+    "STATUS_PASSED": "Đã phê duyệt",
+    "STATUS_FAILED": "Từ chối",
+    "STATUS_IN_REVIEW": "Đang xem xét",
+    "STATUS_ACCREDITED": "Đã công nhận",
+    "STATUS_NOT_ACCREDITED": "Chưa công nhận",
+    "STATUS_NOT_STARTED": "Chưa bắt đầu",
+    "LOADING": "Đang tải hồ sơ…",
+    "EMPTY": "Chưa có hồ sơ công nhận nào.",
+    "RETRY": "Thử lại",
+    "OF": "/",
+    "PREV": "← Trước",
+    "NEXT": "Tiếp →"
   }
 }

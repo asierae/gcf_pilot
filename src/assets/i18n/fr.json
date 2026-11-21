@@ -735,7 +735,7 @@
     "PRICING": "Offres et tarifs",
     "PRESCREENING": "Présélection",
     "ACCREDITATION": "Accréditation",
-    "READINESS": "Demande de préparation",
+    "READINESS": "Readiness",
     "MY_FORMS": "Mes formulaires",
     "MY_ORGANIZATION": "Mon organisation",
     "ACCREDITATION_SUBM": "Demandes de présélection",
@@ -750,7 +750,8 @@
     "MANAGE_ACCOUNTS": "Gérer les comptes et les rôles",
     "SEND_EMAIL": "Envoyer un email",
     "SEND_EMAIL_DESC": "Envoyer des emails aux utilisateurs du portail",
-    "SETTINGS_MENU": "Menu des paramètres"
+    "SETTINGS_MENU": "Menu des paramètres",
+    "ACCREDITATION_SUBMISSIONS": "Soumissions d'accréditation"
   },
   "FOOTER": {
     "DISCLAIMER": "Notre application fournit des outils et des conseils pour optimiser votre processus de demande de subvention. Veuillez noter que nous ne sommes pas un organisme de financement et ne garantissons ni l'approbation des subventions ni la réception de fonds. Nos services visent à améliorer la qualité et la préparation de votre demande ; toutefois, les décisions finales de financement relèvent exclusivement des organismes qui accordent les subventions."
@@ -1150,5 +1151,39 @@
   },
   "USER": {
     "EMAIL_EXISTS": "Un compte existe déjà avec cet e-mail. Connectez-vous pour continuer."
+  },
+  "ACCREDITATION_SUBMISSIONS": {
+    "EYEBROW": "ACCRÉDITATION",
+    "TITLE": "Soumissions d'accréditation",
+    "SUBTITLE": "Demandes d'accréditation complètes et présélections approuvées.",
+    "COUNT_SUFFIX": "soumissions",
+    "SEARCH": "Filtrer par organisation, pays ou contact…",
+    "FILTER_ALL": "Toutes",
+    "FILTER_ACCREDITATION": "Accréditation",
+    "FILTER_PRESCREENING": "Présélection",
+    "COL_TYPE": "Voie",
+    "COL_ORGANIZATION": "Organisation",
+    "COL_COUNTRY": "Pays",
+    "COL_SUBMITTED": "Soumis",
+    "COL_PRE_STATUS": "Présélection",
+    "COL_ACCR_STATUS": "Accréditation",
+    "COL_CONTACT": "Contact",
+    "COL_ACTIONS": "Actions",
+    "VIEW": "Ouvrir le formulaire complet",
+    "TYPE_ACCREDITATION": "Accréditation",
+    "TYPE_PRESCREENING": "Présélection",
+    "STATUS_PENDING": "En attente",
+    "STATUS_PASSED": "Réussi",
+    "STATUS_FAILED": "Échoué",
+    "STATUS_IN_REVIEW": "En examen",
+    "STATUS_ACCREDITED": "Accréditée",
+    "STATUS_NOT_ACCREDITED": "Non accréditée",
+    "STATUS_NOT_STARTED": "Non commencé",
+    "LOADING": "Chargement des soumissions…",
+    "EMPTY": "Aucune soumission d'accréditation pour l'instant.",
+    "RETRY": "Réessayer",
+    "OF": "sur",
+    "PREV": "← Précédent",
+    "NEXT": "Suivant →"
   }
 }

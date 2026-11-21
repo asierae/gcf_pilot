@@ -6,13 +6,14 @@ import {
   SubmissionStatus,
 } from "../models/applicant.model";
 import {
+  AccreditationSubmissionDetail,
+  AccreditationSubmissionSummary,
   DraftForm,
   OrganizationDraft,
   OrganizationFile,
   OrganizationFilesBySection,
   OrganizationForms,
   OrganizationRecord,
-  Stage2DraftSummary,
 } from "../models/organization.model";
 import { AdminStats } from "../models/admin-stats.model";
 import { ApplicantDashboard } from "../models/applicant-dashboard.model";
@@ -585,21 +586,11 @@ export class ApiService {
     );
   }
 
-  async listStage2Drafts(organizationId: string): Promise<Stage2DraftSummary[]> {
-    const payload = await this.request<{ drafts?: Stage2DraftSummary[] }>(
-      `/api/drafts/stage2/${encodeURIComponent(organizationId)}`,
-      { method: "GET" },
-      false,
-    );
-    return payload.drafts ?? [];
-  }
-
   async getStage2Draft(
     organizationId: string,
-    year: number,
   ): Promise<OrganizationDraft | null> {
     const payload = await this.request<{ draft?: OrganizationDraft | null }>(
-      `/api/drafts/stage2/${encodeURIComponent(organizationId)}/${year}`,
+      `/api/drafts/stage2/${encodeURIComponent(organizationId)}`,
       { method: "GET" },
       false,
     );
@@ -608,23 +599,40 @@ export class ApiService {
 
   async saveStage2Draft(
     organizationId: string,
-    year: number,
     data: Record<string, unknown>,
   ): Promise<string> {
     const payload = await this.request<{ updatedAt: string }>(
-      `/api/drafts/stage2/${encodeURIComponent(organizationId)}/${year}`,
+      `/api/drafts/stage2/${encodeURIComponent(organizationId)}`,
       { method: "PUT", body: JSON.stringify({ data }) },
       false,
     );
     return payload.updatedAt;
   }
 
-  async deleteStage2Draft(organizationId: string, year: number): Promise<void> {
+  async deleteStage2Draft(organizationId: string): Promise<void> {
     await this.request<void>(
-      `/api/drafts/stage2/${encodeURIComponent(organizationId)}/${year}`,
+      `/api/drafts/stage2/${encodeURIComponent(organizationId)}`,
       { method: "DELETE" },
       false,
     );
+  }
+
+  async listAccreditationSubmissions(): Promise<AccreditationSubmissionSummary[]> {
+    const payload = await this.request<{
+      submissions?: AccreditationSubmissionSummary[];
+    }>('/api/accreditation/submissions', { method: 'GET' }, true);
+    return payload.submissions ?? [];
+  }
+
+  async getAccreditationSubmission(
+    id: string,
+  ): Promise<AccreditationSubmissionDetail | null> {
+    const payload = await this.request<{
+      submission?: AccreditationSubmissionDetail;
+    }>(`/api/accreditation/submissions/${encodeURIComponent(id)}`, {
+      method: 'GET',
+    }, true);
+    return payload.submission ?? null;
   }
 
   // ── Readiness ───────────────────────────────────────────────────────────
