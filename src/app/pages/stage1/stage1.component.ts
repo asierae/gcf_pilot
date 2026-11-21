@@ -23,6 +23,7 @@ import {
 import { FileUploadComponent } from '../../shared/components/file-upload/file-upload.component';
 import { CountrySelectComponent } from '../../shared/components/country-select/country-select.component';
 import { Stage1StepsComponent } from '../../shared/components/stage1-steps/stage1-steps.component';
+import { PreScreeningTimelineComponent } from './pre-screening-timeline/pre-screening-timeline.component';
 import {
   acronymAvailabilityValidator,
   isOrganizationId,
@@ -46,6 +47,7 @@ import {
     RouterLink,
     CountrySelectComponent,
     Stage1StepsComponent,
+    PreScreeningTimelineComponent,
     TranslatePipe,
   ],
   templateUrl: './stage1.component.html',
@@ -56,6 +58,10 @@ export class Stage1Component implements OnInit, OnDestroy {
   form: FormGroup;
   submitted = false;
   submitSuccess = false;
+
+  /** The Timeline tab is only offered to signed-in users. */
+  isLoggedIn = false;
+  activeTab: 'form' | 'timeline' = 'form';
 
   /** True after blur if an active account already uses the entered email. */
   emailTaken = false;
@@ -142,6 +148,7 @@ export class Stage1Component implements OnInit, OnDestroy {
   }
 
   async ngOnInit(): Promise<void> {
+    this.isLoggedIn = this.authService.isLoggedIn;
     this.form.valueChanges.subscribe(() => this.scheduleDraftSave());
     this.conditionalSyncs = watchStage1ConditionalRequirements(this.form);
 

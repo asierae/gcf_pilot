@@ -1,20 +1,65 @@
 <div class="wizard-shell">
   <header class="wizard-topbar">
     <div class="topbar-inner">
-      <a routerLink="/home" class="wizard-brand" aria-label="Avera Capital Access home">
-        <span class="brand-mark" aria-hidden="true">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M12 2.5 21 7.5v9L12 21.5 3 16.5v-9l9-5Z" />
-            <path d="M12 7.5v9" />
-            <path d="M7.5 10v4.5" />
-            <path d="M16.5 10v4.5" />
-          </svg>
-        </span>
-        <span class="brand-text">
-          <span class="brand-name">Pre-screening</span>
-          <span class="brand-sub">GCF pre-screening · Stage 1</span>
-        </span>
-      </a>
+      @if (isLoggedIn) {
+        <div class="topbar-tabs" role="tablist" aria-label="Pre-screening views">
+          <button
+            type="button"
+            class="topbar-tab"
+            role="tab"
+            [class.is-active]="activeTab === 'form'"
+            [attr.aria-selected]="activeTab === 'form'"
+            (click)="activeTab = 'form'"
+          >
+            <span class="brand-mark" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 2.5 21 7.5v9L12 21.5 3 16.5v-9l9-5Z" />
+                <path d="M12 7.5v9" />
+                <path d="M7.5 10v4.5" />
+                <path d="M16.5 10v4.5" />
+              </svg>
+            </span>
+            <span class="brand-text">
+              <span class="brand-name">Pre-screening</span>
+              <span class="brand-sub">GCF pre-screening · Stage 1</span>
+            </span>
+          </button>
+          <button
+            type="button"
+            class="topbar-tab"
+            role="tab"
+            [class.is-active]="activeTab === 'timeline'"
+            [attr.aria-selected]="activeTab === 'timeline'"
+            (click)="activeTab = 'timeline'"
+          >
+            <span class="brand-mark" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="8.5" />
+                <path d="M12 7.5V12l3 2" />
+              </svg>
+            </span>
+            <span class="brand-text">
+              <span class="brand-name">{{ 'PRE_SCREENING_TIMELINE.TAB' | translate }}</span>
+              <span class="brand-sub">{{ 'PRE_SCREENING_TIMELINE.TAB_SUB' | translate }}</span>
+            </span>
+          </button>
+        </div>
+      } @else {
+        <a routerLink="/home" class="wizard-brand" aria-label="Avera Capital Access home">
+          <span class="brand-mark" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 2.5 21 7.5v9L12 21.5 3 16.5v-9l9-5Z" />
+              <path d="M12 7.5v9" />
+              <path d="M7.5 10v4.5" />
+              <path d="M16.5 10v4.5" />
+            </svg>
+          </span>
+          <span class="brand-text">
+            <span class="brand-name">Pre-screening</span>
+            <span class="brand-sub">GCF pre-screening · Stage 1</span>
+          </span>
+        </a>
+      }
 
       <div class="topbar-actions">
         <span class="save-state" [class.is-saving]="draftSaving">
@@ -32,6 +77,7 @@
     </div>
   </header>
 
+  @if (activeTab === 'form') {
   <div class="wizard-body">
     <nav class="stepper" aria-label="Pre-screening progress">
       <div class="stepper-meta">
@@ -131,4 +177,7 @@
     }
     </main>
   </div>
+  } @else {
+    <app-pre-screening-timeline />
+  }
 </div>
