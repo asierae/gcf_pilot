@@ -6,9 +6,9 @@
     "ALL_SECTIONS": "Todas las secciones",
     "BACK_TO_SECTIONS": "Volver a secciones",
     "ALL_PATHWAYS": "Todas las vías",
-    "KICKER": "ACREDITACIÓN GCF · PRE-ACREDITACIÓN + SOLICITUD COMPLETA",
+    "KICKER": "ACREDITACIÓN GCF · PRESELECCIÓN + SOLICITUD COMPLETA",
     "PROGRESS": "{{value}}% completado",
-    "GROUP_STAGE1": "Pre-acreditación (Etapa 1)",
+    "GROUP_STAGE1": "Preselección (Etapa 1)",
     "GROUP_STAGE2": "Solicitud de acreditación (Etapa 2)",
     "SCREENING_REQUIREMENT": "Requisito de evaluación:",
     "APPLICATION_SETTINGS": "Configuración de la solicitud",
@@ -668,7 +668,7 @@
       "EMPTY": "Aún no hay tipos de organización registrados."
     },
     "SCREENING": {
-      "TITLE": "Preacreditación",
+      "TITLE": "Preselección",
       "SUB": "Estado de las solicitudes de acreditación"
     },
     "LEADS": {
@@ -691,7 +691,7 @@
       "REVIEW": "Revisar consultas →",
       "EMPTY": "Aún no se ha enviado nada.",
       "SUB_ACCREDITATION": "Solicitud de acreditación",
-      "SUB_PRESCREENING": "Preacreditación",
+      "SUB_PRESCREENING": "Preselección",
       "SUB_READINESS": "Solicitud de preparación",
       "SUB_ENQUIRY": "Consulta",
       "SUB_PROFILE": "Evaluación de perfil",
@@ -724,7 +724,7 @@
     "FUNNEL": {
       "ENQUIRIES": "Consultas",
       "ACCREDITATION": "Acreditación",
-      "PASSED": "Aprobaron la preacreditación",
+      "PASSED": "Aprobaron la preselección",
       "STAGE2": "Solicitudes de etapa 2",
       "PROFILE": "Evaluaciones de perfil"
     }
@@ -733,19 +733,19 @@
     "WORKSPACE": "Espacio de trabajo",
     "DASHBOARD": "Panel",
     "PRICING": "Planes y precios",
-    "PRESCREENING": "Preacreditación",
+    "PRESCREENING": "Preselección",
     "ACCREDITATION": "Acreditación",
     "READINESS": "Solicitud de preparación",
     "MY_FORMS": "Mis formularios",
     "MY_ORGANIZATION": "Mi organización",
-    "ACCREDITATION_SUBM": "Solicitudes de acreditación",
+    "ACCREDITATION_SUBM": "Solicitudes de preselección",
     "READINESS_SUBM": "Solicitudes de preparación",
     "LEADS": "Consultas",
     "USERS": "Usuarios",
     "SETTINGS": "Configuración",
     "USER_MANAGEMENT": "Gestión de usuarios",
-    "UNLOCK_ACCREDITATION": "Supere la preacreditación para desbloquear la acreditación (actualmente: {{status}})",
-    "PRESCREENING_STATUS": "Preacreditación: {{status}}",
+    "UNLOCK_ACCREDITATION": "Supere la preselección para desbloquear la acreditación (actualmente: {{status}})",
+    "PRESCREENING_STATUS": "Preselección: {{status}}",
     "SUBMISSION": "Solicitud",
     "MANAGE_ACCOUNTS": "Gestionar cuentas y roles",
     "SEND_EMAIL": "Enviar correo",
@@ -833,12 +833,12 @@
           "DESC": "Identidad legal y contactos registrados."
         },
         "PRESCREENING": {
-          "TITLE": "Preacreditación enviada",
+          "TITLE": "Preselección enviada",
           "DESC": "Respuestas de elegibilidad y capacidad de la etapa 1."
         },
         "REVIEW": {
-          "TITLE": "Revisión de preacreditación",
-          "DESC": "Decisión de Avera sobre tu preacreditación."
+          "TITLE": "Revisión de preselección",
+          "DESC": "Decisión de Avera sobre tu preselección."
         },
         "ACCREDITATION": {
           "TITLE": "Acreditación enviada",
@@ -875,23 +875,23 @@
         "CTA": "Completar perfil"
       },
       "COMPLETE_PRESCREENING": {
-        "TITLE": "Inicia la preacreditación",
+        "TITLE": "Inicia la preselección",
         "DESC": "Envía la etapa 1 para comenzar tu ruta de acreditación.",
-        "CTA": "Abrir preacreditación"
+        "CTA": "Abrir preselección"
       },
       "AWAITING_PRESCREENING": {
-        "TITLE": "Preacreditación en revisión",
+        "TITLE": "Preselección en revisión",
         "DESC": "Tu envío de etapa 1 está con el equipo de Avera.",
         "CTA": "Ver envío"
       },
       "REVISE_PRESCREENING": {
-        "TITLE": "Revisa tu preacreditación",
+        "TITLE": "Revisa tu preselección",
         "DESC": "Revisa los comentarios y vuelve a enviar la etapa 1.",
-        "CTA": "Abrir preacreditación"
+        "CTA": "Abrir preselección"
       },
       "START_ACCREDITATION": {
         "TITLE": "Inicia la acreditación (etapa 2)",
-        "DESC": "Tu preacreditación fue aprobada. Completa los estándares de acreditación.",
+        "DESC": "Tu preselección fue aprobada. Completa los estándares de acreditación.",
         "CTA": "Abrir acreditación"
       },
       "UPLOAD_DOCUMENTS": {
@@ -917,9 +917,9 @@
       "SUB": "Hitos registrados para tu organización.",
       "EMPTY": "Aún no hay actividad registrada.",
       "PROFILE": "Perfil de la organización creado",
-      "STAGE1": "Preacreditación enviada",
-      "PRESCREENING_PASSED": "Preacreditación aprobada",
-      "PRESCREENING_FAILED": "La preacreditación requiere revisión",
+      "STAGE1": "Preselección enviada",
+      "PRESCREENING_PASSED": "Preselección aprobada",
+      "PRESCREENING_FAILED": "La preselección requiere revisión",
       "STAGE2": "Acreditación enviada",
       "READINESS_DRAFT": "Borrador de preparación guardado",
       "READINESS": "Preparación enviada"
@@ -947,12 +947,12 @@
       "NO_READINESS_HINT": "Crea una solicitud de preparación para ver aquí tu presupuesto, evidencia y marco lógico.",
       "START_READINESS": "Iniciar preparación",
       "ACCREDITATION_TITLE": "Resumen de acreditación",
-      "ACCREDITATION_SUB": "Estado de la preacreditación y cobertura de evidencia de la etapa 2.",
+      "ACCREDITATION_SUB": "Estado de la preselección y cobertura de evidencia de la etapa 2.",
       "QUESTIONS": "Preguntas respondidas",
       "QUESTIONS_VALUE": "{{answered}} de {{total}}",
       "SECTIONS": "Secciones completadas",
       "SECTIONS_VALUE": "{{complete}} de {{total}}",
-      "PRESCREENING": "Preacreditación",
+      "PRESCREENING": "Preselección",
       "STAGE2_SUBMITTED": "Etapa 2 enviada",
       "NOT_STARTED": "No iniciada",
       "STAFF": "Personal",
@@ -1026,9 +1026,9 @@
     "RISK_BAND_MODERATE": "Riesgo moderado",
     "RISK_BAND_ELEVATED": "Riesgo elevado",
     "RISK_BAND_HIGH": "Riesgo alto",
-    "ACCR_STATUS_PENDING": "Preacreditación pendiente",
-    "ACCR_STATUS_PASSED": "Preacreditación aprobada",
-    "ACCR_STATUS_FAILED": "Preacreditación fallida",
+    "ACCR_STATUS_PENDING": "Preselección pendiente",
+    "ACCR_STATUS_PASSED": "Preselección aprobada",
+    "ACCR_STATUS_FAILED": "Preselección fallida",
     "ACCR_STATUS_IN_REVIEW": "En revisión",
     "ACCR_STATUS_ACCREDITATED": "Acreditada",
     "ACCR_STATUS_NOT_ACCREDITED": "No acreditada",
@@ -1051,17 +1051,36 @@
     "AUDIT_DATE_LABEL": "Fecha de auditoría",
     "AUDIT_REPORT_URL_LABEL": "URL del informe",
     "AUDIT_NOTES_LABEL": "Hallazgos públicos",
-    "DOWNLOAD_PDF": "Descargar PDF firmado"
-,
+    "DOWNLOAD_PDF": "Descargar PDF firmado",
     "SAVE_ERROR": "No se pudieron guardar los cambios. Inténtalo de nuevo.",
     "DELETE_CONFIRM_BUTTON": "Eliminar organización",
     "SELECT_PLACEHOLDER": "Seleccionar",
     "TAB_DETAILS": "Detalles",
     "TAB_FILES": "Archivos",
+    "TAB_FORMS": "Formularios",
+    "FORMS_LOADING": "Cargando formularios enviados…",
+    "FORMS_EMPTY": "No hay formularios enviados ni borradores para esta organización.",
+    "FORMS_STATUS_NOT_SUBMITTED": "No enviado",
+    "FORMS_STATUS_DRAFT": "Borrador en curso",
+    "FORMS_STATUS_SUBMITTED": "Enviado",
+    "FORMS_CARD_PRESCREENING": "Preselección (etapa 1)",
+    "FORMS_CARD_ACCREDITATION": "Acreditación (etapa 2)",
+    "FORMS_CARD_READINESS": "Preparación",
+    "FORMS_COUNTRY": "País",
+    "FORMS_ENTITY_TYPE": "Tipo de entidad",
+    "FORMS_DRAFT_SAVED": "Borrador guardado",
+    "FORMS_MAX_RISK": "Riesgo A&S máx.",
+    "FORMS_DRAFT_YEARS": "Años con borrador",
+    "FORMS_PROPOSAL": "Propuesta",
+    "FORMS_REQUESTED_AMOUNT": "Importe solicitado",
+    "FORMS_SUBMITTED_AT": "Enviado",
+    "FORMS_SUBMITTED_BY": "Enviado por",
+    "FORMS_OPEN": "Abrir formulario",
+    "FORMS_NOT_SUBMITTED_HINT": "Esta vía aún no se ha iniciado.",
     "FILES_LOADING": "Cargando archivos...",
     "FILES_EMPTY": "No hay archivos subidos para esta organización.",
     "FILES_GROUP_READINESS": "Readiness",
-    "FILES_GROUP_PRESCREENING": "Preacreditación",
+    "FILES_GROUP_PRESCREENING": "Preselección",
     "FILES_GROUP_ACCREDITATION": "Acreditación",
     "FILES_GROUP_OTHER": "Otros documentos",
     "DOWNLOAD": "Descargar",
@@ -1069,7 +1088,7 @@
     "DELETE_CONFIRM_MESSAGE": "¿Estás seguro de que quieres eliminar",
     "DELETE_WARNING": "Esta acción no se puede deshacer. Todos los datos seleccionados se eliminarán permanentemente.",
     "DELETE_FILES": "Eliminar todos los archivos (documentos subidos al almacenamiento R2)",
-    "DELETE_ACCREDITATION": "Eliminar datos de acreditación (resultados de preacreditación, solicitudes de readiness)",
+    "DELETE_ACCREDITATION": "Eliminar datos de acreditación (resultados de preselección, solicitudes de readiness)",
     "DELETE_READINESS": "Eliminar borradores y envíos de readiness",
     "CANCEL": "Cancelar",
     "DELETING": "Eliminando..."

@@ -2487,7 +2487,7 @@ async function notifySubmission(env: Env, notice: SubmissionNotice): Promise<voi
       ? 'readiness application'
       : notice.form === 'stage 2'
         ? 'stage 2 application'
-        : 'pre-accreditation questionnaire';
+        : 'pre-screening questionnaire';
   const org = notice.organizationName || 'your organization';
   const site = siteUrl(env);
   const brand = { site, inbox: contactEmail(env) };
@@ -3938,10 +3938,10 @@ async function notifyPreScreeningStatus(
 
   const intro =
     status === 'Passed'
-      ? `Good news — the pre-accreditation for ${organization} has been approved.`
+      ? `Good news — the pre-screening for ${organization} has been approved.`
       : status === 'Failed'
-        ? `The pre-accreditation for ${organization} was not approved at this time.`
-        : `The pre-accreditation for ${organization} is back under review.`;
+        ? `The pre-screening for ${organization} was not approved at this time.`
+        : `The pre-screening for ${organization} is back under review.`;
 
   const paragraphs =
     status === 'Passed'
@@ -3959,8 +3959,8 @@ async function notifyPreScreeningStatus(
           ];
 
   const content: EmailContent = {
-    kicker: 'Pre-accreditation update',
-    title: `Your pre-accreditation status: ${status}`,
+    kicker: 'Pre-screening update',
+    title: `Your pre-screening status: ${status}`,
     intro,
     paragraphs,
     rows: [
@@ -3978,7 +3978,7 @@ async function notifyPreScreeningStatus(
 
   await sendEmail(env, {
     to: email,
-    subject: `Pre-accreditation status for ${organization}: ${status}`,
+    subject: `Pre-screening status for ${organization}: ${status}`,
     html: renderEmailHtml(content, { site: siteUrl(env), inbox: contactEmail(env) }),
     text: renderEmailText(content, { site: siteUrl(env), inbox: contactEmail(env) }),
   });

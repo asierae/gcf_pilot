@@ -10,7 +10,9 @@ import { BreadcrumbService } from "../../../services/breadcrumb.service";
 import {
   OrganizationFileGroup,
   OrganizationFilesBySection,
+  OrganizationForms,
   OrganizationRecord,
+  Stage2DraftSummary,
 } from "../../../models/organization.model";
 import { map } from "rxjs/operators";
 
@@ -85,6 +87,26 @@ const ACCREDITATION_STATUSES = [
 
 const PRIORITY_LEVELS = ["low", "medium", "high", "critical"];
 
+type FormCardKey = "prescreening" | "accreditation" | "readiness";
+
+interface FormCardRow {
+  labelKey: string;
+  value: string;
+}
+
+interface FormCard {
+  key: FormCardKey;
+  titleKey: string;
+  icon: string;
+  status: string;
+  statusTone: "ok" | "warn" | "info" | "muted";
+  submittedAt: string | null;
+  submittedBy: string;
+  rows: FormCardRow[];
+  link: string[] | null;
+  queryParams?: Record<string, string>;
+}
+
 @Component({
   selector: "app-admin-organization-edit",
   standalone: true,
@@ -114,19 +136,32 @@ export class AdminOrganizationEditComponent implements OnInit {
   orgFiles: OrganizationFilesBySection[] = [];
   filesLoading = false;
   filesError = "";
-  activeTab = "details"; // 'details' | 'files'
+  activeTab = "details"; // 'details' | 'forms' | 'files'
 
-  // Available options (populated from data)
+  // Submitted forms
+  orgForms: OrganizationForms | null = null;
+  stage2Drafts: Stage2DraftSummary[] = [];
+  formsLoading = false;
+  formsError = "";
+
+  // Available options (translated lazily so the labels are ready even when
+  // the page opens before the translation files finish loading).
   entityTypes = ENTITY_TYPES;
-  accreditationStatuses = ACCREDITATION_STATUSES.map((s) => ({
-    value: s,
-    label: this.statusLabel(s),
-  }));
-  priorityLevels = PRIORITY_LEVELS.map((p) => ({
-    value: p,
-    label: this.priorityLabel(p),
-  }));
   auditBands = AUDIT_BANDS;
+
+  get accreditationStatuses() {
+    return ACCREDITATION_STATUSES.map((status) => ({
+      value: status,
+      label: this.statusLabel(status),
+    }));
+  }
+
+  get priorityLevels() {
+    return PRIORITY_LEVELS.map((priority) => ({
+      value: priority,
+      label: this.priorityLabel(priority),
+    }));
+  }
 
   async downloadReport(): Promise<void> {
     if (!this.orgId) return;
@@ -206,8 +241,8 @@ export class AdminOrganizationEditComponent implements OnInit {
         this.breadcrumb.setContext(
           this.translate.instant("ADMIN_ORGANIZATION_EDIT.TITLE"),
         );
-        // Load files
-        await this.loadFiles(id);
+        // Load files and submitted forms in parallel.
+        await Promise.all([this.loadFiles(id), this.loadForms(id)]);
       }
     } catch (error) {
       this.loadError =
@@ -230,7 +265,227 @@ export class AdminOrganizationEditComponent implements OnInit {
     }
   }
 
-  /** Files grouped by origin (readiness → pre-accreditation → accreditation). */
+  async loadForms(organizationId: string): Promise<void> {
+    this.formsLoading = true;
+    this.formsError = "";
+    try {
+      const [forms, stage2Drafts] = await Promise.all([
+        this.api.getOrganizationForms(organizationId),
+        this.api.listStage2Drafts(organizationId).catch(() => []),
+      ]);
+      this.orgForms = forms;
+      this.stage2Drafts = stage2Drafts;
+    } catch (error) {
+      this.formsError =
+        error instanceof Error ? error.message : "Could not load submitted forms.";
+    } finally {
+      this.formsLoading = false;
+    }
+  }
+
+  get submittedFormCount(): number {
+    const forms = this.orgForms;
+    if (!forms) return 0;
+    return [forms.stage1, forms.stage2, forms.readiness].filter(Boolean).length;
+  }
+
+  /**
+   * One card per pathway, with the submission metadata the admin needs to
+   * decide what to open. Draft-only cards link to the in-progress form.
+   */
+  get formCards(): FormCard[] {
+    const forms = this.orgForms;
+    const org = this.organization;
+    const stage1 = forms?.stage1 ?? null;
+    const stage2 = forms?.stage2 ?? null;
+    const readiness = forms?.readiness ?? null;
+    const s1 = (stage1?.data ?? {}) as Record<string, unknown>;
+    const s2 = (stage2?.data ?? {}) as Record<string, unknown>;
+    const rd = (readiness?.data ?? {}) as Record<string, unknown>;
+    const meta = (rd["metadata"] ?? {}) as Record<string, unknown>;
+
+    const stage1Draft = forms?.drafts.stage1 ?? null;
+    const readinessDraft = forms?.drafts.readiness ?? null;
+    const stage2Draft = this.stage2Drafts[0]?.updatedAt ?? null;
+    const preStatus = forms?.preScreeningStatus ?? "Pending";
+    const accrStatus = org?.accreditationStatus ?? "";
+    const accrStatusLabel =
+      accrStatus && accrStatus !== "not_started"
+        ? this.statusLabel(accrStatus)
+        : "";
+    const queryParams = { org: this.orgId };
+
+    const notSubmitted = this.translate.instant(
+      "ADMIN_ORGANIZATION_EDIT.FORMS_STATUS_NOT_SUBMITTED",
+    );
+    const draftLabel = this.translate.instant(
+      "ADMIN_ORGANIZATION_EDIT.FORMS_STATUS_DRAFT",
+    );
+    const submittedLabel = this.translate.instant(
+      "ADMIN_ORGANIZATION_EDIT.FORMS_STATUS_SUBMITTED",
+    );
+
+    return [
+      {
+        key: "prescreening",
+        titleKey: "ADMIN_ORGANIZATION_EDIT.FORMS_CARD_PRESCREENING",
+        icon: "📋",
+        status: stage1
+          ? this.statusLabel(preStatus.toLowerCase())
+          : stage1Draft
+            ? draftLabel
+            : notSubmitted,
+        statusTone: stage1
+          ? preStatus === "Passed"
+            ? "ok"
+            : preStatus === "Failed"
+              ? "warn"
+              : "info"
+          : stage1Draft
+            ? "warn"
+            : "muted",
+        submittedAt: stage1?.submittedAt ?? null,
+        submittedBy: this.contactLine(s1, org),
+        rows: [
+          {
+            labelKey: "ADMIN_ORGANIZATION_EDIT.FORMS_COUNTRY",
+            value:
+              this.readText(s1, "headquartersCountry") || org?.country || "—",
+          },
+          {
+            labelKey: "ADMIN_ORGANIZATION_EDIT.FORMS_ENTITY_TYPE",
+            value: this.readText(s1, "typeOfEntity") || org?.entityType || "—",
+          },
+          {
+            labelKey: "ADMIN_ORGANIZATION_EDIT.FORMS_DRAFT_SAVED",
+            value: this.formatDate(stage1Draft ?? undefined),
+          },
+        ],
+        link: stage1 || stage1Draft ? ["/stage1"] : null,
+        queryParams,
+      },
+      {
+        key: "accreditation",
+        titleKey: "ADMIN_ORGANIZATION_EDIT.FORMS_CARD_ACCREDITATION",
+        icon: "📄",
+        status: stage2
+          ? accrStatusLabel || submittedLabel
+          : stage2Draft
+            ? draftLabel
+            : notSubmitted,
+        statusTone: stage2
+          ? accrStatus === "accredited"
+            ? "ok"
+            : accrStatus === "not_accredited"
+              ? "warn"
+              : "info"
+          : stage2Draft
+            ? "warn"
+            : "muted",
+        submittedAt: stage2?.submittedAt ?? null,
+        submittedBy: this.contactLine(s2, org),
+        rows: [
+          {
+            labelKey: "ADMIN_ORGANIZATION_EDIT.FORMS_COUNTRY",
+            value:
+              this.readText(s2, "headquartersCountry") || org?.country || "—",
+          },
+          {
+            labelKey: "ADMIN_ORGANIZATION_EDIT.FORMS_MAX_RISK",
+            value: this.riskLabel(s2["maxRiskCategory"]),
+          },
+          {
+            labelKey: "ADMIN_ORGANIZATION_EDIT.FORMS_DRAFT_YEARS",
+            value: this.stage2Drafts.map((draft) => draft.year).join(", ") || "—",
+          },
+        ],
+        link: stage2 || stage2Draft ? ["/stage2"] : null,
+        queryParams,
+      },
+      {
+        key: "readiness",
+        titleKey: "ADMIN_ORGANIZATION_EDIT.FORMS_CARD_READINESS",
+        icon: "📊",
+        status: readiness
+          ? submittedLabel
+          : readinessDraft
+            ? draftLabel
+            : notSubmitted,
+        statusTone: readiness ? "ok" : readinessDraft ? "warn" : "muted",
+        submittedAt: readiness?.submittedAt ?? null,
+        submittedBy:
+          [this.readText(meta, "ndaFocalPointName"), this.readText(meta, "ndaEmail")]
+            .filter(Boolean)
+            .join(" · ") || this.contactLine(rd, org),
+        rows: [
+          {
+            labelKey: "ADMIN_ORGANIZATION_EDIT.FORMS_COUNTRY",
+            value: this.readText(meta, "country") || org?.country || "—",
+          },
+          {
+            labelKey: "ADMIN_ORGANIZATION_EDIT.FORMS_PROPOSAL",
+            value: this.readText(meta, "proposalTitle") || "—",
+          },
+          {
+            labelKey: "ADMIN_ORGANIZATION_EDIT.FORMS_REQUESTED_AMOUNT",
+            value: this.formatAmount(meta["requestedAmountUSD"]),
+          },
+        ],
+        link: readiness
+          ? ["/dashboard/readiness", this.orgId]
+          : readinessDraft
+            ? ["/readiness"]
+            : null,
+        queryParams,
+      },
+    ];
+  }
+
+  private contactLine(
+    data: Record<string, unknown>,
+    org: OrganizationRecord | null,
+  ): string {
+    const name =
+      this.readText(data, "primaryContactName", "contactName") ||
+      org?.contactName ||
+      "";
+    const email =
+      this.readText(data, "primaryContactEmail", "contactEmail") ||
+      org?.contactEmail ||
+      "";
+    return [name, email].filter(Boolean).join(" · ") || "—";
+  }
+
+  private readText(data: Record<string, unknown>, ...keys: string[]): string {
+    for (const key of keys) {
+      const value = data[key];
+      if (typeof value === "string" && value.trim()) return value.trim();
+      if (typeof value === "number" && Number.isFinite(value)) {
+        return String(value);
+      }
+    }
+    return "";
+  }
+
+  private riskLabel(value: unknown): string {
+    const key = typeof value === "string" ? value : "";
+    if (key === "high") return this.translate.instant("STAGE2.RISK_HIGH");
+    if (key === "medium") return this.translate.instant("STAGE2.RISK_MEDIUM");
+    if (key === "minimal") return this.translate.instant("STAGE2.RISK_MINIMAL");
+    return key || "—";
+  }
+
+  private formatAmount(value: unknown): string {
+    const amount = typeof value === "number" ? value : Number(value);
+    if (!Number.isFinite(amount) || amount <= 0) return "—";
+    return new Intl.NumberFormat(undefined, {
+      style: "currency",
+      currency: "USD",
+      maximumFractionDigits: 0,
+    }).format(amount);
+  }
+
+  /** Files grouped by origin (readiness → pre-screening → accreditation). */
   get fileGroups(): {
     group: OrganizationFileGroup;
     labelKey: string;

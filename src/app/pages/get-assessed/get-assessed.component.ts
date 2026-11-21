@@ -9,7 +9,7 @@ import { AuthService } from '../../services/auth.service';
 
 /**
  * Public pathway chooser shown by every "Get assessed" call to action.
- * It lets visitors pick readiness, pre-accreditation or a conversation with
+ * It lets visitors pick readiness, pre-screening or a conversation with
  * an adviser instead of dropping everyone into the stage 1 form.
  */
 @Component({

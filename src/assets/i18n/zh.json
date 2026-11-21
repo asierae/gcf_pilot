@@ -6,9 +6,9 @@
     "ALL_SECTIONS": "所有章节",
     "BACK_TO_SECTIONS": "返回章节",
     "ALL_PATHWAYS": "所有途径",
-    "KICKER": "GCF 认证 · 预认证 + 完整申请",
+    "KICKER": "GCF 认证 · 预筛选 + 完整申请",
     "PROGRESS": "已完成 {{value}}%",
-    "GROUP_STAGE1": "预认证（第 1 阶段）",
+    "GROUP_STAGE1": "预筛选（第 1 阶段）",
     "GROUP_STAGE2": "认证申请（第 2 阶段）",
     "SCREENING_REQUIREMENT": "审查要求：",
     "APPLICATION_SETTINGS": "申请设置",
@@ -668,7 +668,7 @@
       "EMPTY": "尚未记录组织类型。"
     },
     "SCREENING": {
-      "TITLE": "预认证",
+      "TITLE": "预筛选",
       "SUB": "认证提交状态"
     },
     "LEADS": {
@@ -691,7 +691,7 @@
       "REVIEW": "查看咨询 →",
       "EMPTY": "尚未提交任何内容。",
       "SUB_ACCREDITATION": "认证提交",
-      "SUB_PRESCREENING": "预认证",
+      "SUB_PRESCREENING": "预筛选",
       "SUB_READINESS": "准备度提交",
       "SUB_ENQUIRY": "咨询",
       "SUB_PROFILE": "机构画像评估",
@@ -724,7 +724,7 @@
     "FUNNEL": {
       "ENQUIRIES": "咨询",
       "ACCREDITATION": "认证",
-      "PASSED": "通过预认证",
+      "PASSED": "通过预筛选",
       "STAGE2": "第二阶段申请",
       "PROFILE": "机构画像评估"
     }
@@ -733,19 +733,19 @@
     "WORKSPACE": "工作区",
     "DASHBOARD": "仪表板",
     "PRICING": "方案与价格",
-    "PRESCREENING": "预认证",
+    "PRESCREENING": "预筛选",
     "ACCREDITATION": "认证",
     "READINESS": "准备度申请",
     "MY_FORMS": "我的表单",
     "MY_ORGANIZATION": "我的组织",
-    "ACCREDITATION_SUBM": "认证提交",
+    "ACCREDITATION_SUBM": "预筛选提交",
     "READINESS_SUBM": "准备度提交",
     "LEADS": "咨询",
     "USERS": "用户",
     "SETTINGS": "设置",
     "USER_MANAGEMENT": "用户管理",
-    "UNLOCK_ACCREDITATION": "通过预认证以解锁认证（当前：{{status}}）",
-    "PRESCREENING_STATUS": "预认证：{{status}}",
+    "UNLOCK_ACCREDITATION": "通过预筛选以解锁认证（当前：{{status}}）",
+    "PRESCREENING_STATUS": "预筛选：{{status}}",
     "SUBMISSION": "提交",
     "MANAGE_ACCOUNTS": "管理账户和角色",
     "SEND_EMAIL": "发送邮件",
@@ -833,12 +833,12 @@
           "DESC": "法律身份与联系人已登记。"
         },
         "PRESCREENING": {
-          "TITLE": "预认证已提交",
+          "TITLE": "预筛选已提交",
           "DESC": "第一阶段资格与能力问答。"
         },
         "REVIEW": {
-          "TITLE": "预认证审查",
-          "DESC": "Avera 对预认证的决定。"
+          "TITLE": "预筛选审查",
+          "DESC": "Avera 对预筛选的决定。"
         },
         "ACCREDITATION": {
           "TITLE": "认证已提交",
@@ -875,23 +875,23 @@
         "CTA": "完善画像"
       },
       "COMPLETE_PRESCREENING": {
-        "TITLE": "开始预认证",
+        "TITLE": "开始预筛选",
         "DESC": "提交第一阶段以启动认证路径。",
-        "CTA": "打开预认证"
+        "CTA": "打开预筛选"
       },
       "AWAITING_PRESCREENING": {
-        "TITLE": "预认证审查中",
+        "TITLE": "预筛选审查中",
         "DESC": "您提交的第一阶段材料已交给 Avera 团队。",
         "CTA": "查看提交"
       },
       "REVISE_PRESCREENING": {
-        "TITLE": "修改预认证",
+        "TITLE": "修改预筛选",
         "DESC": "查看反馈并重新提交第一阶段。",
-        "CTA": "打开预认证"
+        "CTA": "打开预筛选"
       },
       "START_ACCREDITATION": {
         "TITLE": "开始第二阶段认证",
-        "DESC": "预认证已通过。请完成认证标准。",
+        "DESC": "预筛选已通过。请完成认证标准。",
         "CTA": "打开认证"
       },
       "UPLOAD_DOCUMENTS": {
@@ -917,9 +917,9 @@
       "SUB": "机构已记录的里程碑。",
       "EMPTY": "尚无动态。",
       "PROFILE": "机构画像已创建",
-      "STAGE1": "预认证已提交",
-      "PRESCREENING_PASSED": "预认证通过",
-      "PRESCREENING_FAILED": "预认证需要修改",
+      "STAGE1": "预筛选已提交",
+      "PRESCREENING_PASSED": "预筛选通过",
+      "PRESCREENING_FAILED": "预筛选需要修改",
       "STAGE2": "认证已提交",
       "READINESS_DRAFT": "准备度草稿已保存",
       "READINESS": "准备度已提交"
@@ -947,12 +947,12 @@
       "NO_READINESS_HINT": "创建准备度申请后，可在此查看预算、证据和逻辑框架。",
       "START_READINESS": "开始准备度",
       "ACCREDITATION_TITLE": "认证概览",
-      "ACCREDITATION_SUB": "预认证状态与第二阶段证据覆盖。",
+      "ACCREDITATION_SUB": "预筛选状态与第二阶段证据覆盖。",
       "QUESTIONS": "已答问题",
       "QUESTIONS_VALUE": "{{answered}} / {{total}}",
       "SECTIONS": "已完成章节",
       "SECTIONS_VALUE": "{{complete}} / {{total}}",
-      "PRESCREENING": "预认证",
+      "PRESCREENING": "预筛选",
       "STAGE2_SUBMITTED": "第二阶段已提交",
       "NOT_STARTED": "尚未开始",
       "STAFF": "员工",
@@ -1026,9 +1026,9 @@
     "RISK_BAND_MODERATE": "中等风险",
     "RISK_BAND_ELEVATED": "较高风险",
     "RISK_BAND_HIGH": "高风险",
-    "ACCR_STATUS_PENDING": "预认证待定",
-    "ACCR_STATUS_PASSED": "预认证通过",
-    "ACCR_STATUS_FAILED": "预认证失败",
+    "ACCR_STATUS_PENDING": "预筛选待定",
+    "ACCR_STATUS_PASSED": "预筛选通过",
+    "ACCR_STATUS_FAILED": "预筛选失败",
     "ACCR_STATUS_IN_REVIEW": "审核中",
     "ACCR_STATUS_ACCREDITATED": "已认证",
     "ACCR_STATUS_NOT_ACCREDITED": "未认证",
@@ -1051,17 +1051,36 @@
     "AUDIT_DATE_LABEL": "审核日期",
     "AUDIT_REPORT_URL_LABEL": "报告链接",
     "AUDIT_NOTES_LABEL": "公开审核发现",
-    "DOWNLOAD_PDF": "下载已签署 PDF"
-,
+    "DOWNLOAD_PDF": "下载已签署 PDF",
     "SAVE_ERROR": "无法保存更改。请重试。",
     "DELETE_CONFIRM_BUTTON": "删除组织",
     "SELECT_PLACEHOLDER": "选择",
     "TAB_DETAILS": "详情",
     "TAB_FILES": "文件",
+    "TAB_FORMS": "表单",
+    "FORMS_LOADING": "正在加载已提交的表单…",
+    "FORMS_EMPTY": "该组织尚无已提交的表单或草稿。",
+    "FORMS_STATUS_NOT_SUBMITTED": "未提交",
+    "FORMS_STATUS_DRAFT": "草稿进行中",
+    "FORMS_STATUS_SUBMITTED": "已提交",
+    "FORMS_CARD_PRESCREENING": "预筛选（第 1 阶段）",
+    "FORMS_CARD_ACCREDITATION": "认证（第 2 阶段）",
+    "FORMS_CARD_READINESS": "准备度",
+    "FORMS_COUNTRY": "国家",
+    "FORMS_ENTITY_TYPE": "实体类型",
+    "FORMS_DRAFT_SAVED": "草稿已保存",
+    "FORMS_MAX_RISK": "最高 E&S 风险",
+    "FORMS_DRAFT_YEARS": "草稿年份",
+    "FORMS_PROPOSAL": "提案",
+    "FORMS_REQUESTED_AMOUNT": "申请金额",
+    "FORMS_SUBMITTED_AT": "提交时间",
+    "FORMS_SUBMITTED_BY": "提交人",
+    "FORMS_OPEN": "打开表单",
+    "FORMS_NOT_SUBMITTED_HINT": "该路径尚未开始。",
     "FILES_LOADING": "正在加载文件...",
     "FILES_EMPTY": "没有为此组织上传文件。",
     "FILES_GROUP_READINESS": "Readiness",
-    "FILES_GROUP_PRESCREENING": "预认证",
+    "FILES_GROUP_PRESCREENING": "预筛选",
     "FILES_GROUP_ACCREDITATION": "认证",
     "FILES_GROUP_OTHER": "其他文件",
     "DOWNLOAD": "下载",
@@ -1069,7 +1088,7 @@
     "DELETE_CONFIRM_MESSAGE": "确定要删除",
     "DELETE_WARNING": "此操作无法撤销。所选的所有数据将被永久删除。",
     "DELETE_FILES": "删除所有文件（上传到 R2 存储的文档）",
-    "DELETE_ACCREDITATION": "删除认证数据（预认证结果、readyiness 申请）",
+    "DELETE_ACCREDITATION": "删除认证数据（预筛选结果、readyiness 申请）",
     "DELETE_READINESS": "删除 readiness 草稿和提交",
     "CANCEL": "取消",
     "DELETING": "正在删除..."

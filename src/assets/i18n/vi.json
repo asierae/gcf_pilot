@@ -6,9 +6,9 @@
     "ALL_SECTIONS": "Tất cả các mục",
     "BACK_TO_SECTIONS": "Quay lại các mục",
     "ALL_PATHWAYS": "Tất cả lộ trình",
-    "KICKER": "CÔNG NHẬN GCF · TIỀN CÔNG NHẬN + ĐƠN ĐĂNG KÝ ĐẦY ĐỦ",
+    "KICKER": "CÔNG NHẬN GCF · SÀNG LỌC SƠ BỘ + ĐƠN ĐĂNG KÝ ĐẦY ĐỦ",
     "PROGRESS": "Đã hoàn thành {{value}}%",
-    "GROUP_STAGE1": "Tiền công nhận (Bước 1)",
+    "GROUP_STAGE1": "Sàng lọc sơ bộ (Bước 1)",
     "GROUP_STAGE2": "Đơn đăng ký công nhận (Bước 2)",
     "SCREENING_REQUIREMENT": "Yêu cầu sàng lọc:",
     "APPLICATION_SETTINGS": "Cài đặt đơn đăng ký",
@@ -79,7 +79,7 @@
     "READINESS_META": "Khoảng 8 phút · Không cần tài khoản",
     "READINESS_CTA": "Bắt đầu đánh giá",
     "STAGE1_TITLE": "Công nhận",
-    "STAGE1_BODY": "Dành cho các tổ chức theo đuổi công nhận GCF: tiền công nhận có cấu trúc về nhiệm vụ, tiêu chuẩn tín thác, biện pháp bảo vệ và thành tích.",
+    "STAGE1_BODY": "Dành cho các tổ chức theo đuổi công nhận GCF: sàng lọc sơ bộ có cấu trúc về nhiệm vụ, tiêu chuẩn tín thác, biện pháp bảo vệ và thành tích.",
     "STAGE1_META": "Khoảng 12 phút · Tự động lưu bản nháp",
     "STAGE1_CTA": "Bắt đầu công nhận",
     "PROFILE_TITLE": "Đánh giá hồ sơ",
@@ -668,7 +668,7 @@
       "EMPTY": "Chưa có loại hình tổ chức nào được ghi nhận."
     },
     "SCREENING": {
-      "TITLE": "Tiền công nhận",
+      "TITLE": "Sàng lọc sơ bộ",
       "SUB": "Trạng thái hồ sơ công nhận"
     },
     "LEADS": {
@@ -691,7 +691,7 @@
       "REVIEW": "Xem yêu cầu →",
       "EMPTY": "Chưa có nội dung nào được gửi.",
       "SUB_ACCREDITATION": "Hồ sơ công nhận",
-      "SUB_PRESCREENING": "Tiền công nhận",
+      "SUB_PRESCREENING": "Sàng lọc sơ bộ",
       "SUB_READINESS": "Hồ sơ sẵn sàng",
       "SUB_ENQUIRY": "Yêu cầu",
       "SUB_PROFILE": "Đánh giá hồ sơ",
@@ -724,7 +724,7 @@
     "FUNNEL": {
       "ENQUIRIES": "Yêu cầu",
       "ACCREDITATION": "Công nhận",
-      "PASSED": "Đạt tiền công nhận",
+      "PASSED": "Đạt sàng lọc sơ bộ",
       "STAGE2": "Hồ sơ giai đoạn 2",
       "PROFILE": "Đánh giá hồ sơ"
     }
@@ -733,19 +733,19 @@
     "WORKSPACE": "Không gian làm việc",
     "DASHBOARD": "Bảng điều khiển",
     "PRICING": "Gói và bảng giá",
-    "PRESCREENING": "Tiền công nhận",
+    "PRESCREENING": "Sàng lọc sơ bộ",
     "ACCREDITATION": "Công nhận",
     "READINESS": "Hồ sơ sẵn sàng",
     "MY_FORMS": "Biểu mẫu của tôi",
     "MY_ORGANIZATION": "Tổ chức của tôi",
-    "ACCREDITATION_SUBM": "Hồ sơ công nhận",
+    "ACCREDITATION_SUBM": "Hồ sơ sàng lọc sơ bộ",
     "READINESS_SUBM": "Hồ sơ sẵn sàng",
     "LEADS": "Yêu cầu",
     "USERS": "Người dùng",
     "SETTINGS": "Cài đặt",
     "USER_MANAGEMENT": "Quản lý người dùng",
-    "UNLOCK_ACCREDITATION": "Vượt qua tiền công nhận để mở công nhận (hiện tại: {{status}})",
-    "PRESCREENING_STATUS": "Tiền công nhận: {{status}}",
+    "UNLOCK_ACCREDITATION": "Vượt qua sàng lọc sơ bộ để mở công nhận (hiện tại: {{status}})",
+    "PRESCREENING_STATUS": "Sàng lọc sơ bộ: {{status}}",
     "SUBMISSION": "Hồ sơ",
     "MANAGE_ACCOUNTS": "Quản lý tài khoản và vai trò",
     "SEND_EMAIL": "Gửi email",
@@ -833,12 +833,12 @@
           "DESC": "Thông tin pháp lý và liên hệ đã đăng ký."
         },
         "PRESCREENING": {
-          "TITLE": "Đã gửi tiền công nhận",
+          "TITLE": "Đã gửi sàng lọc sơ bộ",
           "DESC": "Câu trả lời về điều kiện và năng lực giai đoạn 1."
         },
         "REVIEW": {
-          "TITLE": "Xét duyệt tiền công nhận",
-          "DESC": "Quyết định của Avera về tiền công nhận."
+          "TITLE": "Xét duyệt sàng lọc sơ bộ",
+          "DESC": "Quyết định của Avera về sàng lọc sơ bộ."
         },
         "ACCREDITATION": {
           "TITLE": "Đã gửi công nhận",
@@ -875,23 +875,23 @@
         "CTA": "Hoàn thiện hồ sơ"
       },
       "COMPLETE_PRESCREENING": {
-        "TITLE": "Bắt đầu tiền công nhận",
+        "TITLE": "Bắt đầu sàng lọc sơ bộ",
         "DESC": "Gửi giai đoạn 1 để bắt đầu lộ trình công nhận.",
-        "CTA": "Mở tiền công nhận"
+        "CTA": "Mở sàng lọc"
       },
       "AWAITING_PRESCREENING": {
-        "TITLE": "Tiền công nhận đang xét duyệt",
+        "TITLE": "Sàng lọc sơ bộ đang xét duyệt",
         "DESC": "Hồ sơ giai đoạn 1 đang ở đội ngũ Avera.",
         "CTA": "Xem hồ sơ"
       },
       "REVISE_PRESCREENING": {
-        "TITLE": "Chỉnh sửa tiền công nhận",
+        "TITLE": "Chỉnh sửa sàng lọc sơ bộ",
         "DESC": "Xem phản hồi và gửi lại giai đoạn 1.",
-        "CTA": "Mở tiền công nhận"
+        "CTA": "Mở sàng lọc"
       },
       "START_ACCREDITATION": {
         "TITLE": "Bắt đầu công nhận giai đoạn 2",
-        "DESC": "Tiền công nhận đã qua. Hoàn thiện tiêu chuẩn công nhận.",
+        "DESC": "Sàng lọc sơ bộ đã qua. Hoàn thiện tiêu chuẩn công nhận.",
         "CTA": "Mở công nhận"
       },
       "UPLOAD_DOCUMENTS": {
@@ -917,9 +917,9 @@
       "SUB": "Các mốc đã ghi nhận cho tổ chức.",
       "EMPTY": "Chưa có hoạt động.",
       "PROFILE": "Đã tạo hồ sơ tổ chức",
-      "STAGE1": "Đã gửi tiền công nhận",
-      "PRESCREENING_PASSED": "Đã qua tiền công nhận",
-      "PRESCREENING_FAILED": "Tiền công nhận cần chỉnh sửa",
+      "STAGE1": "Đã gửi sàng lọc sơ bộ",
+      "PRESCREENING_PASSED": "Đã qua sàng lọc sơ bộ",
+      "PRESCREENING_FAILED": "Sàng lọc sơ bộ cần chỉnh sửa",
       "STAGE2": "Đã gửi công nhận",
       "READINESS_DRAFT": "Đã lưu nháp sẵn sàng",
       "READINESS": "Đã gửi hồ sơ sẵn sàng"
@@ -952,7 +952,7 @@
       "QUESTIONS_VALUE": "{{answered}} trên {{total}}",
       "SECTIONS": "Phần đã hoàn tất",
       "SECTIONS_VALUE": "{{complete}} trên {{total}}",
-      "PRESCREENING": "Tiền công nhận",
+      "PRESCREENING": "Sàng lọc sơ bộ",
       "STAGE2_SUBMITTED": "Đã gửi giai đoạn 2",
       "NOT_STARTED": "Chưa bắt đầu",
       "STAFF": "Nhân sự",
@@ -1026,9 +1026,9 @@
     "RISK_BAND_MODERATE": "Rủi ro trung bình",
     "RISK_BAND_ELEVATED": "Rủi ro cao",
     "RISK_BAND_HIGH": "Rủi ro rất cao",
-    "ACCR_STATUS_PENDING": "Chờ tiền công nhận",
-    "ACCR_STATUS_PASSED": "Đã qua tiền công nhận",
-    "ACCR_STATUS_FAILED": "Thất bại tiền công nhận",
+    "ACCR_STATUS_PENDING": "Chờ sàng lọc sơ bộ",
+    "ACCR_STATUS_PASSED": "Đã qua sàng lọc sơ bộ",
+    "ACCR_STATUS_FAILED": "Thất bại sàng lọc sơ bộ",
     "ACCR_STATUS_IN_REVIEW": "Đang xem xét",
     "ACCR_STATUS_ACCREDITATED": "Đã công nhận",
     "ACCR_STATUS_NOT_ACCREDITED": "Chưa công nhận",
@@ -1051,17 +1051,36 @@
     "AUDIT_DATE_LABEL": "Ngày kiểm toán",
     "AUDIT_REPORT_URL_LABEL": "URL báo cáo",
     "AUDIT_NOTES_LABEL": "Kết luận công khai",
-    "DOWNLOAD_PDF": "Tải PDF đã ký"
-,
+    "DOWNLOAD_PDF": "Tải PDF đã ký",
     "SAVE_ERROR": "Không thể lưu thay đổi. Vui lòng thử lại.",
     "DELETE_CONFIRM_BUTTON": "Xóa tổ chức",
     "SELECT_PLACEHOLDER": "Chọn",
     "TAB_DETAILS": "Chi tiết",
     "TAB_FILES": "Tệp tin",
+    "TAB_FORMS": "Biểu mẫu",
+    "FORMS_LOADING": "Đang tải biểu mẫu đã gửi…",
+    "FORMS_EMPTY": "Chưa có biểu mẫu nào được gửi hoặc lưu nháp cho tổ chức này.",
+    "FORMS_STATUS_NOT_SUBMITTED": "Chưa gửi",
+    "FORMS_STATUS_DRAFT": "Đang lưu nháp",
+    "FORMS_STATUS_SUBMITTED": "Đã gửi",
+    "FORMS_CARD_PRESCREENING": "Sàng lọc sơ bộ (Bước 1)",
+    "FORMS_CARD_ACCREDITATION": "Công nhận (Bước 2)",
+    "FORMS_CARD_READINESS": "Sẵn sàng",
+    "FORMS_COUNTRY": "Quốc gia",
+    "FORMS_ENTITY_TYPE": "Loại tổ chức",
+    "FORMS_DRAFT_SAVED": "Đã lưu nháp",
+    "FORMS_MAX_RISK": "Rủi ro E&S tối đa",
+    "FORMS_DRAFT_YEARS": "Các năm có bản nháp",
+    "FORMS_PROPOSAL": "Đề xuất",
+    "FORMS_REQUESTED_AMOUNT": "Số tiền đề nghị",
+    "FORMS_SUBMITTED_AT": "Đã gửi",
+    "FORMS_SUBMITTED_BY": "Người gửi",
+    "FORMS_OPEN": "Mở biểu mẫu",
+    "FORMS_NOT_SUBMITTED_HINT": "Lộ trình này chưa được bắt đầu.",
     "FILES_LOADING": "Đang tải tệp tin...",
     "FILES_EMPTY": "Không có tệp tin nào đã được tải lên cho tổ chức này.",
     "FILES_GROUP_READINESS": "Readiness",
-    "FILES_GROUP_PRESCREENING": "Tiền công nhận",
+    "FILES_GROUP_PRESCREENING": "Sàng lọc sơ bộ",
     "FILES_GROUP_ACCREDITATION": "Công nhận",
     "FILES_GROUP_OTHER": "Tài liệu khác",
     "DOWNLOAD": "Tải xuống",
@@ -1069,7 +1088,7 @@
     "DELETE_CONFIRM_MESSAGE": "Bạn có chắc chắn muốn xóa",
     "DELETE_WARNING": "Hành động này không thể hoàn tác. Tất cả dữ liệu đã chọn sẽ bị xóa vĩnh viễn.",
     "DELETE_FILES": "Xóa tất cả tệp tin (tài liệu đã tải lên vào bộ lưu trữ R2)",
-    "DELETE_ACCREDITATION": "Xóa dữ liệu công nhận (kết quả tiền công nhận, đề xuất readiness)",
+    "DELETE_ACCREDITATION": "Xóa dữ liệu công nhận (kết quả sàng lọc sơ bộ, đề xuất readiness)",
     "DELETE_READINESS": "Xóa thảo luận và bản nháp readiness",
     "CANCEL": "Hủy",
     "DELETING": "Đang xóa..."

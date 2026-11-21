@@ -318,6 +318,7 @@ export class Stage1Component implements OnInit, OnDestroy {
 
   private async loadOrganizationAndDraft(): Promise<void> {
     const user = this.authService.currentUserValue;
+    const isAdmin = user?.role === 'admin';
 
     this.organization = await this.organizationService.load(this.applicantId);
 
@@ -341,6 +342,21 @@ export class Stage1Component implements OnInit, OnDestroy {
 
     if (this.organization) {
       this.applyServerValues(this.profileForForm(this.organization));
+    }
+
+    // Admins can open an organization's filled pre-screening from the
+    // organization editor. The submitted payload is the base; an existing
+    // draft (if any) is applied afterwards and wins.
+    if (isAdmin) {
+      try {
+        const forms = await this.organizationService.forms(this.applicantId);
+        if (forms.stage1?.data) {
+          this.applyServerValues(forms.stage1.data);
+          this.restoreAfdbOperations(forms.stage1.data);
+        }
+      } catch {
+        // Viewing a submitted form is best-effort; the form stays usable.
+      }
     }
 
     const draft = await this.organizationService.loadDraft('stage1', this.applicantId);

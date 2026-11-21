@@ -78,7 +78,7 @@ export class Stage2Component implements OnInit, OnDestroy {
       ...addStage1FormControls(this.fb),
       maxRiskCategory: ['', Validators.required],
       // Application-only questions from the GCF guidance. They are added here
-      // (not in the shared Stage 1 builder) so pre-accreditation is untouched.
+      // (not in the shared Stage 1 builder) so pre-screening is untouched.
       governmentLegalStatus: [''],
       hasBeneficialOwnershipDocumentation: ['', Validators.required],
       beneficialOwnershipDetails: [''],

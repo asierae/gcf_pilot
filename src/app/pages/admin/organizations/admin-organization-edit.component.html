@@ -56,6 +56,17 @@
       </button>
       <button
         role="tab"
+        [class.active]="activeTab === 'forms'"
+        (click)="activeTab = 'forms'"
+        [attr.aria-selected]="activeTab === 'forms'"
+      >
+        {{ "ADMIN_ORGANIZATION_EDIT.TAB_FORMS" | translate }}
+        @if (submittedFormCount > 0) {
+          <span class="tab-badge">{{ submittedFormCount }}</span>
+        }
+      </button>
+      <button
+        role="tab"
         [class.active]="activeTab === 'files'"
         (click)="activeTab = 'files'"
         [attr.aria-selected]="activeTab === 'files'"
@@ -281,6 +292,87 @@
           </button>
         </div>
       </form>
+    }
+
+    @if (activeTab === 'forms') {
+      <!-- Submitted forms tab -->
+      <div class="ao-forms-tab">
+        @if (formsLoading) {
+          <div class="ao-empty">
+            <span class="ao-empty-icon">⏳</span>
+            <p>{{ "ADMIN_ORGANIZATION_EDIT.FORMS_LOADING" | translate }}</p>
+          </div>
+        } @else if (formsError) {
+          <div class="ao-empty">
+            <span class="ao-empty-icon">⚠️</span>
+            <p>{{ formsError }}</p>
+            <button type="button" class="btn-retry" (click)="loadForms(orgId)">
+              {{ "APPLICANT_DASHBOARD.RETRY" | translate }}
+            </button>
+          </div>
+        } @else if (orgForms && submittedFormCount === 0 && !orgForms.drafts.stage1 && !orgForms.drafts.readiness && stage2Drafts.length === 0) {
+          <div class="ao-empty">
+            <span class="ao-empty-icon">🗂️</span>
+            <p>{{ "ADMIN_ORGANIZATION_EDIT.FORMS_EMPTY" | translate }}</p>
+          </div>
+        } @else {
+          <div class="ao-form-cards">
+            @for (card of formCards; track card.key) {
+              @if (card.link) {
+                <a
+                  class="ao-form-card"
+                  [routerLink]="card.link"
+                  [queryParams]="card.queryParams"
+                >
+                  <div class="ao-form-card-head">
+                    <span class="ao-form-icon" aria-hidden="true">{{ card.icon }}</span>
+                    <div class="ao-form-title">
+                      <h3>{{ card.titleKey | translate }}</h3>
+                      <span [class]="'form-status status-' + card.statusTone">
+                        {{ card.status }}
+                      </span>
+                    </div>
+                  </div>
+                  <dl class="ao-form-meta">
+                    <div>
+                      <dt>{{ "ADMIN_ORGANIZATION_EDIT.FORMS_SUBMITTED_AT" | translate }}</dt>
+                      <dd>{{ formatDate(card.submittedAt ?? undefined) }}</dd>
+                    </div>
+                    <div>
+                      <dt>{{ "ADMIN_ORGANIZATION_EDIT.FORMS_SUBMITTED_BY" | translate }}</dt>
+                      <dd>{{ card.submittedBy }}</dd>
+                    </div>
+                    @for (row of card.rows; track row.labelKey) {
+                      <div>
+                        <dt>{{ row.labelKey | translate }}</dt>
+                        <dd>{{ row.value }}</dd>
+                      </div>
+                    }
+                  </dl>
+                  <span class="ao-form-open">
+                    {{ "ADMIN_ORGANIZATION_EDIT.FORMS_OPEN" | translate }} →
+                  </span>
+                </a>
+              } @else {
+                <div class="ao-form-card is-empty">
+                  <div class="ao-form-card-head">
+                    <span class="ao-form-icon" aria-hidden="true">{{ card.icon }}</span>
+                    <div class="ao-form-title">
+                      <h3>{{ card.titleKey | translate }}</h3>
+                      <span [class]="'form-status status-' + card.statusTone">
+                        {{ card.status }}
+                      </span>
+                    </div>
+                  </div>
+                  <p class="ao-form-empty-hint">
+                    {{ "ADMIN_ORGANIZATION_EDIT.FORMS_NOT_SUBMITTED_HINT" | translate }}
+                  </p>
+                </div>
+              }
+            }
+          </div>
+        }
+      </div>
     }
 
     @if (activeTab === 'files') {

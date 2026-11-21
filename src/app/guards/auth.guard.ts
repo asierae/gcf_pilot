@@ -15,7 +15,7 @@ export const authGuard: CanActivateFn = () => {
   return false;
 };
 
-/** Accreditation opens only after the pre-accreditation has been passed. */
+/** Accreditation opens only after the pre-screening has been passed. */
 export const preScreeningGuard: CanActivateFn = async () => {
   const auth = inject(AuthService);
   const organizations = inject(OrganizationService);

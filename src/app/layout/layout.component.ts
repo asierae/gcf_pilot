@@ -65,7 +65,7 @@ export class LayoutComponent implements OnInit {
     }
   }
 
-  /** Admins always have access; applicants need a passed pre-accreditation. */
+  /** Admins always have access; applicants need a passed pre-screening. */
   get accreditationUnlocked(): boolean {
     return (
       this.authService.currentUserValue?.role === "admin" ||

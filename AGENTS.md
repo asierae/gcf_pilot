@@ -5,7 +5,7 @@
 
 ## 1. Descripción y objetivo
 
-Portal de **Avera Capital Access** para el proceso de acreditación del **GCF (Green Climate Fund)**: captación de leads, evaluación de perfil, cuestionario de **pre-accreditation** (Stage 1), solicitud de **accreditation** (Stage 2), solicitud **Readiness**, y panel de administración de solicitudes, organizaciones, usuarios y correos.
+Portal de **Avera Capital Access** para el proceso de acreditación del **GCF (Green Climate Fund)**: captación de leads, evaluación de perfil, cuestionario de **pre-screening** (Stage 1), solicitud de **accreditation** (Stage 2), solicitud **Readiness**, y panel de administración de solicitudes, organizaciones, usuarios y correos.
 
 El repositorio se llama `gcf` y el proyecto Angular `nuriberry-app` (el `README.md` raíz aún conserva el título original "Climat Advisor"). La UI está en inglés con i18n; el equipo trabaja en español.
 
@@ -65,7 +65,7 @@ El repositorio se llama `gcf` y el proyecto Angular `nuriberry-app` (el `README.
 
 ## 7. Reglas al modificar código existente
 
-1. No cambiar claves i18n, identificadores de `SubmissionForm` (`'pre-screening'`, `'stage 2'`, `'readiness'`), nombres de secciones R2 ni nombres de campos JSON: son contratos con datos ya guardados. Se renombró el **texto visible** de "pre-screening" a "pre-accreditation", pero las claves internas siguen siendo `PRESCREENING`/`preScreeningStatus`.
+1. No cambiar claves i18n, identificadores de `SubmissionForm` (`'pre-screening'`, `'stage 2'`, `'readiness'`), nombres de secciones R2 ni nombres de campos JSON: son contratos con datos ya guardados. La terminología visible es "Pre-screening" (se probó "Pre-Accreditation" y se revirtió), pero las claves internas siguen siendo `PRESCREENING`/`preScreeningStatus`.
 2. Cambios en D1: `schema.sql` es idempotente para bases nuevas; las columnas nuevas de bases existentes van en `worker/migrations/*.sql` y hay que aplicarlas en local **y** en remoto.
 3. Toda cadena visible nueva pasa por i18n en los 7 idiomas (o se documenta como texto fijo deliberado).
 4. No tocar `.dev.vars`, secretos ni IDs de recursos desplegados. No commitear datos de solicitantes (`firestore-export.json` y `worker/import.sql` están ignorados).
@@ -108,8 +108,9 @@ npx ng build
 - D1 guarda payloads JSON completos: los formularios evolucionan sin migraciones de columnas.
 - Solo el estado `Passed` abre Accreditation; el guard consulta `GET /api/organizations/:id/forms`.
 - Las notas de revisión enviadas al solicitante son una instantánea; se publican en `GET /api/organizations/:id/dashboard` (público) y se muestran en el panel "Review feedback".
-- La pestaña Files del admin ordena primero por origen (readiness, pre-accreditation, accreditation) y después por sección, con metadatos en `worker/index.ts` (`DOCUMENT_SECTIONS`, `DOCUMENT_GROUP_ORDER`).
+- La pestaña Files del admin ordena primero por origen (readiness, pre-screening, accreditation) y después por sección, con metadatos en `worker/index.ts` (`DOCUMENT_SECTIONS`, `DOCUMENT_GROUP_ORDER`).
 - Logout redirige a `/home`; el CTA "Get assessed" de la cabecera de la landing se oculta cuando hay sesión iniciada.
 - La comprobación de email duplicado al salir del campo usa `UserService.findByEmail()` (solo cuentas activas de la lista en memoria) y avisa con `USER.EMAIL_EXISTS` en los 7 idiomas. Es una comprobación de UX, no una validación autoritativa: el servidor sigue siendo la fuente de verdad.
 - Eliminación del campo `region`: solo se conserva `country` en los formularios; la sección que quedaba vacía se fusionó con la tarjeta de organización.
-- La terminología visible es "Pre-Accreditation"; los identificadores internos se mantienen por compatibilidad con datos guardados.
+- La terminología visible es "Pre-screening"; los identificadores internos se mantienen por compatibilidad con datos guardados.
+- La pestaña Forms del admin muestra una tarjeta por vía (pre-screening, acreditación, readiness) con metadatos de la presentación y enlace al formulario; el admin abre Stage 1 ya enviado mediante `forms.stage1.data` (fallback en `stage1.component.ts`).

@@ -233,6 +233,104 @@
   color: #e8c06a;
 }
 
+/* Submitted forms tab */
+.ao-form-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1rem;
+}
+
+.ao-form-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  padding: 1.15rem 1.2rem;
+  border: 1px solid rgba(212, 169, 78, 0.2);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.03);
+  text-decoration: none;
+}
+
+a.ao-form-card:hover {
+  border-color: rgba(232, 192, 106, 0.5);
+  background: rgba(232, 192, 106, 0.05);
+}
+
+.ao-form-card-head {
+  display: flex;
+  align-items: flex-start;
+}
+
+.ao-form-icon {
+  font-size: 1.35rem;
+}
+
+.ao-form-title {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.ao-form-title h3 {
+  margin: 0;
+  color: #f8fafc;
+}
+
+.form-status {
+  align-self: flex-start;
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+  font-weight: 700;
+}
+
+.form-status.status-ok {
+  background: rgba(16, 185, 129, 0.16);
+  color: #34d399;
+}
+
+.form-status.status-warn {
+  background: rgba(245, 158, 11, 0.16);
+  color: #fbbf24;
+}
+
+.form-status.status-info {
+  background: rgba(56, 189, 248, 0.16);
+  color: #38bdf8;
+}
+
+.form-status.status-muted {
+  background: rgba(148, 163, 184, 0.16);
+  color: #94a3b8;
+}
+
+.ao-form-meta {
+  display: grid;
+  gap: 0.45rem;
+  margin: 0;
+}
+
+.ao-form-meta div {
+  display: grid;
+  grid-template-columns: 7.5rem minmax(0, 1fr);
+}
+
+.ao-form-meta dt {
+  font-size: 0.66rem;
+  font-weight: 600;
+  color: #64748b;
+}
+
+.ao-form-meta dd {
+  margin: 0;
+  font-size: 0.82rem;
+  color: #cbd5e1;
+}
+
+.ao-form-open {
+  font-weight: 700;
+  color: #e8c06a;
+}
+
 /* Files tab */
 .ao-files-tab {
   max-width: 900px;

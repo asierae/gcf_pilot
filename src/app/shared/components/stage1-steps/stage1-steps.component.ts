@@ -41,7 +41,7 @@ export class Stage1StepsComponent {
   }
 
   addTrackRecord() {
-    // Pre-accreditation keeps its original five columns; the full application
+    // Pre-screening keeps its original five columns; the full application
     // uses the 16-column table required by the GCF guidance.
     const fields = this.applicationMode
       ? {
