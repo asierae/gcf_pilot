@@ -7,11 +7,13 @@ import {
   ReadinessSubmissionSummary,
 } from '../../../services/api.service';
 import { BreadcrumbService } from '../../../services/breadcrumb.service';
+import { NotificationService } from '../../../services/notification.service';
+import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-readiness-dashboard',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule, RouterLink, TranslatePipe],
   templateUrl: './readiness-dashboard.component.html',
   styleUrl: './readiness-dashboard.component.css',
 })
@@ -20,10 +22,12 @@ export class ReadinessDashboardComponent implements OnInit, OnDestroy {
   loading = true;
   loadError = '';
   search = '';
+  showArchived = false;
 
   constructor(
     private readonly api: ApiService,
     private readonly breadcrumb: BreadcrumbService,
+    private readonly notification: NotificationService,
   ) {}
 
   ngOnInit(): void {
@@ -50,10 +54,36 @@ export class ReadinessDashboardComponent implements OnInit, OnDestroy {
     }
   }
 
+  get archivedCount(): number {
+    return this.submissions.filter((submission) => submission.archived).length;
+  }
+
+  toggleArchivedView(): void {
+    this.showArchived = !this.showArchived;
+  }
+
+  async setArchive(archived: boolean, id?: string): Promise<void> {
+    const ids = id ? [id] : [];
+    if (!ids.length) return;
+    try {
+      await this.api.setArchived('readiness', ids, archived);
+      await this.load();
+    } catch (error) {
+      this.notification.error(
+        error instanceof Error
+          ? error.message
+          : 'Could not update the archive state.',
+      );
+    }
+  }
+
   get filteredSubmissions(): ReadinessSubmissionSummary[] {
     const query = this.search.trim().toLowerCase();
-    if (!query) return this.submissions;
-    return this.submissions.filter((submission) =>
+    const archived = this.submissions.filter(
+      (submission) => Boolean(submission.archived) === this.showArchived,
+    );
+    if (!query) return archived;
+    return archived.filter((submission) =>
       [
         submission.organization?.name,
         submission.organization?.acronym,

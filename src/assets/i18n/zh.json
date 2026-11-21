@@ -1185,5 +1185,18 @@
     "OF": "/",
     "PREV": "← 上一页",
     "NEXT": "下一页 →"
+  },
+  "ARCHIVE": {
+    "SHOW_ARCHIVED": "已归档 ({{count}})",
+    "ACTIVE": "当前",
+    "ARCHIVE": "归档",
+    "RESTORE": "恢复",
+    "DELETE_SELECTED": "删除所选 ({{count}})",
+    "CONFIRM_DELETE": "删除所选行？此操作无法撤销。",
+    "EMAIL_CONTACT": "给联系人发送邮件"
+  },
+  "BREADCRUMB": {
+    "STAGE2_REVIEW": "查看提交",
+    "READINESS_EDIT": "编辑准备度申请"
   }
 }

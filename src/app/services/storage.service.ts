@@ -16,6 +16,7 @@ export interface FormSubmission {
   id: string;
   date: string;
   data: Record<string, unknown>;
+  archived?: boolean;
 }
 
 const STAGE1_FIELD_KEYS = [
@@ -306,6 +307,7 @@ export class StorageService {
       id: applicant.id,
       date: applicant.stage1.submittedAt,
       data: applicant.stage1.data,
+      archived: applicant.archived ?? false,
     };
   }
 

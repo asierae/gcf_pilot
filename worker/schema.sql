@@ -13,7 +13,9 @@ CREATE TABLE IF NOT EXISTS applicants (
   -- JSON: { status, reviewNotes, lastReviewSent }
   admin       TEXT NOT NULL,
   -- JSON: reserved for future structured data
-  extensions  TEXT NOT NULL DEFAULT '{}'
+  extensions  TEXT NOT NULL DEFAULT '{}',
+  -- Soft-delete flag for the admin submissions tables
+  archived    INTEGER NOT NULL DEFAULT 0
 );
 
 CREATE INDEX IF NOT EXISTS idx_applicants_created_at
@@ -55,7 +57,8 @@ CREATE TABLE IF NOT EXISTS leads (
   -- low | medium | high | critical (drives the admin leads ordering).
   priority          TEXT NOT NULL DEFAULT 'low',
   created_at        TEXT NOT NULL,
-  updated_at        TEXT NOT NULL
+  updated_at        TEXT NOT NULL,
+  archived          INTEGER NOT NULL DEFAULT 0
 );
 
 CREATE INDEX IF NOT EXISTS idx_leads_created_at
@@ -147,7 +150,8 @@ CREATE TABLE IF NOT EXISTS accreditation_submissions (
   submitted_at    TEXT NOT NULL,
   data            TEXT NOT NULL,
   stage1_data     TEXT,
-  created_at      TEXT NOT NULL
+  created_at      TEXT NOT NULL,
+  archived        INTEGER NOT NULL DEFAULT 0
 );
 
 CREATE INDEX IF NOT EXISTS idx_accreditation_submissions_org
@@ -157,7 +161,8 @@ CREATE TABLE IF NOT EXISTS readiness_applications (
   organization_id TEXT PRIMARY KEY,
   submitted_at    TEXT NOT NULL,
   updated_at      TEXT NOT NULL,
-  data            TEXT NOT NULL
+  data            TEXT NOT NULL,
+  archived        INTEGER NOT NULL DEFAULT 0
 );
 
 -- Sent-email log for the admin "Send email" page. One row per send

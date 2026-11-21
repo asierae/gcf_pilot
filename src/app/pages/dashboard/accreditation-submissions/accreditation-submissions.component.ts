@@ -1,11 +1,9 @@
-import { Component, DestroyRef, inject, OnInit } from "@angular/core";
+import { Component, inject, OnInit } from "@angular/core";
 import { CommonModule } from "@angular/common";
 import { RouterLink } from "@angular/router";
 import { TranslatePipe, TranslateService } from "@ngx-translate/core";
-import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { ApiService } from "../../../services/api.service";
 import { NotificationService } from "../../../services/notification.service";
-import { BreadcrumbService } from "../../../services/breadcrumb.service";
 import { AccreditationSubmissionSummary } from "../../../models/organization.model";
 
 type TypeFilter = "all" | "accreditation" | "prescreening";
@@ -20,27 +18,21 @@ type TypeFilter = "all" | "accreditation" | "prescreening";
 export class AccreditationSubmissionsComponent implements OnInit {
   private api = inject(ApiService);
   private notification = inject(NotificationService);
-  private breadcrumb = inject(BreadcrumbService);
   private translate = inject(TranslateService);
-  private destroyRef = inject(DestroyRef);
 
   submissions: AccreditationSubmissionSummary[] = [];
   loading = true;
   loadError = "";
   searchQuery = "";
   typeFilter: TypeFilter = "all";
+  showArchived = false;
+  selectedIds = new Set<string>();
   sortColumn: keyof AccreditationSubmissionSummary = "submittedAt";
   sortDir: "asc" | "desc" = "desc";
   readonly pageSize = 10;
   currentPage = 1;
 
   ngOnInit(): void {
-    this.breadcrumb.setContext("NAV.ACCREDITATION_SUBMISSIONS");
-    this.translate.onLangChange
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe(() =>
-        this.breadcrumb.setContext("NAV.ACCREDITATION_SUBMISSIONS"),
-      );
     void this.loadSubmissions();
   }
 
@@ -64,6 +56,7 @@ export class AccreditationSubmissionsComponent implements OnInit {
   get filteredSubmissions(): AccreditationSubmissionSummary[] {
     const query = this.searchQuery.trim().toLowerCase();
     const filtered = this.submissions.filter((submission) => {
+      if (Boolean(submission.archived) !== this.showArchived) return false;
       if (
         this.typeFilter !== "all" &&
         submission.type !== this.typeFilter
@@ -109,6 +102,70 @@ export class AccreditationSubmissionsComponent implements OnInit {
 
   get pageEnd(): number {
     return Math.min(this.currentPage * this.pageSize, this.filteredSubmissions.length);
+  }
+
+  get archivedCount(): number {
+    return this.submissions.filter((submission) => submission.archived).length;
+  }
+
+  get visibleIds(): string[] {
+    return this.paginatedSubmissions.map((submission) => submission.id);
+  }
+
+  get allSelected(): boolean {
+    return this.visibleIds.length > 0 && this.visibleIds.every((id) => this.selectedIds.has(id));
+  }
+
+  get someSelected(): boolean {
+    return this.visibleIds.some((id) => this.selectedIds.has(id));
+  }
+
+  toggleSelection(id: string, checked: boolean): void {
+    if (checked) this.selectedIds.add(id);
+    else this.selectedIds.delete(id);
+  }
+
+  toggleSelectAll(checked: boolean): void {
+    for (const id of this.visibleIds) {
+      if (checked) this.selectedIds.add(id);
+      else this.selectedIds.delete(id);
+    }
+  }
+
+  toggleArchivedView(): void {
+    this.showArchived = !this.showArchived;
+    this.selectedIds.clear();
+    this.currentPage = 1;
+  }
+
+  async setArchive(archived: boolean, id?: string): Promise<void> {
+    const ids = id ? [id] : [...this.selectedIds];
+    if (!ids.length) return;
+    try {
+      await this.api.setArchived("accreditation", ids, archived);
+      this.selectedIds.clear();
+      await this.loadSubmissions();
+    } catch (error) {
+      this.notification.error(
+        error instanceof Error ? error.message : "Could not update the archive state.",
+      );
+    }
+  }
+
+  async deleteSelected(): Promise<void> {
+    const ids = [...this.selectedIds];
+    if (!ids.length) return;
+    const message = this.translate.instant("ARCHIVE.CONFIRM_DELETE");
+    if (!window.confirm(message)) return;
+    try {
+      await this.api.deleteAccreditationSubmissions(ids);
+      this.selectedIds.clear();
+      await this.loadSubmissions();
+    } catch (error) {
+      this.notification.error(
+        error instanceof Error ? error.message : "Could not delete the submissions.",
+      );
+    }
   }
 
   onSearchInput(event: Event): void {

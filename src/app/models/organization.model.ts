@@ -77,6 +77,7 @@ export interface AccreditationSubmissionSummary {
   contactEmail: string;
   preScreeningStatus: string;
   accreditationStatus: string;
+  archived?: boolean;
 }
 
 export interface AccreditationSubmissionDetail {

@@ -1186,5 +1186,18 @@
     "OF": "of",
     "PREV": "← Previous",
     "NEXT": "Next →"
+  },
+  "ARCHIVE": {
+    "SHOW_ARCHIVED": "Archived ({{count}})",
+    "ACTIVE": "Active",
+    "ARCHIVE": "Archive",
+    "RESTORE": "Restore",
+    "DELETE_SELECTED": "Delete selected ({{count}})",
+    "CONFIRM_DELETE": "Delete the selected rows? This cannot be undone.",
+    "EMAIL_CONTACT": "Send email to contact"
+  },
+  "BREADCRUMB": {
+    "STAGE2_REVIEW": "Review submission",
+    "READINESS_EDIT": "Edit readiness application"
   }
 }

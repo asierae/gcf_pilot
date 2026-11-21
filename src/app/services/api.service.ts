@@ -41,6 +41,7 @@ export interface ReadinessSubmissionSummary {
   proposalTitle: string;
   requestedAmountUSD: number | null;
   ndaEmail: string;
+  archived?: boolean;
 }
 
 export interface ApiUser {
@@ -622,6 +623,29 @@ export class ApiService {
       submissions?: AccreditationSubmissionSummary[];
     }>('/api/accreditation/submissions', { method: 'GET' }, true);
     return payload.submissions ?? [];
+  }
+
+  async setArchived(
+    kind: "lead" | "applicant" | "readiness" | "accreditation",
+    ids: string[],
+    archived: boolean,
+  ): Promise<void> {
+    await this.request<void>(
+      "/api/admin/archive",
+      {
+        method: "PATCH",
+        body: JSON.stringify({ kind, ids, archived }),
+      },
+      true,
+    );
+  }
+
+  async deleteAccreditationSubmissions(ids: string[]): Promise<void> {
+    await this.request<void>(
+      "/api/accreditation/submissions",
+      { method: "DELETE", body: JSON.stringify({ ids }) },
+      true,
+    );
   }
 
   async getAccreditationSubmission(

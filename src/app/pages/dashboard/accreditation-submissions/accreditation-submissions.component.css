@@ -109,6 +109,37 @@
   vertical-align: middle;
 }
 
+.as-check {
+  width: 2.5rem;
+  text-align: center;
+}
+
+.as-check input {
+  accent-color: #e8c06a;
+  cursor: pointer;
+}
+
+.as-mail {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.as-mail svg {
+  width: 1rem;
+  height: 1rem;
+  flex-shrink: 0;
+}
+
+.as-btn-danger {
+  border-color: rgba(248, 113, 113, 0.5);
+  color: #fca5a5;
+}
+
+.as-btn-danger:hover:not(:disabled) {
+  background: rgba(248, 113, 113, 0.12);
+}
+
 .as-table tbody tr:hover {
   background: rgba(232, 192, 106, 0.04);
 }

@@ -1185,5 +1185,18 @@
     "OF": "/",
     "PREV": "← Trước",
     "NEXT": "Tiếp →"
+  },
+  "ARCHIVE": {
+    "SHOW_ARCHIVED": "Đã lưu trữ ({{count}})",
+    "ACTIVE": "Đang hoạt động",
+    "ARCHIVE": "Lưu trữ",
+    "RESTORE": "Khôi phục",
+    "DELETE_SELECTED": "Xóa đã chọn ({{count}})",
+    "CONFIRM_DELETE": "Xóa các hàng đã chọn? Không thể hoàn tác.",
+    "EMAIL_CONTACT": "Gửi email cho người liên hệ"
+  },
+  "BREADCRUMB": {
+    "STAGE2_REVIEW": "Xem xét hồ sơ",
+    "READINESS_EDIT": "Chỉnh sửa hồ sơ sẵn sàng"
   }
 }

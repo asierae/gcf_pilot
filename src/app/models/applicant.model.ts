@@ -33,6 +33,7 @@ export interface ApplicantRecord {
   admin: ApplicantAdmin;
   /** Optional bucket for future structured data without schema migrations */
   extensions?: Record<string, unknown>;
+  archived?: boolean;
 }
 
 export const DEFAULT_APPLICANT_ADMIN: ApplicantAdmin = {
@@ -83,4 +84,5 @@ export interface LeadRecord {
   region?: string;
   createdAt?: string;
   updatedAt?: string;
+  archived?: boolean;
 }

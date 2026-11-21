@@ -13,6 +13,13 @@
           {{ submissions.length }} submission(s)
         }
       </span>
+      <button type="button" class="btn-retry" (click)="toggleArchivedView()">
+        @if (showArchived) {
+          {{ "ARCHIVE.ACTIVE" | translate }}
+        } @else {
+          {{ "ARCHIVE.SHOW_ARCHIVED" | translate: { count: archivedCount } }}
+        }
+      </button>
     </div>
   </header>
 
@@ -69,7 +76,8 @@
               <th>Requested</th>
               <th>Submitted</th>
               <th>Updated</th>
-              <th class="col-action">Edit</th>
+              <th class="col-action">{{ "ACCREDITATION_SUBMISSIONS.COL_ACTIONS" | translate }}</th>
+              <th>{{ "ARCHIVE.ARCHIVE" | translate }}</th>
             </tr>
           </thead>
           <tbody>
@@ -94,6 +102,11 @@
                   >
                     Open &amp; edit <span aria-hidden="true">→</span>
                   </a>
+                </td>
+                <td class="col-action">
+                  <button type="button" class="btn-edit" (click)="setArchive(!showArchived, submission.organizationId)">
+                    {{ (showArchived ? "ARCHIVE.RESTORE" : "ARCHIVE.ARCHIVE") | translate }}
+                  </button>
                 </td>
               </tr>
             }

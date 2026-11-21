@@ -149,6 +149,7 @@ interface ApplicantRecord {
   stage2: StagePayload | null;
   admin: ApplicantAdmin;
   extensions: JsonObject;
+  archived: boolean;
 }
 
 interface ApplicantRow {
@@ -159,6 +160,7 @@ interface ApplicantRow {
   stage2: string | null;
   admin: string | null;
   extensions: string | null;
+  archived?: number | null;
 }
 
 interface LeadRecord {
@@ -195,6 +197,7 @@ interface LeadRecord {
   priority?: string;
   createdAt: string;
   updatedAt: string;
+  archived: boolean;
 }
 
 interface LeadRow {
@@ -231,6 +234,7 @@ interface LeadRow {
   priority: string | null;
   created_at: string;
   updated_at: string;
+  archived?: number | null;
 }
 
 interface OrganizationRow {
@@ -576,6 +580,7 @@ function rowToApplicant(row: ApplicantRow): ApplicantRecord {
     stage2: normalizeStage(parseJson<unknown>(row.stage2, null)),
     admin: normalizeAdmin(parseJson<unknown>(row.admin, null)),
     extensions: parseJson<JsonObject>(row.extensions, {}),
+    archived: row.archived === 1,
   };
 }
 
@@ -613,6 +618,7 @@ function rowToLead(row: LeadRow): LeadRecord {
     priority: row.priority ?? 'low',
     createdAt: row.created_at,
     updatedAt: row.updated_at,
+    archived: row.archived === 1,
   };
 }
 
@@ -1339,6 +1345,7 @@ interface ReadinessListRow {
   submitted_at: string;
   updated_at: string;
   data: string;
+  archived?: number | null;
   org_name: string | null;
   org_acronym: string | null;
   org_country: string | null;
@@ -1369,12 +1376,13 @@ function readinessSummary(row: ReadinessListRow): JsonObject {
     proposalTitle: read('proposalTitle'),
     requestedAmountUSD: typeof amount === 'number' ? amount : null,
     ndaEmail: read('ndaEmail'),
+    archived: row.archived === 1,
   };
 }
 
 async function listReadiness(env: Env): Promise<Response> {
   const { results } = await env.DB.prepare(
-    `SELECT r.organization_id, r.submitted_at, r.updated_at, r.data,
+    `SELECT r.organization_id, r.submitted_at, r.updated_at, r.data, r.archived,
             o.name AS org_name, o.acronym AS org_acronym, o.country AS org_country
        FROM readiness_applications r
        LEFT JOIN organizations o ON o.id = r.organization_id
@@ -3679,6 +3687,7 @@ async function createStage1(request: Request, env: Env): Promise<Response> {
     stage2: null,
     admin: { ...DEFAULT_ADMIN },
     extensions: {},
+    archived: false,
   };
 
   await env.DB.prepare(
@@ -3723,7 +3732,7 @@ async function createStage1(request: Request, env: Env): Promise<Response> {
 async function listAccreditationSubmissions(env: Env): Promise<Response> {
   const [submissionRows, applicantRows, orgRows] = await Promise.all([
     env.DB.prepare(
-      `SELECT id, organization_id, submitted_at, data, created_at
+      `SELECT id, organization_id, submitted_at, data, created_at, archived
          FROM accreditation_submissions ORDER BY submitted_at DESC`,
     ).all<{
       id: string;
@@ -3731,9 +3740,10 @@ async function listAccreditationSubmissions(env: Env): Promise<Response> {
       submitted_at: string;
       data: string;
       created_at: string;
+      archived: number | null;
     }>(),
     env.DB.prepare(
-      'SELECT id, stage1, stage2, admin, updated_at FROM applicants',
+      'SELECT id, stage1, stage2, admin, updated_at, archived FROM applicants',
     ).all<ApplicantRow>(),
     env.DB.prepare(
       `SELECT id, name, acronym, country, accreditation_status
@@ -3773,6 +3783,7 @@ async function listAccreditationSubmissions(env: Env): Promise<Response> {
       contactEmail: readText(data, 'primaryContactEmail'),
       preScreeningStatus: admin.status ?? 'Pending',
       accreditationStatus: org?.accreditation_status ?? 'not_started',
+      archived: row.archived === 1,
     });
   }
 
@@ -3797,6 +3808,7 @@ async function listAccreditationSubmissions(env: Env): Promise<Response> {
       contactEmail: readText(data, 'primaryContactEmail'),
       preScreeningStatus: 'Passed',
       accreditationStatus: org?.accreditation_status ?? 'not_started',
+      archived: row.archived === 1,
     });
   }
 
@@ -3961,6 +3973,7 @@ async function createStage2(request: Request, env: Env): Promise<Response> {
     stage2: { submittedAt: now, data },
     admin: { ...DEFAULT_ADMIN },
     extensions: {},
+    archived: false,
   };
 
   await env.DB.prepare(
@@ -4010,6 +4023,89 @@ async function deleteApplicants(request: Request, env: Env): Promise<Response> {
     env.DB.prepare('DELETE FROM applicants WHERE id = ?').bind(id),
   );
   await env.DB.batch(statements);
+  return empty();
+}
+
+/** Soft-delete action shared by the four admin tables with an archive view. */
+async function setArchived(request: Request, env: Env): Promise<Response> {
+  const body = await readJson<{
+    kind?: string;
+    ids?: unknown;
+    archived?: unknown;
+  }>(request);
+  const kind = body.kind ?? '';
+  const ids = Array.isArray(body.ids)
+    ? body.ids.filter(
+        (id): id is string => typeof id === 'string' && id.length > 0,
+      )
+    : [];
+  const archived = body.archived === true ? 1 : 0;
+
+  const tables: Record<string, { table: string; column: string }> = {
+    lead: { table: 'leads', column: 'id' },
+    applicant: { table: 'applicants', column: 'id' },
+    readiness: { table: 'readiness_applications', column: 'organization_id' },
+  };
+
+  let statements;
+  if (kind === 'accreditation') {
+    const submissionIds = ids.filter((id) => !id.startsWith('prescreening:'));
+    const organizationIds = ids
+      .filter((id) => id.startsWith('prescreening:'))
+      .map((id) => id.slice('prescreening:'.length));
+    statements = [
+      ...submissionIds.map((id) =>
+        env.DB.prepare(
+          'UPDATE accreditation_submissions SET archived = ? WHERE id = ?',
+        ).bind(archived, id),
+      ),
+      ...organizationIds.map((id) =>
+        env.DB.prepare('UPDATE applicants SET archived = ? WHERE id = ?').bind(
+          archived,
+          id,
+        ),
+      ),
+    ];
+  } else {
+    const target = tables[kind];
+    if (!target) throw new HttpError(400, 'Unknown archive kind.');
+    statements = ids.map((id) =>
+      env.DB.prepare(
+        `UPDATE ${target.table} SET archived = ? WHERE ${target.column} = ?`,
+      ).bind(archived, id),
+    );
+  }
+
+  if (statements.length) await env.DB.batch(statements);
+  return json({ updated: statements.length });
+}
+
+/** Hard delete for rows in the admin Accreditation Submissions table. */
+async function deleteAccreditationSubmissions(
+  request: Request,
+  env: Env,
+): Promise<Response> {
+  const body = await readJson<{ ids?: unknown }>(request);
+  const ids = Array.isArray(body.ids)
+    ? body.ids.filter(
+        (id): id is string => typeof id === 'string' && id.length > 0,
+      )
+    : [];
+  const submissionIds = ids.filter((id) => !id.startsWith('prescreening:'));
+  const organizationIds = ids
+    .filter((id) => id.startsWith('prescreening:'))
+    .map((id) => id.slice('prescreening:'.length));
+  const statements = [
+    ...submissionIds.map((id) =>
+      env.DB.prepare('DELETE FROM accreditation_submissions WHERE id = ?').bind(
+        id,
+      ),
+    ),
+    ...organizationIds.map((id) =>
+      env.DB.prepare('DELETE FROM applicants WHERE id = ?').bind(id),
+    ),
+  ];
+  if (statements.length) await env.DB.batch(statements);
   return empty();
 }
 
@@ -4366,6 +4462,7 @@ function normalizeLeadInput(raw: unknown): Omit<LeadRecord, 'id' | 'createdAt' |
       ? read('source')
       : 'manual',
     priority: LEAD_PRIORITIES.includes(priority) ? priority : 'low',
+    archived: false,
   };
 }
 
@@ -5530,9 +5627,21 @@ async function handleApi(request: Request, env: Env, path: string): Promise<Resp
     return methodNotAllowed('GET, DELETE');
   }
 
+  if (path === '/api/admin/archive') {
+    if (method !== 'PATCH') return methodNotAllowed('PATCH');
+    return withAdmin(env, request, () => setArchived(request, env));
+  }
+
   if (path === '/api/accreditation/submissions') {
-    if (method !== 'GET') return methodNotAllowed('GET');
-    return withAdmin(env, request, () => listAccreditationSubmissions(env));
+    if (method === 'GET') {
+      return withAdmin(env, request, () => listAccreditationSubmissions(env));
+    }
+    if (method === 'DELETE') {
+      return withAdmin(env, request, () =>
+        deleteAccreditationSubmissions(request, env),
+      );
+    }
+    return methodNotAllowed('GET, DELETE');
   }
 
   const accreditationSubmissionMatch =

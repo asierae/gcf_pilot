@@ -1185,5 +1185,18 @@
     "OF": "من",
     "PREV": "← السابق",
     "NEXT": "التالي →"
+  },
+  "ARCHIVE": {
+    "SHOW_ARCHIVED": "المؤرشفة ({{count}})",
+    "ACTIVE": "النشطة",
+    "ARCHIVE": "أرشفة",
+    "RESTORE": "استعادة",
+    "DELETE_SELECTED": "حذف المحدد ({{count}})",
+    "CONFIRM_DELETE": "حذف الصفوف المحددة؟ لا يمكن التراجع عن هذا الإجراء.",
+    "EMAIL_CONTACT": "إرسال بريد إلى جهة الاتصال"
+  },
+  "BREADCRUMB": {
+    "STAGE2_REVIEW": "مراجعة الطلب",
+    "READINESS_EDIT": "تعديل طلب الجاهزية"
   }
 }

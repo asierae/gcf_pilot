@@ -17,6 +17,9 @@ import {
   LeadStatus,
 } from "../../../models/applicant.model";
 import { StorageService } from "../../../services/storage.service";
+import { ApiService } from "../../../services/api.service";
+import { NotificationService } from "../../../services/notification.service";
+import { TranslatePipe } from "@ngx-translate/core";
 import { ConfirmDialogComponent } from "../../../shared/components/confirm-dialog/confirm-dialog.component";
 
 type LeadField = keyof Omit<LeadRecord, "id" | "createdAt" | "updatedAt">;
@@ -30,6 +33,7 @@ type LeadField = keyof Omit<LeadRecord, "id" | "createdAt" | "updatedAt">;
     RouterLink,
     ConfirmDialogComponent,
     CountrySelectComponent,
+    TranslatePipe,
   ],
   templateUrl: "./leads-import.component.html",
   styleUrls: ["./leads-import.component.css"],
@@ -44,6 +48,7 @@ export class LeadsImportComponent implements OnInit, OnDestroy {
   savingFieldId: string | null = null;
   pendingLeads: LeadRecord[] = [];
   savedLeads: LeadRecord[] = [];
+  showArchived = false;
   selectedIds = new Set<string>();
   deleteConfirmOpen = false;
   searchQuery = "";
@@ -252,7 +257,11 @@ export class LeadsImportComponent implements OnInit, OnDestroy {
     }
   }
 
-  constructor(private storageService: StorageService) {}
+  constructor(
+    private storageService: StorageService,
+    private api: ApiService,
+    private notification: NotificationService,
+  ) {}
 
   ngOnInit(): void {
     void this.loadSavedLeads();
@@ -455,11 +464,12 @@ export class LeadsImportComponent implements OnInit, OnDestroy {
 
   get filteredLeads(): LeadRecord[] {
     const query = this.searchQuery.trim().toLowerCase();
+    const visible = this.savedLeads.filter(
+      (lead) => Boolean(lead.archived) === this.showArchived,
+    );
     const leads = query
-      ? this.savedLeads.filter((lead) =>
-          this.getSearchableText(lead).includes(query),
-        )
-      : this.savedLeads;
+      ? visible.filter((lead) => this.getSearchableText(lead).includes(query))
+      : visible;
 
     // Highest priority first; leads with the same level keep their order.
     return [...leads].sort(
@@ -519,6 +529,32 @@ export class LeadsImportComponent implements OnInit, OnDestroy {
 
   get selectedCount(): number {
     return this.selectedIds.size;
+  }
+
+  get archivedCount(): number {
+    return this.savedLeads.filter((lead) => lead.archived).length;
+  }
+
+  toggleArchivedView(): void {
+    this.showArchived = !this.showArchived;
+    this.selectedIds.clear();
+    this.currentPage = 1;
+  }
+
+  async setArchive(archived: boolean, id?: string): Promise<void> {
+    const ids = id ? [id] : [...this.selectedIds];
+    if (!ids.length) return;
+    try {
+      await this.api.setArchived("lead", ids, archived);
+      this.selectedIds.clear();
+      await this.loadSavedLeads();
+    } catch (error) {
+      this.notification.error(
+        error instanceof Error
+          ? error.message
+          : "Could not update the archive state.",
+      );
+    }
   }
 
   get allSelected(): boolean {

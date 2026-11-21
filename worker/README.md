@@ -235,10 +235,16 @@ Admin (`Authorization: Bearer <API_TOKEN>`):
 
 - `GET /api/accreditation/submissions` — every Stage 2 submission from
   `accreditation_submissions`, plus approved (`Passed`) pre-screenings that never
-  reached Stage 2. Rows include the organization, dates, statuses and a `type`
-  (`accreditation` | `prescreening`).
+  reached Stage 2. Rows include the organization, dates, statuses, `archived` and
+  a `type` (`accreditation` | `prescreening`).
+- `DELETE /api/accreditation/submissions` — `{ ids }`; removes the selected
+  history rows and, for `prescreening:<organizationId>` ids, the applicant row.
 - `GET /api/accreditation/submissions/:id` — full payload of one submission. A
   `prescreening:<organizationId>` id returns that organization's Stage 1 payload.
+- `PATCH /api/admin/archive` — `{ kind, ids, archived }` with `kind` one of
+  `lead | applicant | readiness | accreditation`. Soft-delete flag used by the
+  "Archivados" toggle in the four admin tables; for `accreditation`,
+  `prescreening:<orgId>` ids target the applicant row.
 - `GET /api/users` — portal accounts (never includes password hashes)
 - `POST /api/users` — `{ username, email, role, status?, organization*?, invite? }`
 - `PATCH | DELETE /api/users/:id`

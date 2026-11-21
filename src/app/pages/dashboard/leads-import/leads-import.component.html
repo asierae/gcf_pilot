@@ -240,6 +240,13 @@
           }
         </span>
       </div>
+      <button type="button" class="btn-retry" (click)="toggleArchivedView()">
+        @if (showArchived) {
+          {{ "ARCHIVE.ACTIVE" | translate }}
+        } @else {
+          {{ "ARCHIVE.SHOW_ARCHIVED" | translate: { count: archivedCount } }}
+        }
+      </button>
       <button
         type="button"
         class="btn-delete"
@@ -247,7 +254,7 @@
         (click)="openDeleteConfirm()"
         [disabled]="loading"
       >
-        Delete selected ({{ selectedCount }})
+        {{ "ARCHIVE.DELETE_SELECTED" | translate: { count: selectedCount } }}
       </button>
     </div>
 
@@ -366,6 +373,7 @@
             <th>Comments</th>
             <th>Status</th>
             <th>Actions</th>
+            <th>{{ "ARCHIVE.ARCHIVE" | translate }}</th>
           </tr>
         </thead>
         <tbody>
@@ -548,6 +556,16 @@
                   <circle cx="12" cy="12" r="2.5" />
                 </svg>
                 <span>Open</span>
+              </button>
+            </td>
+            <td>
+              <button
+                type="button"
+                class="btn-open-lead"
+                (click)="setArchive(!showArchived, lead.id)"
+                [attr.aria-label]="(showArchived ? 'ARCHIVE.RESTORE' : 'ARCHIVE.ARCHIVE') | translate"
+              >
+                {{ (showArchived ? "ARCHIVE.RESTORE" : "ARCHIVE.ARCHIVE") | translate }}
               </button>
             </td>
           </tr>

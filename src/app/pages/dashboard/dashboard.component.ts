@@ -8,13 +8,15 @@ import {
   SubmissionStatus,
 } from "../../services/storage.service";
 import { NotificationService } from "../../services/notification.service";
+import { ApiService } from "../../services/api.service";
+import { TranslatePipe, TranslateService } from "@ngx-translate/core";
 import { getSubmissionSummary } from "../../shared/data/stage1-display.config";
 import { DatePickerComponent } from "../../shared/components/date-picker/date-picker.component";
 
 @Component({
   selector: "app-dashboard",
   standalone: true,
-  imports: [CommonModule, RouterLink, DatePickerComponent],
+  imports: [CommonModule, RouterLink, DatePickerComponent, TranslatePipe],
   templateUrl: "./dashboard.component.html",
   styleUrl: "./dashboard.component.css",
 })
@@ -24,6 +26,7 @@ export class DashboardComponent implements OnInit {
   selectedIds = new Set<string>();
   statusById: Record<string, SubmissionStatus> = {};
   searchQuery = "";
+  showArchived = false;
   dateFrom = "";
   dateTo = "";
   readonly pageSize = 10;
@@ -36,6 +39,8 @@ export class DashboardComponent implements OnInit {
   constructor(
     private storageService: StorageService,
     private notificationService: NotificationService,
+    private api: ApiService,
+    private translate: TranslateService,
   ) {}
 
   ngOnInit(): void {
@@ -70,7 +75,9 @@ export class DashboardComponent implements OnInit {
       return [];
     }
 
-    let result = this.submissions;
+    let result = this.submissions.filter(
+      (submission) => Boolean(submission.archived) === this.showArchived,
+    );
 
     if (this.dateFrom || this.dateTo) {
       result = result.filter((submission) => this.matchesDateRange(submission));
@@ -240,6 +247,30 @@ export class DashboardComponent implements OnInit {
 
   get selectedCount(): number {
     return this.selectedIds.size;
+  }
+
+  get archivedCount(): number {
+    return this.submissions.filter((submission) => submission.archived).length;
+  }
+
+  toggleArchivedView(): void {
+    this.showArchived = !this.showArchived;
+    this.selectedIds = new Set();
+    this.currentPage = 1;
+  }
+
+  async setArchive(archived: boolean, id?: string): Promise<void> {
+    const ids = id ? [id] : [...this.selectedIds];
+    if (!ids.length) return;
+    try {
+      await this.api.setArchived("applicant", ids, archived);
+      this.selectedIds = new Set();
+      await this.loadSubmissions();
+    } catch (error) {
+      this.notificationService.error(
+        error instanceof Error ? error.message : "Could not update the archive state.",
+      );
+    }
   }
 
   toggleSelection(submissionId: string, event: Event): void {

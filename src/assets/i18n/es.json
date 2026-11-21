@@ -1185,5 +1185,18 @@
     "OF": "de",
     "PREV": "← Anterior",
     "NEXT": "Siguiente →"
+  },
+  "ARCHIVE": {
+    "SHOW_ARCHIVED": "Archivados ({{count}})",
+    "ACTIVE": "Activos",
+    "ARCHIVE": "Archivar",
+    "RESTORE": "Restaurar",
+    "DELETE_SELECTED": "Borrar seleccionados ({{count}})",
+    "CONFIRM_DELETE": "¿Borrar las filas seleccionadas? Esta acción no se puede deshacer.",
+    "EMAIL_CONTACT": "Enviar email al contacto"
+  },
+  "BREADCRUMB": {
+    "STAGE2_REVIEW": "Revisar envío",
+    "READINESS_EDIT": "Editar solicitud de readiness"
   }
 }

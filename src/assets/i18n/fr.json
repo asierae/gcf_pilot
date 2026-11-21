@@ -1185,5 +1185,18 @@
     "OF": "sur",
     "PREV": "← Précédent",
     "NEXT": "Suivant →"
+  },
+  "ARCHIVE": {
+    "SHOW_ARCHIVED": "Archivés ({{count}})",
+    "ACTIVE": "Actifs",
+    "ARCHIVE": "Archiver",
+    "RESTORE": "Restaurer",
+    "DELETE_SELECTED": "Supprimer la sélection ({{count}})",
+    "CONFIRM_DELETE": "Supprimer les lignes sélectionnées ? Cette action est irréversible.",
+    "EMAIL_CONTACT": "Envoyer un email au contact"
+  },
+  "BREADCRUMB": {
+    "STAGE2_REVIEW": "Examiner la soumission",
+    "READINESS_EDIT": "Modifier la demande de préparation"
   }
 }

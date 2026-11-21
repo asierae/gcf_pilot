@@ -24,8 +24,14 @@ const ROUTE_MAP: Record<string, CrumbDef[]> = {
   "/dashboard/overview": [{ key: "DASHBOARD.TITLE" }],
   "/dashboard/applicant": [{ key: "APPLICANT_DASHBOARD.TITLE" }],
   "/dashboard": [{ key: "NAV.ACCREDITATION_SUBM" }],
-  "/dashboard/accreditation": [{ key: "NAV.ACCREDITATION_SUBMISSIONS" }],
-  "/dashboard/readiness": [{ key: "NAV.READINESS_SUBM" }],
+  "/dashboard/accreditation": [
+    { key: "DASHBOARD.TITLE", link: "/dashboard/overview" },
+    { key: "ACCREDITATION_SUBMISSIONS.TITLE" },
+  ],
+  "/dashboard/readiness": [
+    { key: "DASHBOARD.TITLE", link: "/dashboard/overview" },
+    { key: "NAV.READINESS_SUBM" },
+  ],
   "/dashboard/leads": [
     { key: "DASHBOARD.TITLE", link: "/dashboard/overview" },
     { key: "NAV.LEADS" },
@@ -34,6 +40,12 @@ const ROUTE_MAP: Record<string, CrumbDef[]> = {
     { key: "NAV.SETTINGS" },
     { key: "NAV.USER_MANAGEMENT" },
   ],
+  "/settings/send-email": [
+    { key: "NAV.SETTINGS" },
+    { key: "NAV.SEND_EMAIL" },
+  ],
+  "/my-forms": [{ key: "NAV.MY_FORMS" }],
+  "/readiness": [{ key: "NAV.READINESS" }],
   "/admin/organizations": [{ key: "ADMIN_ORGANIZATIONS.TITLE" }],
   "/admin/organizations/edit": [{ key: "ADMIN_ORGANIZATION_EDIT.TITLE" }],
 };
@@ -68,7 +80,40 @@ export class BreadcrumbComponent {
   }
 
   private buildCrumbs(): void {
-    const url = this.router.url.split("?")[0];
+    const [url, search = ""] = this.router.url.split("?");
+    const params = new URLSearchParams(search);
+
+    // Full form opened from the admin Accreditation Submissions table.
+    if (url === "/stage2" && params.has("submission")) {
+      this.crumbs = [
+        {
+          label: this.translate.instant("ACCREDITATION_SUBMISSIONS.TITLE"),
+          link: "/dashboard/accreditation",
+        },
+        {
+          label:
+            this.breadcrumbService.context()?.trim() ||
+            this.translate.instant("BREADCRUMB.STAGE2_REVIEW"),
+        },
+      ];
+      return;
+    }
+
+    // Admin readiness editor.
+    if (url.startsWith("/dashboard/readiness/")) {
+      this.crumbs = [
+        {
+          label: this.translate.instant("NAV.READINESS_SUBM"),
+          link: "/dashboard/readiness",
+        },
+        {
+          label:
+            this.breadcrumbService.context()?.trim() ||
+            this.translate.instant("BREADCRUMB.READINESS_EDIT"),
+        },
+      ];
+      return;
+    }
 
     // Submission detail: /dashboard/submission/:id
     if (url.startsWith("/dashboard/submission/")) {
@@ -90,7 +135,11 @@ export class BreadcrumbComponent {
           label: this.translate.instant("ADMIN_ORGANIZATIONS.TITLE"),
           link: "/admin/organizations",
         },
-        { label: this.translate.instant("ADMIN_ORGANIZATION_EDIT.TITLE") },
+        {
+          label:
+            this.breadcrumbService.context()?.trim() ||
+            this.translate.instant("ADMIN_ORGANIZATION_EDIT.TITLE"),
+        },
       ];
       return;
     }

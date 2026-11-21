@@ -14,7 +14,10 @@ import {
   ORG_QUERY_PARAM,
   syncOrganizationId,
 } from '../../shared/utils/organization.util';
-import { addStage1FormControls } from '../../shared/forms/stage1-form.builder';
+import {
+  addStage1FormControls,
+  watchStage1ConditionalRequirements,
+} from '../../shared/forms/stage1-form.builder';
 import { STAGE2_ENTRY_STEP } from '../../shared/data/form-steps.config';
 import {
   STAGE2_SCREENING_STEPS,
@@ -117,7 +120,8 @@ export class Stage2Component implements OnInit, OnDestroy {
     }
 
     this.form = this.fb.group(group);
-    
+    watchStage1ConditionalRequirements(this.form);
+
     this.isAdmin = this.authService.currentUserValue?.role === 'admin';
     if (!this.isAdmin) {
       this.viewMode = 'grid';
@@ -195,9 +199,15 @@ export class Stage2Component implements OnInit, OnDestroy {
 
   private applyDraftValues(values: Record<string, unknown>): void {
     this.form.patchValue(values as never);
-    const records = values['climateTrackRecord'];
+    this.restoreArray('climateTrackRecord', values);
+    this.restoreArray('afdbOperations', values);
+  }
+
+  /** Rebuilds a FormArray from a saved payload before its rows are rendered. */
+  private restoreArray(name: 'climateTrackRecord' | 'afdbOperations', values: Record<string, unknown>): void {
+    const records = values[name];
     if (!Array.isArray(records)) return;
-    const array = this.form.get('climateTrackRecord') as FormArray;
+    const array = this.form.get(name) as FormArray;
     array.clear();
     for (const record of records) {
       if (!record || typeof record !== 'object') continue;
@@ -251,6 +261,8 @@ export class Stage2Component implements OnInit, OnDestroy {
       operationalAddress: org.operationalAddress,
       website: org.website,
       headquartersCountry: org.country,
+      countryOfOperation: org.country,
+      hqLocation: org.country,
       typeOfEntity: org.entityType,
       primaryContactName: org.contactName,
       primaryContactEmail: org.contactEmail,

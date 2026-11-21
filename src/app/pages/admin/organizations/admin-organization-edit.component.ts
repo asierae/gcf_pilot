@@ -182,10 +182,6 @@ export class AdminOrganizationEditComponent implements OnInit {
     }
   }
 
-  constructor() {
-    this.breadcrumb.setContext("ADMIN_ORGANIZATIONS.TITLE");
-  }
-
   ngOnInit(): void {
     this.route.paramMap
       .pipe(
@@ -199,11 +195,6 @@ export class AdminOrganizationEditComponent implements OnInit {
         }
       });
 
-    this.translate.onLangChange
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe(() => {
-        this.breadcrumb.setContext("ADMIN_ORGANIZATIONS.TITLE");
-      });
   }
 
   ngOnDestroy(): void {
@@ -236,10 +227,8 @@ export class AdminOrganizationEditComponent implements OnInit {
           priorityLevel: org.priorityLevel || "",
           ...this.auditFormFromOrg(org),
         };
-        // Set breadcrumb context for edit page
-        this.breadcrumb.setContext(
-          this.translate.instant("ADMIN_ORGANIZATION_EDIT.TITLE"),
-        );
+        // Show the organization name as the final breadcrumb.
+        this.breadcrumb.setContext(org.name || "");
         // Load files and submitted forms in parallel.
         await Promise.all([this.loadFiles(id), this.loadForms(id)]);
       }
