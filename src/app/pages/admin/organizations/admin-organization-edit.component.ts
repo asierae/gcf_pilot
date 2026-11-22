@@ -128,6 +128,7 @@ export class AdminOrganizationEditComponent implements OnInit {
 
   loading = true;
   saving = false;
+  aiAnalyzing = false;
   loadError = "";
   saveError = "";
 
@@ -556,6 +557,38 @@ export class AdminOrganizationEditComponent implements OnInit {
       auditReportUrl: org.auditReportUrl ?? "",
       auditNotes: org.auditNotes ?? "",
     };
+  }
+
+  /** Runs Gemini with the current global skills and stores score + summary. */
+  async analyzeRisk(): Promise<void> {
+    if (this.aiAnalyzing || !this.organization) return;
+    this.aiAnalyzing = true;
+    try {
+      const { organization, analysis } = await this.api.analyzeOrganizationRisk(
+        this.orgId,
+      );
+      this.organization = organization;
+      this.form.riskScore = organization.riskScore;
+      this.notification.success(
+        this.translate.instant("ADMIN_ORGANIZATION_EDIT.AI_ANALYZED", {
+          score: analysis.score,
+        }),
+      );
+    } catch (error) {
+      this.notification.error(
+        error instanceof Error ? error.message : "AI risk analysis failed.",
+      );
+    } finally {
+      this.aiAnalyzing = false;
+    }
+  }
+
+  get aiRiskSummary(): string {
+    return this.organization?.aiRiskSummary?.trim() || "";
+  }
+
+  get aiRiskAnalyzedAt(): string | null {
+    return this.organization?.aiRiskAnalyzedAt ?? null;
   }
 
   async save(): Promise<void> {

@@ -18,6 +18,95 @@
     <span class="ao-count">{{ countMessage }}</span>
   </div>
 
+  <!-- Global skills used by the AI risk analysis -->
+  <section class="ao-skills">
+    <div class="ao-skills-head">
+      <div>
+        <h3>{{ "ADMIN_ORGANIZATIONS.SKILLS_TITLE" | translate }}</h3>
+        <p>{{ "ADMIN_ORGANIZATIONS.SKILLS_HINT" | translate }}</p>
+      </div>
+      <button type="button" class="btn-skill-add" (click)="startNewSkill()">
+        <span aria-hidden="true">＋</span>
+        {{ "ADMIN_ORGANIZATIONS.SKILL_ADD" | translate }}
+      </button>
+    </div>
+
+    @if (showSkillForm) {
+      <div class="ao-skill-form">
+        <label class="ao-skill-field">
+          <span>{{ "ADMIN_ORGANIZATIONS.SKILL_TITLE" | translate }}</span>
+          <input
+            type="text"
+            [(ngModel)]="skillDraft.title"
+            [placeholder]="'ADMIN_ORGANIZATIONS.SKILL_TITLE_PH' | translate"
+          />
+        </label>
+        <label class="ao-skill-field">
+          <span>{{ "ADMIN_ORGANIZATIONS.SKILL_DESCRIPTION" | translate }}</span>
+          <textarea
+            rows="3"
+            [(ngModel)]="skillDraft.description"
+            [placeholder]="'ADMIN_ORGANIZATIONS.SKILL_DESCRIPTION_PH' | translate"
+          ></textarea>
+        </label>
+        <div class="ao-skill-form-actions">
+          <button
+            type="button"
+            class="btn-skill-save"
+            [disabled]="skillSaving"
+            (click)="saveSkill()"
+          >
+            {{ (skillSaving ? "ADMIN_ORGANIZATIONS.SKILL_SAVING" : "ADMIN_ORGANIZATIONS.SKILL_SAVE") | translate }}
+          </button>
+          <button type="button" class="btn-skill-cancel" (click)="cancelSkill()">
+            {{ "ADMIN_ORGANIZATIONS.SKILL_CANCEL" | translate }}
+          </button>
+        </div>
+      </div>
+    }
+
+    @if (skillsLoading) {
+      <p class="ao-skills-empty">{{ "ADMIN_ORGANIZATIONS.LOADING" | translate }}</p>
+    } @else if (skills.length === 0) {
+      <p class="ao-skills-empty">{{ "ADMIN_ORGANIZATIONS.SKILLS_EMPTY" | translate }}</p>
+    } @else {
+      <ul class="ao-skills-list">
+        @for (skill of skills; track skill.id) {
+          <li class="ao-skill-item">
+            <span class="ao-skill-index">{{ $index + 1 }}</span>
+            <div class="ao-skill-copy">
+              <strong>{{ skill.title }}</strong>
+              <p>{{ skill.description }}</p>
+            </div>
+            <div class="ao-skill-actions">
+              <button
+                type="button"
+                class="btn-skill-icon"
+                [title]="'ADMIN_ORGANIZATIONS.SKILL_EDIT' | translate"
+                (click)="startEditSkill(skill)"
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="m14 4 6 6L9 21H3v-6L14 4Z" />
+                  <path d="m12 6 6 6" />
+                </svg>
+              </button>
+              <button
+                type="button"
+                class="btn-skill-icon btn-skill-delete"
+                [title]="'ADMIN_ORGANIZATIONS.SKILL_DELETE' | translate"
+                (click)="deleteSkill(skill)"
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3" />
+                </svg>
+              </button>
+            </div>
+          </li>
+        }
+      </ul>
+    }
+  </section>
+
   <!-- Loading / Error / Empty states -->
   @if (loading) {
     <div class="ao-empty">
@@ -54,6 +143,7 @@
             <th class="col-risk-score">{{ "ADMIN_ORGANIZATIONS.TABLE.RISK_SCORE" | translate }}</th>
             <th class="col-accreditation-status">{{ "ADMIN_ORGANIZATIONS.TABLE.ACCREDITATION_STATUS" | translate }}</th>
             <th class="col-priority">{{ "ADMIN_ORGANIZATIONS.TABLE.PRIORITY" | translate }}</th>
+            <th class="col-ai-risk">{{ "ADMIN_ORGANIZATIONS.TABLE.AI_RISK" | translate }}</th>
             <th class="col-actions">{{ "ADMIN_ORGANIZATIONS.TABLE.ACTIONS" | translate }}</th>
           </tr>
         </thead>
@@ -73,9 +163,29 @@
               <td class="col-country">{{ org.country }}</td>
               <td class="col-entity-type">{{ entityLabel(org.entityType) }}</td>
               <td class="col-risk-score">
-                <span class="risk-score-badge" [class]="'risk-band-' + riskBand(org.riskScore)">
-                  {{ org.riskScore ?? '—' }}
-                </span>
+                @if (editingScoreId === org.id) {
+                  <input
+                    #scoreInput
+                    type="number"
+                    min="0"
+                    max="100"
+                    class="risk-score-input"
+                    [(ngModel)]="scoreDraft"
+                    (blur)="commitScore(org)"
+                    (keyup.enter)="commitScore(org)"
+                    (keyup.escape)="cancelScore()"
+                  />
+                } @else {
+                  <button
+                    type="button"
+                    class="risk-score-badge"
+                    [class]="'risk-band-' + riskBand(org.riskScore)"
+                    [title]="'ADMIN_ORGANIZATIONS.RISK_SCORE_EDIT' | translate"
+                    (click)="startEditScore(org)"
+                  >
+                    {{ org.riskScore ?? '—' }}
+                  </button>
+                }
               </td>
               <td class="col-accreditation-status">
                 <span class="status-badge" [class]="'status-' + accreditationStatusClass(org.accreditationStatus)">
@@ -86,6 +196,26 @@
                 <span class="priority-badge" [class]="'priority-' + (org.priorityLevel || 'low').toLowerCase()">
                   {{ priorityLabel(org.priorityLevel) }}
                 </span>
+              </td>
+              <td class="col-ai-risk">
+                <button
+                  type="button"
+                  class="btn-analyze-risk"
+                  [disabled]="analyzingId !== null"
+                  [title]="'ADMIN_ORGANIZATIONS.AI_ANALYZE_HINT' | translate"
+                  (click)="analyzeRisk(org)"
+                >
+                  @if (analyzingId === org.id) {
+                    <span class="ao-spinner" aria-hidden="true"></span>
+                    {{ "ADMIN_ORGANIZATIONS.AI_ANALYZING" | translate }}
+                  } @else {
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <path d="m12 3 1.8 4.7L18.5 9.5l-4.7 1.8L12 16l-1.8-4.7L5.5 9.5l4.7-1.8L12 3Z" />
+                      <path d="m18.5 16.5.9 2.1 2.1.9-2.1.9-.9 2.1-.9-2.1-2.1-.9 2.1-.9.9-2.1Z" />
+                    </svg>
+                    {{ "ADMIN_ORGANIZATIONS.AI_ANALYZE" | translate }}
+                  }
+                </button>
               </td>
               <td class="col-actions">
                 <a

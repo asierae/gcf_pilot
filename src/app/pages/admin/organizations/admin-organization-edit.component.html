@@ -195,6 +195,47 @@
           </div>
         </div>
 
+        <!-- AI risk analysis (Gemini + Google Search grounding) -->
+        <div class="ao-section ao-section-ai-risk">
+          <div class="ao-ai-head">
+            <div>
+              <h3>{{ "ADMIN_ORGANIZATION_EDIT.AI_RISK_TITLE" | translate }}</h3>
+              <p class="field-note">{{ "ADMIN_ORGANIZATION_EDIT.AI_RISK_HELP" | translate }}</p>
+            </div>
+            <button
+              type="button"
+              class="ao-ai-button"
+              [disabled]="aiAnalyzing || !organization"
+              (click)="analyzeRisk()"
+            >
+              @if (aiAnalyzing) {
+                <span class="ao-ai-spinner" aria-hidden="true"></span>
+                {{ "ADMIN_ORGANIZATION_EDIT.AI_ANALYZING" | translate }}
+              } @else {
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="m12 3 1.8 4.7L18.5 9.5l-4.7 1.8L12 16l-1.8-4.7L5.5 9.5l4.7-1.8L12 3Z" />
+                  <path d="m18.5 16.5.9 2.1 2.1.9-2.1.9-.9 2.1-.9-2.1-2.1-.9 2.1-.9.9-2.1Z" />
+                </svg>
+                {{ "ADMIN_ORGANIZATION_EDIT.AI_ANALYZE" | translate }}
+              }
+            </button>
+          </div>
+
+          @if (aiRiskAnalyzedAt) {
+            <p class="ao-ai-date">
+              {{ "ADMIN_ORGANIZATION_EDIT.AI_ANALYZED_AT" | translate: { date: (aiRiskAnalyzedAt | date: 'medium') } }}
+            </p>
+          }
+
+          <div class="ao-ai-summary">
+            @if (aiRiskSummary) {
+              {{ aiRiskSummary }}
+            } @else {
+              {{ "ADMIN_ORGANIZATION_EDIT.AI_RISK_EMPTY" | translate }}
+            }
+          </div>
+        </div>
+
         <!-- Avera risk & reputation audit -->
         <div class="ao-section ao-section-audit">
           <h3>{{ "ADMIN_ORGANIZATION_EDIT.AUDIT_TITLE" | translate }}</h3>

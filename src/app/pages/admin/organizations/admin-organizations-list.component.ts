@@ -5,7 +5,10 @@ import { FormsModule } from "@angular/forms";
 import { TranslatePipe } from "@ngx-translate/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { ApiService } from "../../../services/api.service";
-import { OrganizationRecord } from "../../../models/organization.model";
+import {
+  OrganizationRecord,
+  RiskSkill,
+} from "../../../models/organization.model";
 import { NotificationService } from "../../../services/notification.service";
 import { BreadcrumbService } from "../../../services/breadcrumb.service";
 import { TranslateService } from "@ngx-translate/core";
@@ -32,6 +35,20 @@ export class AdminOrganizationsListComponent {
   loadError = "";
   deletingId: string | null = null;
 
+  // Global risk-analysis skills
+  skills: RiskSkill[] = [];
+  skillsLoading = false;
+  skillSaving = false;
+  showSkillForm = false;
+  editingSkillId: string | null = null;
+  skillDraft = { title: "", description: "" };
+
+  // Inline risk score + AI analysis
+  editingScoreId: string | null = null;
+  scoreDraft: number | null = null;
+  savingScoreId: string | null = null;
+  analyzingId: string | null = null;
+
   constructor() {
     this.breadcrumb.setContext("ADMIN_ORGANIZATIONS.TITLE");
   }
@@ -44,6 +61,7 @@ export class AdminOrganizationsListComponent {
         this.loadOrganizations();
       });
     this.loadOrganizations();
+    this.loadSkills();
   }
 
   ngOnDestroy(): void {
@@ -62,6 +80,169 @@ export class AdminOrganizationsListComponent {
     } finally {
       this.loading = false;
     }
+  }
+
+  async loadSkills(): Promise<void> {
+    this.skillsLoading = true;
+    try {
+      this.skills = await this.api.getRiskSkills();
+    } catch (error) {
+      this.notification.error(
+        error instanceof Error ? error.message : "Could not load risk skills.",
+      );
+    } finally {
+      this.skillsLoading = false;
+    }
+  }
+
+  startNewSkill(): void {
+    this.editingSkillId = null;
+    this.skillDraft = { title: "", description: "" };
+    this.showSkillForm = true;
+  }
+
+  startEditSkill(skill: RiskSkill): void {
+    this.editingSkillId = skill.id;
+    this.skillDraft = { title: skill.title, description: skill.description };
+    this.showSkillForm = true;
+  }
+
+  cancelSkill(): void {
+    this.showSkillForm = false;
+    this.editingSkillId = null;
+    this.skillDraft = { title: "", description: "" };
+  }
+
+  async saveSkill(): Promise<void> {
+    if (this.skillSaving) return;
+    const title = this.skillDraft.title.trim();
+    const description = this.skillDraft.description.trim();
+    if (!title || !description) {
+      this.notification.warning(
+        this.translate.instant("ADMIN_ORGANIZATIONS.SKILL_REQUIRED"),
+      );
+      return;
+    }
+
+    this.skillSaving = true;
+    try {
+      if (this.editingSkillId) {
+        const updated = await this.api.updateRiskSkill(this.editingSkillId, {
+          title,
+          description,
+        });
+        this.skills = this.skills.map((skill) =>
+          skill.id === updated.id ? updated : skill,
+        );
+      } else {
+        const created = await this.api.createRiskSkill({ title, description });
+        this.skills = [...this.skills, created];
+      }
+      this.notification.success(
+        this.translate.instant("ADMIN_ORGANIZATIONS.SKILL_SAVED"),
+      );
+      this.cancelSkill();
+    } catch (error) {
+      this.notification.error(
+        error instanceof Error ? error.message : "Could not save the skill.",
+      );
+    } finally {
+      this.skillSaving = false;
+    }
+  }
+
+  async deleteSkill(skill: RiskSkill): Promise<void> {
+    if (
+      !confirm(
+        this.translate.instant("ADMIN_ORGANIZATIONS.SKILL_DELETE_CONFIRM", {
+          title: skill.title,
+        }),
+      )
+    ) {
+      return;
+    }
+    try {
+      await this.api.deleteRiskSkill(skill.id);
+      this.skills = this.skills.filter((item) => item.id !== skill.id);
+      if (this.editingSkillId === skill.id) this.cancelSkill();
+      this.notification.success(
+        this.translate.instant("ADMIN_ORGANIZATIONS.SKILL_DELETED"),
+      );
+    } catch (error) {
+      this.notification.error(
+        error instanceof Error ? error.message : "Could not delete the skill.",
+      );
+    }
+  }
+
+  startEditScore(org: OrgRow): void {
+    this.editingScoreId = org.id;
+    this.scoreDraft = org.riskScore;
+  }
+
+  cancelScore(): void {
+    this.editingScoreId = null;
+    this.scoreDraft = null;
+  }
+
+  async commitScore(org: OrgRow): Promise<void> {
+    if (this.savingScoreId || this.editingScoreId !== org.id) return;
+    const raw = this.scoreDraft;
+    this.editingScoreId = null;
+    const score =
+      raw === null || raw === undefined || Number.isNaN(raw)
+        ? null
+        : Math.max(0, Math.min(100, Math.round(raw)));
+    if (score === org.riskScore) {
+      this.cancelScore();
+      return;
+    }
+
+    this.savingScoreId = org.id;
+    try {
+      const updated = await this.api.updateOrganizationAdmin(org.id, {
+        riskScore: score,
+      });
+      this.applyOrganizationUpdate(org, updated);
+      this.notification.success(
+        this.translate.instant("ADMIN_ORGANIZATIONS.RISK_SCORE_SAVED"),
+      );
+    } catch (error) {
+      this.notification.error(
+        error instanceof Error ? error.message : "Could not save the risk score.",
+      );
+    } finally {
+      this.savingScoreId = null;
+      this.cancelScore();
+    }
+  }
+
+  async analyzeRisk(org: OrgRow): Promise<void> {
+    if (this.analyzingId) return;
+    this.analyzingId = org.id;
+    try {
+      const { organization, analysis } = await this.api.analyzeOrganizationRisk(
+        org.id,
+      );
+      this.applyOrganizationUpdate(org, organization);
+      this.notification.success(
+        this.translate.instant("ADMIN_ORGANIZATIONS.AI_ANALYZED", {
+          score: analysis.score,
+        }),
+      );
+    } catch (error) {
+      this.notification.error(
+        error instanceof Error ? error.message : "AI risk analysis failed.",
+      );
+    } finally {
+      this.analyzingId = null;
+    }
+  }
+
+  private applyOrganizationUpdate(org: OrgRow, updated: OrganizationRecord): void {
+    this.organizations = this.organizations.map((item) =>
+      item.id === org.id ? { ...item, ...updated } : item,
+    );
   }
 
   get filteredOrganizations(): OrgRow[] {

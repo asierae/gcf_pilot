@@ -586,6 +586,41 @@ a.ao-form-card:hover {
   cursor: default;
 }
 
+/* ── AI risk analysis ── */
+.ao-section-ai-risk {
+  border-color: rgba(124, 58, 237, 0.28);
+  background: rgba(124, 58, 237, 0.04);
+}
+.ao-ai-head {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  gap: 1rem; flex-wrap: wrap;
+}
+.ao-ai-button {
+  display: inline-flex; align-items: center; justify-content: center; gap: 0.45rem;
+  min-width: 10rem; padding: 0.5rem 0.9rem;
+  border: 1px solid rgba(167, 139, 250, 0.4); border-radius: 8px;
+  background: rgba(124, 58, 237, 0.16); color: #ddd6fe;
+  font: inherit; font-size: 0.8rem; font-weight: 650; cursor: pointer;
+  transition: background 0.15s;
+}
+.ao-ai-button:hover:not(:disabled) { background: rgba(124, 58, 237, 0.28); }
+.ao-ai-button:disabled { opacity: 0.55; cursor: wait; }
+.ao-ai-button svg { width: 15px; height: 15px; }
+.ao-ai-spinner {
+  width: 0.8rem; height: 0.8rem; flex: none;
+  border: 2px solid rgba(221, 214, 254, 0.3); border-top-color: #ddd6fe;
+  border-radius: 50%; animation: ao-ai-spin 0.7s linear infinite;
+}
+@keyframes ao-ai-spin { to { transform: rotate(360deg); } }
+.ao-ai-date { margin: 0.65rem 0 0; font-size: 0.72rem; color: #a78bfa; }
+.ao-ai-summary {
+  margin-top: 0.75rem; padding: 0.85rem 0.95rem;
+  border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 10px;
+  background: rgba(255, 255, 255, 0.03);
+  color: #cbd5e1; font-size: 0.82rem; line-height: 1.65;
+  white-space: pre-wrap; overflow-wrap: anywhere; min-height: 3rem;
+}
+
 @media (max-width: 768px) {
   .header-actions { width: 100%; justify-content: flex-start; }
   .ao-tabs button[role="tab"] { padding: 0.75rem 0.75rem; font-size: 0.8rem; }
