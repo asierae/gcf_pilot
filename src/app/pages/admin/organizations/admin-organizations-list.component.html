@@ -16,96 +16,15 @@
       [(ngModel)]="search"
     />
     <span class="ao-count">{{ countMessage }}</span>
+    <button type="button" class="btn-skills-panel" (click)="openSkills()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M4 6h16M4 12h16M4 18h10" />
+        <circle cx="18" cy="18" r="3" />
+      </svg>
+      {{ "ADMIN_ORGANIZATIONS.SKILLS_BUTTON" | translate }}
+      <span class="skills-count">{{ skills.length }}</span>
+    </button>
   </div>
-
-  <!-- Global skills used by the AI risk analysis -->
-  <section class="ao-skills">
-    <div class="ao-skills-head">
-      <div>
-        <h3>{{ "ADMIN_ORGANIZATIONS.SKILLS_TITLE" | translate }}</h3>
-        <p>{{ "ADMIN_ORGANIZATIONS.SKILLS_HINT" | translate }}</p>
-      </div>
-      <button type="button" class="btn-skill-add" (click)="startNewSkill()">
-        <span aria-hidden="true">＋</span>
-        {{ "ADMIN_ORGANIZATIONS.SKILL_ADD" | translate }}
-      </button>
-    </div>
-
-    @if (showSkillForm) {
-      <div class="ao-skill-form">
-        <label class="ao-skill-field">
-          <span>{{ "ADMIN_ORGANIZATIONS.SKILL_TITLE" | translate }}</span>
-          <input
-            type="text"
-            [(ngModel)]="skillDraft.title"
-            [placeholder]="'ADMIN_ORGANIZATIONS.SKILL_TITLE_PH' | translate"
-          />
-        </label>
-        <label class="ao-skill-field">
-          <span>{{ "ADMIN_ORGANIZATIONS.SKILL_DESCRIPTION" | translate }}</span>
-          <textarea
-            rows="3"
-            [(ngModel)]="skillDraft.description"
-            [placeholder]="'ADMIN_ORGANIZATIONS.SKILL_DESCRIPTION_PH' | translate"
-          ></textarea>
-        </label>
-        <div class="ao-skill-form-actions">
-          <button
-            type="button"
-            class="btn-skill-save"
-            [disabled]="skillSaving"
-            (click)="saveSkill()"
-          >
-            {{ (skillSaving ? "ADMIN_ORGANIZATIONS.SKILL_SAVING" : "ADMIN_ORGANIZATIONS.SKILL_SAVE") | translate }}
-          </button>
-          <button type="button" class="btn-skill-cancel" (click)="cancelSkill()">
-            {{ "ADMIN_ORGANIZATIONS.SKILL_CANCEL" | translate }}
-          </button>
-        </div>
-      </div>
-    }
-
-    @if (skillsLoading) {
-      <p class="ao-skills-empty">{{ "ADMIN_ORGANIZATIONS.LOADING" | translate }}</p>
-    } @else if (skills.length === 0) {
-      <p class="ao-skills-empty">{{ "ADMIN_ORGANIZATIONS.SKILLS_EMPTY" | translate }}</p>
-    } @else {
-      <ul class="ao-skills-list">
-        @for (skill of skills; track skill.id) {
-          <li class="ao-skill-item">
-            <span class="ao-skill-index">{{ $index + 1 }}</span>
-            <div class="ao-skill-copy">
-              <strong>{{ skill.title }}</strong>
-              <p>{{ skill.description }}</p>
-            </div>
-            <div class="ao-skill-actions">
-              <button
-                type="button"
-                class="btn-skill-icon"
-                [title]="'ADMIN_ORGANIZATIONS.SKILL_EDIT' | translate"
-                (click)="startEditSkill(skill)"
-              >
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="m14 4 6 6L9 21H3v-6L14 4Z" />
-                  <path d="m12 6 6 6" />
-                </svg>
-              </button>
-              <button
-                type="button"
-                class="btn-skill-icon btn-skill-delete"
-                [title]="'ADMIN_ORGANIZATIONS.SKILL_DELETE' | translate"
-                (click)="deleteSkill(skill)"
-              >
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3" />
-                </svg>
-              </button>
-            </div>
-          </li>
-        }
-      </ul>
-    }
-  </section>
 
   <!-- Loading / Error / Empty states -->
   @if (loading) {
@@ -235,5 +154,108 @@
         </tbody>
       </table>
     </div>
+  }
+
+  <!-- Skills drawer -->
+  @if (skillsOpen) {
+    <div class="skills-backdrop" (click)="closeSkills()"></div>
+    <aside class="skills-drawer" role="dialog" aria-modal="true" [attr.aria-label]="'ADMIN_ORGANIZATIONS.SKILLS_TITLE' | translate">
+      <header class="skills-drawer-head">
+        <div>
+          <p class="skills-drawer-eyebrow">{{ "ADMIN_ORGANIZATIONS.SKILLS_EYEBROW" | translate }}</p>
+          <h3>{{ "ADMIN_ORGANIZATIONS.SKILLS_TITLE" | translate }}</h3>
+          <p>{{ "ADMIN_ORGANIZATIONS.SKILLS_HINT" | translate }}</p>
+        </div>
+        <button type="button" class="skills-drawer-close" (click)="closeSkills()" [title]="'ADMIN_ORGANIZATIONS.SKILL_CLOSE' | translate">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+            <path d="M6 6l12 12M18 6 6 18" />
+          </svg>
+        </button>
+      </header>
+
+      <div class="skills-drawer-body">
+        @if (showSkillForm) {
+          <div class="ao-skill-form">
+            <label class="ao-skill-field">
+              <span>{{ "ADMIN_ORGANIZATIONS.SKILL_TITLE" | translate }}</span>
+              <input
+                type="text"
+                [(ngModel)]="skillDraft.title"
+                [placeholder]="'ADMIN_ORGANIZATIONS.SKILL_TITLE_PH' | translate"
+              />
+            </label>
+            <label class="ao-skill-field">
+              <span>{{ "ADMIN_ORGANIZATIONS.SKILL_DESCRIPTION" | translate }}</span>
+              <textarea
+                rows="4"
+                [(ngModel)]="skillDraft.description"
+                [placeholder]="'ADMIN_ORGANIZATIONS.SKILL_DESCRIPTION_PH' | translate"
+              ></textarea>
+            </label>
+            <div class="ao-skill-form-actions">
+              <button
+                type="button"
+                class="btn-skill-save"
+                [disabled]="skillSaving"
+                (click)="saveSkill()"
+              >
+                {{ (skillSaving ? "ADMIN_ORGANIZATIONS.SKILL_SAVING" : "ADMIN_ORGANIZATIONS.SKILL_SAVE") | translate }}
+              </button>
+              <button type="button" class="btn-skill-cancel" (click)="cancelSkill()">
+                {{ "ADMIN_ORGANIZATIONS.SKILL_CANCEL" | translate }}
+              </button>
+            </div>
+          </div>
+        }
+
+        @if (skillsLoading) {
+          <p class="ao-skills-empty">{{ "ADMIN_ORGANIZATIONS.LOADING" | translate }}</p>
+        } @else if (skills.length === 0) {
+          <p class="ao-skills-empty">{{ "ADMIN_ORGANIZATIONS.SKILLS_EMPTY" | translate }}</p>
+        } @else {
+          <ul class="ao-skills-list">
+            @for (skill of skills; track skill.id) {
+              <li class="ao-skill-item">
+                <span class="ao-skill-index">{{ $index + 1 }}</span>
+                <div class="ao-skill-copy">
+                  <strong>{{ skill.title }}</strong>
+                  <p>{{ skill.description }}</p>
+                </div>
+                <div class="ao-skill-actions">
+                  <button
+                    type="button"
+                    class="btn-skill-icon"
+                    [title]="'ADMIN_ORGANIZATIONS.SKILL_EDIT' | translate"
+                    (click)="startEditSkill(skill)"
+                  >
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="m14 4 6 6L9 21H3v-6L14 4Z" />
+                      <path d="m12 6 6 6" />
+                    </svg>
+                  </button>
+                  <button
+                    type="button"
+                    class="btn-skill-icon btn-skill-delete"
+                    [title]="'ADMIN_ORGANIZATIONS.SKILL_DELETE' | translate"
+                    (click)="deleteSkill(skill)"
+                  >
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3" />
+                    </svg>
+                  </button>
+                </div>
+              </li>
+            }
+          </ul>
+        }
+      </div>
+
+      <footer class="skills-drawer-foot">
+        <button type="button" class="btn-skill-add" (click)="startNewSkill()">
+          <span aria-hidden="true">＋</span>
+          {{ "ADMIN_ORGANIZATIONS.SKILL_ADD" | translate }}
+        </button>
+      </footer>
+    </aside>
   }
 </div>

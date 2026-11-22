@@ -1020,7 +1020,10 @@
     "AI_ANALYZE": "Анализ с ИИ",
     "AI_ANALYZING": "Анализ…",
     "AI_ANALYZE_HINT": "Запустить Gemini с Google Search, используя текущие навыки",
-    "AI_ANALYZED": "Анализ рисков с ИИ завершён. Оценка: {{score}}."
+    "AI_ANALYZED": "Анализ рисков с ИИ завершён. Оценка: {{score}}.",
+    "SKILLS_BUTTON": "Навыки ИИ",
+    "SKILLS_EYEBROW": "Настройка анализа",
+    "SKILL_CLOSE": "Закрыть"
   },
   "ADMIN_ORGANIZATION_EDIT": {
     "TITLE": "Редактировать организацию",

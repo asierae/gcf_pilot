@@ -1020,7 +1020,10 @@
     "AI_ANALYZE": "Phân tích AI",
     "AI_ANALYZING": "Đang phân tích…",
     "AI_ANALYZE_HINT": "Chạy Gemini với Google Search bằng các kỹ năng hiện tại",
-    "AI_ANALYZED": "Phân tích rủi ro AI hoàn tất. Điểm: {{score}}."
+    "AI_ANALYZED": "Phân tích rủi ro AI hoàn tất. Điểm: {{score}}.",
+    "SKILLS_BUTTON": "Kỹ năng AI",
+    "SKILLS_EYEBROW": "Cấu hình phân tích",
+    "SKILL_CLOSE": "Đóng"
   },
   "ADMIN_ORGANIZATION_EDIT": {
     "TITLE": "Chỉnh sửa tổ chức",

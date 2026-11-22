@@ -1020,7 +1020,10 @@
     "AI_ANALYZE": "AI 分析",
     "AI_ANALYZING": "正在分析…",
     "AI_ANALYZE_HINT": "使用当前技能通过 Google Search 运行 Gemini",
-    "AI_ANALYZED": "AI 风险分析完成。评分：{{score}}。"
+    "AI_ANALYZED": "AI 风险分析完成。评分：{{score}}。",
+    "SKILLS_BUTTON": "AI 技能",
+    "SKILLS_EYEBROW": "分析配置",
+    "SKILL_CLOSE": "关闭"
   },
   "ADMIN_ORGANIZATION_EDIT": {
     "TITLE": "编辑组织",

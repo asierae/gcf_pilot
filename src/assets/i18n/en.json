@@ -1021,7 +1021,10 @@
     "AI_ANALYZE": "AI Analyze",
     "AI_ANALYZING": "Analyzing…",
     "AI_ANALYZE_HINT": "Run Gemini with Google Search using the current skills",
-    "AI_ANALYZED": "AI risk analysis completed. Score: {{score}}."
+    "AI_ANALYZED": "AI risk analysis completed. Score: {{score}}.",
+    "SKILLS_BUTTON": "AI Skills",
+    "SKILLS_EYEBROW": "Analysis configuration",
+    "SKILL_CLOSE": "Close"
   },
   "ADMIN_ORGANIZATION_EDIT": {
     "TITLE": "Edit organization",

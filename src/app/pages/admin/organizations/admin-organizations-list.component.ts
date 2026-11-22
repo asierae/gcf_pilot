@@ -35,7 +35,8 @@ export class AdminOrganizationsListComponent {
   loadError = "";
   deletingId: string | null = null;
 
-  // Global risk-analysis skills
+  // Global risk-analysis skills (side drawer)
+  skillsOpen = false;
   skills: RiskSkill[] = [];
   skillsLoading = false;
   skillSaving = false;
@@ -80,6 +81,16 @@ export class AdminOrganizationsListComponent {
     } finally {
       this.loading = false;
     }
+  }
+
+  openSkills(): void {
+    this.skillsOpen = true;
+    void this.loadSkills();
+  }
+
+  closeSkills(): void {
+    this.skillsOpen = false;
+    this.cancelSkill();
   }
 
   async loadSkills(): Promise<void> {

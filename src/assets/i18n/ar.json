@@ -1020,7 +1020,10 @@
     "AI_ANALYZE": "تحليل بالذكاء الاصطناعي",
     "AI_ANALYZING": "جارٍ التحليل…",
     "AI_ANALYZE_HINT": "تشغيل Gemini مع بحث Google باستخدام المهارات الحالية",
-    "AI_ANALYZED": "اكتمل تحليل المخاطر بالذكاء الاصطناعي. الدرجة: {{score}}."
+    "AI_ANALYZED": "اكتمل تحليل المخاطر بالذكاء الاصطناعي. الدرجة: {{score}}.",
+    "SKILLS_BUTTON": "مهارات الذكاء الاصطناعي",
+    "SKILLS_EYEBROW": "إعدادات التحليل",
+    "SKILL_CLOSE": "إغلاق"
   },
   "ADMIN_ORGANIZATION_EDIT": {
     "TITLE": "تعديل المنظمة",

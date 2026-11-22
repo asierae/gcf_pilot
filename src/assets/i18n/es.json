@@ -1020,7 +1020,10 @@
     "AI_ANALYZE": "Analizar con IA",
     "AI_ANALYZING": "Analizando…",
     "AI_ANALYZE_HINT": "Ejecutar Gemini con Google Search usando los skills actuales",
-    "AI_ANALYZED": "Análisis de riesgo con IA completado. Puntuación: {{score}}."
+    "AI_ANALYZED": "Análisis de riesgo con IA completado. Puntuación: {{score}}.",
+    "SKILLS_BUTTON": "Skills de IA",
+    "SKILLS_EYEBROW": "Configuración del análisis",
+    "SKILL_CLOSE": "Cerrar"
   },
   "ADMIN_ORGANIZATION_EDIT": {
     "TITLE": "Editar organización",
