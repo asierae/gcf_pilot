@@ -33,9 +33,12 @@
 }
 
 /* ── Top bar ── */
+/* Sticky so the "Send review notes" action stays visible while the admin
+   scrolls through long sections. */
 .wizard-topbar {
-  position: relative;
-  z-index: 2;
+  position: sticky;
+  top: 0;
+  z-index: 20;
   margin-bottom: 1.5rem;
 }
 

@@ -366,10 +366,6 @@ export class Stage2Component implements OnInit, OnDestroy {
       .length;
   }
 
-  hasAnyReviewNotes(): boolean {
-    return this.reviewNotesCount > 0;
-  }
-
   onReviewNoteInput(event: Event): void {
     const value = (event.target as HTMLTextAreaElement).value;
     const key = this.currentReviewKey;
@@ -432,20 +428,20 @@ export class Stage2Component implements OnInit, OnDestroy {
   async sendReviewNotes(): Promise<void> {
     if (this.sendingReview) return;
 
+    const notes = this.reviewNotesPayload();
+    if (!Object.keys(notes).length) {
+      this.notificationService.warning(
+        this.translate.instant('STAGE2.REVIEW_NO_NOTES'),
+      );
+      return;
+    }
+
     const recipient = String(
       this.form.get('primaryContactEmail')?.value ?? '',
     ).trim();
     if (!recipient) {
       this.notificationService.error(
         this.translate.instant('STAGE2.REVIEW_NO_RECIPIENT'),
-      );
-      return;
-    }
-
-    const notes = this.reviewNotesPayload();
-    if (!Object.keys(notes).length) {
-      this.notificationService.warning(
-        this.translate.instant('STAGE2.REVIEW_NO_NOTES'),
       );
       return;
     }

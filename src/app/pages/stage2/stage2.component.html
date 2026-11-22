@@ -41,7 +41,7 @@
           <button
             type="button"
             class="btn btn-ghost review-send-btn"
-            [disabled]="sendingReview || !hasAnyReviewNotes()"
+            [disabled]="sendingReview"
             (click)="sendReviewNotes()"
             [title]="'STAGE2.SEND_REVIEW' | translate"
           >
