@@ -41,6 +41,8 @@ interface Env {
   CORS_ORIGINS?: string;
   /** Resend API key. When missing, emails fall back to Gmail compose in the UI. */
   RESEND_API_KEY?: string;
+  /** Google Gemini API key used by the admin AI risk analysis. */
+  GEMINI_API_KEY?: string;
   /** Public contact inbox (defaults to contact@averacapitalaccess.com). */
   CONTACT_EMAIL?: string;
   /** Sender for automatic emails (defaults to noreply@averacapitalaccess.com). */
@@ -253,6 +255,8 @@ interface OrganizationRow {
   risk_score: number | null;
   risk_notes: string | null;
   admin_notes: string | null;
+  ai_risk_summary: string | null;
+  ai_risk_analyzed_at: string | null;
   accreditation_status: string | null;
   priority_level: string | null;
   audit_enabled: number | null;
@@ -289,6 +293,9 @@ interface OrganizationRecord {
   riskScore: number | null;
   riskNotes: string;
   adminNotes: string;
+  /** Descriptive summary produced by the last Gemini risk analysis. */
+  aiRiskSummary: string | null;
+  aiRiskAnalyzedAt: string | null;
   accreditationStatus: string;
   priorityLevel: string;
   auditEnabled: boolean;
@@ -342,6 +349,25 @@ function emptyAuditFields(): Pick<
     auditNotes: '',
     auditUpdatedAt: null,
   };
+}
+
+/** A skill is a reusable research instruction for the AI risk analysis. */
+interface RiskSkill {
+  id: string;
+  title: string;
+  description: string;
+  sortOrder: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface RiskSkillRow {
+  id: string;
+  title: string;
+  description: string;
+  sort_order: number;
+  created_at: string;
+  updated_at: string;
 }
 
 type DraftForm = 'stage1' | 'readiness';
@@ -642,6 +668,8 @@ function rowToOrganization(row: OrganizationRow): OrganizationRecord {
     riskScore: row.risk_score ?? null,
     riskNotes: row.risk_notes ?? '',
     adminNotes: row.admin_notes ?? '',
+    aiRiskSummary: row.ai_risk_summary ?? null,
+    aiRiskAnalyzedAt: row.ai_risk_analyzed_at ?? null,
     accreditationStatus: row.accreditation_status ?? 'not_started',
     priorityLevel: row.priority_level ?? 'normal',
     auditEnabled: row.audit_enabled === 1,
@@ -695,6 +723,8 @@ function readOrgFields(body: JsonObject): OrganizationRecord {
     riskScore: pickNumber('riskScore'),
     riskNotes: pick('riskNotes'),
     adminNotes: pick('adminNotes'),
+    aiRiskSummary: pick('aiRiskSummary') || null,
+    aiRiskAnalyzedAt: pick('aiRiskAnalyzedAt') || null,
     accreditationStatus: pick('accreditationStatus') || 'not_started',
     priorityLevel: pick('priorityLevel') || 'normal',
     auditEnabled: body.auditEnabled === true || body.auditEnabled === 1,
@@ -843,6 +873,8 @@ function organizationFromStage1(data: JsonObject): OrganizationRecord {
     riskScore: null,
     riskNotes: '',
     adminNotes: '',
+    aiRiskSummary: null,
+    aiRiskAnalyzedAt: null,
     accreditationStatus: 'not_started',
     priorityLevel: 'normal',
     ...emptyAuditFields(),
@@ -877,6 +909,8 @@ function organizationFromReadiness(data: JsonObject): OrganizationRecord {
     riskScore: null,
     riskNotes: '',
     adminNotes: '',
+    aiRiskSummary: null,
+    aiRiskAnalyzedAt: null,
     accreditationStatus: 'not_started',
     priorityLevel: 'normal',
     ...emptyAuditFields(),
@@ -1062,6 +1096,260 @@ async function updateOrganizationAdmin(
     .first<OrganizationRow>();
 
   return json({ organization: row ? rowToOrganization(row) : null });
+}
+
+/* ------------------------------------------------------------------ *
+ * AI risk analysis — global skills + Gemini (Google Search grounding)
+ * ------------------------------------------------------------------ */
+
+function riskSkillFromRow(row: RiskSkillRow): RiskSkill {
+  return {
+    id: row.id,
+    title: row.title,
+    description: row.description,
+    sortOrder: row.sort_order,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  };
+}
+
+async function listRiskSkills(env: Env): Promise<Response> {
+  const { results } = await env.DB.prepare(
+    `SELECT id, title, description, sort_order, created_at, updated_at
+       FROM risk_skills
+      ORDER BY sort_order ASC, created_at ASC`,
+  ).all<RiskSkillRow>();
+  return json({ skills: (results ?? []).map(riskSkillFromRow) });
+}
+
+function readSkillInput(body: JsonObject): { title: string; description: string } | null {
+  const title = typeof body.title === 'string' ? body.title.trim() : '';
+  const description = typeof body.description === 'string' ? body.description.trim() : '';
+  if (!title || !description) return null;
+  return { title: title.slice(0, 200), description: description.slice(0, 4000) };
+}
+
+async function createRiskSkill(request: Request, env: Env): Promise<Response> {
+  const input = readSkillInput(await readJson<JsonObject>(request));
+  if (!input) return json({ error: 'Title and description are required.' }, 400);
+
+  const counts = await env.DB.prepare('SELECT COUNT(*) AS count FROM risk_skills')
+    .all<{ count: number }>();
+  const sortOrder = Number(counts.results?.[0]?.count ?? 0);
+  const now = new Date().toISOString();
+  const skill: RiskSkill = {
+    id: crypto.randomUUID(),
+    ...input,
+    sortOrder,
+    createdAt: now,
+    updatedAt: now,
+  };
+
+  await env.DB.prepare(
+    `INSERT INTO risk_skills (id, title, description, sort_order, created_at, updated_at)
+     VALUES (?, ?, ?, ?, ?, ?)`,
+  )
+    .bind(skill.id, skill.title, skill.description, sortOrder, now, now)
+    .run();
+
+  return json({ skill }, 201);
+}
+
+async function updateRiskSkill(
+  request: Request,
+  env: Env,
+  id: string,
+): Promise<Response> {
+  assertEntityId(id);
+  const existing = await env.DB.prepare('SELECT * FROM risk_skills WHERE id = ?')
+    .bind(id)
+    .first<RiskSkillRow>();
+  if (!existing) return json({ error: 'Skill not found.' }, 404);
+
+  const input = readSkillInput(await readJson<JsonObject>(request));
+  if (!input) return json({ error: 'Title and description are required.' }, 400);
+
+  const now = new Date().toISOString();
+  await env.DB.prepare(
+    'UPDATE risk_skills SET title = ?, description = ?, updated_at = ? WHERE id = ?',
+  )
+    .bind(input.title, input.description, now, id)
+    .run();
+
+  return json({
+    skill: { ...riskSkillFromRow(existing), ...input, updatedAt: now },
+  });
+}
+
+async function deleteRiskSkill(env: Env, id: string): Promise<Response> {
+  assertEntityId(id);
+  const existing = await env.DB.prepare('SELECT id FROM risk_skills WHERE id = ?')
+    .bind(id)
+    .first<{ id: string }>();
+  if (!existing) return json({ error: 'Skill not found.' }, 404);
+  await env.DB.prepare('DELETE FROM risk_skills WHERE id = ?').bind(id).run();
+  return json({ ok: true });
+}
+
+const GEMINI_MODEL = 'gemini-2.5-flash';
+const GEMINI_ENDPOINT =
+  `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`;
+
+function buildRiskPrompt(org: OrganizationRecord, skills: RiskSkill[]): string {
+  const orgLines = [
+    `Organization name: ${org.name || 'N/A'}`,
+    `Acronym: ${org.acronym || 'N/A'}`,
+    `Country: ${org.country || 'N/A'}`,
+    `Entity type: ${org.entityType || 'N/A'}`,
+    `Website: ${org.website || 'N/A'}`,
+    `Contact email: ${org.contactEmail || 'N/A'}`,
+    `Legal address: ${org.legalAddress || 'N/A'}`,
+    `Operational address: ${org.operationalAddress || 'N/A'}`,
+  ];
+  const skillLines = skills
+    .map((skill, index) => `${index + 1}. ${skill.title}\n   ${skill.description}`)
+    .join('\n');
+
+  return [
+    'You are a due-diligence analyst preparing a reputational risk profile for a client applying to the Green Climate Fund.',
+    'Use Google Search to research the organization on the web for EVERY skill below. Do not rely only on your training data: look for current evidence and cite your reasoning in the summary. If a check finds nothing, say so explicitly.',
+    '',
+    'ORGANIZATION',
+    ...orgLines,
+    '',
+    'SKILLS TO INVESTIGATE (apply all of them)',
+    skillLines,
+    '',
+    'SCORING RULES',
+    'score is an integer from 0 to 100 where 0 means no identifiable risk and 100 means critical risk. Higher means riskier.',
+    'Verified negative findings (scandals, fraud, missing legal registration, suspicious or placeholder web presence) must substantially increase the score. Verified positive findings and a transparent, active institutional presence reduce it.',
+    'summary is a plain-text paragraph of 3 to 6 sentences in English describing the most important findings per skill, the evidence you found and the reasons for the score. Be concise and factual; do not use markdown.',
+    '',
+    'Respond with ONLY a JSON object in this exact shape:',
+    '{"score": <integer 0-100>, "summary": "<plain text summary>"}',
+  ].join('\n');
+}
+
+async function callGemini(apiKey: string, prompt: string): Promise<string> {
+  const response = await fetch(GEMINI_ENDPOINT, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-goog-api-key': apiKey,
+    },
+    body: JSON.stringify({
+      contents: [{ parts: [{ text: prompt }] }],
+      tools: [{ google_search: {} }],
+      generationConfig: { temperature: 0.2, maxOutputTokens: 4096 },
+    }),
+    signal: AbortSignal.timeout(60000),
+  });
+
+  if (!response.ok) {
+    const detail = await response.text().catch(() => '');
+    throw new HttpError(
+      502,
+      `Gemini API returned ${response.status}${detail ? `: ${detail.slice(0, 200)}` : ''}.`,
+    );
+  }
+
+  const payload = (await response.json()) as {
+    candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }>;
+    error?: { message?: string };
+  };
+  const text = payload.candidates?.[0]?.content?.parts
+    ?.map((part) => part.text ?? '')
+    .join('')
+    .trim();
+  if (!text) {
+    throw new HttpError(502, payload.error?.message || 'Gemini returned an empty response.');
+  }
+  return text;
+}
+
+function parseRiskAnalysis(text: string): { score: number; summary: string } | null {
+  const start = text.indexOf('{');
+  const end = text.lastIndexOf('}');
+  if (start === -1 || end <= start) return null;
+
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(text.slice(start, end + 1));
+  } catch {
+    return null;
+  }
+  if (!parsed || typeof parsed !== 'object') return null;
+
+  const obj = parsed as Record<string, unknown>;
+  const rawScore = typeof obj.score === 'number' ? obj.score : Number(obj.score);
+  const summary = typeof obj.summary === 'string' ? obj.summary.trim() : '';
+  if (!Number.isFinite(rawScore) || !summary) return null;
+
+  return {
+    score: Math.max(0, Math.min(100, Math.round(rawScore))),
+    summary: summary.slice(0, 6000),
+  };
+}
+
+async function analyzeOrganizationRisk(env: Env, id: string): Promise<Response> {
+  assertEntityId(id);
+
+  if (!env.GEMINI_API_KEY) {
+    return json({ error: 'AI risk analysis is not configured (GEMINI_API_KEY is missing).' }, 501);
+  }
+
+  const orgRow = await env.DB.prepare('SELECT * FROM organizations WHERE id = ?')
+    .bind(id)
+    .first<OrganizationRow>();
+  if (!orgRow) return json({ error: 'Organization not found.' }, 404);
+
+  const skillRows = await env.DB.prepare(
+    `SELECT id, title, description, sort_order, created_at, updated_at
+       FROM risk_skills
+      ORDER BY sort_order ASC, created_at ASC`,
+  ).all<RiskSkillRow>();
+  const skills = (skillRows.results ?? []).map(riskSkillFromRow);
+  if (!skills.length) {
+    return json({ error: 'Add at least one risk skill before running the analysis.' }, 400);
+  }
+
+  let analysis: { score: number; summary: string };
+  try {
+    analysis = parseRiskAnalysis(
+      await callGemini(env.GEMINI_API_KEY, buildRiskPrompt(rowToOrganization(orgRow), skills)),
+    ) ?? (() => {
+      throw new HttpError(502, 'The AI response could not be parsed. Please try again.');
+    })();
+  } catch (error) {
+    if (error instanceof HttpError) return json({ error: error.message }, error.status);
+    return json(
+      { error: error instanceof Error ? error.message : 'AI risk analysis failed.' },
+      502,
+    );
+  }
+
+  const now = new Date().toISOString();
+  await env.DB.prepare(
+    `UPDATE organizations
+        SET risk_score = ?, ai_risk_summary = ?, ai_risk_analyzed_at = ?, updated_at = ?
+      WHERE id = ?`,
+  )
+    .bind(analysis.score, analysis.summary, now, now, id)
+    .run();
+
+  const updated = await env.DB.prepare('SELECT * FROM organizations WHERE id = ?')
+    .bind(id)
+    .first<OrganizationRow>();
+
+  return json({
+    organization: updated ? rowToOrganization(updated) : null,
+    analysis: {
+      score: analysis.score,
+      summary: analysis.summary,
+      analyzedAt: now,
+      skillsUsed: skills.map((skill) => skill.title),
+    },
+  });
 }
 
 /** Admin: delete organization and all its files from R2. */
@@ -3574,8 +3862,8 @@ async function listOrganizationsAdmin(env: Env): Promise<Response> {
     `SELECT
        id, name, acronym, acronym_norm, legal_address, operational_address,
        website, country, entity_type, contact_name, contact_email, contact_phone,
-       risk_score, risk_notes, admin_notes, accreditation_status, priority_level,
-       created_at, updated_at
+       risk_score, risk_notes, admin_notes, ai_risk_summary, ai_risk_analyzed_at,
+       accreditation_status, priority_level, created_at, updated_at
      FROM organizations
      ORDER BY created_at DESC`,
   ).all<OrganizationRow>();
@@ -5734,6 +6022,37 @@ async function handleApi(request: Request, env: Env, path: string): Promise<Resp
       env,
       params.get('acronym') ?? '',
       params.get('exclude') ?? '',
+    );
+  }
+
+  // Admin: global skills used by the AI risk analysis
+  if (path === '/api/admin/risk-skills') {
+    if (method === 'GET') return withAdmin(env, request, () => listRiskSkills(env));
+    if (method === 'POST') {
+      return withAdmin(env, request, () => createRiskSkill(request, env));
+    }
+    return methodNotAllowed('GET, POST');
+  }
+
+  const riskSkillMatch = /^\/api\/admin\/risk-skills\/([^/]+)$/.exec(path);
+  if (riskSkillMatch) {
+    const id = decodeURIComponent(riskSkillMatch[1]);
+    if (method === 'PATCH' || method === 'PUT') {
+      return withAdmin(env, request, () => updateRiskSkill(request, env, id));
+    }
+    if (method === 'DELETE') {
+      return withAdmin(env, request, () => deleteRiskSkill(env, id));
+    }
+    return methodNotAllowed('PATCH, PUT, DELETE');
+  }
+
+  // Admin: run the AI risk analysis for an organization (synchronous)
+  const analyzeRiskMatch =
+    /^\/api\/admin\/organizations\/([^/]+)\/analyze-risk$/.exec(path);
+  if (analyzeRiskMatch) {
+    if (method !== 'POST') return methodNotAllowed('POST');
+    return withAdmin(env, request, () =>
+      analyzeOrganizationRisk(env, decodeURIComponent(analyzeRiskMatch[1])),
     );
   }
 

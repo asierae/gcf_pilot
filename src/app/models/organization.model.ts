@@ -21,6 +21,9 @@ export interface OrganizationRecord {
   riskScore: number | null;
   riskNotes: string;
   adminNotes: string;
+  /** Last Gemini risk analysis: score is written to riskScore, summary kept here. */
+  aiRiskSummary: string | null;
+  aiRiskAnalyzedAt: string | null;
   accreditationStatus: string;
   priorityLevel: string;
   // Avera risk & reputation audit
@@ -40,6 +43,23 @@ export interface OrganizationRecord {
   auditUpdatedAt: string | null;
   createdAt: string;
   updatedAt: string;
+}
+
+/** Global research instruction used by the admin AI risk analysis. */
+export interface RiskSkill {
+  id: string;
+  title: string;
+  description: string;
+  sortOrder: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface AiRiskAnalysis {
+  score: number;
+  summary: string;
+  analyzedAt: string;
+  skillsUsed: string[];
 }
 
 export interface FormSubmissionSummary {

@@ -14,6 +14,8 @@ import {
   OrganizationFilesBySection,
   OrganizationForms,
   OrganizationRecord,
+  AiRiskAnalysis,
+  RiskSkill,
 } from "../models/organization.model";
 import { AdminStats } from "../models/admin-stats.model";
 import { ApplicantDashboard } from "../models/applicant-dashboard.model";
@@ -494,6 +496,63 @@ export class ApiService {
       true,
     );
     return payload.organization;
+  }
+
+  // Admin: global skills used by the AI risk analysis
+  async getRiskSkills(): Promise<RiskSkill[]> {
+    const payload = await this.request<{ skills?: RiskSkill[] }>(
+      `/api/admin/risk-skills`,
+      { method: 'GET' },
+      true,
+    );
+    return payload.skills ?? [];
+  }
+
+  async createRiskSkill(input: {
+    title: string;
+    description: string;
+  }): Promise<RiskSkill> {
+    const payload = await this.request<{ skill: RiskSkill }>(
+      `/api/admin/risk-skills`,
+      { method: 'POST', body: JSON.stringify(input) },
+      true,
+    );
+    return payload.skill;
+  }
+
+  async updateRiskSkill(
+    id: string,
+    input: { title: string; description: string },
+  ): Promise<RiskSkill> {
+    const payload = await this.request<{ skill: RiskSkill }>(
+      `/api/admin/risk-skills/${encodeURIComponent(id)}`,
+      { method: 'PATCH', body: JSON.stringify(input) },
+      true,
+    );
+    return payload.skill;
+  }
+
+  async deleteRiskSkill(id: string): Promise<void> {
+    await this.request(
+      `/api/admin/risk-skills/${encodeURIComponent(id)}`,
+      { method: 'DELETE' },
+      true,
+    );
+  }
+
+  /** Synchronous Gemini analysis: writes riskScore + aiRiskSummary on the org. */
+  async analyzeOrganizationRisk(id: string): Promise<{
+    organization: OrganizationRecord;
+    analysis: AiRiskAnalysis;
+  }> {
+    return this.request<{
+      organization: OrganizationRecord;
+      analysis: AiRiskAnalysis;
+    }>(
+      `/api/admin/organizations/${encodeURIComponent(id)}/analyze-risk`,
+      { method: 'POST' },
+      true,
+    );
   }
 
   // Admin: list files for an organization

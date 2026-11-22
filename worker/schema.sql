@@ -89,6 +89,9 @@ CREATE TABLE IF NOT EXISTS organizations (
   risk_score          INTEGER DEFAULT NULL,
   risk_notes          TEXT NOT NULL DEFAULT '',
   admin_notes         TEXT NOT NULL DEFAULT '',
+  -- Last AI risk analysis (Gemini + Google Search grounding)
+  ai_risk_summary     TEXT DEFAULT NULL,
+  ai_risk_analyzed_at TEXT DEFAULT NULL,
   accreditation_status TEXT NOT NULL DEFAULT 'not_started',
   priority_level      TEXT NOT NULL DEFAULT 'normal',
   -- Avera audit scores (NULL factor = use the value computed from submissions)
@@ -112,6 +115,16 @@ CREATE TABLE IF NOT EXISTS organizations (
 
 CREATE UNIQUE INDEX IF NOT EXISTS idx_organizations_acronym
   ON organizations (acronym_norm);
+
+-- Skills used by the admin AI risk analysis. Shared by all organizations.
+CREATE TABLE IF NOT EXISTS risk_skills (
+  id          TEXT PRIMARY KEY,
+  title       TEXT NOT NULL,
+  description TEXT NOT NULL,
+  sort_order  INTEGER NOT NULL DEFAULT 0,
+  created_at  TEXT NOT NULL,
+  updated_at  TEXT NOT NULL
+);
 
 -- Drafts. The identifier is the organization id: anonymous visitors get a
 -- generated one in the URL (`?org=<id>`), signed-in users use their own.
