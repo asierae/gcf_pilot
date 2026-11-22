@@ -1,20 +1,65 @@
 <div class="wizard-shell">
   <header class="wizard-topbar">
     <div class="topbar-inner">
-      <a routerLink="/home" class="wizard-brand" aria-label="Avera Capital Access home">
-        <span class="brand-mark" aria-hidden="true">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M12 2.5 21 7.5v9L12 21.5 3 16.5v-9l9-5Z" />
-            <path d="M12 7.5v9" />
-            <path d="M7.5 10v4.5" />
-            <path d="M16.5 10v4.5" />
-          </svg>
-        </span>
-        <span class="brand-text">
-          <span class="brand-name">{{ 'STAGE2.TITLE' | translate }}</span>
-          <span class="brand-sub">{{ 'STAGE2.SUBTITLE' | translate }}</span>
-        </span>
-      </a>
+      @if (isLoggedIn) {
+        <div class="topbar-tabs" role="tablist" [attr.aria-label]="'STAGE2.TITLE' | translate">
+          <button
+            type="button"
+            class="topbar-tab"
+            role="tab"
+            [class.is-active]="activeTab === 'form'"
+            [attr.aria-selected]="activeTab === 'form'"
+            (click)="activeTab = 'form'"
+          >
+            <span class="brand-mark" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 2.5 21 7.5v9L12 21.5 3 16.5v-9l9-5Z" />
+                <path d="M12 7.5v9" />
+                <path d="M7.5 10v4.5" />
+                <path d="M16.5 10v4.5" />
+              </svg>
+            </span>
+            <span class="brand-text">
+              <span class="brand-name">{{ 'STAGE2.TITLE' | translate }}</span>
+              <span class="brand-sub">{{ 'STAGE2.SUBTITLE' | translate }}</span>
+            </span>
+          </button>
+          <button
+            type="button"
+            class="topbar-tab"
+            role="tab"
+            [class.is-active]="activeTab === 'timeline'"
+            [attr.aria-selected]="activeTab === 'timeline'"
+            (click)="activeTab = 'timeline'"
+          >
+            <span class="brand-mark" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="8.5" />
+                <path d="M12 7.5V12l3 2" />
+              </svg>
+            </span>
+            <span class="brand-text">
+              <span class="brand-name">{{ 'ACCREDITATION_TIMELINE.TAB' | translate }}</span>
+              <span class="brand-sub">{{ 'ACCREDITATION_TIMELINE.TAB_SUB' | translate }}</span>
+            </span>
+          </button>
+        </div>
+      } @else {
+        <a routerLink="/home" class="wizard-brand" aria-label="Avera Capital Access home">
+          <span class="brand-mark" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 2.5 21 7.5v9L12 21.5 3 16.5v-9l9-5Z" />
+              <path d="M12 7.5v9" />
+              <path d="M7.5 10v4.5" />
+              <path d="M16.5 10v4.5" />
+            </svg>
+          </span>
+          <span class="brand-text">
+            <span class="brand-name">{{ 'STAGE2.TITLE' | translate }}</span>
+            <span class="brand-sub">{{ 'STAGE2.SUBTITLE' | translate }}</span>
+          </span>
+        </a>
+      }
 
       <div class="topbar-actions">
         @if (!viewingSubmission) {
@@ -37,7 +82,7 @@
             {{ 'STAGE2.ALL_SECTIONS' | translate }}
           </button>
         }
-        @if (isAdmin) {
+        @if (isAdmin && activeTab === 'form') {
           <button
             type="button"
             class="btn btn-ghost review-send-btn"
@@ -62,6 +107,9 @@
     </div>
   </header>
 
+  @if (activeTab === 'timeline') {
+    <app-accreditation-timeline />
+  } @else {
   <div class="wizard-body">
     @if (submitSuccess) {
       <div class="success-banner">
@@ -337,4 +385,5 @@
       }
     }
   </div>
+  }
 </div>

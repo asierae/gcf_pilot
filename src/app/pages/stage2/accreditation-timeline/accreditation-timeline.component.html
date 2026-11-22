@@ -1,0 +1,141 @@
+<section class="tl-page">
+  <header class="tl-header">
+    <p class="tl-kicker">{{ t('KICKER') | translate }}</p>
+    <h1>{{ t('TITLE') | translate }}</h1>
+    <p class="tl-lead">{{ t('LEAD') | translate }}</p>
+  </header>
+
+  <div class="tl-meta">
+    <article class="tl-meta-card">
+      <div class="tl-num">{{ t('META1_NUM') | translate }} <small>{{ t('META1_UNIT') | translate }}</small></div>
+      <div class="tl-tag">{{ t('META1_TAG') | translate }}</div>
+      <p class="tl-copy">{{ t('META1_COPY') | translate }}</p>
+    </article>
+    <article class="tl-meta-card">
+      <div class="tl-num tl-num-text">{{ t('META2_NUM') | translate }}</div>
+      <div class="tl-tag">{{ t('META2_TAG') | translate }}</div>
+      <p class="tl-copy">{{ t('META2_COPY') | translate }}</p>
+    </article>
+    <article class="tl-meta-card">
+      <div class="tl-num tl-num-text">{{ t('META3_NUM') | translate }}</div>
+      <div class="tl-tag">{{ t('META3_TAG') | translate }}</div>
+      <p class="tl-copy">{{ t('META3_COPY') | translate }}</p>
+    </article>
+  </div>
+
+  <section class="tl-section" [attr.aria-label]="t('GANTT_TITLE') | translate">
+    <div class="tl-section-top">
+      <div>
+        <h2>{{ t('GANTT_TITLE') | translate }}</h2>
+        <p>{{ t('GANTT_SUB') | translate }}</p>
+      </div>
+      <span class="tl-daytag">{{ t('WEEK_TAG') | translate }}</span>
+    </div>
+
+    <div class="tl-legend">
+      @for (item of legend; track item.key) {
+        <span class="tl-leg">
+          <i [class]="'tl-sw tl-sw-' + item.kind"></i>
+          {{ item.key | translate }}
+        </span>
+      }
+    </div>
+    <p class="tl-hint">{{ t('HINT') | translate }}</p>
+
+    <div class="tl-scroller" role="region" tabindex="0" [attr.aria-label]="t('GANTT_TITLE') | translate">
+      <div class="tl-gantt">
+        <div class="tl-gantt-head">
+          <div class="tl-hleft">AVERA Workstream</div>
+          <div class="tl-axis">
+            @for (week of weeks; track week) {
+              <span>{{ week }}</span>
+            }
+          </div>
+        </div>
+
+        @for (task of tasks; track task.n) {
+          <div class="tl-row">
+            <div class="tl-task">
+              <div class="tl-task-line">
+                <span class="tl-task-n">{{ task.n }}</span>
+                <span class="tl-task-name">{{ task.nameKey | translate }}</span>
+              </div>
+              <p class="tl-task-detail">{{ task.detailKey | translate }}</p>
+            </div>
+            <div class="tl-track">
+              <div [class]="'tl-bar tl-bar-' + task.bar" [style.grid-column]="task.column">
+                {{ task.label }}
+              </div>
+            </div>
+          </div>
+        }
+
+        <div class="tl-row tl-row-milestone">
+          <div class="tl-task">
+            <div class="tl-task-line">
+              <span class="tl-task-n">◆</span>
+              <span class="tl-task-name">{{ t('MILESTONE_NAME') | translate }}</span>
+            </div>
+            <p class="tl-task-detail">{{ t('MILESTONE_DETAIL') | translate }}</p>
+          </div>
+          <div class="tl-track">
+            <div class="tl-marker" style="grid-column: 8; grid-row: 1"></div>
+            <span class="tl-marker-label" style="grid-column: 5 / span 3; grid-row: 1">
+              {{ t('MILESTONE_LABEL') | translate }}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tl-gate">
+      <span class="tl-check" aria-hidden="true">✓</span>
+      <div>
+        <h3>{{ t('GATE_TITLE') | translate }}</h3>
+        <p>{{ t('GATE_COPY') | translate }}</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="tl-lower">
+    <h2>{{ t('OUTPUTS_TITLE') | translate }}</h2>
+    <p class="tl-subtitle">{{ t('OUTPUTS_SUB') | translate }}</p>
+    <div class="tl-outputs">
+      @for (output of outputs; track output.idKey) {
+        <article class="tl-output">
+          <div class="tl-output-id">{{ output.idKey | translate }}</div>
+          <h3>{{ output.nameKey | translate }}</h3>
+          <p>{{ output.copyKey | translate }}</p>
+        </article>
+      }
+    </div>
+  </section>
+
+  <section class="tl-responsive">
+    <h2>{{ t('RESP_TITLE') | translate }}</h2>
+    <p class="tl-subtitle">{{ t('RESP_SUB') | translate }}</p>
+    <div class="tl-response-grid">
+      @for (response of responses; track response.nameKey) {
+        <article class="tl-response">
+          <div class="tl-ey">{{ response.eyeKey | translate }}</div>
+          <h3>{{ response.nameKey | translate }}</h3>
+          <div class="tl-time">
+            {{ response.timeKey | translate }}
+            <span class="tl-unit">{{ response.unitKey | translate }}</span>
+          </div>
+          <p>{{ response.copyKey | translate }}</p>
+        </article>
+      }
+    </div>
+  </section>
+
+  <div class="tl-dependency">
+    <strong>{{ t('DEP_TITLE') | translate }}</strong>
+    <p>{{ t('DEP_COPY') | translate }}</p>
+  </div>
+
+  <p class="tl-note">
+    {{ t('NOTE') | translate }}
+    <a [href]="gcfLink" target="_blank" rel="noopener">{{ t('LINK') | translate }}</a>.
+  </p>
+</section>

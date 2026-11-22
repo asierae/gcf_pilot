@@ -30,6 +30,7 @@ import {
 import { Stage1StepsComponent } from '../../shared/components/stage1-steps/stage1-steps.component';
 import { FileUploadComponent } from '../../shared/components/file-upload/file-upload.component';
 import { StepIconComponent } from '../../shared/components/step-icon/step-icon.component';
+import { AccreditationTimelineComponent } from './accreditation-timeline/accreditation-timeline.component';
 
 const SUBMISSION_QUERY_PARAM = 'submission';
 
@@ -48,7 +49,7 @@ const STAGE1_REVIEW_KEYS = [
 @Component({
   selector: 'app-stage2',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, Stage1StepsComponent, FileUploadComponent, StepIconComponent, RouterLink, TranslatePipe],
+  imports: [CommonModule, ReactiveFormsModule, Stage1StepsComponent, FileUploadComponent, StepIconComponent, AccreditationTimelineComponent, RouterLink, TranslatePipe],
   templateUrl: './stage2.component.html',
   styleUrl: './stage2.component.css'
 })
@@ -68,6 +69,9 @@ export class Stage2Component implements OnInit, OnDestroy {
   identityLocked = false;
 
   isAdmin = false;
+  isLoggedIn = false;
+  /** Signed-in users can switch between the form and the advisory timeline. */
+  activeTab: 'form' | 'timeline' = 'form';
   viewMode: 'grid' | 'form' = 'form';
 
   /** Set when the admin opens a specific submission from the submissions table. */
@@ -146,6 +150,7 @@ export class Stage2Component implements OnInit, OnDestroy {
     watchStage1ConditionalRequirements(this.form);
 
     this.isAdmin = this.authService.currentUserValue?.role === 'admin';
+    this.isLoggedIn = this.authService.isLoggedIn;
     if (!this.isAdmin) {
       this.viewMode = 'grid';
     }
