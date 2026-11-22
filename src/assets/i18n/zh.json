@@ -35,7 +35,20 @@
     "ERROR": "无法提交申请。请检查表单后重试。",
     "DRAFT_SAVED": "草稿已保存",
     "DRAFT_SAVING": "正在保存草稿…",
-    "DRAFT_YEAR": "草稿年份"
+    "DRAFT_YEAR": "草稿年份",
+    "REVIEW_NOTES": "审核备注",
+    "REVIEW_NOTES_HINT": "只有管理员可以看到这些备注。输入时会自动保存。",
+    "REVIEW_NOTES_PLACEHOLDER": "为此部分添加审核备注...",
+    "REVIEW_NOTES_SAVING": "正在保存…",
+    "REVIEW_NOTES_SAVED": "已自动保存",
+    "SEND_REVIEW": "发送审核备注",
+    "SENDING_REVIEW": "正在发送…",
+    "REVIEW_NO_NOTES": "发送前请至少添加一条审核备注。",
+    "REVIEW_NO_RECIPIENT": "此申请中未找到申请人的电子邮箱。",
+    "REVIEW_SENT": "审核备注已发送至 {{email}}。",
+    "REVIEW_MANUAL": "已为 {{email}} 打开 Gmail。请使用该账户登录并点击发送。",
+    "REVIEW_SEND_ERROR": "无法发送审核备注。请重试。",
+    "REVIEW_LAST_SENT": "上次发送 {{date}}"
   },
   "MY_ORGANIZATION": {
     "TITLE": "我的组织",

@@ -6,6 +6,7 @@ import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators } fr
 import { StorageService } from '../../services/storage.service';
 import { NotificationService } from '../../services/notification.service';
 import { AuthService } from '../../services/auth.service';
+import { EmailService } from '../../services/email.service';
 import { OrganizationService } from '../../services/organization.service';
 import { OrganizationRecord } from '../../models/organization.model';
 import {
@@ -31,6 +32,18 @@ import { FileUploadComponent } from '../../shared/components/file-upload/file-up
 import { StepIconComponent } from '../../shared/components/step-icon/step-icon.component';
 
 const SUBMISSION_QUERY_PARAM = 'submission';
+
+/**
+ * Review-note key for each pre-screening step. They match the section ids used
+ * by the pre-screening submission detail, so notes are shared between both
+ * admin views.
+ */
+const STAGE1_REVIEW_KEYS = [
+  'access-modality',
+  'general-information',
+  'legal-status',
+  'additional-information',
+];
 
 @Component({
   selector: 'app-stage2',
@@ -67,11 +80,21 @@ export class Stage2Component implements OnInit, OnDestroy {
   private draftLoaded = false;
   private pendingSave = false;
 
+  /** Admin-only review notes, one entry per section (saved on the applicant). */
+  sectionNotes: Record<string, string> = {};
+  reviewSaving = false;
+  reviewSavedAt: string | null = null;
+  lastReviewSentAt: string | null = null;
+  sendingReview = false;
+  private reviewTimer: ReturnType<typeof setTimeout> | null = null;
+  private pendingReview: { key: string; note: string } | null = null;
+
   constructor(
     private fb: FormBuilder,
     private storageService: StorageService,
     private notificationService: NotificationService,
     private authService: AuthService,
+    private emailService: EmailService,
     private organizationService: OrganizationService,
     private translate: TranslateService,
     private route: ActivatedRoute,
@@ -132,6 +155,10 @@ export class Stage2Component implements OnInit, OnDestroy {
     this.submissionId = this.route.snapshot.queryParamMap.get(SUBMISSION_QUERY_PARAM);
     this.viewingSubmission = Boolean(this.submissionId);
     this.form.valueChanges.subscribe(() => this.scheduleDraftSave());
+
+    if (this.isAdmin) {
+      void this.loadReviewNotes();
+    }
 
     void this.loadSavedData();
   }
@@ -220,6 +247,17 @@ export class Stage2Component implements OnInit, OnDestroy {
     }
   }
 
+  /** Loads the admin review notes stored on the applicant record. */
+  private async loadReviewNotes(): Promise<void> {
+    try {
+      const record = await this.storageService.getApplicantRecord(this.applicantId);
+      this.sectionNotes = { ...(record?.admin.reviewNotes ?? {}) };
+      this.lastReviewSentAt = record?.admin.lastReviewSent?.sentAt ?? null;
+    } catch {
+      // Review notes are admin metadata; a missing applicant is not an error.
+    }
+  }
+
   private scheduleDraftSave(): void {
     if (this.viewingSubmission) return;
     if (!this.draftLoaded) {
@@ -250,6 +288,13 @@ export class Stage2Component implements OnInit, OnDestroy {
     if (this.draftTimer) {
       clearTimeout(this.draftTimer);
       void this.saveDraft();
+    }
+    if (this.reviewTimer) {
+      clearTimeout(this.reviewTimer);
+      this.reviewTimer = null;
+      const pending = this.pendingReview;
+      this.pendingReview = null;
+      if (pending) void this.persistReviewNote(pending.key, pending.note);
     }
   }
 
@@ -294,6 +339,182 @@ export class Stage2Component implements OnInit, OnDestroy {
       .find((step) => step.index === this.currentStep);
     if (!item) return '';
     return item.number === '0' ? item.title : `Section ${item.number}: ${item.title}`;
+  }
+
+  // ── Admin review notes ───────────────────────────────────────────────────
+
+  /** Review-note key for a wizard step (pre-screening ids or `s4` … `s13`). */
+  private reviewKeyForStep(step: number): string {
+    if (step < STAGE2_ENTRY_STEP) {
+      return STAGE1_REVIEW_KEYS[step] ?? `stage1-${step}`;
+    }
+    return (
+      STAGE2_SCREENING_STEPS[step - STAGE2_ENTRY_STEP]?.id ?? `section-${step}`
+    );
+  }
+
+  get currentReviewKey(): string {
+    return this.reviewKeyForStep(this.currentStep);
+  }
+
+  get currentReviewNote(): string {
+    return this.sectionNotes[this.currentReviewKey] ?? '';
+  }
+
+  get reviewNotesCount(): number {
+    return Object.values(this.sectionNotes).filter((note) => note.trim())
+      .length;
+  }
+
+  hasAnyReviewNotes(): boolean {
+    return this.reviewNotesCount > 0;
+  }
+
+  onReviewNoteInput(event: Event): void {
+    const value = (event.target as HTMLTextAreaElement).value;
+    const key = this.currentReviewKey;
+    this.sectionNotes = { ...this.sectionNotes, [key]: value };
+    this.pendingReview = { key, note: value };
+    if (this.reviewTimer) clearTimeout(this.reviewTimer);
+    this.reviewSaving = true;
+    this.reviewTimer = setTimeout(() => void this.flushReviewNote(), 700);
+  }
+
+  private async flushReviewNote(): Promise<void> {
+    this.reviewTimer = null;
+    const pending = this.pendingReview;
+    this.pendingReview = null;
+    if (!pending) {
+      this.reviewSaving = false;
+      return;
+    }
+    await this.persistReviewNote(pending.key, pending.note);
+  }
+
+  private async persistReviewNote(key: string, note: string): Promise<void> {
+    try {
+      await this.storageService.saveSubmissionReviewNote(
+        this.applicantId,
+        key,
+        note,
+      );
+      this.reviewSavedAt = new Date().toISOString();
+    } catch {
+      this.notificationService.error('Could not save the review note.');
+    } finally {
+      this.reviewSaving = false;
+    }
+  }
+
+  /** Non-empty notes in questionnaire order, ready to store or email. */
+  private reviewNotesPayload(): Record<string, string> {
+    const notes: Record<string, string> = {};
+    for (const group of this.navGroups) {
+      for (const step of group.steps) {
+        const key = this.reviewKeyForStep(step.index);
+        const note = (this.sectionNotes[key] ?? '').trim();
+        if (note) notes[key] = note;
+      }
+    }
+    return notes;
+  }
+
+  private reviewLabelForKey(key: string): string {
+    const item = this.navGroups
+      .flatMap((group) => group.steps)
+      .find((step) => this.reviewKeyForStep(step.index) === key);
+    if (!item) return key;
+    return item.number === '0'
+      ? item.title
+      : `Section ${item.number}: ${item.title}`;
+  }
+
+  async sendReviewNotes(): Promise<void> {
+    if (this.sendingReview) return;
+
+    const recipient = String(
+      this.form.get('primaryContactEmail')?.value ?? '',
+    ).trim();
+    if (!recipient) {
+      this.notificationService.error(
+        this.translate.instant('STAGE2.REVIEW_NO_RECIPIENT'),
+      );
+      return;
+    }
+
+    const notes = this.reviewNotesPayload();
+    if (!Object.keys(notes).length) {
+      this.notificationService.warning(
+        this.translate.instant('STAGE2.REVIEW_NO_NOTES'),
+      );
+      return;
+    }
+
+    const applicantName =
+      String(this.form.get('applicantName')?.value ?? '').trim() || 'Applicant';
+    const contactName =
+      String(this.form.get('primaryContactName')?.value ?? '').trim() ||
+      applicantName;
+    const subject = `GCF Accreditation Review Notes — ${applicantName}`;
+    const body = this.buildReviewEmailBody(contactName, notes);
+
+    this.sendingReview = true;
+    try {
+      const mode = await this.emailService.sendReviewEmail({
+        to: recipient,
+        subject,
+        body,
+      });
+      await this.storageService.markReviewSent(
+        this.applicantId,
+        recipient,
+        notes,
+      );
+      this.lastReviewSentAt = new Date().toISOString();
+
+      if (mode === 'automatic') {
+        this.notificationService.success(
+          this.translate.instant('STAGE2.REVIEW_SENT', { email: recipient }),
+        );
+      } else {
+        this.notificationService.info(
+          this.translate.instant('STAGE2.REVIEW_MANUAL', {
+            email: this.emailService.senderEmail,
+          }),
+        );
+      }
+    } catch {
+      this.notificationService.error(
+        this.translate.instant('STAGE2.REVIEW_SEND_ERROR'),
+      );
+    } finally {
+      this.sendingReview = false;
+    }
+  }
+
+  private buildReviewEmailBody(
+    contactName: string,
+    notes: Record<string, string>,
+  ): string {
+    const lines = [
+      `Dear ${contactName},`,
+      '',
+      'Please find below our review notes regarding your accreditation application:',
+      '',
+    ];
+    for (const [key, note] of Object.entries(notes)) {
+      lines.push(`--- ${this.reviewLabelForKey(key)} ---`);
+      lines.push(note);
+      lines.push('');
+    }
+    lines.push('---');
+    lines.push(`Applicant: ${this.form.get('applicantName')?.value || 'N/A'}`);
+    lines.push(`Reference ID: ${this.applicantId}`);
+    lines.push('');
+    lines.push('Kind regards,');
+    lines.push('GCF Accreditation Team');
+    lines.push(this.emailService.senderEmail);
+    return lines.join('\n');
   }
 
   goToStep(step: number): void {

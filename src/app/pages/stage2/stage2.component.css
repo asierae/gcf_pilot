@@ -688,6 +688,83 @@ textarea {
 }
 .reference-links a:hover { color: #f5dfa8; }
 
+/* ── Admin review notes ── */
+.review-send-btn svg {
+  width: 15px;
+  height: 15px;
+}
+
+.review-send-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.review-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.15rem;
+  height: 1.15rem;
+  padding: 0 0.3rem;
+  border-radius: 999px;
+  background: var(--app-accent-soft);
+  border: 1px solid var(--app-accent-line);
+  color: var(--app-accent);
+  font-size: 0.66rem;
+  font-weight: 700;
+}
+
+.review-card {
+  margin-top: 1.25rem;
+  padding: 1.2rem 1.25rem 1.3rem;
+  border: 1px solid var(--app-accent-line);
+  border-radius: 16px;
+  background:
+    radial-gradient(400px 140px at 100% 0%, rgba(232, 192, 106, 0.07), transparent 70%),
+    rgba(12, 21, 36, 0.55);
+}
+
+.review-card-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.8rem;
+}
+
+.review-card-head h3 {
+  margin: 0 0 0.25rem;
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: var(--app-text-strong);
+}
+
+.review-card-head p {
+  margin: 0;
+  font-size: 0.74rem;
+  line-height: 1.55;
+  color: var(--app-muted);
+}
+
+.review-save-state {
+  flex: none;
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: var(--app-accent);
+  white-space: nowrap;
+}
+
+.review-textarea {
+  min-height: 7.5rem;
+  resize: vertical;
+}
+
+.review-last-sent {
+  margin: 0.6rem 0 0;
+  font-size: 0.68rem;
+  color: var(--app-subtle);
+}
+
 /* ── Navigation / submit ── */
 .form-navigation {
   display: flex;

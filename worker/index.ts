@@ -1785,6 +1785,17 @@ const REVIEW_SECTION_LABELS: Record<string, string> = {
   'legal-status': 'Legal Status & Eligibility',
   'additional-information': 'Additional Information',
   'fast-track': 'Fast-Track & Engagement',
+  // Accreditation sections (full form) use their wizard step ids.
+  s4: 'Section 4: Contribution to GCF',
+  s5: 'Section 5: Corporate Governance',
+  s6: 'Section 6: Financial Management',
+  s7: 'Section 7: Procurement',
+  s8: 'Section 8: Integrity',
+  s9: 'Section 9: Project Design',
+  s10: 'Section 10: ESS Management',
+  s11: 'Section 11: Grievance Redress',
+  s12: 'Section 12: Indigenous People',
+  s13: 'Section 13: Gender',
 };
 const REVIEW_SECTION_ORDER = Object.keys(REVIEW_SECTION_LABELS);
 

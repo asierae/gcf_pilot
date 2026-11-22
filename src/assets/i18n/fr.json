@@ -35,7 +35,20 @@
     "ERROR": "Impossible de soumettre la demande. Vérifiez le formulaire et réessayez.",
     "DRAFT_SAVED": "Brouillon enregistré",
     "DRAFT_SAVING": "Enregistrement du brouillon…",
-    "DRAFT_YEAR": "Année du brouillon"
+    "DRAFT_YEAR": "Année du brouillon",
+    "REVIEW_NOTES": "Notes de révision",
+    "REVIEW_NOTES_HINT": "Seuls les administrateurs voient ces notes. Elles sont enregistrées automatiquement pendant la saisie.",
+    "REVIEW_NOTES_PLACEHOLDER": "Ajoutez vos notes de révision pour cette section...",
+    "REVIEW_NOTES_SAVING": "Enregistrement…",
+    "REVIEW_NOTES_SAVED": "Enregistré automatiquement",
+    "SEND_REVIEW": "Envoyer les notes de révision",
+    "SENDING_REVIEW": "Envoi…",
+    "REVIEW_NO_NOTES": "Ajoutez au moins une note de révision avant l'envoi.",
+    "REVIEW_NO_RECIPIENT": "Aucun e-mail de demandeur trouvé dans cette candidature.",
+    "REVIEW_SENT": "Notes de révision envoyées à {{email}}.",
+    "REVIEW_MANUAL": "Gmail a été ouvert pour {{email}}. Connectez-vous avec ce compte et cliquez sur Envoyer.",
+    "REVIEW_SEND_ERROR": "Impossible d'envoyer les notes de révision. Veuillez réessayer.",
+    "REVIEW_LAST_SENT": "Dernier envoi {{date}}"
   },
   "MY_ORGANIZATION": {
     "TITLE": "Mon organisation",

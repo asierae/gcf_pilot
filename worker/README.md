@@ -273,8 +273,10 @@ Admin (`Authorization: Bearer <API_TOKEN>`):
   `NOREPLY_EMAIL` with `reply_to: CONTACT_EMAIL`. Skipped without
   `RESEND_API_KEY`; a mail failure never fails the status update.
 - `PATCH /api/applicants/:id/stage1` — `{ data, updatedAt? }`
-- `PATCH /api/applicants/:id/review-notes` — `{ sectionId, note }`
-- `PATCH /api/applicants/:id/review-sent` — `{ recipient }`
+- `PATCH /api/applicants/:id/review-notes` — `{ sectionId, note }`; section ids
+  are the pre-screening display ids or the accreditation step ids (`s4` … `s13`)
+- `PATCH /api/applicants/:id/review-sent` — `{ recipient, notes }` (snapshot of
+  the non-empty notes shown on the applicant dashboard)
 - `DELETE /api/applicants` — `{ ids }`
 - `GET | POST | DELETE /api/leads`
 - `PATCH /api/leads/:id` — `{ lead }`

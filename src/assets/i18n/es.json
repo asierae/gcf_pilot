@@ -35,7 +35,20 @@
     "ERROR": "No se pudo enviar la solicitud. Revise el formulario e inténtelo de nuevo.",
     "DRAFT_SAVED": "Borrador guardado",
     "DRAFT_SAVING": "Guardando borrador…",
-    "DRAFT_YEAR": "Año del borrador"
+    "DRAFT_YEAR": "Año del borrador",
+    "REVIEW_NOTES": "Notas de revisión",
+    "REVIEW_NOTES_HINT": "Solo los administradores pueden ver estas notas. Se guardan automáticamente mientras escribes.",
+    "REVIEW_NOTES_PLACEHOLDER": "Añade tus notas de revisión para esta sección...",
+    "REVIEW_NOTES_SAVING": "Guardando…",
+    "REVIEW_NOTES_SAVED": "Guardado automáticamente",
+    "SEND_REVIEW": "Enviar notas de revisión",
+    "SENDING_REVIEW": "Enviando…",
+    "REVIEW_NO_NOTES": "Añade al menos una nota de revisión antes de enviar.",
+    "REVIEW_NO_RECIPIENT": "No se ha encontrado el email del solicitante en esta solicitud.",
+    "REVIEW_SENT": "Notas de revisión enviadas a {{email}}.",
+    "REVIEW_MANUAL": "Se ha abierto Gmail para {{email}}. Inicia sesión con esa cuenta y pulsa Enviar.",
+    "REVIEW_SEND_ERROR": "No se pudieron enviar las notas de revisión. Inténtalo de nuevo.",
+    "REVIEW_LAST_SENT": "Último envío {{date}}"
   },
   "MY_ORGANIZATION": {
     "TITLE": "Mi organización",

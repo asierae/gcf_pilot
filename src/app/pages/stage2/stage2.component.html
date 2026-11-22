@@ -37,6 +37,26 @@
             {{ 'STAGE2.ALL_SECTIONS' | translate }}
           </button>
         }
+        @if (isAdmin) {
+          <button
+            type="button"
+            class="btn btn-ghost review-send-btn"
+            [disabled]="sendingReview || !hasAnyReviewNotes()"
+            (click)="sendReviewNotes()"
+            [title]="'STAGE2.SEND_REVIEW' | translate"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <rect x="3" y="5" width="18" height="14" rx="2" />
+              <path d="m3.5 6.5 8.5 6 8.5-6" />
+            </svg>
+            <span>
+              {{ (sendingReview ? 'STAGE2.SENDING_REVIEW' : 'STAGE2.SEND_REVIEW') | translate }}
+            </span>
+            @if (!sendingReview && reviewNotesCount) {
+              <span class="review-count">{{ reviewNotesCount }}</span>
+            }
+          </button>
+        }
         <a routerLink="/get-assessed" class="btn btn-ghost">{{ 'STAGE2.ALL_PATHWAYS' | translate }}</a>
       </div>
     </div>
@@ -271,6 +291,36 @@
                   </div>
                 }
               </div>
+            }
+
+            @if (isAdmin) {
+              <aside class="review-card">
+                <div class="review-card-head">
+                  <div>
+                    <h3>{{ 'STAGE2.REVIEW_NOTES' | translate }}</h3>
+                    <p>{{ 'STAGE2.REVIEW_NOTES_HINT' | translate }}</p>
+                  </div>
+                  <span class="review-save-state">
+                    @if (reviewSaving) {
+                      {{ 'STAGE2.REVIEW_NOTES_SAVING' | translate }}
+                    } @else if (reviewSavedAt && currentReviewNote) {
+                      {{ 'STAGE2.REVIEW_NOTES_SAVED' | translate }}
+                    }
+                  </span>
+                </div>
+                <textarea
+                  class="review-textarea"
+                  [value]="currentReviewNote"
+                  (input)="onReviewNoteInput($event)"
+                  rows="5"
+                  [attr.placeholder]="'STAGE2.REVIEW_NOTES_PLACEHOLDER' | translate"
+                ></textarea>
+                @if (lastReviewSentAt) {
+                  <p class="review-last-sent">
+                    {{ 'STAGE2.REVIEW_LAST_SENT' | translate: { date: (lastReviewSentAt | date: 'short') } }}
+                  </p>
+                }
+              </aside>
             }
 
             <div class="form-navigation">

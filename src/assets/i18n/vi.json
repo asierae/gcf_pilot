@@ -35,7 +35,20 @@
     "ERROR": "Không thể gửi đơn đăng ký. Vui lòng kiểm tra biểu mẫu và thử lại.",
     "DRAFT_SAVED": "Đã lưu bản nháp",
     "DRAFT_SAVING": "Đang lưu bản nháp…",
-    "DRAFT_YEAR": "Năm của bản nháp"
+    "DRAFT_YEAR": "Năm của bản nháp",
+    "REVIEW_NOTES": "Ghi chú đánh giá",
+    "REVIEW_NOTES_HINT": "Chỉ quản trị viên mới thấy các ghi chú này. Chúng được lưu tự động khi bạn nhập.",
+    "REVIEW_NOTES_PLACEHOLDER": "Thêm ghi chú đánh giá cho phần này...",
+    "REVIEW_NOTES_SAVING": "Đang lưu…",
+    "REVIEW_NOTES_SAVED": "Đã lưu tự động",
+    "SEND_REVIEW": "Gửi ghi chú đánh giá",
+    "SENDING_REVIEW": "Đang gửi…",
+    "REVIEW_NO_NOTES": "Hãy thêm ít nhất một ghi chú đánh giá trước khi gửi.",
+    "REVIEW_NO_RECIPIENT": "Không tìm thấy email của người nộp đơn trong hồ sơ này.",
+    "REVIEW_SENT": "Đã gửi ghi chú đánh giá tới {{email}}.",
+    "REVIEW_MANUAL": "Đã mở Gmail cho {{email}}. Đăng nhập bằng tài khoản đó và nhấn Gửi.",
+    "REVIEW_SEND_ERROR": "Không thể gửi ghi chú đánh giá. Vui lòng thử lại.",
+    "REVIEW_LAST_SENT": "Lần gửi cuối {{date}}"
   },
   "MY_ORGANIZATION": {
     "TITLE": "Tổ chức của tôi",

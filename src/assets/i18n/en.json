@@ -35,7 +35,20 @@
     "ERROR": "Could not submit the application. Please check the form and try again.",
     "DRAFT_SAVED": "Draft saved",
     "DRAFT_SAVING": "Saving draft…",
-    "DRAFT_YEAR": "Draft year"
+    "DRAFT_YEAR": "Draft year",
+    "REVIEW_NOTES": "Review notes",
+    "REVIEW_NOTES_HINT": "Only administrators can see these notes. They are saved automatically as you type.",
+    "REVIEW_NOTES_PLACEHOLDER": "Add your review notes for this section...",
+    "REVIEW_NOTES_SAVING": "Saving…",
+    "REVIEW_NOTES_SAVED": "Saved automatically",
+    "SEND_REVIEW": "Send review notes",
+    "SENDING_REVIEW": "Sending…",
+    "REVIEW_NO_NOTES": "Add at least one review note before sending.",
+    "REVIEW_NO_RECIPIENT": "No applicant email found in this application.",
+    "REVIEW_SENT": "Review notes sent to {{email}}.",
+    "REVIEW_MANUAL": "Gmail opened for {{email}}. Sign in with that account and click Send.",
+    "REVIEW_SEND_ERROR": "Could not send the review notes. Please try again.",
+    "REVIEW_LAST_SENT": "Last sent {{date}}"
   },
   "MY_ORGANIZATION": {
     "TITLE": "My organization",
