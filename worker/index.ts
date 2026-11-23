@@ -41,8 +41,8 @@ interface Env {
   CORS_ORIGINS?: string;
   /** Resend API key. When missing, emails fall back to Gmail compose in the UI. */
   RESEND_API_KEY?: string;
-  /** DeepSeek API key used by the admin AI risk analysis (with web search). */
-  DEEPSEEK_API_KEY?: string;
+  /** Groq API key used by the admin AI risk analysis (browser search tool). */
+  GROQ_API_KEY?: string;
   /** Public contact inbox (defaults to contact@averacapitalaccess.com). */
   CONTACT_EMAIL?: string;
   /** Sender for automatic emails (defaults to noreply@averacapitalaccess.com). */
@@ -1121,7 +1121,7 @@ async function updateOrganizationAdmin(
 }
 
 /* ------------------------------------------------------------------ *
- * AI risk analysis — global skills + DeepSeek web search
+ * AI risk analysis — global skills + Groq browser search
  * ------------------------------------------------------------------ */
 
 function riskSkillFromRow(row: RiskSkillRow): RiskSkill {
@@ -1213,8 +1213,8 @@ async function deleteRiskSkill(env: Env, id: string): Promise<Response> {
   return json({ ok: true });
 }
 
-const DEEPSEEK_ENDPOINT = 'https://api.deepseek.com/chat/completions';
-const DEEPSEEK_MODEL = 'deepseek-flash';
+const GROQ_ENDPOINT = 'https://api.groq.com/openai/v1/chat/completions';
+const GROQ_MODEL = 'openai/gpt-oss-20b';
 
 function buildRiskPrompt(org: OrganizationRecord, skills: RiskSkill[]): string {
   const orgLines = [
@@ -1233,7 +1233,7 @@ function buildRiskPrompt(org: OrganizationRecord, skills: RiskSkill[]): string {
 
   return [
     'You are a due-diligence analyst preparing a reputational risk profile for a client applying to the Green Climate Fund.',
-    'Use the web search tool to research the organization on the web for EVERY skill below. Do not rely only on your training data: look for current evidence and cite your reasoning in the summary. If a check finds nothing, say so explicitly.',
+    'Use the browser search tool to research the organization on the web for EVERY skill below. Do not rely only on your training data: look for current evidence and cite your reasoning in the summary. If a check finds nothing, say so explicitly.',
     '',
     'ORGANIZATION',
     ...orgLines,
@@ -1251,36 +1251,38 @@ function buildRiskPrompt(org: OrganizationRecord, skills: RiskSkill[]): string {
   ].join('\n');
 }
 
-async function callDeepSeek(apiKey: string, prompt: string): Promise<string> {
-  const response = await fetch(DEEPSEEK_ENDPOINT, {
+async function callGroq(apiKey: string, prompt: string): Promise<string> {
+  const response = await fetch(GROQ_ENDPOINT, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
       Authorization: `Bearer ${apiKey}`,
     },
     body: JSON.stringify({
-      model: DEEPSEEK_MODEL,
+      model: GROQ_MODEL,
       messages: [
         {
           role: 'system',
           content:
-            'You are a due-diligence analyst. Use the web search tool to verify current facts. Always finish with the requested JSON object and nothing else.',
+            'You are a due-diligence analyst. Use the browser search tool to verify current facts on the web. Always finish with the requested JSON object and nothing else.',
         },
         { role: 'user', content: prompt },
       ],
-      tools: [{ type: 'deepseek_web_search', name: 'deepseek_web_search' }],
-      thinking: { type: 'disabled' },
-      max_tokens: 4096,
+      tools: [{ type: 'browser_search' }],
+      tool_choice: 'required',
+      temperature: 1,
+      max_completion_tokens: 4096,
+      reasoning_effort: 'low',
       stream: false,
     }),
-    signal: AbortSignal.timeout(120000),
+    signal: AbortSignal.timeout(180000),
   });
 
   if (!response.ok) {
     const detail = await response.text().catch(() => '');
     throw new HttpError(
       502,
-      `DeepSeek API returned ${response.status}${detail ? `: ${detail.slice(0, 200)}` : ''}.`,
+      `Groq API returned ${response.status}${detail ? `: ${detail.slice(0, 200)}` : ''}.`,
     );
   }
 
@@ -1296,7 +1298,7 @@ async function callDeepSeek(apiKey: string, prompt: string): Promise<string> {
   if (!text || choice?.finish_reason === 'content_filter') {
     throw new HttpError(
       502,
-      payload.error?.message || 'DeepSeek returned an empty response.',
+      payload.error?.message || 'Groq returned an empty response.',
     );
   }
   return text;
@@ -1329,8 +1331,8 @@ function parseRiskAnalysis(text: string): { score: number; summary: string } | n
 async function analyzeOrganizationRisk(env: Env, id: string): Promise<Response> {
   assertEntityId(id);
 
-  if (!env.DEEPSEEK_API_KEY) {
-    return json({ error: 'AI risk analysis is not configured (DEEPSEEK_API_KEY is missing).' }, 501);
+  if (!env.GROQ_API_KEY) {
+    return json({ error: 'AI risk analysis is not configured (GROQ_API_KEY is missing).' }, 501);
   }
 
   const orgRow = await env.DB.prepare('SELECT * FROM organizations WHERE id = ?')
@@ -1351,7 +1353,7 @@ async function analyzeOrganizationRisk(env: Env, id: string): Promise<Response> 
   let analysis: { score: number; summary: string };
   try {
     analysis = parseRiskAnalysis(
-      await callDeepSeek(env.DEEPSEEK_API_KEY, buildRiskPrompt(rowToOrganization(orgRow), skills)),
+      await callGroq(env.GROQ_API_KEY, buildRiskPrompt(rowToOrganization(orgRow), skills)),
     ) ?? (() => {
       throw new HttpError(502, 'The AI response could not be parsed. Please try again.');
     })();
