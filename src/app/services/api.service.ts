@@ -471,6 +471,7 @@ export class ApiService {
         OrganizationRecord,
         | 'name'
         | 'acronym'
+        | 'contactEmail'
         | 'riskScore'
         | 'riskNotes'
         | 'adminNotes'

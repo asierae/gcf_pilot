@@ -1025,6 +1025,7 @@ async function updateOrganizationAdmin(
     // but an admin may correct them from the organization editor.
     'name',
     'acronym',
+    'contactEmail',
     'riskScore',
     'riskNotes',
     'adminNotes',

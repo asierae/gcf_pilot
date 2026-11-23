@@ -606,7 +606,6 @@ export class AdminOrganizationEditComponent implements OnInit {
         country: this.form.country.trim(),
         entityType: this.form.entityType,
         contactName: this.form.contactName.trim(),
-        contactEmail: this.form.contactEmail.trim(),
         contactPhone: this.form.contactPhone.trim(),
       };
 
@@ -614,10 +613,11 @@ export class AdminOrganizationEditComponent implements OnInit {
 
       // Admin-only fields use PATCH /api/admin/organizations/:id
       const adminUpdates: Parameters<typeof this.api.updateOrganizationAdmin>[1] = {
-        // Name and acronym are immutable for applicants, but an admin can
+        // Identity fields are immutable for applicants, but an admin can
         // correct them here through the admin endpoint.
         name: this.form.name.trim(),
         acronym: this.form.acronym.trim(),
+        contactEmail: this.form.contactEmail.trim(),
         riskScore: this.form.riskScore,
         riskNotes: this.form.riskNotes.trim(),
         adminNotes: this.form.adminNotes.trim(),
