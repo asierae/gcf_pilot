@@ -21,7 +21,7 @@ export interface OrganizationRecord {
   riskScore: number | null;
   riskNotes: string;
   adminNotes: string;
-  /** Last Gemini risk analysis: score is written to riskScore, summary kept here. */
+  /** Last AI risk analysis: score is written to riskScore, summary kept here. */
   aiRiskSummary: string | null;
   aiRiskAnalyzedAt: string | null;
   accreditationStatus: string;

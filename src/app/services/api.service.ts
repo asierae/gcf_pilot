@@ -543,7 +543,7 @@ export class ApiService {
     );
   }
 
-  /** Synchronous Gemini analysis: writes riskScore + aiRiskSummary on the org. */
+  /** Synchronous AI analysis: writes riskScore, aiRiskSummary and the audit fields. */
   async analyzeOrganizationRisk(id: string): Promise<{
     organization: OrganizationRecord;
     analysis: AiRiskAnalysis;

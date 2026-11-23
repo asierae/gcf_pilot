@@ -195,7 +195,7 @@
           </div>
         </div>
 
-        <!-- AI risk analysis (Gemini + Google Search grounding) -->
+        <!-- AI risk analysis (Groq + web search) -->
         <div class="ao-section ao-section-ai-risk">
           <div class="ao-ai-head">
             <div>
@@ -205,7 +205,7 @@
             <button
               type="button"
               class="ao-ai-button"
-              [disabled]="aiAnalyzing || !organization"
+              [disabled]="aiAnalyzing || saving || !organization"
               (click)="analyzeRisk()"
             >
               @if (aiAnalyzing) {
@@ -318,7 +318,7 @@
           <button type="button" class="btn-cancel-form" (click)="goBack()">
             {{ "ADMIN_ORGANIZATION_EDIT.BACK" | translate }}
           </button>
-          <button type="submit" class="btn-save-form" [disabled]="saving || saveError">
+          <button type="submit" class="btn-save-form" [disabled]="saving || aiAnalyzing">
             @if (saving) {
               <span>{{ "ADMIN_ORGANIZATION_EDIT.SAVING" | translate }}</span>
             } @else {

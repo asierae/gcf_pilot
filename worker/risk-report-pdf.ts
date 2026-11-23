@@ -32,6 +32,8 @@ export interface RiskReportInput {
     summary: string;
     analyzedAt: string | null;
   } | null;
+  /** AI risk score (higher = riskier), when available. */
+  riskScore: number | null;
   generatedAt: string;
 }
 
@@ -92,10 +94,18 @@ function hexColor(value: number): string {
   return '0.984 0.443 0.522';
 }
 
+/** Risk scale: the higher the score, the more severe the colour. */
+function hexColorRisk(value: number): string {
+  if (value >= 75) return '0.984 0.443 0.522';
+  if (value >= 60) return '0.984 0.749 0.235';
+  if (value >= 40) return '0.910 0.753 0.416';
+  return '0.204 0.831 0.600';
+}
+
 export function buildRiskReportPdf(input: RiskReportInput): Uint8Array {
   const width = 595;
   const height = 842;
-  const commands: string[] = [];
+  let commands: string[] = [];
 
   const rect = (
     x: number,
@@ -229,29 +239,45 @@ export function buildRiskReportPdf(input: RiskReportInput): Uint8Array {
   line(48, y, width - 48, y);
 
   // ── Overall score ─────────────────────────────────────
+  const riskScore = input.riskScore;
   y -= 34;
-  text(48, y, 'OVERALL RISK & REPUTATION INDEX', 9, 'F2', MUTED);
+  text(48, y, 'AVERA CAPABILITY INDEX (HIGHER = STRONGER)', 9, 'F2', MUTED);
   text(48, y - 36, String(input.overall), 40, 'F2', hexColor(input.overall));
   text(110, y - 32, '/ 100', 12, 'F1', MUTED);
   textRight(
     width - 48,
     y - 4,
-    `Risk band: ${input.riskBand}`,
+    `Risk exposure: ${input.riskBand}`,
     10,
     'F2',
     hexColor(input.overall),
   );
+  if (riskScore !== null) {
+    textRight(
+      width - 48,
+      y - 22,
+      `AI risk score: ${riskScore} / 100 (higher = riskier)`,
+      9,
+      'F2',
+      hexColorRisk(riskScore),
+    );
+  }
   textRight(
     width - 48,
-    y - 22,
+    y - (riskScore !== null ? 40 : 22),
     `Benchmark (${input.benchmarkSource}): ${input.benchmark}`,
     9,
   );
-  textRight(width - 48, y - 38, `Evidence confidence: ${input.confidence}`, 9);
+  textRight(
+    width - 48,
+    y - (riskScore !== null ? 56 : 38),
+    `Evidence confidence: ${input.confidence}`,
+    9,
+  );
 
   // ── Factor bars ───────────────────────────────────────
-  y -= 86;
-  text(48, y, 'SCORE DRIVERS', 9, 'F2', MUTED);
+  y -= riskScore !== null ? 106 : 86;
+  text(48, y, 'CAPABILITY DRIVERS (HIGHER = STRONGER)', 9, 'F2', MUTED);
   y -= 24;
   const barX = 230;
   const barW = 250;
@@ -270,75 +296,101 @@ export function buildRiskReportPdf(input: RiskReportInput): Uint8Array {
     y -= 24;
   }
 
-  // ── Audit / AI analysis findings ──────────────────────
-  if (input.auditFirm || input.auditDate || input.auditNotes || input.aiAnalysis) {
-    const ai = input.aiAnalysis;
-    y -= 12;
-    line(48, y, width - 48, y);
+  const pages = [commands];
+  const nextPage = () => {
+    commands = [];
+    pages.push(commands);
+    rect(0, height - 65, width, 65, NAVY);
+    logo(48, height - 48, 30);
+    text(92, height - 38, 'AVERA  /  EXTERNAL DUE DILIGENCE', 12, 'F2', '1 1 1');
+    y = height - 104;
+  };
+  const ensureSpace = (amount: number) => { if (y - amount < 70) nextPage(); };
+  const heading = (label: string) => {
+    ensureSpace(65);
+    y -= 10;
+    rect(48, y - 2, 3, 12, GOLD);
+    text(58, y, label, 11, 'F2', NAVY);
     y -= 22;
-    text(
-      48,
-      y,
-      ai ? 'AI RISK ANALYSIS - AVERA AUDIT FINDINGS' : 'AVERA AUDIT FINDINGS',
-      9,
-      'F2',
-      MUTED,
-    );
-    if (ai) {
-      y -= 16;
-      text(48, y, `AI risk score: ${ai.score} / 100 (higher = riskier)`, 9);
-    }
-    if (input.auditFirm) {
-      y -= 16;
-      text(48, y, `Issued by: ${input.auditFirm}`, 9);
-    }
-    if (input.auditDate) {
-      y -= 16;
-      text(48, y, `Audit date: ${input.auditDate.slice(0, 10)}`, 9);
-    }
-    if (input.auditNotes) {
-      y -= 16;
-      const chunks = input.auditNotes.match(/.{1,92}(\s|$)/g) ?? [
-        input.auditNotes,
-      ];
-      for (const chunk of chunks.slice(0, ai ? 10 : 6)) {
-        text(48, y, chunk.trim(), 8, 'F1', MUTED);
-        y -= 12;
+  };
+  const paragraph = (value: string) => {
+    const print = (row: string) => {
+      ensureSpace(15);
+      text(48, y, row, 10);
+      y -= 15;
+    };
+    for (const block of value.trim().split(/\n+/)) {
+      let row = '';
+      for (let word of block.trim().split(/\s+/)) {
+        if (row && textWidth(`${row} ${word}`, 10, false) > width - 100) {
+          print(row);
+          row = '';
+        }
+        while (textWidth(word, 10, false) > width - 100) {
+          let n = 1;
+          while (textWidth(word.slice(0, n + 1), 10, false) <= width - 100) n++;
+          print(word.slice(0, n));
+          word = word.slice(n);
+        }
+        row = row ? `${row} ${word}` : word;
       }
+      if (row) print(row);
+      y -= 7;
     }
+  };
+
+  const ai = input.aiAnalysis;
+  heading('01   Executive assessment');
+  if (ai) {
+    paragraph(`Risk score on file: ${ai.score}/100 (higher indicates greater risk).` +
+      (ai.analyzedAt ? ` Research date: ${ai.analyzedAt.slice(0, 10)}.` : ''));
+    paragraph(ai.summary);
+  } else {
+    paragraph('No AI research analysis is on file. The index reflects available submission data and any published audit overrides.');
+  }
+  nextPage();
+  heading('02   Scope and methodology');
+  paragraph('The capability index weighs governance (24%), financial management (24%), delivery (20%), climate alignment (17%) and transparency (15%). Higher scores indicate stronger demonstrated capacity. Evidence confidence measures support for the assessment.');
+  if (ai) paragraph('This AI-assisted external desk review examines public information. It does not authenticate original records. Gaps in public evidence require follow-up and are not proof of misconduct.');
+  heading('03   Findings and follow-up');
+  if (input.auditFirm) paragraph(`Prepared by: ${input.auditFirm}`);
+  if (input.auditDate) paragraph(`Assessment date: ${input.auditDate.slice(0, 10)}`);
+  paragraph(input.auditNotes && input.auditNotes !== ai?.summary ? input.auditNotes :
+    ai ? 'See the executive assessment. No separate detailed findings are on file.' : 'No published audit findings are on file.');
+
+  heading('04   Declaration');
+  paragraph('This report was prepared by Avera Capital Access for accreditation screening and risk monitoring. It is an AI-assisted desk review of publicly available information, not a statutory audit, and it does not replace on-site verification or the review of original documents.');
+  paragraph('Evidence gaps listed above are requests for further information and must not be read as adverse findings. The assessment reflects information available on the issue date and may change as new evidence is reviewed.');
+  ensureSpace(96);
+  y -= 16;
+  line(48, y, 250, y);
+  y -= 14;
+  text(48, y, 'Authorised signature', 8, 'F1', MUTED);
+  y -= 14;
+  text(48, y, 'Avera Capital Access', 11, 'F2', NAVY);
+  if (input.auditDate) {
+    y -= 13;
+    text(48, y, `Issued ${input.auditDate.slice(0, 10)}`, 8, 'F1', MUTED);
   }
 
-  // ── Signature + footer ────────────────────────────────
-  const footerY = 96;
-  line(48, footerY + 34, width - 48, footerY + 34);
-  text(48, footerY + 16, 'Authorised signature', 8, 'F1', MUTED);
-  text(48, footerY - 4, 'Avera Capital Access', 12, 'F2', NAVY);
-  textRight(
-    width - 48,
-    footerY + 16,
-    `Generated ${input.generatedAt.slice(0, 10)}`,
-    8,
-    'F1',
-    MUTED,
-  );
-  textRight(
-    width - 48,
-    footerY - 4,
-    'This report is computed from submitted data and Avera research.',
-    7,
-    'F1',
-    MUTED,
-  );
-
-  const content = commands.join('\n');
+  const kids = pages.map((_, i) => `${5 + 2 * i} 0 R`);
   const objects: string[] = [
     '<< /Type /Catalog /Pages 2 0 R >>',
-    '<< /Type /Pages /Kids [3 0 R] /Count 1 >>',
-    `<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${width} ${height}] /Resources << /Font << /F1 5 0 R /F2 6 0 R >> >> /Contents 4 0 R >>`,
-    `<< /Length ${encoder.encode(content).length} >>\nstream\n${content}\nendstream`,
+    `<< /Type /Pages /Kids [${kids.join(' ')}] /Count ${pages.length} >>`,
     '<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>',
     '<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>',
   ];
+  pages.forEach((page, i) => {
+    commands = page;
+    line(48, 49, width - 48, 49);
+    text(48, 32, `Avera Capital Access  |  Issued ${input.generatedAt.slice(0, 10)}`, 8, 'F1', MUTED);
+    textRight(width - 48, 32, `${i + 1} / ${pages.length}`, 8, 'F2', MUTED);
+    const content = commands.join('\n');
+    objects.push(
+      `<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${width} ${height}] /Resources << /Font << /F1 3 0 R /F2 4 0 R >> >> /Contents ${6 + 2 * i} 0 R >>`,
+      `<< /Length ${encoder.encode(content).length} >>\nstream\n${content}\nendstream`,
+    );
+  });
 
   let pdf = '%PDF-1.4\n';
   const offsets: number[] = [];

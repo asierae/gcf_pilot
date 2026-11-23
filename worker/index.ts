@@ -1233,23 +1233,28 @@ function buildRiskPrompt(org: OrganizationRecord, skills: RiskSkill[]): string {
 
   return [
     'You are a due-diligence analyst preparing a reputational risk profile for a client applying to the Green Climate Fund.',
-    'Use the browser search tool to research the organization on the web for EVERY skill below. Do not rely only on your training data: look for current evidence and cite your reasoning in the summary. If a check finds nothing, say so explicitly.',
+    'Use the browser search tool for real research. Run several searches: first identify the legal entity, then research each mandatory dimension and every additional check. Do not rely on your training data. Look for current evidence and name the source (publisher and URL) in each finding. If a check finds nothing, say so explicitly.',
     '',
     'ORGANIZATION',
     ...orgLines,
     '',
-    'SKILLS TO INVESTIGATE (apply all of them)',
-    skillLines,
+    'MANDATORY EXTERNAL DESK REVIEW, independent of any additional skills:',
+    'First match the legal entity by name, country and registration. Do not attribute evidence from namesakes. Prefer official registers, regulators, audited accounts, funders and independent reporting.',
+    'Governance: registration, directors, oversight, sanctions and adverse findings. Financial: published accounts, independent audits and controls. Delivery: independently documented projects, partners and results. Climate: mandate, climate projects and safeguards. Transparency: public disclosures, accountability and evidence quality.',
+    'For each dimension provide a finding, identify the source by name and URL when available, and distinguish verified facts from allegations and gaps. Where evidence is unavailable say what could not be verified; do not infer misconduct. In this case score demonstrated capability, not presumed wrongdoing, and reduce confidence. Never invent citations.',
+    'ADDITIONAL CONFIGURED CHECKS (apply all if present)',
+    skillLines || 'None configured.',
     '',
     'SCORING RULES',
     'score is an integer from 0 to 100 where 0 means no identifiable risk and 100 means critical risk. Higher means riskier.',
     'Verified negative findings (scandals, fraud, missing legal registration, suspicious or placeholder web presence) must substantially increase the score. Verified positive findings and a transparent, active institutional presence reduce it.',
-    'summary is a plain-text paragraph of 3 to 6 sentences in English describing the most important findings per skill, the evidence you found and the reasons for the score. Be concise and factual; do not use markdown.',
+    'summary is a plain-text executive summary of 4 to 7 sentences in English covering the entity identification, the most important findings, the evidence behind them and the reasons for the score. Be concise and factual; do not use markdown.',
     'factors are Avera capability scores from 0 to 100 where 100 means strong and low risk: governance, financial, delivery, climate and transparency. They are the reverse of the risk score.',
+    'findings is one short paragraph per factor: what you verified, the source and what remains unverified.',
     'confidence is an integer from 0 to 100 stating how much verifiable evidence you found.',
     '',
     'Respond with ONLY a JSON object in this exact shape:',
-    '{"score": <integer 0-100>, "summary": "<plain text summary>", "factors": {"governance": <0-100>, "financial": <0-100>, "delivery": <0-100>, "climate": <0-100>, "transparency": <0-100>}, "confidence": <integer 0-100>}',
+    '{"score": 0, "summary": "...", "factors": {"governance": 0, "financial": 0, "delivery": 0, "climate": 0, "transparency": 0}, "confidence": 0, "findings": {"governance": "...", "financial": "...", "delivery": "...", "climate": "...", "transparency": "..."}, "followUp": "Specific documents to request or next verification steps."} Replace every example value with the actual assessment.',
   ].join('\n');
 }
 
@@ -1273,7 +1278,7 @@ async function callGroq(apiKey: string, prompt: string): Promise<string> {
       tools: [{ type: 'browser_search' }],
       tool_choice: 'required',
       temperature: 1,
-      max_completion_tokens: 4096,
+      max_completion_tokens: 6144,
       reasoning_effort: 'low',
       stream: false,
     }),
@@ -1307,6 +1312,7 @@ async function callGroq(apiKey: string, prompt: string): Promise<string> {
 }
 
 interface ParsedRiskAnalysis {
+  notes: string;
   score: number;
   summary: string;
   factors: Record<'governance' | 'financial' | 'delivery' | 'climate' | 'transparency', number>;
@@ -1328,44 +1334,43 @@ function parseRiskAnalysis(text: string): ParsedRiskAnalysis | null {
   }
   if (!parsed || typeof parsed !== 'object') return null;
 
-  const clamp = (value: unknown, fallback: number): number => {
-    const num = typeof value === 'number' ? value : Number(value);
-    return Number.isFinite(num)
-      ? Math.max(0, Math.min(100, Math.round(num)))
-      : fallback;
-  };
+  const validScore = (value: unknown): value is number =>
+    typeof value === 'number' && Number.isInteger(value) && value >= 0 && value <= 100;
 
   const obj = parsed as Record<string, unknown>;
-  const rawScore = Number(obj.score);
+  const score = obj.score;
   const summary = typeof obj.summary === 'string' ? obj.summary.trim() : '';
-  if (!Number.isFinite(rawScore) || !summary) return null;
+  if (!validScore(score) || !validScore(obj.confidence) || !summary) return null;
 
-  const score = clamp(rawScore, 50);
   const factorInput =
     obj.factors && typeof obj.factors === 'object'
       ? (obj.factors as Record<string, unknown>)
       : {};
-  const factorFallback = 100 - score;
-  const factors = {
-    governance: clamp(factorInput.governance, factorFallback),
-    financial: clamp(factorInput.financial, factorFallback),
-    delivery: clamp(factorInput.delivery, factorFallback),
-    climate: clamp(factorInput.climate, factorFallback),
-    transparency: clamp(factorInput.transparency, factorFallback),
-  };
-
-  // The admin risk score uses "higher = riskier"; the dashboard audit scores
-  // use "higher = better", so the benchmark is the reverse of the risk score.
-  const riskBand: ParsedRiskAnalysis['riskBand'] =
-    score >= 75 ? 'high' : score >= 60 ? 'elevated' : score >= 40 ? 'moderate' : 'low';
+  const factors = {} as ParsedRiskAnalysis['factors'];
+  const findings = dashboardRecord(obj.findings);
+  const notes: string[] = [];
+  let capability = 0;
+  for (const key of ['governance', 'financial', 'delivery', 'climate', 'transparency'] as const) {
+    const value = factorInput[key];
+    const finding = findings[key];
+    if (!validScore(value) || typeof finding !== 'string' || !finding.trim()) return null;
+    factors[key] = value;
+    capability += value * RISK_FACTOR_WEIGHTS[key];
+    notes.push(`${RISK_FACTOR_LABELS[key]}: ${finding.trim()}`);
+  }
+  if (typeof obj.followUp !== 'string' || !obj.followUp.trim()) return null;
+  notes.push(`Recommended follow-up: ${obj.followUp.trim()}`);
 
   return {
     score,
     summary: summary.slice(0, 6000),
     factors,
-    confidence: clamp(obj.confidence, 70),
-    benchmark: 100 - score,
-    riskBand,
+    notes: notes.join('\n\n'),
+    confidence: obj.confidence,
+    benchmark: DJSI_REFERENCE,
+    // The published band follows the same capability index the dashboard
+    // computes, so the gauge and the band can never contradict each other.
+    riskBand: dashboardRiskBand(capability),
   };
 }
 
@@ -1387,9 +1392,6 @@ async function analyzeOrganizationRisk(env: Env, id: string): Promise<Response> 
       ORDER BY sort_order ASC, created_at ASC`,
   ).all<RiskSkillRow>();
   const skills = (skillRows.results ?? []).map(riskSkillFromRow);
-  if (!skills.length) {
-    return json({ error: 'Add at least one risk skill before running the analysis.' }, 400);
-  }
 
   let analysis: ParsedRiskAnalysis;
   try {
@@ -1418,6 +1420,7 @@ async function analyzeOrganizationRisk(env: Env, id: string): Promise<Response> 
             audit_climate = ?, audit_transparency = ?, audit_benchmark = ?,
             audit_confidence = ?, audit_risk_band = ?,
             audit_firm = ?, audit_date = ?, audit_notes = ?, audit_updated_at = ?,
+            audit_report_url = COALESCE(NULLIF(audit_report_url, ''), ?),
             updated_at = ?
       WHERE id = ?`,
   )
@@ -1433,10 +1436,11 @@ async function analyzeOrganizationRisk(env: Env, id: string): Promise<Response> 
       analysis.benchmark,
       analysis.confidence,
       analysis.riskBand,
-      'AI Risk Analysis (Groq browser search)',
+      'Avera Capital Access | AI-assisted desk review',
+      now.slice(0, 10),
+      analysis.notes,
       now,
-      analysis.summary,
-      now,
+      `${siteUrl(env)}/api/organizations/${encodeURIComponent(id)}/risk-report.pdf`,
       now,
       id,
     )
@@ -2726,6 +2730,15 @@ const RISK_FACTOR_LABELS: Record<string, string> = {
   transparency: 'Transparency & evidence',
 };
 
+/** Same weights the applicant dashboard applies to the capability factors. */
+const RISK_FACTOR_WEIGHTS: Record<keyof ParsedRiskAnalysis['factors'], number> = {
+  governance: 0.24,
+  financial: 0.24,
+  delivery: 0.2,
+  climate: 0.17,
+  transparency: 0.15,
+};
+
 /** Signed-by-brand PDF report: same data as the applicant dashboard. */
 async function organizationRiskReport(
   env: Env,
@@ -2769,6 +2782,9 @@ async function organizationRiskReport(
             ? String((risk.aiAnalysis as JsonObject).analyzedAt)
             : null,
         }
+      : null,
+    riskScore: risk.aiAnalysis
+      ? Number((risk.aiAnalysis as JsonObject).score) || 0
       : null,
     generatedAt: String(payload.generatedAt ?? new Date().toISOString()),
   };

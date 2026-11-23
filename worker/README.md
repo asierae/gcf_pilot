@@ -306,7 +306,10 @@ organization's profile.
 - `POST /api/admin/organizations/:id/analyze-risk` → `{ organization, analysis }`.
   Overwrites `risk_score` (0–100, higher = riskier) and stores `ai_risk_summary`
   and `ai_risk_analyzed_at` on the organization. Returns 501 without
-  `GROQ_API_KEY` and 400 when no skill has been configured yet.
+  `GROQ_API_KEY`. The five audit dimensions are mandatory even without custom
+  skills. A successful run also publishes factor scores, evidence confidence,
+  findings and follow-up in the Avera audit. The PDF includes the saved executive
+  assessment, methodology and published findings; it does not rerun research.
 
 ## Portal accounts
 

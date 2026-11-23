@@ -559,9 +559,9 @@ export class AdminOrganizationEditComponent implements OnInit {
     };
   }
 
-  /** Runs Gemini with the current global skills and stores score + summary. */
+  /** Runs the AI desk review and stores the score, summary and audit fields. */
   async analyzeRisk(): Promise<void> {
-    if (this.aiAnalyzing || !this.organization) return;
+    if (this.aiAnalyzing || this.saving || !this.organization) return;
     this.aiAnalyzing = true;
     try {
       const { organization, analysis } = await this.api.analyzeOrganizationRisk(
@@ -569,6 +569,7 @@ export class AdminOrganizationEditComponent implements OnInit {
       );
       this.organization = organization;
       this.form.riskScore = organization.riskScore;
+      Object.assign(this.form, this.auditFormFromOrg(organization));
       this.notification.success(
         this.translate.instant("ADMIN_ORGANIZATION_EDIT.AI_ANALYZED", {
           score: analysis.score,
@@ -592,7 +593,7 @@ export class AdminOrganizationEditComponent implements OnInit {
   }
 
   async save(): Promise<void> {
-    if (this.saving) return;
+    if (this.saving || this.aiAnalyzing) return;
 
     this.saving = true;
     this.saveError = "";
