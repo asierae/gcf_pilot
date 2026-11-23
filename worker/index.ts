@@ -1021,6 +1021,10 @@ async function updateOrganizationAdmin(
   const body = await readJson<JsonObject>(request);
 
   const allowedFields = [
+    // Identity fields are immutable for applicants (PUT /api/organizations/:id)
+    // but an admin may correct them from the organization editor.
+    'name',
+    'acronym',
     'riskScore',
     'riskNotes',
     'adminNotes',
@@ -1074,6 +1078,23 @@ async function updateOrganizationAdmin(
 
   if (updates.length === 0) {
     return json({ error: 'No valid fields provided.' }, 400);
+  }
+
+  // Keep the normalized acronym in sync with the editable value and reject
+  // duplicates, exactly like the creation path does.
+  if (body.acronym !== undefined) {
+    const acronym = typeof body.acronym === 'string' ? body.acronym.trim() : '';
+    if (!acronym) {
+      return json({ error: 'Organization acronym is required.' }, 400);
+    }
+    if (await findAcronymOwner(env, acronym, id)) {
+      return json(
+        { error: `The acronym "${acronym}" is already registered.` },
+        409,
+      );
+    }
+    updates.push('acronym_norm = ?');
+    values.push(normalizeAcronym(acronym));
   }
 
   if (auditChanged) {

@@ -600,8 +600,6 @@ export class AdminOrganizationEditComponent implements OnInit {
     try {
       // Basic fields use PUT /api/organizations/:id
       const basicUpdates: Partial<OrganizationRecord> = {
-        name: this.form.name.trim(),
-        acronym: this.form.acronym.trim(),
         legalAddress: this.form.legalAddress.trim(),
         operationalAddress: this.form.operationalAddress.trim(),
         website: this.form.website.trim(),
@@ -616,6 +614,10 @@ export class AdminOrganizationEditComponent implements OnInit {
 
       // Admin-only fields use PATCH /api/admin/organizations/:id
       const adminUpdates: Parameters<typeof this.api.updateOrganizationAdmin>[1] = {
+        // Name and acronym are immutable for applicants, but an admin can
+        // correct them here through the admin endpoint.
+        name: this.form.name.trim(),
+        acronym: this.form.acronym.trim(),
         riskScore: this.form.riskScore,
         riskNotes: this.form.riskNotes.trim(),
         adminNotes: this.form.adminNotes.trim(),

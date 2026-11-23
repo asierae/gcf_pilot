@@ -469,6 +469,8 @@ export class ApiService {
     updates: Partial<
       Pick<
         OrganizationRecord,
+        | 'name'
+        | 'acronym'
         | 'riskScore'
         | 'riskNotes'
         | 'adminNotes'
