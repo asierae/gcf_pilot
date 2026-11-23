@@ -240,9 +240,20 @@ export function buildRiskReportPdf(input: RiskReportInput): Uint8Array {
 
   // ── Overall score ─────────────────────────────────────
   const riskScore = input.riskScore;
+  const headline = riskScore !== null ? riskScore : input.overall;
+  const headlineColor = riskScore !== null ? hexColorRisk(riskScore) : hexColor(input.overall);
   y -= 34;
-  text(48, y, 'AVERA CAPABILITY INDEX (HIGHER = STRONGER)', 9, 'F2', MUTED);
-  text(48, y - 36, String(input.overall), 40, 'F2', hexColor(input.overall));
+  text(
+    48,
+    y,
+    riskScore !== null
+      ? 'OVERALL RISK SCORE (HIGHER = RISKIER)'
+      : 'AVERA CAPABILITY INDEX (HIGHER = STRONGER)',
+    9,
+    'F2',
+    MUTED,
+  );
+  text(48, y - 36, String(headline), 40, 'F2', headlineColor);
   text(110, y - 32, '/ 100', 12, 'F1', MUTED);
   textRight(
     width - 48,
@@ -250,16 +261,14 @@ export function buildRiskReportPdf(input: RiskReportInput): Uint8Array {
     `Risk exposure: ${input.riskBand}`,
     10,
     'F2',
-    hexColor(input.overall),
+    headlineColor,
   );
   if (riskScore !== null) {
     textRight(
       width - 48,
       y - 22,
-      `AI risk score: ${riskScore} / 100 (higher = riskier)`,
+      `Avera capability index: ${input.overall} / 100 (higher = stronger)`,
       9,
-      'F2',
-      hexColorRisk(riskScore),
     );
   }
   textRight(
@@ -342,7 +351,7 @@ export function buildRiskReportPdf(input: RiskReportInput): Uint8Array {
   const ai = input.aiAnalysis;
   heading('01   Executive assessment');
   if (ai) {
-    paragraph(`Risk score on file: ${ai.score}/100 (higher indicates greater risk).` +
+    paragraph(`Overall risk score: ${ai.score}/100 (higher = riskier).` +
       (ai.analyzedAt ? ` Research date: ${ai.analyzedAt.slice(0, 10)}.` : ''));
     paragraph(ai.summary);
   } else {
