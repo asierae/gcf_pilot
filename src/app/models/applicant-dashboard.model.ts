@@ -24,6 +24,13 @@ export interface ApplicantAuditSummary {
   updatedAt: string | null;
 }
 
+/** AI-generated risk analysis, also published as the Avera audit scores. */
+export interface ApplicantAiRiskAnalysis {
+  score: number;
+  summary: string;
+  analyzedAt: string | null;
+}
+
 export interface ApplicantRisk {
   overall: number;
   benchmark: number;
@@ -34,6 +41,7 @@ export interface ApplicantRisk {
   /** 'computed' from submitted data, or 'avera-audit' when Avera published scores. */
   source: 'computed' | 'avera-audit';
   auditedFactors: string[];
+  aiAnalysis: ApplicantAiRiskAnalysis | null;
   audit: ApplicantAuditSummary | null;
 }
 

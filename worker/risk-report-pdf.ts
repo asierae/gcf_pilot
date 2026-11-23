@@ -26,6 +26,12 @@ export interface RiskReportInput {
   auditFirm: string;
   auditDate: string | null;
   auditNotes: string;
+  /** Present when the audit was produced by the AI risk analysis. */
+  aiAnalysis: {
+    score: number;
+    summary: string;
+    analyzedAt: string | null;
+  } | null;
   generatedAt: string;
 }
 
@@ -68,6 +74,11 @@ const LINE = '0.878 0.902 0.929';
 
 function escapeText(value: string): string {
   return value
+    .replace(/[\u2018\u2019\u201A\u201B]/g, "'")
+    .replace(/[\u201C\u201D\u201E\u201F]/g, '"')
+    .replace(/[\u2010-\u2015\u2212]/g, '-')
+    .replace(/[\u2026]/g, '...')
+    .replace(/\u00A0/g, ' ')
     .replace(/[^\x20-\x7E]/g, '?')
     .replace(/\\/g, '\\\\')
     .replace(/\(/g, '\\(')
@@ -259,12 +270,24 @@ export function buildRiskReportPdf(input: RiskReportInput): Uint8Array {
     y -= 24;
   }
 
-  // ── Audit findings ────────────────────────────────────
-  if (input.auditFirm || input.auditDate || input.auditNotes) {
+  // ── Audit / AI analysis findings ──────────────────────
+  if (input.auditFirm || input.auditDate || input.auditNotes || input.aiAnalysis) {
+    const ai = input.aiAnalysis;
     y -= 12;
     line(48, y, width - 48, y);
     y -= 22;
-    text(48, y, 'AVERA AUDIT FINDINGS', 9, 'F2', MUTED);
+    text(
+      48,
+      y,
+      ai ? 'AI RISK ANALYSIS - AVERA AUDIT FINDINGS' : 'AVERA AUDIT FINDINGS',
+      9,
+      'F2',
+      MUTED,
+    );
+    if (ai) {
+      y -= 16;
+      text(48, y, `AI risk score: ${ai.score} / 100 (higher = riskier)`, 9);
+    }
     if (input.auditFirm) {
       y -= 16;
       text(48, y, `Issued by: ${input.auditFirm}`, 9);
@@ -278,7 +301,7 @@ export function buildRiskReportPdf(input: RiskReportInput): Uint8Array {
       const chunks = input.auditNotes.match(/.{1,92}(\s|$)/g) ?? [
         input.auditNotes,
       ];
-      for (const chunk of chunks.slice(0, 6)) {
+      for (const chunk of chunks.slice(0, ai ? 10 : 6)) {
         text(48, y, chunk.trim(), 8, 'F1', MUTED);
         y -= 12;
       }

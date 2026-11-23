@@ -1245,9 +1245,11 @@ function buildRiskPrompt(org: OrganizationRecord, skills: RiskSkill[]): string {
     'score is an integer from 0 to 100 where 0 means no identifiable risk and 100 means critical risk. Higher means riskier.',
     'Verified negative findings (scandals, fraud, missing legal registration, suspicious or placeholder web presence) must substantially increase the score. Verified positive findings and a transparent, active institutional presence reduce it.',
     'summary is a plain-text paragraph of 3 to 6 sentences in English describing the most important findings per skill, the evidence you found and the reasons for the score. Be concise and factual; do not use markdown.',
+    'factors are Avera capability scores from 0 to 100 where 100 means strong and low risk: governance, financial, delivery, climate and transparency. They are the reverse of the risk score.',
+    'confidence is an integer from 0 to 100 stating how much verifiable evidence you found.',
     '',
     'Respond with ONLY a JSON object in this exact shape:',
-    '{"score": <integer 0-100>, "summary": "<plain text summary>"}',
+    '{"score": <integer 0-100>, "summary": "<plain text summary>", "factors": {"governance": <0-100>, "financial": <0-100>, "delivery": <0-100>, "climate": <0-100>, "transparency": <0-100>}, "confidence": <integer 0-100>}',
   ].join('\n');
 }
 
@@ -1304,7 +1306,16 @@ async function callGroq(apiKey: string, prompt: string): Promise<string> {
   return text;
 }
 
-function parseRiskAnalysis(text: string): { score: number; summary: string } | null {
+interface ParsedRiskAnalysis {
+  score: number;
+  summary: string;
+  factors: Record<'governance' | 'financial' | 'delivery' | 'climate' | 'transparency', number>;
+  confidence: number;
+  benchmark: number;
+  riskBand: 'low' | 'moderate' | 'elevated' | 'high';
+}
+
+function parseRiskAnalysis(text: string): ParsedRiskAnalysis | null {
   const start = text.indexOf('{');
   const end = text.lastIndexOf('}');
   if (start === -1 || end <= start) return null;
@@ -1317,14 +1328,44 @@ function parseRiskAnalysis(text: string): { score: number; summary: string } | n
   }
   if (!parsed || typeof parsed !== 'object') return null;
 
+  const clamp = (value: unknown, fallback: number): number => {
+    const num = typeof value === 'number' ? value : Number(value);
+    return Number.isFinite(num)
+      ? Math.max(0, Math.min(100, Math.round(num)))
+      : fallback;
+  };
+
   const obj = parsed as Record<string, unknown>;
-  const rawScore = typeof obj.score === 'number' ? obj.score : Number(obj.score);
+  const rawScore = Number(obj.score);
   const summary = typeof obj.summary === 'string' ? obj.summary.trim() : '';
   if (!Number.isFinite(rawScore) || !summary) return null;
 
+  const score = clamp(rawScore, 50);
+  const factorInput =
+    obj.factors && typeof obj.factors === 'object'
+      ? (obj.factors as Record<string, unknown>)
+      : {};
+  const factorFallback = 100 - score;
+  const factors = {
+    governance: clamp(factorInput.governance, factorFallback),
+    financial: clamp(factorInput.financial, factorFallback),
+    delivery: clamp(factorInput.delivery, factorFallback),
+    climate: clamp(factorInput.climate, factorFallback),
+    transparency: clamp(factorInput.transparency, factorFallback),
+  };
+
+  // The admin risk score uses "higher = riskier"; the dashboard audit scores
+  // use "higher = better", so the benchmark is the reverse of the risk score.
+  const riskBand: ParsedRiskAnalysis['riskBand'] =
+    score >= 75 ? 'high' : score >= 60 ? 'elevated' : score >= 40 ? 'moderate' : 'low';
+
   return {
-    score: Math.max(0, Math.min(100, Math.round(rawScore))),
+    score,
     summary: summary.slice(0, 6000),
+    factors,
+    confidence: clamp(obj.confidence, 70),
+    benchmark: 100 - score,
+    riskBand,
   };
 }
 
@@ -1350,7 +1391,7 @@ async function analyzeOrganizationRisk(env: Env, id: string): Promise<Response> 
     return json({ error: 'Add at least one risk skill before running the analysis.' }, 400);
   }
 
-  let analysis: { score: number; summary: string };
+  let analysis: ParsedRiskAnalysis;
   try {
     analysis = parseRiskAnalysis(
       await callGroq(env.GROQ_API_KEY, buildRiskPrompt(rowToOrganization(orgRow), skills)),
@@ -1366,12 +1407,39 @@ async function analyzeOrganizationRisk(env: Env, id: string): Promise<Response> 
   }
 
   const now = new Date().toISOString();
+  // The analysis also becomes the Avera audit: factor scores are capability
+  // scores (higher = better) while risk_score keeps the "higher = riskier"
+  // scale used by the admin table.
   await env.DB.prepare(
     `UPDATE organizations
-        SET risk_score = ?, ai_risk_summary = ?, ai_risk_analyzed_at = ?, updated_at = ?
+        SET risk_score = ?, ai_risk_summary = ?, ai_risk_analyzed_at = ?,
+            audit_enabled = 1,
+            audit_governance = ?, audit_financial = ?, audit_delivery = ?,
+            audit_climate = ?, audit_transparency = ?, audit_benchmark = ?,
+            audit_confidence = ?, audit_risk_band = ?,
+            audit_firm = ?, audit_date = ?, audit_notes = ?, audit_updated_at = ?,
+            updated_at = ?
       WHERE id = ?`,
   )
-    .bind(analysis.score, analysis.summary, now, now, id)
+    .bind(
+      analysis.score,
+      analysis.summary,
+      now,
+      analysis.factors.governance,
+      analysis.factors.financial,
+      analysis.factors.delivery,
+      analysis.factors.climate,
+      analysis.factors.transparency,
+      analysis.benchmark,
+      analysis.confidence,
+      analysis.riskBand,
+      'AI Risk Analysis (Groq browser search)',
+      now,
+      analysis.summary,
+      now,
+      now,
+      id,
+    )
     .run();
 
   const updated = await env.DB.prepare('SELECT * FROM organizations WHERE id = ?')
@@ -2576,6 +2644,13 @@ async function buildOrganizationDashboard(
       factors,
       source: riskSource,
       auditedFactors,
+      aiAnalysis: orgRow?.ai_risk_summary
+        ? {
+            score: orgRow.risk_score,
+            summary: orgRow.ai_risk_summary,
+            analyzedAt: orgRow.ai_risk_analyzed_at,
+          }
+        : null,
       audit: auditActive && orgRow
         ? {
             firm: orgRow.audit_firm ?? '',
@@ -2686,6 +2761,15 @@ async function organizationRiskReport(
     auditFirm: String(audit?.firm ?? ''),
     auditDate: audit?.date ? String(audit.date) : null,
     auditNotes: String(audit?.notes ?? ''),
+    aiAnalysis: risk.aiAnalysis
+      ? {
+          score: Number((risk.aiAnalysis as JsonObject).score) || 0,
+          summary: String((risk.aiAnalysis as JsonObject).summary ?? ''),
+          analyzedAt: (risk.aiAnalysis as JsonObject).analyzedAt
+            ? String((risk.aiAnalysis as JsonObject).analyzedAt)
+            : null,
+        }
+      : null,
     generatedAt: String(payload.generatedAt ?? new Date().toISOString()),
   };
 
