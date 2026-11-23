@@ -1000,7 +1000,7 @@
     "LOAD_ERROR": "Could not load organizations. Please try again.",
     "LOADING": "Loading organizations...",
     "SKILLS_TITLE": "AI Risk Analysis Skills",
-    "SKILLS_HINT": "Gemini uses these checks when analysing an organization’s risk profile. Edit the list at any time; the next analysis uses the skills saved here at that moment.",
+    "SKILLS_HINT": "The AI uses these checks when analysing an organization’s risk profile. Edit the list at any time; the next analysis uses the skills saved here at that moment.",
     "SKILLS_EMPTY": "No skills yet. Add the first one to enable AI risk analysis.",
     "SKILL_ADD": "Add skill",
     "SKILL_TITLE": "Title",
@@ -1020,11 +1020,12 @@
     "RISK_SCORE_SAVED": "Risk score saved.",
     "AI_ANALYZE": "AI Analyze",
     "AI_ANALYZING": "Analyzing…",
-    "AI_ANALYZE_HINT": "Run Gemini with Google Search using the current skills",
+    "AI_ANALYZE_HINT": "Research the organization on the web using the current skills",
     "AI_ANALYZED": "AI risk analysis completed. Score: {{score}}.",
     "SKILLS_BUTTON": "AI Skills",
     "SKILLS_EYEBROW": "Analysis configuration",
-    "SKILL_CLOSE": "Close"
+    "SKILL_CLOSE": "Close",
+    "AI_RISK_HELP": "The AI researches the organization on the web using the skills saved on the organizations screen. The analysis overwrites the risk score and stores the summary here."
   },
   "ADMIN_ORGANIZATION_EDIT": {
     "TITLE": "Edit organization",
@@ -1135,7 +1136,7 @@
     "CANCEL": "Cancel",
     "DELETING": "Deleting...",
     "AI_RISK_TITLE": "AI Risk Analysis",
-    "AI_RISK_HELP": "Gemini researches the organization on the web using the skills saved on the organizations screen. The analysis overwrites the risk score and stores the summary here.",
+    "AI_RISK_HELP": "The AI researches the organization on the web using the skills saved on the organizations screen. The analysis overwrites the risk score and stores the summary here.",
     "AI_RISK_EMPTY": "No summary yet. Click “AI Analyze” to generate one.",
     "AI_ANALYZE": "AI Analyze",
     "AI_ANALYZING": "Analyzing…",

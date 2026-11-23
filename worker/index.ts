@@ -41,8 +41,8 @@ interface Env {
   CORS_ORIGINS?: string;
   /** Resend API key. When missing, emails fall back to Gmail compose in the UI. */
   RESEND_API_KEY?: string;
-  /** Google Gemini API key used by the admin AI risk analysis. */
-  GEMINI_API_KEY?: string;
+  /** DeepSeek API key used by the admin AI risk analysis (with web search). */
+  DEEPSEEK_API_KEY?: string;
   /** Public contact inbox (defaults to contact@averacapitalaccess.com). */
   CONTACT_EMAIL?: string;
   /** Sender for automatic emails (defaults to noreply@averacapitalaccess.com). */
@@ -293,7 +293,7 @@ interface OrganizationRecord {
   riskScore: number | null;
   riskNotes: string;
   adminNotes: string;
-  /** Descriptive summary produced by the last Gemini risk analysis. */
+  /** Descriptive summary produced by the last AI risk analysis. */
   aiRiskSummary: string | null;
   aiRiskAnalyzedAt: string | null;
   accreditationStatus: string;
@@ -1121,7 +1121,7 @@ async function updateOrganizationAdmin(
 }
 
 /* ------------------------------------------------------------------ *
- * AI risk analysis — global skills + Gemini (Google Search grounding)
+ * AI risk analysis — global skills + DeepSeek web search
  * ------------------------------------------------------------------ */
 
 function riskSkillFromRow(row: RiskSkillRow): RiskSkill {
@@ -1213,9 +1213,8 @@ async function deleteRiskSkill(env: Env, id: string): Promise<Response> {
   return json({ ok: true });
 }
 
-const GEMINI_MODEL = 'gemini-2.5-flash';
-const GEMINI_ENDPOINT =
-  `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`;
+const DEEPSEEK_ENDPOINT = 'https://api.deepseek.com/chat/completions';
+const DEEPSEEK_MODEL = 'deepseek-flash';
 
 function buildRiskPrompt(org: OrganizationRecord, skills: RiskSkill[]): string {
   const orgLines = [
@@ -1234,7 +1233,7 @@ function buildRiskPrompt(org: OrganizationRecord, skills: RiskSkill[]): string {
 
   return [
     'You are a due-diligence analyst preparing a reputational risk profile for a client applying to the Green Climate Fund.',
-    'Use Google Search to research the organization on the web for EVERY skill below. Do not rely only on your training data: look for current evidence and cite your reasoning in the summary. If a check finds nothing, say so explicitly.',
+    'Use the web search tool to research the organization on the web for EVERY skill below. Do not rely only on your training data: look for current evidence and cite your reasoning in the summary. If a check finds nothing, say so explicitly.',
     '',
     'ORGANIZATION',
     ...orgLines,
@@ -1252,39 +1251,53 @@ function buildRiskPrompt(org: OrganizationRecord, skills: RiskSkill[]): string {
   ].join('\n');
 }
 
-async function callGemini(apiKey: string, prompt: string): Promise<string> {
-  const response = await fetch(GEMINI_ENDPOINT, {
+async function callDeepSeek(apiKey: string, prompt: string): Promise<string> {
+  const response = await fetch(DEEPSEEK_ENDPOINT, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'x-goog-api-key': apiKey,
+      Authorization: `Bearer ${apiKey}`,
     },
     body: JSON.stringify({
-      contents: [{ parts: [{ text: prompt }] }],
-      tools: [{ google_search: {} }],
-      generationConfig: { temperature: 0.2, maxOutputTokens: 4096 },
+      model: DEEPSEEK_MODEL,
+      messages: [
+        {
+          role: 'system',
+          content:
+            'You are a due-diligence analyst. Use the web search tool to verify current facts. Always finish with the requested JSON object and nothing else.',
+        },
+        { role: 'user', content: prompt },
+      ],
+      tools: [{ type: 'deepseek_web_search', name: 'deepseek_web_search' }],
+      thinking: { type: 'disabled' },
+      max_tokens: 4096,
+      stream: false,
     }),
-    signal: AbortSignal.timeout(60000),
+    signal: AbortSignal.timeout(120000),
   });
 
   if (!response.ok) {
     const detail = await response.text().catch(() => '');
     throw new HttpError(
       502,
-      `Gemini API returned ${response.status}${detail ? `: ${detail.slice(0, 200)}` : ''}.`,
+      `DeepSeek API returned ${response.status}${detail ? `: ${detail.slice(0, 200)}` : ''}.`,
     );
   }
 
   const payload = (await response.json()) as {
-    candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }>;
+    choices?: Array<{
+      message?: { content?: string };
+      finish_reason?: string;
+    }>;
     error?: { message?: string };
   };
-  const text = payload.candidates?.[0]?.content?.parts
-    ?.map((part) => part.text ?? '')
-    .join('')
-    .trim();
-  if (!text) {
-    throw new HttpError(502, payload.error?.message || 'Gemini returned an empty response.');
+  const choice = payload.choices?.[0];
+  const text = choice?.message?.content?.trim() ?? '';
+  if (!text || choice?.finish_reason === 'content_filter') {
+    throw new HttpError(
+      502,
+      payload.error?.message || 'DeepSeek returned an empty response.',
+    );
   }
   return text;
 }
@@ -1316,8 +1329,8 @@ function parseRiskAnalysis(text: string): { score: number; summary: string } | n
 async function analyzeOrganizationRisk(env: Env, id: string): Promise<Response> {
   assertEntityId(id);
 
-  if (!env.GEMINI_API_KEY) {
-    return json({ error: 'AI risk analysis is not configured (GEMINI_API_KEY is missing).' }, 501);
+  if (!env.DEEPSEEK_API_KEY) {
+    return json({ error: 'AI risk analysis is not configured (DEEPSEEK_API_KEY is missing).' }, 501);
   }
 
   const orgRow = await env.DB.prepare('SELECT * FROM organizations WHERE id = ?')
@@ -1338,7 +1351,7 @@ async function analyzeOrganizationRisk(env: Env, id: string): Promise<Response> 
   let analysis: { score: number; summary: string };
   try {
     analysis = parseRiskAnalysis(
-      await callGemini(env.GEMINI_API_KEY, buildRiskPrompt(rowToOrganization(orgRow), skills)),
+      await callDeepSeek(env.DEEPSEEK_API_KEY, buildRiskPrompt(rowToOrganization(orgRow), skills)),
     ) ?? (() => {
       throw new HttpError(502, 'The AI response could not be parsed. Please try again.');
     })();

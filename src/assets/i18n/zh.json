@@ -999,7 +999,7 @@
     "LOAD_ERROR": "无法加载组织。请重试。",
     "LOADING": "加载组织中...",
     "SKILLS_TITLE": "AI 风险分析技能",
-    "SKILLS_HINT": "Gemini 在分析机构风险状况时使用这些检查项。您可以随时编辑列表；下一次分析会使用此刻保存的技能。",
+    "SKILLS_HINT": "AI 在分析机构风险状况时使用这些检查项。您可以随时编辑列表；下一次分析会使用此刻保存的技能。",
     "SKILLS_EMPTY": "还没有技能。添加第一个即可启用 AI 风险分析。",
     "SKILL_ADD": "添加技能",
     "SKILL_TITLE": "标题",
@@ -1019,11 +1019,12 @@
     "RISK_SCORE_SAVED": "风险评分已保存。",
     "AI_ANALYZE": "AI 分析",
     "AI_ANALYZING": "正在分析…",
-    "AI_ANALYZE_HINT": "使用当前技能通过 Google Search 运行 Gemini",
+    "AI_ANALYZE_HINT": "使用当前技能在互联网上调研该机构",
     "AI_ANALYZED": "AI 风险分析完成。评分：{{score}}。",
     "SKILLS_BUTTON": "AI 技能",
     "SKILLS_EYEBROW": "分析配置",
-    "SKILL_CLOSE": "关闭"
+    "SKILL_CLOSE": "关闭",
+    "AI_RISK_HELP": "AI 使用组织页面中保存的技能在互联网上调研该机构。分析会覆盖风险评分并将摘要保存在此处。"
   },
   "ADMIN_ORGANIZATION_EDIT": {
     "TITLE": "编辑组织",
@@ -1134,7 +1135,7 @@
     "CANCEL": "取消",
     "DELETING": "正在删除...",
     "AI_RISK_TITLE": "AI 风险分析",
-    "AI_RISK_HELP": "Gemini 使用组织页面中保存的技能在互联网上调研该机构。分析会覆盖风险评分并将摘要保存在此处。",
+    "AI_RISK_HELP": "AI 使用组织页面中保存的技能在互联网上调研该机构。分析会覆盖风险评分并将摘要保存在此处。",
     "AI_RISK_EMPTY": "尚无摘要。点击“AI 分析”生成。",
     "AI_ANALYZE": "AI 分析",
     "AI_ANALYZING": "正在分析…",

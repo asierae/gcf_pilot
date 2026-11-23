@@ -78,11 +78,12 @@ Transactional email uses [Resend](https://resend.com):
 npx wrangler secret put RESEND_API_KEY
 ```
 
-The admin AI risk analysis uses [Gemini](https://ai.google.dev) with Google
-Search grounding. Without this secret the analysis endpoint answers 501:
+The admin AI risk analysis uses [DeepSeek](https://platform.deepseek.com)
+(`deepseek-flash`) with its native `deepseek_web_search` tool. Without this
+secret the analysis endpoint answers 501:
 
 ```powershell
-npx wrangler secret put GEMINI_API_KEY
+npx wrangler secret put DEEPSEEK_API_KEY
 ```
 
 The sender and inbox are plain vars in `wrangler.jsonc → vars`:
@@ -114,7 +115,7 @@ ADMIN_ACCOUNTS={"hatyja":"asier"}
 # optional: enables real emails in local dev
 # RESEND_API_KEY=re_xxxxxxxx
 # optional: enables the AI risk analysis in local dev
-# GEMINI_API_KEY=AIza...
+# DEEPSEEK_API_KEY=sk-...
 ```
 
 ```powershell
@@ -293,8 +294,9 @@ Admin (`Authorization: Bearer <API_TOKEN>`):
 ## AI risk analysis (admin)
 
 The skills are global and shared by all organizations. The analysis is
-synchronous: every skill's title and description is sent to Gemini 2.5 Flash
-with Google Search grounding, along with the organization's profile.
+synchronous: every skill's title and description is sent to DeepSeek
+`deepseek-flash` with the native `deepseek_web_search` tool, along with the
+organization's profile.
 
 - `GET /api/admin/risk-skills` — `{ skills }`
 - `POST /api/admin/risk-skills` — `{ title, description }` → `{ skill }`
@@ -303,7 +305,7 @@ with Google Search grounding, along with the organization's profile.
 - `POST /api/admin/organizations/:id/analyze-risk` → `{ organization, analysis }`.
   Overwrites `risk_score` (0–100, higher = riskier) and stores `ai_risk_summary`
   and `ai_risk_analyzed_at` on the organization. Returns 501 without
-  `GEMINI_API_KEY` and 400 when no skill has been configured yet.
+  `DEEPSEEK_API_KEY` and 400 when no skill has been configured yet.
 
 ## Portal accounts
 
