@@ -134,6 +134,14 @@
         </header>
       }
 
+    @if (issuesOpen && issues.length) {
+      <app-form-issues
+        [issues]="issues"
+        (dismiss)="dismissIssues()"
+        (select)="goToIssue($event)"
+      />
+    }
+
     @if (submitSuccess) {
       <div class="success-banner">
         <span class="success-icon" aria-hidden="true">

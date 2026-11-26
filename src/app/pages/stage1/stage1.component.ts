@@ -1,6 +1,7 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { TranslatePipe } from '@ngx-translate/core';
 import { CommonModule, Location } from '@angular/common';
+import { Subscription } from 'rxjs';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import {
   ReactiveFormsModule,
@@ -33,10 +34,15 @@ import {
   syncOrganizationId,
 } from '../../shared/utils/organization.util';
 import {
-  buildMissingFieldsMessage,
-  collectInvalidFields,
-  markAllControlsTouched
+  collectInvalidLeaves,
+  markAllControlsTouched,
+  STAGE1_FIELD_LABELS,
+  STAGE1_FIELD_STEPS
 } from '../../shared/forms/form-validation.util';
+import {
+  FormIssue,
+  FormIssuesComponent
+} from '../../shared/components/form-issues/form-issues.component';
 
 @Component({
   selector: 'app-stage1',
@@ -50,6 +56,7 @@ import {
     Stage1StepsComponent,
     PreScreeningTimelineComponent,
     TranslatePipe,
+    FormIssuesComponent,
   ],
   templateUrl: './stage1.component.html',
   styleUrl: './stage1.component.css'
@@ -66,6 +73,11 @@ export class Stage1Component implements OnInit, OnDestroy {
 
   /** True after blur if an active account already uses the entered email. */
   emailTaken = false;
+
+  /** Requirements listed in the summary card after a failed submit. */
+  issues: FormIssue[] = [];
+  issuesOpen = false;
+  private issuesWatcher?: Subscription;
 
   checkEmailTaken(): void {
     const email = this.form.get('primaryContactEmail')?.value ?? '';
@@ -145,6 +157,7 @@ export class Stage1Component implements OnInit, OnDestroy {
   async ngOnInit(): Promise<void> {
     this.isLoggedIn = this.authService.isLoggedIn;
     this.form.valueChanges.subscribe(() => this.scheduleDraftSave());
+    this.issuesWatcher = this.form.valueChanges.subscribe(() => this.refreshIssues());
     this.conditionalSyncs = watchStage1ConditionalRequirements(this.form);
 
     this.applicantId = this.resolveOrganizationId();
@@ -161,6 +174,7 @@ export class Stage1Component implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.issuesWatcher?.unsubscribe();
     if (this.draftTimer) {
       clearTimeout(this.draftTimer);
       void this.saveDraft();
@@ -451,16 +465,72 @@ export class Stage1Component implements OnInit, OnDestroy {
     markAllControlsTouched(this.form);
 
     if (this.form.valid) {
+      this.issuesOpen = false;
       void this.submitForm();
-    } else {
-      const missing = collectInvalidFields(this.form);
-      if (missing.length > 0) {
-        this.goToStep(missing[0].step);
-      }
-      const message = buildMissingFieldsMessage(missing);
-      const duration = Math.min(12000, 5000 + missing.length * 500);
-      this.notificationService.show(message, 'error', duration);
+      return;
     }
+
+    this.issues = this.buildIssues();
+    this.issuesOpen = this.issues.length > 0;
+    // The summary sits above the form, so go to the first section that needs
+    // attention and bring the card into view instead of showing a toast.
+    if (this.issues.length > 0 && this.issues[0].step !== this.currentStep) {
+      this.goToStep(this.issues[0].step);
+    }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  dismissIssues(): void {
+    this.issuesOpen = false;
+  }
+
+  /** Scrolls to the section and focuses the exact control of a listed issue. */
+  goToIssue(issue: FormIssue): void {
+    if (issue.step !== this.currentStep) {
+      this.goToStep(issue.step);
+    }
+    setTimeout(() => {
+      const element = issue.field
+        ? document.querySelector<HTMLElement>(
+            `[formcontrolname="${issue.field}"], [data-field="${issue.field}"], [name="${issue.field}"]`,
+          )
+        : null;
+      if (!element) {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        return;
+      }
+      element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      element.focus({ preventScroll: true });
+    }, 80);
+  }
+
+  private refreshIssues(): void {
+    if (!this.issuesOpen) return;
+    this.issues = this.buildIssues();
+    if (!this.issues.length) {
+      this.issuesOpen = false;
+    }
+  }
+
+  private buildIssues(): FormIssue[] {
+    return collectInvalidLeaves(this.form)
+      .map((leaf) => {
+        const step = STAGE1_FIELD_STEPS[leaf.key] ?? 0;
+        const label = STAGE1_FIELD_LABELS[leaf.key] ?? leaf.key;
+        return {
+          section: this.sectionTitle(step),
+          label: leaf.row ? `${label} #${leaf.row}` : label,
+          step,
+          field: leaf.key,
+          error: leaf.error,
+        };
+      })
+      .sort((a, b) => a.step - b.step);
+  }
+
+  private sectionTitle(step: number): string {
+    const meta = this.steps[step] ?? this.steps[0];
+    return meta.number === '0' ? meta.title : `Section ${meta.number}: ${meta.title}`;
   }
 
   getStepProgress(): number {

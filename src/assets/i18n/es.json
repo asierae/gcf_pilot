@@ -1405,5 +1405,16 @@
     "DEP_COPY": "AVERA prepara y apoya al solicitante; la Secretaría del GCF, el Panel de Acreditación y la Junta determinan de forma independiente las solicitudes de revisión, las recomendaciones y las decisiones. AVERA no participa en las deliberaciones privadas del Panel ni de la Junta.",
     "NOTE": "Todas las duraciones son objetivos de entrega indicativos de AVERA, no periodos de finalización garantizados ni promedios históricos. El rango de 4–8 semanas asume una institución preparada, acceso oportuno a la documentación y aprobaciones gerenciales rápidas. Cambios significativos de políticas o remediación institucional pueden requerir un plan de trabajo más largo. El programa asesor de 14 días hábiles de pre-screening no está incluido en este gráfico.",
     "LINK": "requisitos de acreditación del GCF"
+  },
+  "FORM_ISSUES": {
+    "TITLE": "Completa estos puntos antes de enviar",
+    "PENDING": "{{count}} puntos pendientes",
+    "DISMISS": "Cerrar",
+    "INVALID_EMAIL": "Email no válido",
+    "INVALID_VALUE": "Valor no válido",
+    "NOTE_STEP": "Completa el paso actual antes de avanzar.",
+    "NOTE_CONTINUE": "Resuelve los puntos indicados antes de continuar.",
+    "NOTE_SUBMIT": "Completa los requisitos pendientes antes de enviar.",
+    "NOTE_EXPORT": "Completa los requisitos pendientes antes de exportar."
   }
 }

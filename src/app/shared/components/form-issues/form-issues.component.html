@@ -1,0 +1,56 @@
+<section class="fi-card" role="alert" aria-live="polite">
+  <div class="fi-head">
+    <span class="fi-badge" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 3 2.5 20h19L12 3Z" />
+        <path d="M12 9v5" />
+        <path d="M12 17.3h.01" />
+      </svg>
+    </span>
+    <div class="fi-headings">
+      <p class="fi-title">{{ 'FORM_ISSUES.TITLE' | translate }}</p>
+      <p class="fi-meta">
+        {{ 'FORM_ISSUES.PENDING' | translate: { count: issues.length } }}
+        @if (note) {
+          <span class="fi-sep" aria-hidden="true">·</span>
+          <span class="fi-note">{{ note }}</span>
+        }
+      </p>
+    </div>
+    <button
+      type="button"
+      class="fi-close"
+      (click)="dismiss.emit()"
+      [attr.aria-label]="'FORM_ISSUES.DISMISS' | translate"
+      [attr.title]="'FORM_ISSUES.DISMISS' | translate"
+    >
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" aria-hidden="true">
+        <path d="m6 6 12 12M18 6 6 18" />
+      </svg>
+    </button>
+  </div>
+
+  <div class="fi-groups">
+    @for (group of groups; track group.section) {
+      <div class="fi-group">
+        <p class="fi-section">
+          <span>{{ group.section }}</span>
+          <span class="fi-count">{{ group.items.length }}</span>
+        </p>
+        <ul class="fi-list">
+          @for (issue of group.items; track $index) {
+            <li>
+              <button type="button" class="fi-item" (click)="select.emit(issue)">
+                <span class="fi-dot" aria-hidden="true"></span>
+                <span class="fi-label">{{ issue.label }}</span>
+                @if (errorKey(issue.error); as errorKey) {
+                  <span class="fi-error">{{ errorKey | translate }}</span>
+                }
+              </button>
+            </li>
+          }
+        </ul>
+      </div>
+    }
+  </div>
+</section>

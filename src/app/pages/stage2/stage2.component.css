@@ -1077,3 +1077,11 @@ textarea {
     transition: none;
   }
 }
+
+/* Missing required controls after a failed submit or blur. */
+input:not([type='radio']):not([type='checkbox']).ng-invalid.ng-touched,
+textarea.ng-invalid.ng-touched,
+select.ng-invalid.ng-touched {
+  border-color: rgba(248, 113, 113, 0.7) !important;
+  box-shadow: 0 0 0 3px rgba(248, 113, 113, 0.12) !important;
+}

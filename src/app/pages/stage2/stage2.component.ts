@@ -27,6 +27,17 @@ import {
   WizardNavGroup,
   buildWizardNav
 } from '../../shared/data/stage2-form.config';
+import { STAGE1_ALL_LABELS } from '../../shared/data/stage1-display.config';
+import {
+  collectInvalidLeaves,
+  markAllControlsTouched,
+  STAGE1_FIELD_LABELS,
+  STAGE1_FIELD_STEPS,
+} from '../../shared/forms/form-validation.util';
+import {
+  FormIssue,
+  FormIssuesComponent,
+} from '../../shared/components/form-issues/form-issues.component';
 import { Stage1StepsComponent } from '../../shared/components/stage1-steps/stage1-steps.component';
 import { FileUploadComponent } from '../../shared/components/file-upload/file-upload.component';
 import { StepIconComponent } from '../../shared/components/step-icon/step-icon.component';
@@ -49,7 +60,7 @@ const STAGE1_REVIEW_KEYS = [
 @Component({
   selector: 'app-stage2',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, Stage1StepsComponent, FileUploadComponent, StepIconComponent, AccreditationTimelineComponent, RouterLink, TranslatePipe],
+  imports: [CommonModule, ReactiveFormsModule, Stage1StepsComponent, FileUploadComponent, StepIconComponent, AccreditationTimelineComponent, RouterLink, TranslatePipe, FormIssuesComponent],
   templateUrl: './stage2.component.html',
   styleUrl: './stage2.component.css'
 })
@@ -79,6 +90,12 @@ export class Stage2Component implements OnInit, OnDestroy {
   viewingSubmission = false;
   draftSaving = false;
   draftSavedAt: string | null = null;
+
+  /** Requirements listed in the summary card after a failed submit. */
+  issues: FormIssue[] = [];
+  issuesOpen = false;
+  /** Question/status labels per control, used to build the issues list. */
+  private questionMeta = new Map<string, { step: number; label?: string; labelKey?: string }>();
 
   private draftTimer: ReturnType<typeof setTimeout> | null = null;
   private draftLoaded = false;
@@ -148,6 +165,7 @@ export class Stage2Component implements OnInit, OnDestroy {
 
     this.form = this.fb.group(group);
     watchStage1ConditionalRequirements(this.form);
+    this.buildQuestionMeta();
 
     this.isAdmin = this.authService.currentUserValue?.role === 'admin';
     this.isLoggedIn = this.authService.isLoggedIn;
@@ -159,7 +177,10 @@ export class Stage2Component implements OnInit, OnDestroy {
     syncOrganizationId(this.location, this.applicantId);
     this.submissionId = this.route.snapshot.queryParamMap.get(SUBMISSION_QUERY_PARAM);
     this.viewingSubmission = Boolean(this.submissionId);
-    this.form.valueChanges.subscribe(() => this.scheduleDraftSave());
+    this.form.valueChanges.subscribe(() => {
+      this.scheduleDraftSave();
+      this.refreshIssues();
+    });
 
     if (this.isAdmin) {
       void this.loadReviewNotes();
@@ -543,11 +564,118 @@ export class Stage2Component implements OnInit, OnDestroy {
 
   onSubmit(): void {
     this.submitted = true;
+    markAllControlsTouched(this.form);
+
     if (this.form.valid) {
+      this.issuesOpen = false;
       void this.submitForm();
-    } else {
-      this.notificationService.error(this.translate.instant('STAGE2.ERROR'));
+      return;
     }
+
+    this.issues = this.buildIssues();
+    this.issuesOpen = this.issues.length > 0;
+    if (this.issues.length > 0) {
+      this.goToStep(this.issues[0].step);
+    }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  dismissIssues(): void {
+    this.issuesOpen = false;
+  }
+
+  /** Opens the section that owns an issue and focuses its control. */
+  goToIssue(issue: FormIssue): void {
+    if (issue.step !== this.currentStep) {
+      this.goToStep(issue.step);
+    }
+    setTimeout(() => {
+      const element = issue.field
+        ? document.querySelector<HTMLElement>(
+            `[formcontrolname="${issue.field}"], [data-field="${issue.field}"], [name="${issue.field}"]`,
+          )
+        : null;
+      if (!element) {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        return;
+      }
+      element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      element.focus({ preventScroll: true });
+    }, 80);
+  }
+
+  private refreshIssues(): void {
+    if (!this.issuesOpen) return;
+    this.issues = this.buildIssues();
+    if (!this.issues.length) {
+      this.issuesOpen = false;
+    }
+  }
+
+  private buildQuestionMeta(): void {
+    this.questionMeta.clear();
+    STAGE2_SCREENING_STEPS.forEach((step, index) => {
+      const stepIndex = this.stage2EntryStep + index;
+      for (const question of step.questions) {
+        const label = this.questionShortLabel(question.label);
+        this.questionMeta.set(`${question.key}_answer`, {
+          step: stepIndex,
+          label: `${label} · answer`,
+        });
+        this.questionMeta.set(`${question.key}_narrative`, {
+          step: stepIndex,
+          label: `${label} · narrative`,
+        });
+      }
+      if (step.sectionStatusKey) {
+        this.questionMeta.set(step.sectionStatusKey, {
+          step: stepIndex,
+          labelKey: 'STAGE2.SECTION_STATUS',
+        });
+      }
+    });
+  }
+
+  /** `5.2.1 (a)` keeps the list readable; questions can be long sentences. */
+  private questionShortLabel(label: string): string {
+    const match = /^(\d+(?:\.\d+)*(?:\s*\([a-z]\))?)/i.exec(label.trim());
+    return match ? match[1] : label.trim();
+  }
+
+  private buildIssues(): FormIssue[] {
+    const extraSteps: Record<string, number> = {
+      hasBeneficialOwnershipDocumentation: 3,
+      intendedESSRiskCategory: 3,
+      intendedFinancialInstruments: 3,
+      maxRiskCategory: this.stage2EntryStep,
+    };
+
+    return collectInvalidLeaves(this.form)
+      .map((leaf) => {
+        const meta = this.questionMeta.get(leaf.key);
+        const step = meta?.step ?? extraSteps[leaf.key] ?? STAGE1_FIELD_STEPS[leaf.key] ?? 0;
+        const fallback =
+          STAGE1_FIELD_LABELS[leaf.key] ?? STAGE1_ALL_LABELS[leaf.key] ?? leaf.key;
+        const label = meta?.labelKey
+          ? this.translate.instant(meta.labelKey)
+          : meta?.label ?? fallback;
+        return {
+          section: this.sectionTitle(step),
+          label: leaf.row ? `${label} #${leaf.row}` : label,
+          step,
+          field: leaf.key,
+          error: leaf.error,
+        };
+      })
+      .sort((a, b) => a.step - b.step);
+  }
+
+  private sectionTitle(step: number): string {
+    const item = this.navGroups
+      .flatMap((group) => group.steps)
+      .find((entry) => entry.index === step);
+    if (!item) return '';
+    return item.number === '0' ? item.title : `Section ${item.number}: ${item.title}`;
   }
 
   private async submitForm(): Promise<void> {

@@ -219,6 +219,14 @@
             </p>
           </header>
 
+          @if (issuesOpen && issues.length) {
+            <app-form-issues
+              [issues]="issues"
+              (dismiss)="dismissIssues()"
+              (select)="goToIssue($event)"
+            />
+          }
+
           <form [formGroup]="form" (ngSubmit)="onSubmit()">
             @if (isStage1Step) {
               <app-stage1-steps
@@ -269,12 +277,12 @@
                       }
                       <div class="yes-no-group">
                         <label class="radio-option compact">
-                          <input type="radio" [formControlName]="question.key + '_answer'" value="yes">
+                          <input type="radio" [formControlName]="question.key + '_answer'" [attr.data-field]="question.key + '_answer'" value="yes">
                           <span class="radio-custom"></span>
                           <span>{{ 'STAGE2.YES' | translate }}</span>
                         </label>
                         <label class="radio-option compact">
-                          <input type="radio" [formControlName]="question.key + '_answer'" value="no">
+                          <input type="radio" [formControlName]="question.key + '_answer'" [attr.data-field]="question.key + '_answer'" value="no">
                           <span class="radio-custom"></span>
                           <span>{{ 'STAGE2.NO' | translate }}</span>
                         </label>
@@ -284,12 +292,14 @@
                       <label>{{ 'STAGE2.NARRATIVE_LABEL' | translate }} <span class="required">*</span></label>
                       <textarea
                         [formControlName]="question.key + '_narrative'"
+                        [attr.data-field]="question.key + '_narrative'"
                         rows="4"
                         [attr.placeholder]="'STAGE2.NARRATIVE_PLACEHOLDER' | translate"
                       ></textarea>
                     </div>
                     <app-file-upload
                       [formControlName]="question.key + '_files'"
+                      [attr.data-field]="question.key + '_files'"
                       [entityId]="applicantId"
                       [section]="currentScreeningStep.id"
                       [label]="'STAGE2.UPLOAD_LABEL' | translate"
@@ -304,12 +314,12 @@
                       <label>{{ 'STAGE2.SECTION_STATUS' | translate }} <span class="required">*</span></label>
                       <div class="status-group">
                         <label class="radio-option compact">
-                          <input type="radio" [formControlName]="currentScreeningStep.sectionStatusKey" value="complete">
+                          <input type="radio" [formControlName]="currentScreeningStep.sectionStatusKey" [attr.data-field]="currentScreeningStep.sectionStatusKey" value="complete">
                           <span class="radio-custom"></span>
                           <span class="status-badge complete">{{ 'STAGE2.COMPLETED' | translate }}</span>
                         </label>
                         <label class="radio-option compact">
-                          <input type="radio" [formControlName]="currentScreeningStep.sectionStatusKey" value="pending">
+                          <input type="radio" [formControlName]="currentScreeningStep.sectionStatusKey" [attr.data-field]="currentScreeningStep.sectionStatusKey" value="pending">
                           <span class="radio-custom"></span>
                           <span class="status-badge pending">{{ 'STAGE2.PENDING' | translate }}</span>
                         </label>
@@ -319,6 +329,7 @@
                       <label>{{ 'STAGE2.SECTION_COMMENTS' | translate }}</label>
                       <textarea
                         [formControlName]="currentScreeningStep.sectionCommentsKey"
+                        [attr.data-field]="currentScreeningStep.sectionCommentsKey"
                         rows="4"
                         placeholder="No comments yet. Please share your feedback."
                       ></textarea>

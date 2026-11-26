@@ -1,9 +1,13 @@
 import { CommonModule, Location } from '@angular/common';
-import { TranslatePipe } from '@ngx-translate/core';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { Component, OnDestroy, OnInit, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { CountrySelectComponent } from '../../shared/components/country-select/country-select.component';
+import {
+  FormIssue,
+  FormIssuesComponent,
+} from '../../shared/components/form-issues/form-issues.component';
 import {
   ACCOUNTING_STANDARD_OPTIONS,
   AUDIT_OPINION_OPTIONS,
@@ -71,7 +75,7 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 @Component({
   selector: 'app-readiness-wizard',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule, CountrySelectComponent, TranslatePipe],
+  imports: [CommonModule, FormsModule, RouterModule, CountrySelectComponent, TranslatePipe, FormIssuesComponent],
   templateUrl: './readiness-wizard.component.html',
   styleUrl: './readiness-wizard.component.css',
 })
@@ -194,6 +198,9 @@ export class ReadinessWizardComponent implements OnInit, OnDestroy {
   docUploading: Partial<Record<DocumentKey, boolean>> = {};
   docErrors: Partial<Record<DocumentKey, string>> = {};
   errorSummary = '';
+  /** Requirements listed in the summary card after a failed attempt. */
+  issues: FormIssue[] = [];
+  issuesOpen = false;
   saveState: 'saved' | 'saving' | 'error' = 'saved';
   previewOpen = false;
   previewJson = '';
@@ -205,6 +212,7 @@ export class ReadinessWizardComponent implements OnInit, OnDestroy {
   private readonly authService = inject(AuthService);
   private readonly organizationService = inject(OrganizationService);
   private readonly userService = inject(UserService);
+  private readonly translate = inject(TranslateService);
   private readonly route = inject(ActivatedRoute);
   private readonly location = inject(Location);
   private saveTimer: ReturnType<typeof setTimeout> | null = null;
@@ -441,6 +449,7 @@ export class ReadinessWizardComponent implements OnInit, OnDestroy {
   }
 
   scheduleSave(): void {
+    this.refreshIssues();
     this.saveState = 'saving';
     if (this.saveTimer) clearTimeout(this.saveTimer);
     this.saveTimer = setTimeout(() => void this.persist(), 450);
@@ -529,12 +538,42 @@ export class ReadinessWizardComponent implements OnInit, OnDestroy {
     return 'todo';
   }
 
-  get currentIssues(): string[] {
-    return this.stepIssues(this.currentStep);
+  /** All pending requirements, grouped by wizard step by the summary card. */
+  private buildIssues(): FormIssue[] {
+    const issues: FormIssue[] = [];
+    for (const step of this.steps) {
+      if (!this.stepVisible(step.n)) continue;
+      for (const label of this.stepIssues(step.n)) {
+        issues.push({ section: `${step.n}. ${step.title}`, label, step: step.n });
+      }
+    }
+    return issues;
   }
 
-  get showIssues(): boolean {
-    return this.attempted.has(this.currentStep) && this.currentIssues.length > 0;
+  private openIssuesSummary(message: string): void {
+    this.errorSummary = message;
+    this.issues = this.buildIssues();
+    this.issuesOpen = this.issues.length > 0;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  dismissIssues(): void {
+    this.issuesOpen = false;
+  }
+
+  goToIssue(issue: FormIssue): void {
+    this.currentStep = issue.step;
+    this.errorSummary = '';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  private refreshIssues(): void {
+    if (!this.issuesOpen) return;
+    this.issues = this.buildIssues();
+    if (!this.issues.length) {
+      this.issuesOpen = false;
+      this.errorSummary = '';
+    }
   }
 
   get progressPercent(): number {
@@ -550,7 +589,7 @@ export class ReadinessWizardComponent implements OnInit, OnDestroy {
     if (this.stepSkipped(n)) return;
     if (n > this.currentStep && !this.allStepsBeforeValid(n)) {
       this.attempted.add(this.currentStep);
-      this.errorSummary = 'Complete the current step before moving forward.';
+      this.openIssuesSummary(this.translate.instant('FORM_ISSUES.NOTE_STEP'));
       return;
     }
     this.currentStep = n;
@@ -562,8 +601,7 @@ export class ReadinessWizardComponent implements OnInit, OnDestroy {
     if (this.currentStep === 7) return;
     if (!this.stepValid(this.currentStep)) {
       this.attempted.add(this.currentStep);
-      this.errorSummary = 'Please resolve the items below before continuing.';
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      this.openIssuesSummary(this.translate.instant('FORM_ISSUES.NOTE_CONTINUE'));
       return;
     }
     if (this.currentStep === 5) {
@@ -1253,8 +1291,7 @@ export class ReadinessWizardComponent implements OnInit, OnDestroy {
       const step = this.firstInvalidStep();
       this.currentStep = step;
       this.attempted.add(step);
-      this.errorSummary = 'Complete the remaining requirements before submitting.';
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      this.openIssuesSummary(this.translate.instant('FORM_ISSUES.NOTE_SUBMIT'));
       return;
     }
 
@@ -1321,8 +1358,7 @@ export class ReadinessWizardComponent implements OnInit, OnDestroy {
       const step = this.firstInvalidStep();
       this.currentStep = step;
       this.attempted.add(step);
-      this.errorSummary = 'Complete the remaining requirements before exporting.';
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      this.openIssuesSummary(this.translate.instant('FORM_ISSUES.NOTE_EXPORT'));
       return;
     }
     const json = JSON.stringify(this.buildExportObject(), null, 2);

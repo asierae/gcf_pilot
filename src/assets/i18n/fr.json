@@ -1405,5 +1405,16 @@
     "DEP_COPY": "AVERA prépare et accompagne le demandeur ; le Secrétariat du GCF, le Panel d'accréditation et le Conseil déterminent indépendamment les demandes de révision, les recommandations et les décisions. AVERA ne participe pas aux délibérations privées du Panel ou du Conseil.",
     "NOTE": "Toutes les durées sont des objectifs indicatifs de livraison AVERA, et non des délais garantis ni des moyennes historiques. La fourchette de 4 à 8 semaines suppose une institution préparée, un accès rapide aux documents et des approbations de gestion rapides. Des changements de politiques importants ou une remédiation institutionnelle peuvent nécessiter un plan de travail plus long. Le programme de conseil de 14 jours ouvrables pour le pré-sélection n'est pas inclus dans ce graphique.",
     "LINK": "exigences d'accréditation du GCF"
+  },
+  "FORM_ISSUES": {
+    "TITLE": "Complétez ces éléments avant d’envoyer",
+    "PENDING": "{{count}} éléments en attente",
+    "DISMISS": "Fermer",
+    "INVALID_EMAIL": "E-mail invalide",
+    "INVALID_VALUE": "Valeur invalide",
+    "NOTE_STEP": "Complétez l’étape en cours avant de continuer.",
+    "NOTE_CONTINUE": "Résolvez les éléments ci-dessous avant de poursuivre.",
+    "NOTE_SUBMIT": "Complétez les exigences restantes avant d’envoyer.",
+    "NOTE_EXPORT": "Complétez les exigences restantes avant d’exporter."
   }
 }

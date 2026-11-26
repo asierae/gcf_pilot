@@ -1405,5 +1405,16 @@
     "DEP_COPY": "AVERA chuẩn bị và hỗ trợ nộp đơn; Ban Thư ký GCF, Hội đồng Công nhận và Hội đồng quản trị độc lập xác định các yêu cầu xem xét, khuyến nghị và quyết định. AVERA không tham gia vào các cuộc thảo luận riêng tư của Hội đồng Công nhận hay Hội đồng quản trị.",
     "NOTE": "Tất cả thời lượng là mục tiêu phân phối tư vấn đề xuất của AVERA, không phải thời hạn hoàn thành được đảm bảo hay ước tính lịch sử. Khoảng 4–8 tuần giả định một tổ chức đã chuẩn bị, truy cập tài liệu kịp thời và sự phê duyệt nhanh chóng của ban quản lý. Những thay đổi chính sách đáng kể hoặc việc khắc phục thể chế có thể đòi hỏi kế hoạch làm việc dài hơn. Chương trình tư vấn sàng lọc 14 ngày làm việc riêng biệt không được tính trong biểu đồ này.",
     "LINK": "yêu cầu công nhận của GCF"
+  },
+  "FORM_ISSUES": {
+    "TITLE": "Hoàn thành các mục sau trước khi gửi",
+    "PENDING": "{{count}} mục còn lại",
+    "DISMISS": "Đóng",
+    "INVALID_EMAIL": "Email không hợp lệ",
+    "INVALID_VALUE": "Giá trị không hợp lệ",
+    "NOTE_STEP": "Hoàn thành bước hiện tại trước khi tiếp tục.",
+    "NOTE_CONTINUE": "Vui lòng xử lý các mục bên dưới trước khi tiếp tục.",
+    "NOTE_SUBMIT": "Hoàn thành các yêu cầu còn lại trước khi gửi.",
+    "NOTE_EXPORT": "Hoàn thành các yêu cầu còn lại trước khi xuất."
   }
 }

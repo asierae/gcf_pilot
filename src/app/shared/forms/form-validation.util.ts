@@ -1,4 +1,4 @@
-import { FormGroup } from '@angular/forms';
+import { AbstractControl, FormArray, FormGroup } from '@angular/forms';
 
 export const STAGE1_FIELD_LABELS: Record<string, string> = {
   organizationType: 'Organization Type',
@@ -37,6 +37,7 @@ export const STAGE1_FIELD_LABELS: Record<string, string> = {
   hasESSCapacity: 'ESS Capacity (2.3.5)',
   hasGenderCapacity: 'Gender Capacity (2.3.5)',
   hasMonitoringCapacity: 'Monitoring Capacity (2.3.5)',
+  hasInvestmentCriteria: 'Investment Criteria (2.2.1)',
   businessMandate: 'Business Mandate (3.1.1)',
   hasClimateFinanceExperience: 'Climate Finance Experience (3.1.2)',
   climateFinanceOverview: 'Climate Finance Track Record (3.1.2)',
@@ -102,6 +103,7 @@ export const STAGE1_FIELD_STEPS: Record<string, number> = {
   hasESSCapacity: 2,
   hasGenderCapacity: 2,
   hasMonitoringCapacity: 2,
+  hasInvestmentCriteria: 2,
   businessMandate: 3,
   hasClimateFinanceExperience: 3,
   climateFinanceOverview: 3,
@@ -119,76 +121,62 @@ export const STAGE1_FIELD_STEPS: Record<string, number> = {
   canMonitorCompliance: 3,
   riskCategory: 3,
   hasESMS: 3,
-  fastTrack: 4,
-  fastTrackCredentials: 4,
-  hasReceivedReadinessSupport: 4,
-  hasServedAsExecutingEntity: 4,
-  executingEntityDetails: 4,
-  hasServedAsDeliveryPartner: 4,
-  hasEngagedInPSAA: 4,
-  preparedForPartnerships: 4,
+  fastTrack: 3,
+  fastTrackCredentials: 3,
+  hasReceivedReadinessSupport: 3,
+  hasServedAsExecutingEntity: 3,
+  executingEntityDetails: 3,
+  hasServedAsDeliveryPartner: 3,
+  hasEngagedInPSAA: 3,
+  preparedForPartnerships: 3,
 };
 
-export interface InvalidFieldInfo {
+export interface InvalidLeaf {
+  /** Dotted path, e.g. `climateTrackRecord.0.projectTitle`. */
+  path: string;
+  /** Leaf control name, without array indices. */
   key: string;
-  label: string;
-  step: number;
+  /** 1-based row number when the control lives inside a FormArray. */
+  row?: number;
+  /** `required`, `email` or `invalid`. */
   error: string;
 }
 
-export function collectInvalidFields(
-  form: FormGroup,
-  labels: Record<string, string> = STAGE1_FIELD_LABELS,
-  steps: Record<string, number> = STAGE1_FIELD_STEPS
-): InvalidFieldInfo[] {
-  const invalid: InvalidFieldInfo[] = [];
+/**
+ * Walks the whole form (including FormArrays) and returns one entry per invalid
+ * leaf control. Valid groups are skipped, so this stays cheap on large forms.
+ */
+export function collectInvalidLeaves(
+  control: AbstractControl,
+  path: string[] = []
+): InvalidLeaf[] {
+  if (control.valid) {
+    return [];
+  }
 
-  for (const key of Object.keys(form.controls)) {
-    const control = form.get(key);
-    if (!control || !control.invalid) {
-      continue;
-    }
+  if (control instanceof FormArray || control instanceof FormGroup) {
+    const entries = Object.entries(control.controls);
+    return entries.flatMap(([key, child]) =>
+      collectInvalidLeaves(child, [...path, key])
+    );
+  }
 
-    if (control instanceof FormGroup) {
-      continue;
-    }
+  const key = path[path.length - 1] ?? '';
+  const parent = path.length > 1 ? Number(path[path.length - 2]) : NaN;
+  const error = control.errors?.['email']
+    ? 'email'
+    : control.errors?.['required']
+      ? 'required'
+      : 'invalid';
 
-    let error = 'Required';
-    if (control.errors?.['email']) {
-      error = 'Invalid email';
-    } else if (control.errors?.['required']) {
-      error = 'Required';
-    }
-
-    invalid.push({
+  return [
+    {
+      path: path.join('.'),
       key,
-      label: labels[key] ?? key,
-      step: steps[key] ?? 0,
+      row: Number.isInteger(parent) ? parent + 1 : undefined,
       error
-    });
-  }
-
-  return invalid.sort((a, b) => a.step - b.step || a.label.localeCompare(b.label));
-}
-
-export function buildMissingFieldsMessage(fields: InvalidFieldInfo[], maxListed = 6): string {
-  if (fields.length === 0) {
-    return 'Please fill in all required fields before submitting.';
-  }
-
-  const listed = fields.slice(0, maxListed).map((f) => {
-    const suffix = f.error === 'Required' ? '' : ` (${f.error})`;
-    return `${f.label}${suffix}`;
-  });
-
-  const remaining = fields.length - listed.length;
-  const listText = listed.join(', ');
-
-  if (remaining > 0) {
-    return `You still need to complete ${fields.length} required fields: ${listText} and ${remaining} more.`;
-  }
-
-  return `You still need to complete: ${listText}.`;
+    }
+  ];
 }
 
 export function markAllControlsTouched(form: FormGroup): void {
@@ -196,6 +184,13 @@ export function markAllControlsTouched(form: FormGroup): void {
     control.markAsTouched();
     if (control instanceof FormGroup) {
       markAllControlsTouched(control);
+    } else if (control instanceof FormArray) {
+      control.controls.forEach((child) => {
+        child.markAsTouched();
+        if (child instanceof FormGroup) {
+          markAllControlsTouched(child);
+        }
+      });
     }
   });
 }

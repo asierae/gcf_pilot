@@ -1406,5 +1406,16 @@
     "DEP_COPY": "AVERA prepares and supports the applicant; the GCF Secretariat, Accreditation Panel and Board independently determine review requests, recommendations and decisions. AVERA does not participate in private Panel or Board deliberations.",
     "NOTE": "All durations are proposed AVERA advisory delivery targets, not guaranteed completion periods or historical averages. The 4–8-week range assumes a prepared institution, timely document access, and prompt management approvals. Significant policy changes or institutional remediation may require a longer workplan. The separate 14-business-day pre-screening advisory programme is not included in this chart.",
     "LINK": "GCF accreditation requirements"
+  },
+  "FORM_ISSUES": {
+    "TITLE": "Complete these items before submitting",
+    "PENDING": "{{count}} items pending",
+    "DISMISS": "Dismiss",
+    "INVALID_EMAIL": "Invalid email",
+    "INVALID_VALUE": "Invalid value",
+    "NOTE_STEP": "Complete the current step before moving forward.",
+    "NOTE_CONTINUE": "Please resolve the items below before continuing.",
+    "NOTE_SUBMIT": "Complete the remaining requirements before submitting.",
+    "NOTE_EXPORT": "Complete the remaining requirements before exporting."
   }
 }
