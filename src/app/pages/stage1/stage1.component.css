@@ -47,8 +47,7 @@
   padding: 0.85rem 1.1rem;
   border-radius: 16px;
   border: 1px solid var(--app-line);
-  background: linear-gradient(140deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.015));
-  backdrop-filter: blur(6px);
+  background: var(--app-surface);
 }
 
 .wizard-brand {
@@ -96,56 +95,55 @@
   color: var(--app-muted);
 }
 
-/* Signed-in users get a compact segmented control inside the top bar. */
+/* Signed-in users get a two-tab switcher inside the top bar. The active tab
+   is marked with a gold underline instead of a tinted block, so the labels
+   keep their contrast and the bar does not glare. */
 .topbar-tabs {
   display: inline-flex;
   align-items: center;
-  gap: 2px;
-  padding: 3px;
-  border: 1px solid var(--app-line);
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.03);
+  gap: 0.35rem;
+  padding: 0;
+  border: 0;
+  background: transparent;
 }
 
 .topbar-tab {
   display: flex;
   align-items: center;
   gap: 0.6rem;
-  padding: 0.35rem 0.8rem;
-  border: 1px solid transparent;
-  border-radius: 9px;
+  padding: 0.3rem 0.15rem 0.5rem;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  border-radius: 0;
   background: transparent;
-  color: var(--app-muted);
+  color: var(--app-text);
   font: inherit;
   text-align: left;
   cursor: pointer;
-  transition: color 0.16s ease, background 0.16s ease, border-color 0.16s ease;
+  transition: color 0.16s ease, border-color 0.16s ease;
 }
 
 .topbar-tab:hover {
   color: var(--app-text-strong);
-  background: rgba(255, 255, 255, 0.04);
+  border-bottom-color: var(--app-line-strong);
 }
 
 .topbar-tab.is-active {
   color: var(--app-text-strong);
-  border-color: var(--app-accent-line);
-  background: linear-gradient(180deg, rgba(232, 192, 106, 0.10), rgba(232, 192, 106, 0.03));
+  border-bottom-color: var(--app-accent);
 }
 
 .topbar-tab .brand-mark {
-  width: 32px;
-  height: 32px;
-  border-radius: 9px;
-  color: var(--app-muted);
-  background: rgba(255, 255, 255, 0.03);
-  border-color: var(--app-line);
+  width: 30px;
+  height: 30px;
+  border-radius: 0;
+  color: inherit;
+  background: transparent;
+  border-color: transparent;
 }
 
 .topbar-tab.is-active .brand-mark {
   color: var(--app-accent);
-  background: var(--app-accent-soft);
-  border-color: var(--app-accent-line);
 }
 
 .topbar-tab .brand-mark svg {
@@ -160,8 +158,8 @@
 }
 
 .topbar-tab .brand-sub {
-  font-size: 0.6rem;
-  color: var(--app-subtle);
+  font-size: 0.64rem;
+  color: var(--app-muted);
 }
 
 .topbar-actions {
